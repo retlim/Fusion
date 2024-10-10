@@ -43,6 +43,7 @@ $tests = [
     new Valvoid\Fusion\Tests\Tasks\Build\SAT\GraphTest,
     new Valvoid\Fusion\Tests\Tasks\Build\SAT\ClauseTest,
     new Valvoid\Fusion\Tests\Tasks\Build\SAT\SolverTest,
+    new Valvoid\Fusion\Tests\Tasks\Copy\CopyTest,
     new Valvoid\Fusion\Tests\Tasks\Categorize\CategorizeTest,
     new Valvoid\Fusion\Tests\Tasks\GroupTest
 ];
@@ -62,7 +63,7 @@ try {
             unset($classnames[$i]);
     }
 
-    echo "Code coverage: " .
+    echo "\nCode coverage: " .
         round(100 * sizeof($tests) / sizeof($classnames), 2) .
         "%";
 

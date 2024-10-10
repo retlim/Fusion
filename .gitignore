@@ -5,4 +5,5 @@
 !/cache/loadable
 /extensions
 /tests/Dir/cache
+/tests/Tasks/Copy/Mocks/package/cache
 fusion.local.php
