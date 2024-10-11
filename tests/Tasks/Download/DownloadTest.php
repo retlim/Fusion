@@ -17,38 +17,43 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Copy;
+namespace Valvoid\Fusion\Tests\Tasks\Download;
 
 use Exception;
 use Valvoid\Fusion\Log\Events\Errors\Error;
-use Valvoid\Fusion\Tasks\Copy\Copy;
+use Valvoid\Fusion\Tasks\Download\Download;
 use Valvoid\Fusion\Tasks\Group;
-use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\DirMock;
-use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\LogMock;
-use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\MetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Download\Mocks\DirMock;
+use Valvoid\Fusion\Tests\Tasks\Download\Mocks\HubMock;
+use Valvoid\Fusion\Tests\Tasks\Download\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Download\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Integration test case for the copy task.
+ * Integration test case for the download task.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
  */
-class CopyTest extends Test
+class DownloadTest extends Test
 {
     private string $cache = __DIR__ . "/Mocks/package/cache/packages";
 
     public function __construct()
     {
         try {
+            $this->delete($this->cache);
+
             $log = new LogMock;
             $dir = new DirMock;
+            $hub = new HubMock;
             $group = Group::___init();
             MetadataMock::addMockedMetadata();
 
             $this->testTargetCacheDirectory();
 
             $group->destroy();
+            $hub->destroy();
             $log->destroy();
             $dir->destroy();
 
@@ -64,6 +69,9 @@ class CopyTest extends Test
             if (isset($dir))
                 $dir->destroy();
 
+            if (isset($hub))
+                $hub->destroy();
+
             $this->result = false;
         }
     }
@@ -73,7 +81,7 @@ class CopyTest extends Test
      */
     public function testTargetCacheDirectory(): void
     {
-        $copy = new Copy([]);
+        $copy = new Download(["id" => "test"]);
         $copy->execute();
 
         if (is_dir($this->cache)) {
@@ -81,9 +89,8 @@ class CopyTest extends Test
 
             $assert = [
                 __DIR__ . "/Mocks/package/cache/packages/metadata1",
-                __DIR__ . "/Mocks/package/cache/packages/metadata1/metadata1",
-                __DIR__ . "/Mocks/package/cache/packages/metadata2",
-                __DIR__ . "/Mocks/package/cache/packages/metadata2/metadata2"
+                __DIR__ . "/Mocks/package/cache/packages/metadata1/fusion.bot.php",
+                __DIR__ . "/Mocks/package/cache/packages/metadata1/fusion.json"
             ];
 
             if ($filenames == $assert)
@@ -117,5 +124,18 @@ class CopyTest extends Test
         }
 
         return $content;
+    }
+
+    public function delete(string $file): void
+    {
+        if (is_dir($file)) {
+            foreach (scandir($file, SCANDIR_SORT_NONE) as $filename)
+                if ($filename != "." && $filename != "..")
+                    $this->delete("$file/$filename");
+
+            rmdir($file);
+
+        } elseif (is_file($file))
+            unlink($file);
     }
 }

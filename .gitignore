@@ -6,4 +6,5 @@
 /extensions
 /tests/Dir/cache
 /tests/Tasks/Copy/Mocks/package/cache
+/tests/Tasks/Download/Mocks/package
 fusion.local.php

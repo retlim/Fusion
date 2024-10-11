@@ -45,6 +45,7 @@ $tests = [
     new Valvoid\Fusion\Tests\Tasks\Build\SAT\SolverTest,
     new Valvoid\Fusion\Tests\Tasks\Copy\CopyTest,
     new Valvoid\Fusion\Tests\Tasks\Categorize\CategorizeTest,
+    new Valvoid\Fusion\Tests\Tasks\Download\DownloadTest,
     new Valvoid\Fusion\Tests\Tasks\GroupTest
 ];
 
