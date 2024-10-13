@@ -39,11 +39,27 @@ class ExtendTest extends Test
 
     private string $dir = __DIR__ . "/Mocks/package/dependencies/metadata2/extensions";
 
+    private array $structure = [
+        __DIR__ . "/Mocks/package/cache/packages/metadata1",
+        __DIR__ . "/Mocks/package/cache/packages/metadata2/extensions/metadata1",
+        __DIR__ . "/Mocks/package/cache/packages/metadata2/extensions/metadata2",
+        __DIR__ . "/Mocks/package/cache/packages/metadata3",
+        __DIR__ . "/Mocks/package/dependencies/metadata2/extensions/metadata1",
+        __DIR__ . "/Mocks/package/dependencies/metadata2/extensions/metadata2",
+    ];
+
     private int $time;
 
     public function __construct()
     {
         try {
+            foreach ($this->structure as $directory)
+                if (!is_dir($directory))
+                    if (!mkdir($directory, 0777, true))
+                        throw new Exception(
+                            "Failed to create structure directory $directory"
+                        );
+
             $this->time = time();
             $log = new LogMock;
             $dir = new DirMock;
