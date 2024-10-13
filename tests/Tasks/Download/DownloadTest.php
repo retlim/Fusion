@@ -81,8 +81,8 @@ class DownloadTest extends Test
      */
     public function testTargetCacheDirectory(): void
     {
-        $copy = new Download(["id" => "test"]);
-        $copy->execute();
+        $download = new Download(["id" => "test"]);
+        $download->execute();
 
         if (is_dir($this->cache)) {
             $filenames = $this->getFilenames($this->cache);
