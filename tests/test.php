@@ -47,6 +47,7 @@ $tests = [
     new Valvoid\Fusion\Tests\Tasks\Categorize\CategorizeTest,
     new Valvoid\Fusion\Tests\Tasks\Download\DownloadTest,
     new Valvoid\Fusion\Tests\Tasks\Extend\ExtendTest,
+    new Valvoid\Fusion\Tests\Tasks\Image\ImageTest,
     new Valvoid\Fusion\Tests\Tasks\GroupTest
 ];
 
