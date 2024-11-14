@@ -50,6 +50,7 @@ $tests = [
     new Valvoid\Fusion\Tests\Tasks\Image\ImageTest,
     new Valvoid\Fusion\Tests\Tasks\Inflate\InflateTest,
     new Valvoid\Fusion\Tests\Tasks\Register\RegisterTest,
+    new Valvoid\Fusion\Tests\Tasks\Replicate\ReplicateTest,
     new Valvoid\Fusion\Tests\Tasks\GroupTest
 ];
 
