@@ -1,8 +1,13 @@
 # Fusion
 
-Fusion is a package manager for PHP-based projects. It increases productivity by
-handling all the processable redundant micromanagement that occurs during
-development, deployment, and maintenance.
+Fusion is a PHP package manager for PHP-based projects that boosts 
+productivity by automating redundant micromanagement tasks during 
+development, deployment, and maintenance. For example, these tasks 
+include:
+
+- Resolving package dependencies.
+- Migrating packages.
+- Managing loadable code.
 
 ## Documentation
 
