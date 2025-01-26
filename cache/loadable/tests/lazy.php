@@ -4,6 +4,12 @@
 return [
 	'Valvoid\Fusion\Tests\Bus\BusTest' => '/tests/Bus/BusTest.php',
 	'Valvoid\Fusion\Tests\Config\ConfigTest' => '/tests/Config/ConfigTest.php',
+	'Valvoid\Fusion\Tests\Config\Interpreter\DirTest' => '/tests/Config/Interpreter/DirTest.php',
+	'Valvoid\Fusion\Tests\Config\Interpreter\HubTest' => '/tests/Config/Interpreter/HubTest.php',
+	'Valvoid\Fusion\Tests\Config\Interpreter\InterpreterTest' => '/tests/Config/Interpreter/InterpreterTest.php',
+	'Valvoid\Fusion\Tests\Config\Interpreter\LogTest' => '/tests/Config/Interpreter/LogTest.php',
+	'Valvoid\Fusion\Tests\Config\Interpreter\PersistenceTest' => '/tests/Config/Interpreter/PersistenceTest.php',
+	'Valvoid\Fusion\Tests\Config\Interpreter\TasksTest' => '/tests/Config/Interpreter/TasksTest.php',
 	'Valvoid\Fusion\Tests\Dir\ConfigMock' => '/tests/Dir/ConfigMock.php',
 	'Valvoid\Fusion\Tests\Dir\DirTest' => '/tests/Dir/DirTest.php',
 	'Valvoid\Fusion\Tests\Hub\Cache\CacheTest' => '/tests/Hub/Cache/CacheTest.php',
