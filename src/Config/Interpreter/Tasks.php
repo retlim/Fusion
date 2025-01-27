@@ -275,7 +275,7 @@ class Tasks
      *
      * @param string $taskClassName Task class name.
      * @param array $breadcrumb Index path inside the config.
-     * @param mixed $entry Task config entry.
+     * @param array $entry Task config entry.
      */
     private static function interpretAnonymousTaskConfig(string $taskClassName,
                                                          array $breadcrumb, array $entry): void

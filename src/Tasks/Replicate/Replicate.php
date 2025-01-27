@@ -187,7 +187,7 @@ class Replicate extends Task implements Interceptor
             "source" => $source
         ];
 
-        Hub::executeRequests(function (Snapshot $response) use ($metadata) {
+        Hub::executeRequests(function (Snapshot $response) {
             $this->addSnapshot(
                 $response->getContent(),
                 $response->getFile()
@@ -228,7 +228,6 @@ class Replicate extends Task implements Interceptor
      * Builds nested roots.
      *
      * @param InternalMetadata $metadata
-     * @throws Structure Hub exception.
      * @throws Request Request exception.
      * @throws InternalError Internal error.
      */
@@ -265,7 +264,6 @@ class Replicate extends Task implements Interceptor
      * Adds versions requests for each source.
      *
      * @param Metadata $metadata Metadata.
-     * @throws Structure Hub exception.
      * @throws InternalError Internal error.
      */
     private function addMetadataRequests(Metadata $metadata, array &$metas,
@@ -319,8 +317,6 @@ class Replicate extends Task implements Interceptor
     /**
      * Builds all requests.
      *
-     * @throws Structure Hub exception.
-     * @throws Request Request exception.
      * @throws InternalError
      */
     private function buildRequests(): void

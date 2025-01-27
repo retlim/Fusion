@@ -258,41 +258,39 @@ class Group
             // take first match
             foreach (array_reverse($backtrace) as $entry)
                 if ($entry["class"] == Fusion::class) {
-                    $layer = $entry["file"];
-                    $row = $entry["line"];
+                    $path[] = [
+                        "layer" => $entry["line"] . " - " . $entry["file"] . " (runtime config layer)",
+                        "breadcrumb" => $group->implicationBreadcrumb,
+                        "source" => $source
+                    ];
 
                     break;
                 }
-
-            $path[] = [
-                "layer" => $row . " - " . $layer . " (runtime config layer)",
-                "breadcrumb" => $group->implicationBreadcrumb,
-                "source" => $source
-            ];
 
         } else
             $metadata = Group::getInternalRootMetadata();
 
         foreach ($sourcePath as $id => $source) {
-            foreach ($metadata?->getLayers() as $layer => $content)
-                if (isset($content["structure"])) {
-                    $breadcrumb = Structure::getBreadcrumb(
-                        $content["structure"],
-                        $source,
-                        ["structure"]
-                    );
+            if (isset($metadata))
+                foreach ($metadata->getLayers() as $layer => $content)
+                    if (isset($content["structure"])) {
+                        $breadcrumb = Structure::getBreadcrumb(
+                            $content["structure"],
+                            $source,
+                            ["structure"]
+                        );
 
-                    if ($breadcrumb) {
-                        $path[] = [
-                            "layer" => $layer,
-                            "breadcrumb" => $breadcrumb,
-                            "source" => $source
-                        ];
+                        if ($breadcrumb) {
+                            $path[] = [
+                                "layer" => $layer,
+                                "breadcrumb" => $breadcrumb,
+                                "source" => $source
+                            ];
 
-                        // take first match
-                        break;
+                            // take first match
+                            break;
+                        }
                     }
-                }
 
             // next parent
             // last own entry - maybe not built yet

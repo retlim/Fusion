@@ -207,7 +207,8 @@ class Build extends Task implements Interceptor
             ];
         }
 
-        $deadlock->throwError();
+        if (isset($deadlock))
+            $deadlock->throwError();
     }
 
     /**
@@ -541,41 +542,39 @@ class Build extends Task implements Interceptor
             // take first match
             foreach (array_reverse($backtrace) as $entry)
                 if ($entry["class"] == Fusion::class) {
-                    $layer = $entry["file"];
-                    $row = $entry["line"];
+                    $path[] = [
+                        "layer" => $entry["line"] . " - " . $entry["file"] . " (runtime config layer)",
+                        "breadcrumb" => ["build", "source"],
+                        "source" => $source
+                    ];
 
                     break;
                 }
-
-            $path[] = [
-                "layer" => $row . " - " . $layer . " (runtime config layer)",
-                "breadcrumb" => ["build", "source"],
-                "source" => $source
-            ];
 
         } else
             $metadata = Group::getInternalRootMetadata();
 
         foreach ($implicationPath as $id => $entry) {
-            foreach ($metadata?->getLayers() as $layer => $content)
-                if (isset($content["structure"])) {
-                    $breadcrumb = Structure::getBreadcrumb(
-                        $content["structure"],
-                        $entry["source"],
-                        ["structure"]
-                    );
+            if (isset($metadata))
+                foreach ($metadata->getLayers() as $layer => $content)
+                    if (isset($content["structure"])) {
+                        $breadcrumb = Structure::getBreadcrumb(
+                            $content["structure"],
+                            $entry["source"],
+                            ["structure"]
+                        );
 
-                    if ($breadcrumb) {
-                        $path[] = [
-                            "layer" => $layer,
-                            "breadcrumb" => $breadcrumb,
-                            "source" => $entry["source"]
-                        ];
+                        if ($breadcrumb) {
+                            $path[] = [
+                                "layer" => $layer,
+                                "breadcrumb" => $breadcrumb,
+                                "source" => $entry["source"]
+                            ];
 
-                        // take first match
-                        break;
+                            // take first match
+                            break;
+                        }
                     }
-                }
 
             // next parent
             // last own entry

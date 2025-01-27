@@ -3,9 +3,23 @@ variables:
   FILE: fusion-$CI_COMMIT_TAG.tar.gz
 
 stages:
+  - lint
   - test
   - deploy
   - image
+
+analyze code:
+  stage: lint
+  image:
+    name: ghcr.io/phpstan/phpstan
+    entrypoint: [""]
+  script:
+    - phpstan analyse -c phpstan.neon --error-format gitlab > phpstan.json
+  artifacts:
+    paths:
+      - phpstan.json
+    reports:
+      codequality: phpstan.json
 
 test units and integrations:
   stage: test

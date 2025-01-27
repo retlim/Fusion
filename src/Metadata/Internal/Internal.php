@@ -145,7 +145,7 @@ class Internal extends Metadata
             if (isset($content["lifecycle"][$this->lifecycle["state"]]))
                 break;
 
-        return $layer;
+        return $layer ?? "unknown layer";
     }
 
     /**
@@ -153,6 +153,7 @@ class Internal extends Metadata
      * triggered or not indicator.
      *
      * @return bool Indicator.
+     * @throws Lifecycle Error.
      */
     public function onUpdate(): bool
     {
@@ -174,6 +175,7 @@ class Internal extends Metadata
      * triggered or not indicator.
      *
      * @return bool Indicator.
+     * @throws Lifecycle Error.
      */
     public function onDelete(): bool
     {

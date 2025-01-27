@@ -11,3 +11,4 @@ CONTRIBUTING.md export-ignore
 .gitignore export-ignore
 fusion.dev.php export-ignore
 .gitlab-ci.yml export-ignore
+phpstan.neon export-ignore

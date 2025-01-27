@@ -35,7 +35,7 @@ class Dir
     /**
      * Interprets current working directory entry.
      *
-     * @param mixed $config Entry.
+     * @param array $config Entry.
      */
     public static function interpret(array $config): void
     {

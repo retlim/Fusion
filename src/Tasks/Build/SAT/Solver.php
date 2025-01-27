@@ -49,9 +49,7 @@ class Solver
      *
      * @param string $id Root package identifier.
      * @param string $version Root package version.
-     * @param array<string, array{
-     *      tree: <string, array>
-     * }> $implication Structure relation.
+     * @param array<string, array{tree: <string, array>}> $implication Structure relation.
      */
     public function __construct(string $id, string $version, array $implication)
     {

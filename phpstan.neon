@@ -1,0 +1,9 @@
+parameters:
+  level: 1
+  paths:
+    - src
+  earlyTerminatingMethodCalls:
+    Valvoid\Fusion\Hub\Requests\Remote\Remote:
+      - throwError
+    Valvoid\Fusion\Config\Config:
+      - throwMetaError

@@ -54,15 +54,18 @@ class Dir
 
         foreach ($path as $filename)
             if ($filename == "..")
-                array_pop($filenames) ??
-                Bus::broadcast(new ConfigEvent(
-                    "The value of the \"path\" key, the " .
-                    "current working directory, does not point to anything, " .
-                    "as it contains a reference (double dot) to a " .
-                    "non-existent parent directory.",
-                    Level::ERROR,
-                    ["dir", "path"]
-                ));
+                if (!empty($filenames))
+                    array_pop($filenames);
+
+                else
+                    Bus::broadcast(new ConfigEvent(
+                        "The value of the \"path\" key, the " .
+                        "current working directory, does not point to anything, " .
+                        "as it contains a reference (double dot) to a " .
+                        "non-existent parent directory.",
+                        Level::ERROR,
+                        ["dir", "path"]
+                    ));
 
             elseif ($filename != '.')
                 $filenames[] = $filename;
