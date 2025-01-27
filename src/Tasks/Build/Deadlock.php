@@ -154,7 +154,7 @@ class Deadlock
 
         return [
             "path" => $path,
-            "file" => $file
+            "file" => $file ?? "unknown file"
         ];
     }
 }

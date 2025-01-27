@@ -433,7 +433,7 @@ class Config
      * Returns composite settings.
      *
      * @param string ...$breadcrumb Index path inside config.
-     * @return array Config.
+     * @return mixed Config.
      */
     public static function get(string ...$breadcrumb): mixed
     {

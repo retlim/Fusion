@@ -232,10 +232,19 @@ abstract class Metadata
     }
 
     /**
+     * Throws lifecycle error.
+     *
+     * @param string $message Message.
+     * @throws Lifecycle Error.
+     */
+    abstract protected function throwLifecycleError(string $message): void;
+
+    /**
      * Requires lifecycle callback file.
      *
      * @param array $variables Variables.
      * @return bool Indicator.
+     * @throws Lifecycle Error.
      */
     protected function requireCallback(array $variables = []): bool
     {

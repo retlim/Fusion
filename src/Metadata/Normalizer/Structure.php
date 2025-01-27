@@ -65,7 +65,7 @@ class Structure
      * @param array $meta Meta.
      * @param string $layer Current layer identifier.
      */
-    public static function normalize(array &$meta, string $layer, string $cache = null): void
+    public static function normalize(array &$meta, string $layer, ?string $cache = null): void
     {
         $structure = new self($layer);
 

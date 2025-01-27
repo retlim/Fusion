@@ -351,7 +351,7 @@ class Dir
 
                 if (!rmdir($directory))
                     throw new Error(
-                        "Can't delete the directory \"$directory\".", "", "", ""
+                        "Can't delete the directory \"$directory\".", "", ""
                     );
             }
 
