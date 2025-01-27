@@ -2,6 +2,7 @@ parameters:
   level: 1
   paths:
     - src
+    - tests
   earlyTerminatingMethodCalls:
     Valvoid\Fusion\Hub\Requests\Remote\Remote:
       - throwError
