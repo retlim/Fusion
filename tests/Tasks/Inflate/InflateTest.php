@@ -100,7 +100,7 @@ class InflateTest extends Test
             $lazy = include "$loadable/lazy.php";
 
             if ($lazy == ['Metadata1\Metadata1' => '/Metadata1.php'] &&
-                $asap == ["/metadata1.php"])
+                $asap == ["/metadata_1.php"])
                 return;
         }
 
