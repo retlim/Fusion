@@ -17,20 +17,36 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests;
+namespace Valvoid\Fusion\Tests\Tasks\Snap\Mocks;
+
+use ReflectionClass;
+use ReflectionException;
+use Valvoid\Fusion\Log\Log;
 
 /**
- * Test case.
+ * Mocked log.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
  */
-abstract class Test
+class LogMock
 {
-    protected bool $result = true;
+    private Log $log;
 
-    public function getResult(): bool
+    private ReflectionClass $reflection;
+
+    /**
+     * @throws ReflectionException
+     */
+    public function __construct()
     {
-        return $this->result;
+        $this->reflection = new ReflectionClass(Log::class);
+        $this->log = $this->reflection->newInstanceWithoutConstructor();
+        $this->reflection->setStaticPropertyValue("instance", $this->log);
+    }
+
+    public function destroy(): void
+    {
+        $this->reflection->setStaticPropertyValue("instance", null);
     }
 }

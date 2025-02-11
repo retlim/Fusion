@@ -7,4 +7,5 @@
 /tests/Dir/cache
 /tests/Tasks/Copy/Mocks/package/cache
 /tests/Tasks/Download/Mocks/package
+/tests/Tasks/Snap/Mocks/package
 /fusion.local.php
