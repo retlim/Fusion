@@ -31,6 +31,7 @@ use Valvoid\Fusion\Log\Serializers\Streams\Stream;
  */
 class SerializerMock implements Stream
 {
+    // @phpstan-ignore constructor.unusedParameter
     public function __construct(array $config) {}
 
     public function log(Level $level, string|Event $event): void {}
