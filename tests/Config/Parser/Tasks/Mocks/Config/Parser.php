@@ -17,39 +17,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests;
+namespace Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\Config;
+
+use Valvoid\Fusion\Config\Parser as ConfigParser;
 
 /**
- * Test case.
+ * Mocked task parser.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
  */
-abstract class Test
+class Parser extends ConfigParser
 {
-    /** @var string|array<string> Code coverage. */
-    protected string|array $coverage;
-
-    /** @var bool Test result. */
-    protected bool $result = true;
-
-    /**
-     * Returns the test result. True for success and false for not.
-     *
-     * @return bool Result.
-     */
-    public function getResult(): bool
-    {
-        return $this->result;
-    }
-
-    /**
-     * Returns code coverage.
-     *
-     * @return array|string Class/function names.
-     */
-    public function getCoverage(): array|string
-    {
-        return $this->coverage;
-    }
+    public static function parse(array $breadcrumb, array &$config): void {}
 }

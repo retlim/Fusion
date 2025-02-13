@@ -17,39 +17,35 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests;
+namespace Valvoid\Fusion\Tests\Config\Parser;
+
+use Valvoid\Fusion\Config\Parser\Dir;
+use Valvoid\Fusion\Tests\Test;
 
 /**
- * Test case.
+ * Config dir parser test.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
  */
-abstract class Test
+class DirTest extends Test
 {
-    /** @var string|array<string> Code coverage. */
-    protected string|array $coverage;
+    protected string|array $coverage = Dir::class;
 
-    /** @var bool Test result. */
-    protected bool $result = true;
-
-    /**
-     * Returns the test result. True for success and false for not.
-     *
-     * @return bool Result.
-     */
-    public function getResult(): bool
+    public function __construct()
     {
-        return $this->result;
+        $this->testRootDir();
     }
 
-    /**
-     * Returns code coverage.
-     *
-     * @return array|string Class/function names.
-     */
-    public function getCoverage(): array|string
+    public function testRootDir(): void
     {
-        return $this->coverage;
+        $dir = Dir::getNonNestedPath(__DIR__);
+        $assertion = dirname(__DIR__, 3);
+
+        if ($dir !== $assertion) {
+            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
+
+            $this->result = false;
+        }
     }
 }
