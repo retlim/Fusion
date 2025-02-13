@@ -17,39 +17,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests;
+namespace Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks;
+
+use Valvoid\Fusion\Log\Events\Event;
+use Valvoid\Fusion\Log\Events\Level;
+use Valvoid\Fusion\Log\Serializers\Streams\Stream;
 
 /**
- * Test case.
+ * Mocked task.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
  */
-abstract class Test
+class TaskMock implements Stream
 {
-    /** @var string|array<string> Code coverage. */
-    protected string|array $coverage;
+    public function __construct(array $config) {}
 
-    /** @var bool Test result. */
-    protected bool $result = true;
-
-    /**
-     * Returns the test result. True for success and false for not.
-     *
-     * @return bool Result.
-     */
-    public function getResult(): bool
-    {
-        return $this->result;
-    }
-
-    /**
-     * Returns code coverage.
-     *
-     * @return array|string Class/function names.
-     */
-    public function getCoverage(): array|string
-    {
-        return $this->coverage;
-    }
+    public function log(Level $level, string|Event $event): void {}
 }

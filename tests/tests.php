@@ -34,6 +34,11 @@ spl_autoload_register(function (string $loadable) use ($root, $lazy)
 $tests = [
     new Valvoid\Fusion\Tests\Bus\BusTest,
     new Valvoid\Fusion\Tests\Config\ConfigTest,
+    new Valvoid\Fusion\Tests\Config\Parser\DirTest,
+    new Valvoid\Fusion\Tests\Config\Parser\Hub\HubTest,
+    new Valvoid\Fusion\Tests\Config\Parser\Log\LogTest,
+    new Valvoid\Fusion\Tests\Config\Parser\ParserTest,
+    new Valvoid\Fusion\Tests\Config\Parser\Tasks\TasksTest,
     new Valvoid\Fusion\Tests\Config\Interpreter\InterpreterTest,
     new Valvoid\Fusion\Tests\Config\Interpreter\DirTest,
     new Valvoid\Fusion\Tests\Config\Interpreter\PersistenceTest,

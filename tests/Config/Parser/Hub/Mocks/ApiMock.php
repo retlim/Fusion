@@ -17,39 +17,33 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests;
+namespace Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks;
+
+use Valvoid\Fusion\Hub\APIs\Local\Local;
+use Valvoid\Fusion\Hub\Responses\Local\Archive;
+use Valvoid\Fusion\Hub\Responses\Local\File;
+use Valvoid\Fusion\Hub\Responses\Local\References;
 
 /**
- * Test case.
+ * Mocked APi.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
  */
-abstract class Test
+class ApiMock extends Local
 {
-    /** @var string|array<string> Code coverage. */
-    protected string|array $coverage;
-
-    /** @var bool Test result. */
-    protected bool $result = true;
-
-    /**
-     * Returns the test result. True for success and false for not.
-     *
-     * @return bool Result.
-     */
-    public function getResult(): bool
+    public function getReferences(string $path): References|string
     {
-        return $this->result;
+        return "";
     }
 
-    /**
-     * Returns code coverage.
-     *
-     * @return array|string Class/function names.
-     */
-    public function getCoverage(): array|string
+    public function getFileContent(string $path, string $reference, string $filename): File|string
     {
-        return $this->coverage;
+        return "";
+    }
+
+    public function createArchive(string $path, string $reference, string $dir): Archive|string
+    {
+        return "";
     }
 }
