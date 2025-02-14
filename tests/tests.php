@@ -92,9 +92,9 @@ foreach ($tests as $test) {
     // array, string, null
     if (is_array($coverage)) {
         foreach ($coverage as $coverageItem)
-            if (!in_array($coverage, $coverageClassnames) &&
-                in_array($coverage, $classnames))
-                $coverageClassnames[] = $coverage;
+            if (!in_array($coverageItem, $coverageClassnames) &&
+                in_array($coverageItem, $classnames))
+                $coverageClassnames[] = $coverageItem;
 
     } elseif (is_string($coverage) &&
         !in_array($coverage, $coverageClassnames) &&

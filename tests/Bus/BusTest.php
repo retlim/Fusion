@@ -20,6 +20,10 @@
 namespace Valvoid\Fusion\Tests\Bus;
 
 use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Bus\Events\Cache;
+use Valvoid\Fusion\Bus\Events\Config;
+use Valvoid\Fusion\Bus\Events\Metadata;
+use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -30,7 +34,16 @@ use Valvoid\Fusion\Tests\Test;
  */
 class BusTest extends Test
 {
-    protected string|array $coverage = Bus::class;
+    protected string|array $coverage = [
+        Bus::class,
+
+        // exclude data wrapper since
+        // nothing to test
+        Cache::class,
+        Config::class,
+        Metadata::class,
+        Root::class
+    ];
 
     private Bus $bus;
 
