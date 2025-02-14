@@ -31,6 +31,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class ClauseTest extends Test
 {
+    protected string|array $coverage = Clause::class;
+
     public function __construct()
     {
         $this->testUnitState();

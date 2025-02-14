@@ -30,6 +30,8 @@ use Valvoid\Fusion\Util\Version\Interpreter;
  */
 class InterpreterTest extends Test
 {
+    protected string|array $coverage = Interpreter::class;
+
     public function __construct()
     {
         $this->testCoreIsBiggerThan();

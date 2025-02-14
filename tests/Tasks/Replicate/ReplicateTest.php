@@ -37,6 +37,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class ReplicateTest extends Test
 {
+    protected string|array $coverage = Replicate::class;
+
     private int $time;
 
     private array $environment = [

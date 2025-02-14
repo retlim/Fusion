@@ -37,6 +37,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class DownloadTest extends Test
 {
+    protected string|array $coverage = Download::class;
+
     private string $cache = __DIR__ . "/Mocks/package/cache/packages";
 
     public function __construct()

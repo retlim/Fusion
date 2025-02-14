@@ -32,6 +32,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class DirTest extends Test
 {
+    protected string|array $coverage = Dir::class;
+
     private Dir $dir;
 
     public function __construct()

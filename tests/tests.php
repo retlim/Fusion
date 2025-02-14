@@ -24,6 +24,7 @@ $lazy = require "$root/cache/loadable/lazy.php";
 $classnames = array_keys($lazy);
 $lazy += require "$root/cache/loadable/tests/lazy.php";
 $result = 0;
+$coverageClassnames = [];
 
 spl_autoload_register(function (string $loadable) use ($root, $lazy)
 {
@@ -82,9 +83,24 @@ $tests = [
     new Valvoid\Fusion\Tests\Tasks\GroupTest
 ];
 
-foreach ($tests as $test)
+foreach ($tests as $test) {
     if (!$test->getResult())
         $result = 1;
+
+    $coverage = $test->getCoverage();
+
+    // array, string, null
+    if (is_array($coverage)) {
+        foreach ($coverage as $coverageItem)
+            if (!in_array($coverage, $coverageClassnames) &&
+                in_array($coverage, $classnames))
+                $coverageClassnames[] = $coverage;
+
+    } elseif (is_string($coverage) &&
+        !in_array($coverage, $coverageClassnames) &&
+        in_array($coverage, $classnames))
+        $coverageClassnames[] = $coverage;
+}
 
 try {
 
@@ -98,7 +114,7 @@ try {
     }
 
     echo "\nCode coverage: " .
-        round(100 * sizeof($tests) / sizeof($classnames), 2) .
+        round(100 * sizeof($coverageClassnames) / sizeof($classnames), 2) .
         "%";
 
 } catch (ReflectionException $e) {

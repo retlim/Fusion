@@ -32,6 +32,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class HubTest extends Test
 {
+    protected string|array $coverage = Hub::class;
+
     private Hub $hub;
     private Logic $logic;
 

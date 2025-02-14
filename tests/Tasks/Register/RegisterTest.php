@@ -35,6 +35,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class RegisterTest extends Test
 {
+    protected string|array $coverage = Register::class;
+
     private int $time;
 
     public function __construct()

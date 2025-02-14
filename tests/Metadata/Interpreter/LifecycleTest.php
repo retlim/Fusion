@@ -34,6 +34,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class LifecycleTest extends Test
 {
+    protected string|array $coverage = Lifecycle::class;
+
     /** @var ?MetadataEvent last event */
     private ?MetadataEvent $event = null;
 

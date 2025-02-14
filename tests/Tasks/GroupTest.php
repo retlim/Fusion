@@ -30,6 +30,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class GroupTest extends Test
 {
+    protected string|array $coverage = Group::class;
+
     private Group $group;
 
     public function __construct()

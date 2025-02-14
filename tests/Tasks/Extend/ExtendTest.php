@@ -35,6 +35,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class ExtendTest extends Test
 {
+    protected string|array $coverage = Extend::class;
+
     private string $cache = __DIR__ . "/Mocks/package/cache/packages";
 
     private string $dir = __DIR__ . "/Mocks/package/dependencies/metadata2/extensions";

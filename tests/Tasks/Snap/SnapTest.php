@@ -36,6 +36,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class SnapTest extends Test
 {
+    protected string|array $coverage = Snap::class;
+
     public function __construct()
     {
         try {

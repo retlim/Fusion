@@ -31,6 +31,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class LogTest extends Test
 {
+    protected string|array $coverage = Log::class;
+
     private Log $log;
 
     public function __construct()

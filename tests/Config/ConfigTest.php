@@ -33,6 +33,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class ConfigTest extends Test
 {
+    protected string|array $coverage = Config::class;
+
     private string $root;
 
     private array $lazy;

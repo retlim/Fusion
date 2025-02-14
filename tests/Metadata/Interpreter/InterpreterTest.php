@@ -34,6 +34,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class InterpreterTest extends Test
 {
+    protected string|array $coverage = Interpreter::class;
+
     /** @var ?MetadataEvent last event */
     private ?MetadataEvent $event = null;
 

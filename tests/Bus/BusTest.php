@@ -30,6 +30,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class BusTest extends Test
 {
+    protected string|array $coverage = Bus::class;
+
     private Bus $bus;
 
     public function __construct()
