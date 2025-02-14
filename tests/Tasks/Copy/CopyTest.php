@@ -36,6 +36,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class CopyTest extends Test
 {
+    protected string|array $coverage = Copy::class;
+
     private string $cache = __DIR__ . "/Mocks/package/cache/packages";
 
     public function __construct()

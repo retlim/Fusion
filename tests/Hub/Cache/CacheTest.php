@@ -30,6 +30,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class CacheTest extends Test
 {
+    protected string|array $coverage = Cache::class;
+
     private Cache $cache;
 
     private array $versions = [

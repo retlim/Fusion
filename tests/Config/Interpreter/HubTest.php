@@ -34,6 +34,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class HubTest extends Test
 {
+    protected string|array $coverage = HubInterpreter::class;
+
     /** @var ?ConfigEvent last event */
     private ?ConfigEvent $event = null;
 

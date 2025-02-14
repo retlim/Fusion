@@ -31,6 +31,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class GraphTest extends Test
 {
+    protected string|array $coverage = Graph::class;
+
     public function __construct()
     {
         $this->testFallback();

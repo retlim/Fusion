@@ -34,6 +34,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class StructureTest extends Test
 {
+    protected string|array $coverage = Structure::class;
+
     /** @var ?MetadataEvent last event */
     private ?MetadataEvent $event = null;
 

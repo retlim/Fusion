@@ -34,6 +34,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class TasksTest extends Test
 {
+    protected string|array $coverage = TasksInterpreter::class;
+
     /** @var ?ConfigEvent last event */
     private ?ConfigEvent $event = null;
 

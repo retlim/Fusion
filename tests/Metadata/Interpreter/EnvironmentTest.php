@@ -34,6 +34,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class EnvironmentTest extends Test
 {
+    protected string|array $coverage = Environment::class;
+
     /** @var ?MetadataEvent last event */
     private ?MetadataEvent $event = null;
 

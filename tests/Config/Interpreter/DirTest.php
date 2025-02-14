@@ -34,6 +34,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class DirTest extends Test
 {
+    protected string|array $coverage = DirInterpreter::class;
+
     /** @var ?ConfigEvent last event */
     private ?ConfigEvent $event = null;
 

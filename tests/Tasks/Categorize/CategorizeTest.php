@@ -36,6 +36,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class CategorizeTest extends Test
 {
+    protected string|array $coverage = Categorize::class;
+
     public function __construct()
     {
         try {

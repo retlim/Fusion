@@ -35,6 +35,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class ImageTest extends Test
 {
+    protected string|array $coverage = Image::class;
+
     public function __construct()
     {
         try {

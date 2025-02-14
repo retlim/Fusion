@@ -34,6 +34,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class PersistenceTest extends Test
 {
+    protected string|array $coverage = PersistenceInterpreter::class;
+
     /** @var ?ConfigEvent last event */
     private ?ConfigEvent $event = null;
 

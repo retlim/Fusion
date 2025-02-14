@@ -30,6 +30,8 @@ use Valvoid\Fusion\Util\Pattern\Interpreter;
  */
 class InterpreterTest extends Test
 {
+    protected string|array $coverage = Interpreter::class;
+
     public function __construct()
     {
         $this->testMatch();

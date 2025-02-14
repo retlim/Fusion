@@ -35,6 +35,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class InflateTest extends Test
 {
+    protected string|array $coverage = Inflate::class;
+
     private string $cache = __DIR__ . "/Mocks/package/cache/packages";
 
     private string $dependencies = __DIR__ . "/Mocks/package/dependencies";

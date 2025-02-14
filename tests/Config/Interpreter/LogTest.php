@@ -34,6 +34,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class LogTest extends Test
 {
+    protected string|array $coverage = LogInterpreter::class;
+
     /** @var ?ConfigEvent last event */
     private ?ConfigEvent $event = null;
 

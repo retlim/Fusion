@@ -30,6 +30,8 @@ use Valvoid\Fusion\Tests\Test;
  */
 class SolverTest extends Test
 {
+    protected string|array $coverage = Solver::class;
+
     private array $structure = [
         "mosaic" => [
             "implication" => [

@@ -44,12 +44,13 @@ abstract class Test
     }
 
     /**
-     * Returns code coverage.
+     * Returns optional code coverage.
      *
-     * @return array|string Class/function names.
+     * @return null|array|string Class/function names.
      */
-    public function getCoverage(): array|string
+    public function getCoverage(): null|array|string
     {
-        return $this->coverage;
+        return $this->coverage ??
+            null;
     }
 }
