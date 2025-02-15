@@ -279,12 +279,32 @@ class Dir
     /**
      * Renames file or directory.
      *
-     * @param string $from Current file.
-     * @param string $to To file.
+     * @param string $from Current file or directory.
+     * @param string $to To file or directory.
      * @throws Error Internal error.
      */
     public static function rename(string $from, string $to): void
     {
+        // normalize to parent directory
+        // not all php os builds can't handle replacement
+        if (str_ends_with($from, "/" . basename($to)))
+            if (is_file($to) &&
+                !unlink($to))
+                throw new Error(
+                    "Can't rename the file \"$from\" to \"$to\" " .
+                    "because the target file cannot be normalized to the "  .
+                    "parent directory \"" . dirname($to) . "\"."
+                );
+
+            elseif (is_dir($to) &&
+                !rmdir($to))
+                throw new Error(
+                    "Can't rename the directory \"$from\" to \"$to\" " .
+                    "because the target directory cannot be normalized to the "  .
+                    "parent directory \"" . dirname($to) . "\"."
+                );
+
+
         if (!rename($from, $to))
             throw new Error(
                 "Can't rename the file \"$from\" to \"$to\"."
