@@ -287,23 +287,21 @@ class Dir
     {
         // normalize to parent directory
         // not all php os builds can't handle replacement
-        if (str_ends_with($from, "/" . basename($to)))
-            if (is_file($to) &&
-                !unlink($to))
-                throw new Error(
-                    "Can't rename the file \"$from\" to \"$to\" " .
-                    "because the target file cannot be normalized to the "  .
-                    "parent directory \"" . dirname($to) . "\"."
-                );
+        if (is_file($to) &&
+            !unlink($to))
+            throw new Error(
+                "Can't rename the file \"$from\" to \"$to\" " .
+                "because the target file cannot be normalized to the "  .
+                "parent directory \"" . dirname($to) . "\"."
+            );
 
-            elseif (is_dir($to) &&
-                !rmdir($to))
-                throw new Error(
-                    "Can't rename the directory \"$from\" to \"$to\" " .
-                    "because the target directory cannot be normalized to the "  .
-                    "parent directory \"" . dirname($to) . "\"."
-                );
-
+        elseif (is_dir($to) &&
+            !rmdir($to))
+            throw new Error(
+                "Can't rename the directory \"$from\" to \"$to\" " .
+                "because the target directory cannot be normalized to the "  .
+                "parent directory \"" . dirname($to) . "\"."
+            );
 
         if (!rename($from, $to))
             throw new Error(
