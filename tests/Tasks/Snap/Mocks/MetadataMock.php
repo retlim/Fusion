@@ -21,7 +21,6 @@ namespace Valvoid\Fusion\Tests\Tasks\Snap\Mocks;
 
 use ReflectionClass;
 use ReflectionException;
-use Valvoid\Fusion\Metadata\External\Category;
 use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
