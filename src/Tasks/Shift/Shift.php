@@ -24,6 +24,7 @@ use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Log\Events\Errors\Error;
+use Valvoid\Fusion\Log\Events\Errors\Lifecycle;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
@@ -53,18 +54,30 @@ class Shift extends Task
     /** @var InternalMeta[] Internal metas. */
     private array $internalMetas;
 
+    /** @var ExternalMeta[] External metas. */
+    private array $externalMetas;
+
     /** @var string[] Cache and nested source dirs. */
     private array $lockedDirs;
+
+    /** @var string[] Normalized file deletions. */
+    private array $executedFiles = [];
+
+    /** @var string Current directory helper. */
+    private string $dir = __DIR__;
 
     /**
      * Executes the task.
      *
      * @throws Error Internal error.
+     * @throws Lifecycle Lifecycle error.
      */
     public function execute(): void
     {
         Log::info("shift state");
 
+        // current state
+        // rebuilt cache, ...
         if (!Group::hasDownloadable()) {
             foreach (Group::getInternalMetas() as $meta)
                 $meta->onUpdate();
@@ -76,6 +89,7 @@ class Shift extends Task
         $this->internalMetas = Group::getInternalMetas();
         $this->state = Dir::getStateDir();
         $this->externalRootMeta = Group::getExternalRootMetadata();
+        $this->externalMetas = Group::getExternalMetas();
 
         // complete recursive or
         // pick nested
@@ -89,17 +103,23 @@ class Shift extends Task
      * Shifts recursive state.
      *
      * @throws Error Internal error.
+     * @throws Lifecycle Lifecycle error.
      */
     private function shiftRecursive(): void
     {
         $hasInternalFusion = isset($this->internalMetas["valvoid/fusion"]) &&
-            str_starts_with(__DIR__, $this->root);
+
+            // normalize dir
+            str_starts_with(str_replace('\\', '/', $this->dir),
+                $this->root);
 
         // keep current package manager code alive
         // if inside working directory
         if ($hasInternalFusion)
             $this->persistCurrentCode(true);
 
+        $internalCachePath = Group::getInternalRootMetadata()->getStructureCache();
+        $externalCachePath = $this->externalRootMeta->getStructureCache();
         $this->lockedDirs = [
             Dir::getCacheDir() . "/log",
             $this->state,
@@ -108,89 +128,52 @@ class Shift extends Task
             Dir::getOtherDir()
         ];
 
+        // before drop/clean up
         foreach ($this->internalMetas as $meta)
-            $meta->onDelete();
+            if ($meta->getCategory() == InternalMetaCategory::OBSOLETE)
+                $meta->onDelete();
 
         // delete current state
-        // keep cached state dir
+        // keep cached state dir and
+        // executed files
         $this->cleanUpDir($this->root);
 
-        // potential new cache directory
-        $cachePath = $this->externalRootMeta->getStructureCache();
-        $externalCacheDir = $this->root . $cachePath;
-        $internalCacheDir = Dir::getCacheDir();
-
-        if ($internalCacheDir != $externalCacheDir) {
+        //  new cache directory
+        if ($internalCachePath != $externalCachePath) {
 
             // notify new cache directory change
-            Bus::broadcast(new Cache($externalCacheDir));
+            Bus::broadcast(new Cache($this->root . $externalCachePath));
 
             // keep current code session alive
             if ($hasInternalFusion)
                 Bus::broadcast(new Root(Dir::getOtherDir() .
                     "/valvoid/fusion"));
 
-            $internalPath = Group::getInternalRootMetadata()->getStructureCache();
-            $externalPath = $this->externalRootMeta->getStructureCache();
-            $externalDirname = explode('/', $externalPath,
+            Dir::rename(
+                $this->root . $internalCachePath,
+                $this->root . $externalCachePath
+            );
 
-                // take second entry
-                // fusion dir starts always with slash
-                3)[1];
-
-            // add "." prevent naming conflict
-            Dir::rename("$this->root/$internalPath", "$this->root/.$externalDirname");
-            Dir::createDir("$this->root$externalPath");
-            Dir::rename("$this->root/.$externalDirname", "$this->root$externalPath");
-
-            // changed
+            // update changed
             $this->state = Dir::getStateDir();
         }
 
-        // shift all but cache
-        foreach (scandir($this->state, SCANDIR_SORT_NONE) as $filename)
-            if ($filename != "." && $filename != "..")
-                if (str_starts_with($cachePath, "/$filename"))
-                    $this->shiftNonEmpty(
-                        "$this->state/$filename",
-                        "$this->root/$filename"
-                    );
+        $this->shiftDirectory($this->state, $this->root);
 
-                else Dir::rename(
-                    "$this->state/$filename",
-                    "$this->root/$filename"
-                );
-
-        foreach (Group::getExternalMetas() as $meta)
-            if ($meta->getCategory() == ExternalMetaCategory::DOWNLOADABLE) {
+        // downloaded or
+        // moved rebuilt to new directory -> "downloaded" from internal directory
+        foreach ($this->externalMetas as $id => $meta)
+            if ($meta->getCategory() == ExternalMetaCategory::DOWNLOADABLE ||
+                $this->internalMetas[$id]->getCategory() === InternalMetaCategory::MOVABLE) {
                 Log::info(new Content($meta->getContent()));
                 $meta->onInstall();
             }
 
-        foreach (Group::getInternalMetas() as $meta)
-            if ($meta->getCategory() != InternalMetaCategory::OBSOLETE)
+        // rebuilt cache, state, ...
+        foreach ($this->internalMetas as $meta)
+            if ($meta->getCategory() === InternalMetaCategory::RECYCLABLE) {
                 Log::info(new Content($meta->getContent()));
-    }
-
-    /**
-     * Shifts non-empty directory.
-     *
-     * @param string $from Source directory.
-     * @param string $to Target directory.
-     * @throws Error
-     */
-    private function shiftNonEmpty(string $from, string $to): void
-    {
-        foreach (scandir($from, SCANDIR_SORT_NONE) as $filename)
-            if ($filename != "." && $filename != "..") {
-                $file = "$from/$filename";
-
-                if (is_dir($file) && file_exists("$to/$filename"))
-                    $this->shiftNonEmpty($file, "$to/$filename");
-
-                else Dir::rename($file,
-                    "$to/$filename"
-                );
+                $meta->onUpdate();
             }
     }
 
@@ -198,18 +181,22 @@ class Shift extends Task
      * Shifts nested state.
      *
      * @throws Error Internal error.
+     * @throws Lifecycle Lifecycle error.
      */
     private function shiftNested(): void
     {
-        $externalMetas = Group::getExternalMetas();
         $stateDir = Dir::getStateDir();
+        $this->lockedDirs = [];
 
         foreach ($this->internalMetas as $id => $metadata) {
 
             // keep current package manager code alive
             // if inside working directory
             if ($id == "valvoid/fusion" &&
-                str_starts_with(__DIR__, $this->root))
+
+                // normalize dir
+                str_starts_with(str_replace('\\', '/', $this->dir),
+                    $this->root))
                 $this->persistCurrentCode(false);
 
             // recycle
@@ -229,8 +216,8 @@ class Shift extends Task
                 // keep static content
                 // state, log, ... directory
                 } else {
-                    $this->lockedDirs = [
-                        "$from/log",
+                    $this->lockedDirs += [
+                        "$to/log",
                         $this->state,
                         Dir::getPackagesDir(),
                         Dir::getTaskDir(),
@@ -265,6 +252,7 @@ class Shift extends Task
                     }
                 }
 
+                // rebuilt cache, state, ...
                 $metadata->onUpdate();
                 Log::info(new Content($metadata->getContent()));
 
@@ -272,29 +260,31 @@ class Shift extends Task
             // delete obsolete and movable
             } else {
                 $metadata->onDelete();
-                Dir::delete($metadata->getSource());
+                $this->cleanUpDir($metadata->getSource());
             }
         }
 
         // shift
         // rename loadable and movable
-        foreach ($externalMetas as $id => $metadata) {
-            if ($metadata->getCategory() == ExternalMetaCategory::REDUNDANT)
-                if ($this->internalMetas[$id]->getCategory() !==
-                    InternalMetaCategory::MOVABLE)
-                    continue;
+        // downloaded or
+        // moved rebuilt to new directory -> "downloaded" from internal directory
+        foreach ($this->externalMetas as $id => $metadata)
+            if ($metadata->getCategory() == ExternalMetaCategory::DOWNLOADABLE ||
+                $this->internalMetas[$id]->getCategory() === InternalMetaCategory::MOVABLE) {
 
             $dir = $metadata->getDir();
             $to = $this->root . $dir;
 
-            Log::info(new Content($metadata->getContent()));
+            if (!file_exists($to))
+                Dir::createDir($to);
 
-            // prev version?
-            Dir::delete($to);
-            Dir::createDir($to);
-            Dir::rename($stateDir . $dir, $to);
+            $this->shiftDirectory(
+                $stateDir . $dir,
+                $to
+            );
 
             $metadata->onInstall();
+            Log::info(new Content($metadata->getContent()));
         }
     }
 
@@ -314,6 +304,23 @@ class Shift extends Task
         // lock state and packages
         if ($recursive) {
 
+            // same directory
+            // normalize executed file "fusion" deletion
+            // keep file open and replace content
+            if ($meta->getCategory() == InternalMetaCategory::RECYCLABLE)
+                $this->executedFiles[] = "$from/fusion";
+
+            elseif (isset($this->externalMetas["valvoid/fusion"])) {
+                $externalMeta = $this->externalMetas["valvoid/fusion"];
+
+                // different version in same nested directory
+                // keep executed file and
+                // replace content
+                if ($externalMeta->getCategory() == ExternalMetaCategory::DOWNLOADABLE &&
+                    $meta->getDir() == $externalMeta->getDir())
+                    $this->executedFiles[] = "$from/fusion";
+            }
+
             // lock unimportant dirs
             // cache directory
             $this->lockedDirs = [
@@ -324,9 +331,26 @@ class Shift extends Task
             ];
 
             // nested source wrapper directories
+            // actually only if top
+            // nested has no sources inside
             foreach ($meta->getStructureSources() as $dir => $source)
                 if ($dir)
                     $this->lockedDirs[] = $from . $dir;
+
+        // not recycle -> generated files only
+        // not movable -> new directory
+        // downloadable
+        } elseif (isset($this->externalMetas["valvoid/fusion"])) {
+            $externalMeta = $this->externalMetas["valvoid/fusion"];
+
+            // different version in same nested directory
+            // keep executed file and
+            // replace content
+            if ($externalMeta->getCategory() == ExternalMetaCategory::DOWNLOADABLE &&
+                $meta->getDir() == $externalMeta->getDir()) {
+                $this->lockedDirs[] = $from;
+                $this->executedFiles[] = "$from/fusion";
+            }
         }
 
         Dir::createDir($to);
@@ -338,11 +362,74 @@ class Shift extends Task
     }
 
     /**
+     * Shifts a directory.
+     *
+     * @param string $from Source directory.
+     * @param string $to Target directory.
+     * @throws Error Invalid directory error.
+     */
+    private function shiftDirectory(string $from, string $to): void
+    {
+        $filenames = scandir($from, SCANDIR_SORT_NONE);
+
+        if ($filenames === false)
+            throw new Error(
+                "Can't read directory \"$from\"."
+            );
+
+        foreach ($filenames as $filename)
+            if ($filename != "." && $filename != "..") {
+                $source = "$from/$filename";
+                $target = "$to/$filename";
+
+                if (is_dir($source))
+                    if (file_exists($target))
+                        $this->shiftDirectory($source, $target);
+
+                    else {
+                        Dir::createDir($target);
+                        Dir::rename($source, $target);
+                    }
+
+                else
+                    $this->shiftFile($source, $target);
+            }
+    }
+
+    /**
+     * Shifts a file.
+     *
+     * @param string $from Source file.
+     * @param string $to Target file.
+     * @throws Error Invalid file error.
+     */
+    private function shiftFile(string $from, string $to): void
+    {
+        // normalized
+        // keep executed file and replace content
+        if (in_array($to, $this->executedFiles)) {
+            $content = file_get_contents($from);
+
+            if ($content === false)
+                throw new Error(
+                    "Can't read for executed file \"$from\"."
+                );
+
+            if (file_put_contents($to, $content) === false)
+                throw new Error(
+                    "Can't write to executed file \"$to\"."
+                );
+
+        } else
+            Dir::rename($from, $to);
+    }
+
+    /**
      * Copies content from one to other directory.
      *
      * @param string $from Origin directory.
      * @param string $to Cache directory.
-     * @throws Error
+     * @throws Error Internal error.
      */
     private function copyDir(string $from, string $to): void
     {
@@ -367,7 +454,7 @@ class Shift extends Task
      * Cleans up directory.
      *
      * @param string $dir Directory.
-     * @throws Error
+     * @throws Error Internal error.
      */
     private function cleanUpDir(string $dir): void
     {
@@ -378,6 +465,14 @@ class Shift extends Task
                 if (is_dir($file)) {
                     if (!in_array($file, $this->lockedDirs))
                         $this->cleanUpDir($file);
+
+                // normalized executed file deletion
+                // replace content
+                } elseif (in_array($file, $this->executedFiles)) {
+                    if (file_put_contents($file, "") === false)
+                        throw new Error(
+                            "Can't clear executed file \"$file\"."
+                        );
 
                 } else
                     Dir::delete($file);
