@@ -8,6 +8,7 @@ stages:
   - deploy
   - image
 
+# static tests
 analyze code:
   stage: lint
   image:
@@ -21,13 +22,26 @@ analyze code:
     reports:
       codequality: phpstan.json
 
-test units and integrations:
+# test units and
+# encapsulated integrations
+test units:
   stage: test
   image: php:8.1.0
   coverage: /^Code\scoverage:\s\d{1,3}(?:\.\d{1,2})?\%/
   script:
-    - php tests/tests.php
+    - php tests/units.php
 
+# test integrations
+# package as it is
+test integrations:
+  stage: test
+  image: php:8.1.0
+  rules:
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX
+  script:
+    - php tests/integrations.php
+
+# build data
 replicate package:
   stage: deploy
   rules:
