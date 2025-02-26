@@ -34,7 +34,7 @@ use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Log\Log;
 
 /**
- * Package manager configuration.
+ * Package manager configuration proxy.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
@@ -45,19 +45,19 @@ class Config
     private static ?Config $instance = null;
 
     /** @var string @var Package manager root directory. */
-    private string $root;
+    protected string $root;
 
     /** @var array Lazy code registry. */
-    private array $lazy;
+    protected array $lazy;
 
     /** @var array Separated raw settings. */
-    private array $configs;
+    protected array $configs;
 
     /** @var array Composite settings. */
-    private array $content = [];
+    protected array $content = [];
 
     /** @var string Current source. */
-    private string $layer = "runtime";
+    protected string $layer = "runtime";
 
     /**
      * Constructs the config.
@@ -143,7 +143,7 @@ class Config
      *
      * @throws ConfigError Invalid config exception.
      */
-    private function initDefaultLayer(): void
+    protected function initDefaultLayer(): void
     {
         $this->loadConfigs(
             $this->configs["default"],
@@ -158,7 +158,7 @@ class Config
      *
      * @param array $wrapper
      */
-    private function overlayConfigs(array $wrapper): void
+    protected function overlayConfigs(array $wrapper): void
     {
         foreach (array_reverse($wrapper) as $file => $content) {
             $this->layer = $file;
@@ -183,7 +183,7 @@ class Config
      * @param array $wrapper
      * @throws ConfigError Invalid config exception.
      */
-    private function loadConfigs(array &$wrapper, string $dir): void
+    protected function loadConfigs(array &$wrapper, string $dir): void
     {
         foreach (scandir($dir, SCANDIR_SORT_ASCENDING) as $filename) {
             if ($filename == "." || $filename == "..")
@@ -200,7 +200,7 @@ class Config
                 $wrapper[$file] = $config;
 
                 if ($config === false)
-                    self::handleBusEvent(new ConfigEvent(
+                    $this->handleBusEvent(new ConfigEvent(
                         "Can't read the file.",
                         Level::ERROR
                     ));
@@ -216,7 +216,7 @@ class Config
      * @throws ConfigError Invalid config exception.
      * @throws Metadata Invalid meta exception.
      */
-    private function initPersistenceLayer(): void
+    protected function initPersistenceLayer(): void
     {
         $id = $this->getNonNestedPackageId();
         $dir = "$this->root/extensions/config/$id";
@@ -260,19 +260,19 @@ class Config
                     $this->layer = $file;
 
                     if ($extension === false)
-                        self::handleBusEvent(new ConfigEvent(
+                        $this->handleBusEvent(new ConfigEvent(
                             "Can't read the file.",
                             Level::ERROR
                         ));
 
                     if (!isset($extension["/extensions/config"]))
-                        self::handleBusEvent(new ConfigEvent(
+                        $this->handleBusEvent(new ConfigEvent(
                             "Missing \"/extensions/config\" index.",
                             Level::ERROR
                         ));
 
                     if (!is_array($extension["/extensions/config"]))
-                        self::handleBusEvent(new ConfigEvent(
+                        $this->handleBusEvent(new ConfigEvent(
                             "The value of the \"/extensions/config\" " .
                             "key must be an array.",
                             Level::ERROR
@@ -304,7 +304,7 @@ class Config
                         // has more than
                         // ".", "..", and "id part"
                         if (isset($filenames[3]))
-                            self::handleBusEvent(new ConfigEvent(
+                            $this->handleBusEvent(new ConfigEvent(
                                 "Can't load persistence config layer " .
                                 "due to lack of extension cache that contains the " .
                                 "overlay order. Run the \"build\" or \"replicate\" " .
@@ -335,7 +335,7 @@ class Config
      *
      * @throws Metadata Invalid meta exception.
      */
-    private function getNonNestedPackageId(): string
+    protected function getNonNestedPackageId(): string
     {
         $path = DirectoryParser::getNonNestedPath($this->root);
 
@@ -359,7 +359,7 @@ class Config
                         $meta = file_get_contents($file);
 
                         if ($meta === false)
-                            self::throwMetaError(
+                            $this->throwMetaError(
                                 "Invalid meta. Can't read it from the file.",
                                 $file
                             );
@@ -370,7 +370,7 @@ class Config
                         // only .php file config can contain reset so
                         // drop error on null or false
                         if (!is_array($meta))
-                            self::throwMetaError(
+                            $this->throwMetaError(
                                 "Invalid meta. Can't decode it as json.",
                                 $file
                             );
@@ -380,13 +380,13 @@ class Config
                         $meta = include $file;
 
                         if ($meta === false)
-                            self::throwMetaError(
+                            $this->throwMetaError(
                                 "Invalid meta. Can't read it from the file.",
                                 $file
                             );
 
                         if (!is_array($meta))
-                            self::throwMetaError(
+                            $this->throwMetaError(
                                 "Invalid meta. The content must be an array.",
                                 $file
                             );
@@ -397,7 +397,7 @@ class Config
                 // take first match that overrides all other
                 if (isset($meta["id"])) {
                     if (!is_string($meta["id"]) || !$meta["id"])
-                        self::throwMetaError(
+                        $this->throwMetaError(
                             "Invalid meta. The value of the \"id\" " .
                             "index must be a non-empty string.",
                             $file,
@@ -408,7 +408,7 @@ class Config
                 }
             }
 
-            self::throwMetaError(
+            $this->throwMetaError(
                 "Invalid meta. The directory does not have a " .
                 "metafile with a package ID.",
                 $path
@@ -424,7 +424,7 @@ class Config
      * @param array $index Index.
      * @throws Metadata Invalid meta exception.
      */
-    private function throwMetaError(string $message, string $file, array $index = []): void
+    protected function throwMetaError(string $message, string $file, array $index = []): void
     {
         throw new Metadata($this->root, $message, $file, $index);
     }
@@ -437,7 +437,20 @@ class Config
      */
     public static function get(string ...$breadcrumb): mixed
     {
-        $content = self::$instance->content;
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->get_(...$breadcrumb);
+    }
+
+    /**
+     * Returns composite settings.
+     *
+     * @param string ...$breadcrumb Index path inside config.
+     * @return mixed Config.
+     */
+    protected function get_(string ...$breadcrumb): mixed
+    {
+        $content = $this->content;
 
         foreach ($breadcrumb as $index)
             if (isset($content[$index]))
@@ -456,7 +469,17 @@ class Config
      */
     public static function getLazy(): array
     {
-        return self::$instance->lazy;
+        return self::$instance->getLazy_();
+    }
+
+    /**
+     * Returns lazy code registry.
+     *
+     * @return array Lazy.
+     */
+    protected function getLazy_(): array
+    {
+        return $this->lazy;
     }
 
     /**
@@ -467,7 +490,20 @@ class Config
      */
     public static function hasLazy(string $class): bool
     {
-        return isset(self::$instance->lazy[$class]);
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->hasLazy_($class);
+    }
+
+    /**
+     * Returns indicator for existing lazy code.
+     *
+     * @param string $class Class.
+     * @return bool Indicator.
+     */
+    protected function hasLazy_(string $class): bool
+    {
+        return isset($this->lazy[$class]);
     }
 
     /**

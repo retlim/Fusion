@@ -37,10 +37,14 @@ class HubTest extends Test
 
     public function __construct()
     {
+        $configMock = new ConfigMock();
+
         // test parseable api
         $this->testDefaultApiConfig();
         $this->testConfiguredApiConfig();
+        $configMock->addParser();
         $this->testConfiguredParsableApiConfig();
+        $configMock->destroy();
     }
 
     public function testDefaultApiConfig(): void
@@ -97,7 +101,6 @@ class HubTest extends Test
 
     public function testConfiguredParsableApiConfig(): void
     {
-        $configMock = new ConfigMock();
         $config = [
             "apis" => [
 
@@ -117,7 +120,5 @@ class HubTest extends Test
 
             $this->result = false;
         }
-
-        $configMock->destroy();
     }
 }

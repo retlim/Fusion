@@ -37,10 +37,14 @@ class LogTest extends Test
 
     public function __construct()
     {
+        $configMock = new ConfigMock;
+
         // test parseable serializer
         $this->testDefaultSerializerConfig();
         $this->testConfiguredSerializerConfig();
+        $configMock->addParser();
         $this->testConfiguredParsableSerializerConfig();
+        $configMock->destroy();
     }
 
     public function testDefaultSerializerConfig(): void
@@ -97,7 +101,7 @@ class LogTest extends Test
 
     public function testConfiguredParsableSerializerConfig(): void
     {
-        $configMock = new ConfigMock();
+
         $config = [
             "serializers" => [
 
@@ -117,7 +121,5 @@ class LogTest extends Test
 
             $this->result = false;
         }
-
-        $configMock->destroy();
     }
 }

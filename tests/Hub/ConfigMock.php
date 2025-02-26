@@ -41,18 +41,21 @@ class ConfigMock
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Config::class);
-        $this->config = $this->reflection->newInstanceWithoutConstructor();
-        $this->reflection->setStaticPropertyValue("instance", $this->config);
-        $content = $this->reflection->getProperty('content');
+        $this->reflection->setStaticPropertyValue("instance", new class extends Config
+        {
+            protected array $content = [
+                "hub" => [
+                    "apis" => []
+                ],
+                "dir" => [
+                    "path" => __DIR__,
+                ]
+            ];
 
-        $content->setValue($this->config, [
-            "hub" => [
-                "apis" => []
-            ],
-            "dir" => [
-                "path" => __DIR__,
-            ]
-        ]);
+            public function __construct() {}
+            public function __destruct() {}
+
+        });
     }
 
     public function destroy(): void

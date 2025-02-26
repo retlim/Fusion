@@ -31,23 +31,33 @@ use Valvoid\Fusion\Config\Config;
  */
 class ConfigMock
 {
-    private Config $config;
-
     private ReflectionClass $reflection;
 
     /**
-     * @throws ReflectionException
      */
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Config::class);
-        $this->config = $this->reflection->newInstanceWithoutConstructor();
-        $this->reflection->setStaticPropertyValue("instance", $this->config);
-        $lazy = $this->reflection->getProperty('lazy');
+        $this->reflection->setStaticPropertyValue("instance", new class extends Config
+        {
+            public function __construct() {}
+            public function __destruct() {}
 
-        $lazy->setValue($this->config, [
-            'Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\Config\Parser' => '/tests/Config/Parser/Log/Mocks/Config/Parser.php',
-        ]);
+        });
+    }
+
+    public function addParser(): void
+    {
+        $this->reflection->setStaticPropertyValue("instance", new class extends Config
+        {
+            protected array $lazy = [
+                'Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\Config\Parser' => '/tests/Config/Parser/Log/Mocks/Config/Parser.php',
+            ];
+
+            public function __construct() {}
+            public function __destruct() {}
+
+        });
     }
 
     public function destroy(): void
