@@ -34,7 +34,7 @@ class Bus
     private static ?Bus $instance = null;
 
     /** @var array<string, array<string, Closure>> Event receivers. */
-    private array $receivers = [];
+    protected array $receivers = [];
 
     /** Constructs the bus. */
     private function __construct() {}
