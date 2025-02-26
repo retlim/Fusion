@@ -25,7 +25,6 @@ use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Hub\Hub;
-use Valvoid\Fusion\Hub\Logic;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Errors\Metadata as MetadataError;
@@ -89,7 +88,7 @@ class Fusion
         $this->config = Config::___init($this->root, $this->lazy, $config);
         $this->dir = Dir::___init();
         $this->log = Log::___init();
-        $this->hub = Hub::___init(new Logic);
+        $this->hub = Hub::___init();
 
         Bus::addReceiver(self::class, $this->handleBusEvent(...),
             Root::class);

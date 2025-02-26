@@ -58,7 +58,6 @@ return [
 	'Valvoid\Fusion\Hub\APIs\Remote\Valvoid\Valvoid' => '/src/Hub/APIs/Remote/Valvoid/Valvoid.php',
 	'Valvoid\Fusion\Hub\Cache' => '/src/Hub/Cache.php',
 	'Valvoid\Fusion\Hub\Hub' => '/src/Hub/Hub.php',
-	'Valvoid\Fusion\Hub\Logic' => '/src/Hub/Logic.php',
 	'Valvoid\Fusion\Hub\Parser' => '/src/Hub/Parser.php',
 	'Valvoid\Fusion\Hub\Requests\Cache\Archive' => '/src/Hub/Requests/Cache/Archive.php',
 	'Valvoid\Fusion\Hub\Requests\Cache\Cache' => '/src/Hub/Requests/Cache/Cache.php',
