@@ -26,7 +26,7 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Metadata;
 
 /**
- * Current package directory.
+ * Current package directory proxy.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
@@ -37,10 +37,10 @@ class Dir
     private static ?Dir $instance = null;
 
     /** @var string Constant cwd root. */
-    private string $root;
+    protected string $root;
 
     /** @var string Dynamic cache directory. */
-    private string $cache;
+    protected string $cache;
 
     /**
      * Constructs the directory.
@@ -69,7 +69,7 @@ class Dir
                         $meta = file_get_contents($file);
 
                         if ($meta === false)
-                            self::throwMetaError(
+                            $this->throwMetaError(
                                 "Invalid meta. Can't read it from the file.",
                                 $file
                             );
@@ -80,7 +80,7 @@ class Dir
                         // only .php file config can contain reset so
                         // drop error on null or false
                         if (!is_array($meta))
-                            self::throwMetaError(
+                            $this->throwMetaError(
                                 "Invalid meta. Can't decode it as json.",
                                 $file
                             );
@@ -90,13 +90,13 @@ class Dir
                         $meta = include $file;
 
                         if ($meta === false)
-                            self::throwMetaError(
+                            $this->throwMetaError(
                                 "Invalid meta. Can't read it from the file.",
                                 $file
                             );
 
                         if (!is_array($meta))
-                            self::throwMetaError(
+                            $this->throwMetaError(
                                 "Invalid meta. The content must be an array.",
                                 $file
                             );
@@ -105,7 +105,7 @@ class Dir
 
                 if (isset($meta["structure"])) {
                     if (!is_array($meta["structure"]) || !$meta["structure"])
-                        self::throwMetaError(
+                        $this->throwMetaError(
                             "Invalid meta. The value of the \"structure\" " .
                             "index must be an non-empty associative array.",
                             $file,
@@ -169,7 +169,7 @@ class Dir
      * @param string $breadcrumb
      * @return string|null
      */
-    private function getCachePath(array $struct, string $breadcrumb = ""): ?string
+    protected function getCachePath(array $struct, string $breadcrumb = ""): ?string
     {
         // assoc or seq key due to loadable inside cache folder
         foreach ($struct as $key => $value)
@@ -179,7 +179,7 @@ class Dir
                     $breadcrumb;
 
             elseif (is_array($value))
-                if ($dir = self::getCachePath($value, is_string($key) ?
+                if ($dir = $this->getCachePath($value, is_string($key) ?
                     $breadcrumb . $key :
                     $breadcrumb))
                     return $dir;
@@ -194,7 +194,19 @@ class Dir
      */
     public static function getTaskDir(): string
     {
-        return self::$instance->cache . "/task";
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getTaskDir_();
+    }
+
+    /**
+     * Returns current (locked) task cache directory.
+     *
+     * @return string Directory.
+     */
+    protected function getTaskDir_(): string
+    {
+        return "$this->cache/task";
     }
 
     /**
@@ -204,7 +216,19 @@ class Dir
      */
     public static function getStateDir(): string
     {
-        return self::$instance->cache. "/state";
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getStateDir_();
+    }
+
+    /**
+     * Returns current (locked) task cache directory.
+     *
+     * @return string Directory.
+     */
+    protected function getStateDir_(): string
+    {
+        return "$this->cache/state";
     }
 
     /**
@@ -214,7 +238,19 @@ class Dir
      */
     public static function getCacheDir(): string
     {
-        return self::$instance->cache;
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getCacheDir_();
+    }
+
+    /**
+     * Returns absolute cache directory.
+     *
+     * @return string Directory.
+     */
+    protected function getCacheDir_(): string
+    {
+        return $this->cache;
     }
 
     /**
@@ -224,7 +260,19 @@ class Dir
      */
     public static function getOtherDir(): string
     {
-        return self::$instance->cache. "/other";
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getOtherDir_();
+    }
+
+    /**
+     * Returns other directory.
+     *
+     * @return string Directory.
+     */
+    protected function getOtherDir_(): string
+    {
+        return "$this->cache/other";
     }
 
     /**
@@ -234,7 +282,19 @@ class Dir
      */
     public static function getPackagesDir(): string
     {
-        return self::$instance->cache. "/packages";
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getPackagesDir_();
+    }
+
+    /**
+     * Returns packages directory.
+     *
+     * @return string Directory.
+     */
+    protected function getPackagesDir_(): string
+    {
+        return "$this->cache/packages";
     }
 
     /**
@@ -253,11 +313,25 @@ class Dir
     }
 
     /**
-     * @return string
+     * Returns root directory.
+     *
+     * @return string Root dir.
      */
     public static function getRootDir(): string
     {
-        return self::$instance->root;
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getRootDir_();
+    }
+
+    /**
+     * Returns root directory.
+     *
+     * @return string Root dir.
+     */
+    protected function getRootDir_(): string
+    {
+        return $this->root;
     }
 
     /**
@@ -269,11 +343,25 @@ class Dir
      */
     public static function createDir(string $dir, int $permissions = 0755): void
     {
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->createDir_($dir, $permissions);
+    }
+
+    /**
+     * Creates directory.
+     *
+     * @param string $dir Dir.
+     * @param int $permissions Permissions.
+     * @throws Error Internal error.
+     */
+    protected function createDir_(string $dir, int $permissions = 0755): void
+    {
         if (!file_exists($dir) &&
             !mkdir($dir, $permissions, true))
-                throw new Error(
-                    "Can't create the directory \"$dir\"."
-                );
+            throw new Error(
+                "Can't create the directory \"$dir\"."
+            );
     }
 
     /**
@@ -284,6 +372,20 @@ class Dir
      * @throws Error Internal error.
      */
     public static function rename(string $from, string $to): void
+    {
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->rename_($from, $to);
+    }
+
+    /**
+     * Renames file or directory.
+     *
+     * @param string $from Current file or directory.
+     * @param string $to To file or directory.
+     * @throws Error Internal error.
+     */
+    protected function rename_(string $from, string $to): void
     {
         // normalize to parent directory
         // not all php os builds can't handle replacement
@@ -318,6 +420,20 @@ class Dir
      */
     public static function copy(string $from, string $to): void
     {
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->copy_($from, $to);
+    }
+
+    /**
+     * Copies file.
+     *
+     * @param string $from Current file.
+     * @param string $to To file.
+     * @throws Error Internal error.
+     */
+    protected function copy_(string $from, string $to): void
+    {
         if (!copy($from, $to))
             throw new Error(
                 "Can't copy the file \"$from\" to \"$to\"."
@@ -332,10 +448,23 @@ class Dir
      */
     public static function delete(string $file): void
     {
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->delete_($file);
+    }
+
+    /**
+     * Deletes file or directory.
+     *
+     * @param string $file Dir or file.
+     * @throws Error Internal error.
+     */
+    protected function delete_(string $file): void
+    {
         if (is_dir($file)) {
             foreach (scandir($file, SCANDIR_SORT_NONE) as $filename)
                 if ($filename != "." && $filename != "..")
-                    self::delete("$file/$filename");
+                    $this->delete_("$file/$filename");
 
             if (!rmdir($file))
                 throw new Error(
@@ -357,6 +486,20 @@ class Dir
      * @throws Error
      */
     public static function clear(string $dir, string $path): void
+    {
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->clear_($dir, $path);
+    }
+
+    /**
+     * Deletes empty path parts.
+     *
+     * @param string $dir Directory.
+     * @param string $path Path.
+     * @throws Error
+     */
+    protected function clear_(string $dir, string $path): void
     {
         $directory = $dir . $path;
 
@@ -385,7 +528,7 @@ class Dir
      * @param array $index Index.
      * @throws Metadata Invalid meta exception.
      */
-    private function throwMetaError(string $message, string $file, array $index = []): void
+    protected function throwMetaError(string $message, string $file, array $index = []): void
     {
         throw new Metadata(
             "runtime config layer",
@@ -400,7 +543,7 @@ class Dir
      *
      * @param Cache $event Event.
      */
-    private function handleBusEvent(Cache $event): void
+    protected function handleBusEvent(Cache $event): void
     {
         $this->cache = $event->getDir();
     }
