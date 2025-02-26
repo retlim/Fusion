@@ -29,7 +29,7 @@ use Valvoid\Fusion\Log\Serializers\Streams\Stream;
 use Valvoid\Fusion\Tasks\Task;
 
 /**
- * Event log.
+ * Event log facade.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
@@ -40,10 +40,10 @@ class Log
     private static ?Log $instance = null;
 
     /** @var File[]|Stream[] Output formatters. */
-    private array $serializers = [];
+    protected array $serializers = [];
 
     /** @var Interceptor Event interceptor. */
-    private Interceptor $interceptor;
+    protected Interceptor $interceptor;
 
     /** Constructs the log. */
     private function __construct()
@@ -118,13 +118,13 @@ class Log
      * @param Level $level Level.
      * @param Event|string $event Event.
      */
-    private function log(Level $level, Event|string $event): void
+    protected function log(Level $level, Event|string $event): void
     {
         // extend manually
         if (isset($this->interceptor))
             $this->interceptor->extend($event);
 
-        foreach (self::$instance->serializers as $serializer)
+        foreach ($this->serializers as $serializer)
             $serializer->log($level, $event);
     }
 
@@ -135,7 +135,19 @@ class Log
      */
     public static function error(Event|string $event): void
     {
-        self::$instance->log(Level::ERROR, $event);
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->error_($event);
+    }
+
+    /**
+     * Logs error event.
+     *
+     * @param Event|string $event Event.
+     */
+    protected function error_(Event|string $event): void
+    {
+        $this->log(Level::ERROR, $event);
     }
 
     /**
@@ -145,7 +157,19 @@ class Log
      */
     public static function warning(Event|string $event): void
     {
-        self::$instance->log(Level::WARNING, $event);
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->warning_($event);
+    }
+
+    /**
+     * Logs warning event.
+     *
+     * @param Event|string $event Event.
+     */
+    protected function warning_(Event|string $event): void
+    {
+        $this->log(Level::WARNING, $event);
     }
 
     /**
@@ -155,7 +179,19 @@ class Log
      */
     public static function notice(Event|string $event): void
     {
-        self::$instance->log(Level::NOTICE, $event);
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->notice_($event);
+    }
+
+    /**
+     * Logs notice event.
+     *
+     * @param Event|string $event Event.
+     */
+    protected function notice_(Event|string $event): void
+    {
+        $this->log(Level::NOTICE, $event);
     }
 
     /**
@@ -165,7 +201,19 @@ class Log
      */
     public static function info(Event|string $event): void
     {
-        self::$instance->log(Level::INFO, $event);
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->info_($event);
+    }
+
+    /**
+     * Logs info event.
+     *
+     * @param Event|string $event Event.
+     */
+    protected function info_(Event|string $event): void
+    {
+        $this->log(Level::INFO, $event);
     }
 
     /**
@@ -175,7 +223,19 @@ class Log
      */
     public static function verbose(Event|string $event): void
     {
-        self::$instance->log(Level::VERBOSE, $event);
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->verbose_($event);
+    }
+
+    /**
+     * Logs verbose event.
+     *
+     * @param Event|string $event Event.
+     */
+    protected function verbose_(Event|string $event): void
+    {
+        $this->log(Level::VERBOSE, $event);
     }
 
     /**
@@ -185,6 +245,18 @@ class Log
      */
     public static function debug(Event|string $event): void
     {
-        self::$instance->log(Level::DEBUG, $event);
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->debug_($event);
+    }
+
+    /**
+     * Logs debug event.
+     *
+     * @param Event|string $event Event.
+     */
+    protected function debug_(Event|string $event): void
+    {
+        $this->log(Level::DEBUG, $event);
     }
 }
