@@ -23,7 +23,7 @@ use Closure;
 use Valvoid\Fusion\Bus\Events\Event;
 
 /**
- * Event bus.
+ * Event bus facade.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
@@ -75,8 +75,22 @@ class Bus
      */
     public static function addReceiver(string $id, Closure $callback, string ...$events): void
     {
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->addReceiver_($id, $callback, ...$events);
+    }
+
+    /**
+     * Adds event receiver.
+     *
+     * @param string $id Receiver ID.
+     * @param Closure $callback Receiver callback.
+     * @param string ...$events Event class name IDs.
+     */
+    protected function addReceiver_(string $id, Closure $callback, string ...$events): void
+    {
         foreach ($events as $event)
-            self::$instance->receivers[$event][$id] = $callback;
+            $this->receivers[$event][$id] = $callback;
     }
 
     /**
@@ -87,15 +101,26 @@ class Bus
      */
     public static function removeReceiver(string $id, string ...$events): void
     {
-        $bus = self::$instance;
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->removeReceiver_($id, ...$events);
+    }
 
+    /**
+     * Removes selected or complete event receiver.
+     *
+     * @param string $id Receiver ID.
+     * @param string ...$events Event class name IDs.
+     */
+    protected function removeReceiver_(string $id, string ...$events): void
+    {
         // clear selected event or
         // complete
         if (!$events)
-            $events = array_keys($bus->receivers);
+            $events = array_keys($this->receivers);
 
         foreach ($events as $event)
-            unset($bus->receivers[$event][$id]);
+            unset($this->receivers[$event][$id]);
     }
 
     /**
@@ -105,7 +130,19 @@ class Bus
      */
     public static function broadcast(Event $event): void
     {
-        $receivers = self::$instance->receivers[$event::class] ??
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->broadcast_($event);
+    }
+
+    /**
+     * Sends the event to all receivers.
+     *
+     * @param Event $event Event.
+     */
+    protected function broadcast_(Event $event): void
+    {
+        $receivers = $this->receivers[$event::class] ??
 
             // fallback
             // broadcast has no confirmation
