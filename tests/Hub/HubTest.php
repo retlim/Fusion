@@ -21,7 +21,6 @@ namespace Valvoid\Fusion\Tests\Hub;
 
 use ReflectionException;
 use Valvoid\Fusion\Hub\Hub;
-use Valvoid\Fusion\Hub\Logic;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -35,14 +34,12 @@ class HubTest extends Test
     protected string|array $coverage = Hub::class;
 
     private Hub $hub;
-    private Logic $logic;
 
     public function __construct()
     {
         try {
             $configMock = new ConfigMock;
-            $this->logic = new Logic;
-            $this->hub = Hub::___init($this->logic);
+            $this->hub = Hub::___init();
 
             $this->testLockedSingletonInstance();
             $this->testInstanceDestruction();
@@ -59,7 +56,7 @@ class HubTest extends Test
 
     public function testLockedSingletonInstance(): void
     {
-        $instance = Hub::___init($this->logic);
+        $instance = Hub::___init();
 
         // assert indicator for locked and consumed instance
         if ($instance !== true) {
@@ -73,7 +70,7 @@ class HubTest extends Test
     {
         $instance = $this->hub;
         $this->hub->destroy();
-        $this->hub = Hub::___init($this->logic);
+        $this->hub = Hub::___init();
 
         // assert different instances
         if ($instance === $this->hub) {

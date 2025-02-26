@@ -23,7 +23,6 @@ use Closure;
 use ReflectionClass;
 use ReflectionException;
 use Valvoid\Fusion\Hub\Hub;
-use Valvoid\Fusion\Hub\Logic;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive as ArchiveResponse;
 
 /**
@@ -42,23 +41,18 @@ class HubMock
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Hub::class);
-        $hub = $this->reflection->newInstanceWithoutConstructor();
-        $this->reflection->setStaticPropertyValue("instance", $hub);
-        $logic = $this->reflection->getProperty("logic");
-
-        // pseudo logic
-        $logic->setValue($hub, new class extends Logic
+        $this->reflection->setStaticPropertyValue("instance", new class extends Hub
         {
             public function __construct() {}
             public function __destruct() {}
 
-            public function addArchiveRequest(array $source): int
+            protected function addArchiveRequest_(array $source): int
             {
                 // fake request id
                 return 1;
             }
 
-            public function executeRequests(Closure $callback): void
+            protected function executeRequests_(Closure $callback): void
             {
                 $callback(new ArchiveResponse(1, __DIR__));
             }
