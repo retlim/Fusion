@@ -29,7 +29,7 @@ use Valvoid\Fusion\Log\Serializers\Streams\Stream;
 use Valvoid\Fusion\Tasks\Task;
 
 /**
- * Event log facade.
+ * Event log proxy.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3

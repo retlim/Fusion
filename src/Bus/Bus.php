@@ -23,7 +23,7 @@ use Closure;
 use Valvoid\Fusion\Bus\Events\Event;
 
 /**
- * Event bus facade.
+ * Event bus proxy.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
