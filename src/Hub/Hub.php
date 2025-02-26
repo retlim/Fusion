@@ -24,7 +24,7 @@ use Valvoid\Fusion\Log\Events\Errors\Error as HubError;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 
 /**
- * Hub facade.
+ * Hub proxy.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3

@@ -27,7 +27,7 @@ use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
 use Valvoid\Fusion\Util\Metadata\Structure;
 
 /**
- * Task group.
+ * Task group proxy.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
@@ -38,25 +38,25 @@ class Group
     private static ?Group $instance = null;
 
     /** @var array<string, InternalMeta> Internal metas by ID. */
-    private array $internalMetas = [];
+    protected array $internalMetas = [];
 
     /** @var array<string, ExternalMeta> External metas by ID. */
-    private array $externalMetas = [];
+    protected array $externalMetas = [];
 
     /** @var array Root-leaf metadata relations (inline sources - ID's). */
-    private array $implication = [];
+    protected array $implication = [];
 
     /** @var bool Loadable external indicator. */
-    private bool $downloadable;
+    protected bool $downloadable;
 
     /** @var InternalMeta Internal root meta. */
-    private InternalMeta $internalRootMeta;
+    protected InternalMeta $internalRootMeta;
 
     /** @var ?ExternalMeta Recursive external root meta. */
-    private ?ExternalMeta $externalRootMeta = null;
+    protected ?ExternalMeta $externalRootMeta = null;
 
     /** @var string[] Runtime layer implication breadcrumb. */
-    private array $implicationBreadcrumb = [];
+    protected array $implicationBreadcrumb = [];
 
     /**
      * Constructs the group.
@@ -99,11 +99,23 @@ class Group
      */
     public static function setInternalMetas(array $metas): void
     {
-        self::$instance->internalMetas = $metas;
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->setInternalMetas_($metas);
+    }
+
+    /**
+     * Sets internal metas.
+     *
+     * @param array<string, InternalMeta> $metas Metas.
+     */
+    protected function setInternalMetas_(array $metas): void
+    {
+        $this->internalMetas = $metas;
 
         foreach ($metas as $meta)
             if (!$meta->getDir()) {
-                self::$instance->internalRootMeta = $meta;
+                $this->internalRootMeta = $meta;
 
                 break;
             }
@@ -116,7 +128,19 @@ class Group
      */
     public static function setImplication(array $implication): void
     {
-        self::$instance->implication = $implication;
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->setImplication_($implication);
+    }
+
+    /**
+     * Sets implication.
+     *
+     * @param array $implication Implication.
+     */
+    protected function setImplication_(array $implication): void
+    {
+        $this->implication = $implication;
     }
 
     /**
@@ -126,14 +150,26 @@ class Group
      */
     public static function setExternalMetas(array $metas): void
     {
-        self::$instance->externalMetas = $metas;
-        self::$instance->externalRootMeta = null;
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->setExternalMetas_($metas);
+    }
+
+    /**
+     * Sets external metas.
+     *
+     * @param array<string, ExternalMeta> $metas Metas.
+     */
+    protected function setExternalMetas_(array $metas): void
+    {
+        $this->externalMetas = $metas;
+        $this->externalRootMeta = null;
 
         foreach ($metas as $meta)
             if (!$meta->getDir())
-                self::$instance->externalRootMeta = $meta;
+                $this->externalRootMeta = $meta;
 
-        unset(self::$instance->downloadable);
+        unset($this->downloadable);
     }
 
     /**
@@ -143,7 +179,19 @@ class Group
      */
     public static function getExternalRootMetadata(): ?ExternalMeta
     {
-        return self::$instance->externalRootMeta;
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getExternalRootMetadata_();
+    }
+
+    /**
+     * Returns optional external root meta.
+     *
+     * @return ExternalMeta|null Meta.
+     */
+    protected function getExternalRootMetadata_(): ?ExternalMeta
+    {
+        return $this->externalRootMeta;
     }
 
     /**
@@ -153,7 +201,19 @@ class Group
      */
     public static function getInternalRootMetadata(): InternalMeta
     {
-        return self::$instance->internalRootMeta;
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getInternalRootMetadata_();
+    }
+
+    /**
+     * Returns internal root meta.
+     *
+     * @return InternalMeta Meta.
+     */
+    protected function getInternalRootMetadata_(): InternalMeta
+    {
+        return $this->internalRootMeta;
     }
 
     /**
@@ -163,10 +223,20 @@ class Group
      */
     public static function getRootMetadata(): ExternalMeta|InternalMeta
     {
-        $group = self::$instance;
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getRootMetadata_();
+    }
 
-        return $group->externalRootMeta ??
-            $group->internalRootMeta;
+    /**
+     * Returns root metadata.
+     *
+     * @return ExternalMeta|InternalMeta Meta.
+     */
+    protected function getRootMetadata_(): ExternalMeta|InternalMeta
+    {
+        return $this->externalRootMeta ??
+            $this->internalRootMeta;
     }
 
     /**
@@ -176,18 +246,30 @@ class Group
      */
     public static function hasDownloadable(): bool
     {
-        if (!isset(self::$instance->downloadable)) {
-            self::$instance->downloadable = false;
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->hasDownloadable_();
+    }
 
-            foreach (self::$instance->externalMetas as $meta)
+    /**
+     * Returns indicator for loadable meta.
+     *
+     * @return bool Indicator.
+     */
+    protected function hasDownloadable_(): bool
+    {
+        if (!isset($this->downloadable)) {
+            $this->downloadable = false;
+
+            foreach ($this->externalMetas as $meta)
                 if ($meta->getCategory() == Category::DOWNLOADABLE) {
-                    self::$instance->downloadable = true;
+                    $this->downloadable = true;
 
                     return true;
                 }
         }
 
-        return self::$instance->downloadable;
+        return $this->downloadable;
     }
 
     /**
@@ -197,7 +279,19 @@ class Group
      */
     public static function getExternalMetas(): array
     {
-        return self::$instance->externalMetas;
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getExternalMetas_();
+    }
+
+    /**
+     * Returns external metas.
+     *
+     * @return array<string, ExternalMeta> Metas.
+     */
+    protected function getExternalMetas_(): array
+    {
+        return $this->externalMetas;
     }
 
     /**
@@ -207,7 +301,19 @@ class Group
      */
     public static function getInternalMetas(): array
     {
-        return self::$instance->internalMetas;
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getInternalMetas_();
+    }
+
+    /**
+     * Returns internal metas.
+     *
+     * @return array<string, InternalMeta> Metas.
+     */
+    protected function getInternalMetas_(): array
+    {
+        return $this->internalMetas;
     }
 
     /**
@@ -218,7 +324,20 @@ class Group
      */
     public static function setImplicationBreadcrumb(array $breadcrumb): void
     {
-        self::$instance->implicationBreadcrumb = $breadcrumb;
+        // decoupled logic
+        // trailing underscore identifier
+        self::$instance->setImplicationBreadcrumb_($breadcrumb);
+    }
+
+    /**
+     * Sets implication breadcrumb. If set implication starts
+     * at runtime layer passed to the Fusion object.
+     *
+     * @param string[] $breadcrumb Breadcrumb.
+     */
+    protected function setImplicationBreadcrumb_(array $breadcrumb): void
+    {
+        $this->implicationBreadcrumb = $breadcrumb;
     }
 
     /**
@@ -228,7 +347,19 @@ class Group
      */
     public static function getImplication(): array
     {
-        return self::$instance->implication;
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getImplication_();
+    }
+
+    /**
+     * Returns implication.
+     *
+     * @return array Implication.
+     */
+    protected function getImplication_(): array
+    {
+        return $this->implication;
     }
 
     /**
@@ -239,17 +370,29 @@ class Group
      */
     public static function getPath(string $source): array
     {
-        $group = self::$instance;
-        $sourcePath = Group::getSourcePath($group->implication, $source);
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getPath_($source);
+    }
+
+    /**
+     * Returns event path.
+     *
+     * @param string $source Source.
+     * @return array Path.
+     */
+    protected function getPath_(string $source): array
+    {
+        $sourcePath = $this->getSourcePath_($this->implication, $source);
         $path = [];
 
-        if ($group->implicationBreadcrumb) {
+        if ($this->implicationBreadcrumb) {
             $id = array_key_first($sourcePath);
 
             // remove recursive root
             if ($id) {
                 $source = array_shift($sourcePath);
-                $metadata = $group->externalMetas[$id];
+                $metadata = $this->externalMetas[$id];
             }
 
             $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
@@ -260,7 +403,7 @@ class Group
                 if ($entry["class"] == Fusion::class) {
                     $path[] = [
                         "layer" => $entry["line"] . " - " . $entry["file"] . " (runtime config layer)",
-                        "breadcrumb" => $group->implicationBreadcrumb,
+                        "breadcrumb" => $this->implicationBreadcrumb,
                         "source" => $source
                     ];
 
@@ -268,7 +411,7 @@ class Group
                 }
 
         } else
-            $metadata = Group::getInternalRootMetadata();
+            $metadata = $this->internalRootMeta;
 
         foreach ($sourcePath as $id => $source) {
             if (isset($metadata))
@@ -294,10 +437,10 @@ class Group
 
             // next parent
             // last own entry - maybe not built yet
-            if (!isset($group->externalMetas[$id]))
+            if (!isset($this->externalMetas[$id]))
                 break;
 
-            $metadata = $group->externalMetas[$id];
+            $metadata = $this->externalMetas[$id];
         }
 
         return $path;
@@ -312,6 +455,20 @@ class Group
      */
     public static function getSourcePath(array $implication, string $source): array
     {
+        // decoupled logic
+        // trailing underscore identifier
+        return self::$instance->getSourcePath_($implication, $source);
+    }
+
+    /**
+     * Returns first match path to a source.
+     *
+     * @param array $implication Implication.
+     * @param string $source Source.
+     * @return array Path.
+     */
+    protected function getSourcePath_(array $implication, string $source): array
+    {
         $path = [];
 
         foreach ($implication as $identifier => $entry) {
@@ -320,7 +477,7 @@ class Group
                     $identifier => $entry["source"]
                 ];
 
-            $path = self::getSourcePath($entry["implication"], $source);
+            $path = $this->getSourcePath_($entry["implication"], $source);
 
             if ($path)
                 return [
