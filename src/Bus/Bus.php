@@ -58,7 +58,7 @@ class Bus
         if (self::$instance)
             return true;
 
-        self::$instance = new self(new Instance());
+        self::$instance = new self(new Instance);
 
         return self::$instance;
     }
