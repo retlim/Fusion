@@ -83,19 +83,19 @@ class ReplicateTest extends Test
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
 
-            if (isset($group))
+
                 $group->destroy();
 
-            if (isset($dir))
+
                 $dir->destroy();
 
-            if (isset($bus))
+
                 $bus->destroy();
 
-            if (isset($hub))
+
                 $hub->destroy();
 
-            if (isset($log))
+
                 $log->destroy();
 
             $this->result = false;

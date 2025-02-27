@@ -63,12 +63,10 @@ class SnapTest extends Test
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-            if (isset($group))
                 $group->destroy();
 
                 $log->destroy();
 
-            if (isset($dir))
                 $dir->destroy();
 
             $this->result = false;

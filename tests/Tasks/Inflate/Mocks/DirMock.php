@@ -20,8 +20,8 @@
 namespace Valvoid\Fusion\Tests\Tasks\Inflate\Mocks;
 
 use ReflectionClass;
-use ReflectionException;
 use Valvoid\Fusion\Dir\Dir;
+use Valvoid\Fusion\Dir\Proxy\Logic;
 
 /**
  * Mocked dir.
@@ -31,26 +31,25 @@ use Valvoid\Fusion\Dir\Dir;
  */
 class DirMock
 {
-    private Dir $dir;
-
     private ReflectionClass $reflection;
 
-    /**
-     * @throws ReflectionException
-     */
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Dir::class);
-        $this->dir = $this->reflection->newInstanceWithoutConstructor();
-        $this->reflection->setStaticPropertyValue("instance", $this->dir);
-
-        // project root
-        $root = $this->reflection->getProperty("root");
-        $root->setValue($this->dir, __DIR__ . "/package");
-
-        // project cache
-        $root = $this->reflection->getProperty("cache");
-        $root->setValue($this->dir, __DIR__ . "/package/cache");
+        $this->reflection->setStaticPropertyValue("instance", new class extends Dir
+        {
+            public function __construct()
+            {
+                $this->logic = new class extends Logic
+                {
+                    public function __construct()
+                    {
+                        $this->root = __DIR__ . "/package";
+                        $this->cache = __DIR__ . "/package/cache";
+                    }
+                };
+            }
+        });
     }
 
     public function destroy(): void

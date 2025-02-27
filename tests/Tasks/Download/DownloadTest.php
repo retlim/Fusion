@@ -62,16 +62,16 @@ class DownloadTest extends Test
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-            if (isset($group))
+
                 $group->destroy();
 
 
                 $log->destroy();
 
-            if (isset($dir))
+
                 $dir->destroy();
 
-            if (isset($hub))
+
                 $hub->destroy();
 
             $this->result = false;

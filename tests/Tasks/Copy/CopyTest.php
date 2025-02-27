@@ -57,13 +57,9 @@ class CopyTest extends Test
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-            if (isset($group))
-                $group->destroy();
-
+            $group->destroy();
             $log->destroy();
-
-            if (isset($dir))
-                $dir->destroy();
+            $dir->destroy();
 
             $this->result = false;
         }

@@ -10,68 +10,32 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Dir;
+namespace Valvoid\Fusion\Dir\Proxy;
 
-use Valvoid\Fusion\Dir\Proxy\Instance;
-use Valvoid\Fusion\Dir\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 
 /**
- * Current package directory proxy.
+ * Default current packager directory instance.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
  */
-class Dir
+class Instance implements Proxy
 {
-    /** @var ?Dir Runtime instance. */
-    private static ?Dir $instance = null;
-
-    /** @var Proxy Decoupled logic. */
+    /** @var Proxy Implementation. */
     protected Proxy $logic;
 
-    /**
-     * Constructs the directory.
-     *
-     * @param Proxy $logic Logic.
-     */
-    private function __construct(Proxy $logic)
+    /** Constructs the directory. */
+    public function __construct()
     {
-        $this->logic = $logic;
-    }
-
-    /**
-     * Returns initial instance or true for recycled instance.
-     *
-     * @return Dir|bool Instance or recycled.
-     */
-    public static function ___init(): bool|Dir
-    {
-        if (self::$instance)
-            return true;
-
-        self::$instance = new self(new Instance);
-
-        return self::$instance;
-    }
-
-    /**
-     * Destroys the cache instance.
-     *
-     * @return bool True for success.
-     */
-    public function destroy(): bool
-    {
-        self::$instance = null;
-
-        return true;
+        $this->logic = new Logic;
     }
 
     /**
@@ -79,9 +43,9 @@ class Dir
      *
      * @return string Directory.
      */
-    public static function getTaskDir(): string
+    public function getTaskDir(): string
     {
-        return self::$instance->logic->getTaskDir();
+        return $this->logic->getTaskDir();
     }
 
     /**
@@ -89,9 +53,9 @@ class Dir
      *
      * @return string Directory.
      */
-    public static function getStateDir(): string
+    public function getStateDir(): string
     {
-        return self::$instance->logic->getStateDir();
+        return $this->logic->getStateDir();
     }
 
     /**
@@ -99,9 +63,9 @@ class Dir
      *
      * @return string Directory.
      */
-    public static function getCacheDir(): string
+    public function getCacheDir(): string
     {
-        return self::$instance->logic->getCacheDir();
+        return $this->logic->getCacheDir();
     }
 
     /**
@@ -109,9 +73,9 @@ class Dir
      *
      * @return string Directory.
      */
-    public static function getOtherDir(): string
+    public function getOtherDir(): string
     {
-        return self::$instance->logic->getOtherDir();
+        return $this->logic->getOtherDir();
     }
 
     /**
@@ -119,9 +83,9 @@ class Dir
      *
      * @return string Directory.
      */
-    public static function getPackagesDir(): string
+    public function getPackagesDir(): string
     {
-        return self::$instance->logic->getPackagesDir();
+        return $this->logic->getPackagesDir();
     }
 
     /**
@@ -139,9 +103,9 @@ class Dir
      *
      * @return string Root dir.
      */
-    public static function getRootDir(): string
+    public function getRootDir(): string
     {
-        return self::$instance->logic->getRootDir();
+        return $this->logic->getRootDir();
     }
 
     /**
@@ -151,9 +115,9 @@ class Dir
      * @param int $permissions Permissions.
      * @throws Error Internal error.
      */
-    public static function createDir(string $dir, int $permissions = 0755): void
+    public function createDir(string $dir, int $permissions = 0755): void
     {
-        self::$instance->logic->createDir($dir, $permissions);
+        $this->logic->createDir($dir, $permissions);
     }
 
     /**
@@ -163,9 +127,9 @@ class Dir
      * @param string $to To file or directory.
      * @throws Error Internal error.
      */
-    public static function rename(string $from, string $to): void
+    public function rename(string $from, string $to): void
     {
-        self::$instance->logic->rename($from, $to);
+        $this->logic->rename($from, $to);
     }
 
     /**
@@ -175,9 +139,9 @@ class Dir
      * @param string $to To file.
      * @throws Error Internal error.
      */
-    public static function copy(string $from, string $to): void
+    public function copy(string $from, string $to): void
     {
-        self::$instance->logic->copy($from, $to);
+        $this->logic->copy($from, $to);
     }
 
     /**
@@ -186,9 +150,9 @@ class Dir
      * @param string $file Dir or file.
      * @throws Error Internal error.
      */
-    public static function delete(string $file): void
+    public function delete(string $file): void
     {
-        self::$instance->logic->delete($file);
+        $this->logic->delete($file);
     }
 
     /**
@@ -196,10 +160,10 @@ class Dir
      *
      * @param string $dir Directory.
      * @param string $path Path.
-     * @throws Error
+     * @throws Error Internal error.
      */
-    public static function clear(string $dir, string $path): void
+    public function clear(string $dir, string $path): void
     {
-        self::$instance->logic->clear($dir, $path);
+        $this->logic->clear($dir, $path);
     }
 }
