@@ -23,6 +23,7 @@ use Closure;
 use ReflectionClass;
 use ReflectionException;
 use Valvoid\Fusion\Hub\Hub;
+use Valvoid\Fusion\Hub\Proxy\Proxy;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive as ArchiveResponse;
 
 /**
@@ -35,26 +36,41 @@ class HubMock
 {
     private ReflectionClass $reflection;
 
-    /**
-     * @throws ReflectionException
-     */
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Hub::class);
         $this->reflection->setStaticPropertyValue("instance", new class extends Hub
         {
-            public function __construct() {}
-            public function __destruct() {}
-
-            protected function addArchiveRequest_(array $source): int
+            public function __construct()
             {
-                // fake request id
-                return 1;
-            }
+                $this->logic = new class implements Proxy {
 
-            protected function executeRequests_(Closure $callback): void
-            {
-                $callback(new ArchiveResponse(1, __DIR__));
+                    public function addVersionsRequest(array $source): int
+                    {
+                        return 0;
+                    }
+
+                    public function addMetadataRequest(array $source): int
+                    {
+                        return 0;
+                    }
+
+                    public function addSnapshotRequest(array $source, string $path): int
+                    {
+                        return 0;
+                    }
+
+                    public function addArchiveRequest(array $source): int
+                    {
+                        // fake request id
+                        return 1;
+                    }
+
+                    public function executeRequests(Closure $callback): void
+                    {
+                        $callback(new ArchiveResponse(1, __DIR__));
+                    }
+                };
             }
         });
     }

@@ -10,70 +10,34 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Hub;
+namespace Valvoid\Fusion\Hub\Proxy;
 
 use Closure;
-use Valvoid\Fusion\Hub\Proxy\Instance;
-use Valvoid\Fusion\Hub\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Errors\Error as HubError;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 
 /**
- * Hub proxy.
+ * Default hub proxy instance.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
  */
-class Hub
+class Instance implements Proxy
 {
-    /** @var ?Hub Runtime instance. */
-    private static ?Hub $instance = null;
-
-    /** @var Proxy Decoupled logic. */
+    /** @var Proxy Implementation. */
     protected Proxy $logic;
 
-    /**
-     * Constructs the hub.
-     *
-     * @param Proxy $logic Logic.
-     */
-    private function __construct(Proxy $logic)
+    /** Constructs the hub. */
+    public function __construct()
     {
-        $this->logic = $logic;
-    }
-
-    /**
-     * Returns initial instance or true for recycled instance.
-     *
-     * @return Hub|bool Instance or recycled.
-     */
-    public static function ___init(): bool|Hub
-    {
-        if (self::$instance)
-            return true;
-
-        self::$instance = new self(new Instance);
-
-        return self::$instance;
-    }
-
-    /**
-     * Destroys the hub instance.
-     *
-     * @return bool True for success.
-     */
-    public function destroy(): bool
-    {
-        self::$instance = null;
-
-        return true;
+        $this->logic = new Logic;
     }
 
     /**
@@ -84,9 +48,9 @@ class Hub
      * @throws HubError Hub exception.
      * @throws RequestError Request exception.
      */
-    public static function addVersionsRequest(array $source): int
+    public function addVersionsRequest(array $source): int
     {
-        return self::$instance->logic->addVersionsRequest($source);
+        return $this->logic->addVersionsRequest($source);
     }
 
     /**
@@ -96,9 +60,9 @@ class Hub
      * @return int Unique request ID.
      * @throws HubError Hub exception.
      */
-    public static function addMetadataRequest(array $source): int
+    public function addMetadataRequest(array $source): int
     {
-        return self::$instance->logic->addMetadataRequest($source);
+        return $this->logic->addMetadataRequest($source);
     }
 
     /**
@@ -109,9 +73,9 @@ class Hub
      * @return int Unique request ID.
      * @throws HubError Hub exception.
      */
-    public static function addSnapshotRequest(array $source, string $path): int
+    public function addSnapshotRequest(array $source, string $path): int
     {
-        return self::$instance->logic->addSnapshotRequest($source, $path);
+        return $this->logic->addSnapshotRequest($source, $path);
     }
 
     /**
@@ -121,9 +85,9 @@ class Hub
      * @return int Unique request ID.
      * @throws HubError Hub exception.
      */
-    public static function addArchiveRequest(array $source): int
+    public function addArchiveRequest(array $source): int
     {
-        return self::$instance->logic->addArchiveRequest($source);
+        return $this->logic->addArchiveRequest($source);
     }
 
     /**
@@ -133,8 +97,8 @@ class Hub
      * @param Closure $callback Response|result receiver.
      * @throws HubError Hub exception.
      */
-    public static function executeRequests(Closure $callback): void
+    public function executeRequests(Closure $callback): void
     {
-        self::$instance->logic->executeRequests($callback);
+        $this->logic->executeRequests($callback);
     }
 }
