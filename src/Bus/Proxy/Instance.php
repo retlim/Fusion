@@ -33,9 +33,6 @@ class Instance implements Proxy
     /** @var Proxy Implementation. */
     protected Proxy $logic;
 
-    /** @var array<string, array<string, Closure>> Event receivers. */
-    protected array $receivers = [];
-
     /** Constructs the bus. */
     public function __construct()
     {
@@ -51,8 +48,7 @@ class Instance implements Proxy
      */
     public function addReceiver(string $id, Closure $callback, string ...$events): void
     {
-        foreach ($events as $event)
-            $this->receivers[$event][$id] = $callback;
+        $this->logic->addReceiver($id, $callback, ...$events);
     }
 
     /**
@@ -62,14 +58,7 @@ class Instance implements Proxy
      */
     public function broadcast(Event $event): void
     {
-        $receivers = $this->receivers[$event::class] ??
-
-            // fallback
-            // broadcast has no confirmation
-            [];
-
-        foreach ($receivers as $callback)
-            $callback($event);
+        $this->logic->broadcast($event);
     }
 
     /**
@@ -80,12 +69,6 @@ class Instance implements Proxy
      */
     public function removeReceiver(string $id, string ...$events): void
     {
-        // clear selected event or
-        // complete
-        if (!$events)
-            $events = array_keys($this->receivers);
-
-        foreach ($events as $event)
-            unset($this->receivers[$event][$id]);
+        $this->logic->removeReceiver($id, ...$events);
     }
 }
