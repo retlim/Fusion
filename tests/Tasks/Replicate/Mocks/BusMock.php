@@ -19,10 +19,11 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
 
+use Closure;
 use ReflectionClass;
-use ReflectionException;
 use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Dir\Dir;
+use Valvoid\Fusion\Bus\Events\Event;
+use Valvoid\Fusion\Bus\Proxy\Proxy;
 
 /**
  * Mocked bus.
@@ -32,18 +33,24 @@ use Valvoid\Fusion\Dir\Dir;
  */
 class BusMock
 {
-    private Bus $bus;
-
     private ReflectionClass $reflection;
 
-    /**
-     * @throws ReflectionException
-     */
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Bus::class);
-        $this->bus = $this->reflection->newInstanceWithoutConstructor();
-        $this->reflection->setStaticPropertyValue("instance", $this->bus);
+        $this->reflection->setStaticPropertyValue("instance", new class extends Bus {
+            public function __construct()
+            {
+                $this->logic = new class implements Proxy {
+
+                    public function addReceiver(string $id, Closure $callback, string ...$events): void{}
+
+                    public function broadcast(Event $event): void{}
+
+                    public function removeReceiver(string $id, string ...$events): void{}
+                };
+            }
+        });
     }
 
     public function destroy(): void

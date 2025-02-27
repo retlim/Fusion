@@ -21,6 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Shift;
 
 use Exception;
 use ReflectionClass;
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Shift\Shift;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\BusMock;
@@ -45,7 +46,7 @@ class ShiftTest extends Test
     {
         try {
             $log = new LogMock;
-            $bus = new BusMock;
+            $bus = Bus::___init();// new BusMock;
             $dir = new DirMock;
             $group = Group::___init();
 
@@ -88,7 +89,7 @@ class ShiftTest extends Test
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
+var_dump($exception->getMessage());
             if (isset($group))
                 $group->destroy();
 

@@ -17,62 +17,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Bus;
+namespace Valvoid\Fusion\Bus\Proxy;
 
 use Closure;
 use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Instance;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
 
 /**
- * Event bus proxy.
+ * Default event bus proxy instance.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
  */
-class Bus
+class Instance implements Proxy
 {
-    /** @var ?Bus Runtime instance. */
-    private static ?Bus $instance = null;
-
-    /** @var Proxy Decoupled logic. */
+    /** @var Proxy Implementation. */
     protected Proxy $logic;
 
-    /**
-     * Constructs the bus.
-     *
-     * @param Proxy $logic Logic.
-     */
-    private function __construct(Proxy $logic)
+    /** @var array<string, array<string, Closure>> Event receivers. */
+    protected array $receivers = [];
+
+    /** Constructs the bus. */
+    public function __construct()
     {
-        $this->logic = $logic;
-    }
-
-    /**
-     * Returns initial instance or true for recycled instance.
-     *
-     * @return Bus|bool Instance or recycled.
-     */
-    public static function ___init(): bool|Bus
-    {
-        if (self::$instance)
-            return true;
-
-        self::$instance = new self(new Instance());
-
-        return self::$instance;
-    }
-
-    /**
-     * Destroys the bus instance.
-     *
-     * @return bool True for success.
-     */
-    public function destroy(): bool
-    {
-        self::$instance = null;
-
-        return true;
+        $this->logic = new Logic;
     }
 
     /**
@@ -82,9 +49,10 @@ class Bus
      * @param Closure $callback Receiver callback.
      * @param string ...$events Event class name IDs.
      */
-    public static function addReceiver(string $id, Closure $callback, string ...$events): void
+    public function addReceiver(string $id, Closure $callback, string ...$events): void
     {
-        self::$instance->logic->addReceiver($id, $callback, ...$events);
+        foreach ($events as $event)
+            $this->receivers[$event][$id] = $callback;
     }
 
     /**
@@ -92,9 +60,16 @@ class Bus
      *
      * @param Event $event Event.
      */
-    public static function broadcast(Event $event): void
+    public function broadcast(Event $event): void
     {
-        self::$instance->logic->broadcast($event);
+        $receivers = $this->receivers[$event::class] ??
+
+            // fallback
+            // broadcast has no confirmation
+            [];
+
+        foreach ($receivers as $callback)
+            $callback($event);
     }
 
     /**
@@ -103,8 +78,14 @@ class Bus
      * @param string $id Receiver ID.
      * @param string ...$events Event class name IDs.
      */
-    public static function removeReceiver(string $id, string ...$events): void
+    public function removeReceiver(string $id, string ...$events): void
     {
-        self::$instance->logic->removeReceiver($id, ...$events);
+        // clear selected event or
+        // complete
+        if (!$events)
+            $events = array_keys($this->receivers);
+
+        foreach ($events as $event)
+            unset($this->receivers[$event][$id]);
     }
 }
