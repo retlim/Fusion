@@ -65,7 +65,7 @@ class DownloadTest extends Test
             if (isset($group))
                 $group->destroy();
 
-            if (isset($log))
+
                 $log->destroy();
 
             if (isset($dir))

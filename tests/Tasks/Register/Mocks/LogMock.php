@@ -20,8 +20,10 @@
 namespace Valvoid\Fusion\Tests\Tasks\Register\Mocks;
 
 use ReflectionClass;
-use ReflectionException;
+use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Log\Proxy\Proxy;
+use Valvoid\Fusion\Tasks\Task;
 
 /**
  * Mocked log.
@@ -31,18 +33,35 @@ use Valvoid\Fusion\Log\Log;
  */
 class LogMock
 {
-    private Log $log;
-
     private ReflectionClass $reflection;
 
-    /**
-     * @throws ReflectionException
-     */
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Log::class);
-        $this->log = $this->reflection->newInstanceWithoutConstructor();
-        $this->reflection->setStaticPropertyValue("instance", $this->log);
+        $this->reflection->setStaticPropertyValue("instance", new class extends Log
+        {
+            public function __construct()
+            {
+                $this->logic = new class implements Proxy {
+
+                    public function addInterceptor(Task $task): void{}
+
+                    public function removeInterceptor(): void{}
+
+                    public function error(string|Event $event): void {}
+
+                    public function warning(string|Event $event): void {}
+
+                    public function notice(string|Event $event): void {}
+
+                    public function info(string|Event $event): void {}
+
+                    public function verbose(string|Event $event): void {}
+
+                    public function debug(string|Event $event): void {}
+                };
+            }
+        });
     }
 
     public function destroy(): void
