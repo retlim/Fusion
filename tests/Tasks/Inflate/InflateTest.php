@@ -75,15 +75,14 @@ class InflateTest extends Test
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-            echo "\n " . $exception->getMessage();
 
-            if (isset($group))
+
                 $group->destroy();
 
-            if (isset($dir))
+
                 $dir->destroy();
 
-            if (isset($log))
+
                 $log->destroy();
 
             $this->result = false;

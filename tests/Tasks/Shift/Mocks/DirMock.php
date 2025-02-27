@@ -25,6 +25,7 @@ use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Dir\Dir;
+use Valvoid\Fusion\Dir\Proxy\Logic;
 
 /**
  * Mocked dir.
@@ -44,34 +45,40 @@ class DirMock
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Dir::class);
-        $this->dir = $this->reflection->newInstanceWithoutConstructor();
-        $this->reflection->setStaticPropertyValue("instance", $this->dir);
+        $this->reflection->setStaticPropertyValue("instance", new class extends Dir
+        {
+            protected string $cache;
 
-        // project root
-        $root = $this->reflection->getProperty("root");
-        $root->setValue($this->dir, dirname(__DIR__) . "/cache");
+            public function __construct()
+            {
+                $this->logic = new class extends Logic
+                {
+                    public function __construct()
+                    {
+                        $this->root = dirname(__DIR__) . "/cache";
+                        $this->cache = dirname(__DIR__) . "/cache/cache";
 
-        // project cache
-        $root = $this->reflection->getProperty("cache");
-        $root->setValue($this->dir, dirname(__DIR__) . "/cache/cache");
+                        Bus::addReceiver("whatever", $this->handleBusEvent(...),
+                            Cache::class);
+                    }
 
-        Bus::addReceiver(self::class, $this->handleBusEvent(...),
-            Root::class, Cache::class);
+                };
+            }
+
+            /**
+             * Handles bus event.
+             *
+             * @param Cache $event Event.
+             */
+            protected function handleBusEvent(Cache $event): void
+            {
+                $this->cache = $event->getDir();
+            }
+        });
     }
 
     public function destroy(): void
     {
         $this->reflection->setStaticPropertyValue("instance", null);
-    }
-
-    private function handleBusEvent(Root|Cache $event): void
-    {
-
-        if ($event instanceof Cache) {
-            $this->reflection->getProperty("cache")->setValue($this->dir,$event->getDir());
-        }
-
-
-        // $this->root = $event->getDir();
     }
 }
