@@ -54,11 +54,8 @@ class CategorizeTest extends Test
         } catch (ReflectionException $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-            if (isset($group))
-                $group->destroy();
-
-            if (isset($log))
-                $log->destroy();
+            $group->destroy();
+            $log->destroy();
 
             $this->result = false;
         }

@@ -19,13 +19,9 @@
 
 namespace Valvoid\Fusion\Log;
 
-use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Log\Events\Event;
-use Valvoid\Fusion\Log\Events\Infos\Error as ErrorInfo;
-use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Events\Level;
-use Valvoid\Fusion\Log\Serializers\Files\File;
-use Valvoid\Fusion\Log\Serializers\Streams\Stream;
+use Valvoid\Fusion\Log\Proxy\Instance;
+use Valvoid\Fusion\Log\Proxy\Proxy;
 use Valvoid\Fusion\Tasks\Task;
 
 /**
@@ -39,33 +35,17 @@ class Log
     /** @var ?Log Runtime instance. */
     private static ?Log $instance = null;
 
-    /** @var File[]|Stream[] Output formatters. */
-    protected array $serializers = [];
+    /** @var Proxy Decoupled logic. */
+    protected Proxy $logic;
 
-    /** @var Interceptor Event interceptor. */
-    protected Interceptor $interceptor;
-
-    /** Constructs the log. */
-    private function __construct()
+    /**
+     * Constructs the log.
+     *
+     * @param Proxy $logic Logic.
+     */
+    private function __construct(Proxy $logic)
     {
-        $config = Config::get("log");
-
-        foreach ($config["serializers"] as $serializer)
-            $this->serializers[] = new $serializer["serializer"]($serializer);
-
-        // verbose debug log
-        // wrap all to extended serializer info
-        set_error_handler(function ($code, $message) {
-            $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-
-            // clear self-entry
-            unset($backtrace[0]);
-
-            // top down flow
-            $backtrace = array_reverse($backtrace);
-
-            self::verbose(new ErrorInfo($message, $code, $backtrace));
-        });
+        $this->logic = $logic;
     }
 
     /**
@@ -78,7 +58,7 @@ class Log
         if (self::$instance)
             return true;
 
-        self::$instance = new self;
+        self::$instance = new self(new Instance);
 
         return self::$instance;
     }
@@ -92,7 +72,7 @@ class Log
     {
         self::$instance = null;
 
-        return restore_error_handler();
+        return true;
     }
 
     /**
@@ -102,30 +82,13 @@ class Log
      */
     public function addInterceptor(Task $task): void
     {
-        if (is_subclass_of($task, Interceptor::class))
-            $this->interceptor = $task;
+        self::$instance->logic->addInterceptor($task);
     }
 
     /** Removes event interceptor. */
     public function removeInterceptor(): void
     {
-        unset($this->interceptor);
-    }
-
-    /**
-     * Logs event.
-     *
-     * @param Level $level Level.
-     * @param Event|string $event Event.
-     */
-    protected function log(Level $level, Event|string $event): void
-    {
-        // extend manually
-        if (isset($this->interceptor))
-            $this->interceptor->extend($event);
-
-        foreach ($this->serializers as $serializer)
-            $serializer->log($level, $event);
+        self::$instance->logic->removeInterceptor();
     }
 
     /**
@@ -135,19 +98,7 @@ class Log
      */
     public static function error(Event|string $event): void
     {
-        // decoupled logic
-        // trailing underscore identifier
-        self::$instance->error_($event);
-    }
-
-    /**
-     * Logs error event.
-     *
-     * @param Event|string $event Event.
-     */
-    protected function error_(Event|string $event): void
-    {
-        $this->log(Level::ERROR, $event);
+        self::$instance->logic->error($event);
     }
 
     /**
@@ -157,19 +108,7 @@ class Log
      */
     public static function warning(Event|string $event): void
     {
-        // decoupled logic
-        // trailing underscore identifier
-        self::$instance->warning_($event);
-    }
-
-    /**
-     * Logs warning event.
-     *
-     * @param Event|string $event Event.
-     */
-    protected function warning_(Event|string $event): void
-    {
-        $this->log(Level::WARNING, $event);
+        self::$instance->logic->warning($event);
     }
 
     /**
@@ -179,19 +118,7 @@ class Log
      */
     public static function notice(Event|string $event): void
     {
-        // decoupled logic
-        // trailing underscore identifier
-        self::$instance->notice_($event);
-    }
-
-    /**
-     * Logs notice event.
-     *
-     * @param Event|string $event Event.
-     */
-    protected function notice_(Event|string $event): void
-    {
-        $this->log(Level::NOTICE, $event);
+        self::$instance->logic->notice($event);
     }
 
     /**
@@ -201,19 +128,7 @@ class Log
      */
     public static function info(Event|string $event): void
     {
-        // decoupled logic
-        // trailing underscore identifier
-        self::$instance->info_($event);
-    }
-
-    /**
-     * Logs info event.
-     *
-     * @param Event|string $event Event.
-     */
-    protected function info_(Event|string $event): void
-    {
-        $this->log(Level::INFO, $event);
+        self::$instance->logic->info($event);
     }
 
     /**
@@ -223,19 +138,7 @@ class Log
      */
     public static function verbose(Event|string $event): void
     {
-        // decoupled logic
-        // trailing underscore identifier
-        self::$instance->verbose_($event);
-    }
-
-    /**
-     * Logs verbose event.
-     *
-     * @param Event|string $event Event.
-     */
-    protected function verbose_(Event|string $event): void
-    {
-        $this->log(Level::VERBOSE, $event);
+        self::$instance->logic->verbose($event);
     }
 
     /**
@@ -245,18 +148,6 @@ class Log
      */
     public static function debug(Event|string $event): void
     {
-        // decoupled logic
-        // trailing underscore identifier
-        self::$instance->debug_($event);
-    }
-
-    /**
-     * Logs debug event.
-     *
-     * @param Event|string $event Event.
-     */
-    protected function debug_(Event|string $event): void
-    {
-        $this->log(Level::DEBUG, $event);
+        self::$instance->logic->debug($event);
     }
 }

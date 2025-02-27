@@ -65,10 +65,8 @@ class ImageTest extends Test
             if (isset($config))
                 $config->destroy();
 
-            if (isset($bus))
                 $bus->destroy();
 
-            if (isset($log))
                 $log->destroy();
 
             $this->result = false;

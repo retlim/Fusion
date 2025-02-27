@@ -60,8 +60,7 @@ class CopyTest extends Test
             if (isset($group))
                 $group->destroy();
 
-            if (isset($log))
-                $log->destroy();
+            $log->destroy();
 
             if (isset($dir))
                 $dir->destroy();

@@ -89,17 +89,15 @@ class ShiftTest extends Test
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-var_dump($exception->getMessage());
+
             if (isset($group))
                 $group->destroy();
 
-            if (isset($log))
                 $log->destroy();
 
             if (isset($dir))
                 $dir->destroy();
 
-            if (isset($bus))
                 $bus->destroy();
 
             $this->result = false;
