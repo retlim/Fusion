@@ -64,7 +64,7 @@ return [
 	'Valvoid\Fusion\Tests\Tasks\Image\Config\InterpreterTest' => '/tests/Tasks/Image/Config/InterpreterTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Image\ImageTest' => '/tests/Tasks/Image/ImageTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Image\Mocks\BusMock' => '/tests/Tasks/Image/Mocks/BusMock.php',
-	'Valvoid\Fusion\Tests\Image\ConfigMock' => '/tests/Tasks/Image/Mocks/ConfigMock.php',
+	'Valvoid\Fusion\Tests\Tasks\Image\Mocks\ConfigMock' => '/tests/Tasks/Image/Mocks/ConfigMock.php',
 	'Valvoid\Fusion\Tests\Tasks\Image\Mocks\LogMock' => '/tests/Tasks/Image/Mocks/LogMock.php',
 	'Valvoid\Fusion\Tests\Tasks\Inflate\Config\InterpreterTest' => '/tests/Tasks/Inflate/Config/InterpreterTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Inflate\InflateTest' => '/tests/Tasks/Inflate/InflateTest.php',

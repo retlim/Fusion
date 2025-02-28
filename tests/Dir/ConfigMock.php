@@ -20,8 +20,8 @@
 namespace Valvoid\Fusion\Tests\Dir;
 
 use ReflectionClass;
-use ReflectionException;
 use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Config\Proxy\Proxy;
 
 /**
  * Dir config mock.
@@ -31,27 +31,34 @@ use Valvoid\Fusion\Config\Config;
  */
 class ConfigMock
 {
-    private Config $config;
-
     private ReflectionClass $reflection;
 
-    /**
-     * @throws ReflectionException
-     */
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Config::class);
-        $this->config = $this->reflection->newInstanceWithoutConstructor();
-        $this->reflection->setStaticPropertyValue("instance", $this->config);
-        $content = $this->reflection->getProperty('content');
+        $this->reflection->setStaticPropertyValue("instance", new class extends Config
+        {
+            public function __construct()
+            {
+                $this->logic = new class implements Proxy
+                {
+                    public function get(string ...$breadcrumb): mixed
+                    {
+                        return [
+                            "path" => __DIR__ . "/cache",
+                            "clearable" => true,
+                            "creatable" => true
+                        ];
+                    }
 
-        $content->setValue($this->config, [
-            "dir" => [
-                "path" => __DIR__ . "/cache",
-                "clearable" => true,
-                "creatable" => true
-            ]
-        ]);
+                    // @phpstan-ignore-next-line
+                    public function __construct(string $root = "", array &$lazy = [], array $config = []) {}
+                    public function build(): void {}
+                    public function getLazy(): array {return [];}
+                    public function hasLazy(string $class): bool {return false;}
+                };
+            }
+        });
     }
 
     public function destroy(): void

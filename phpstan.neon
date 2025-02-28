@@ -6,5 +6,5 @@ parameters:
   earlyTerminatingMethodCalls:
     Valvoid\Fusion\Hub\Requests\Remote\Remote:
       - throwError
-    Valvoid\Fusion\Config\Config:
+    Valvoid\Fusion\Config\Proxy\Logic:
       - throwMetaError

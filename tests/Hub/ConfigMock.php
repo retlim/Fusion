@@ -20,8 +20,8 @@
 namespace Valvoid\Fusion\Tests\Hub;
 
 use ReflectionClass;
-use ReflectionException;
 use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Config\Proxy\Proxy;
 
 /**
  * Hub config mock.
@@ -31,30 +31,33 @@ use Valvoid\Fusion\Config\Config;
  */
 class ConfigMock
 {
-    private Config $config;
-
     private ReflectionClass $reflection;
 
-    /**
-     * @throws ReflectionException
-     */
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Config::class);
         $this->reflection->setStaticPropertyValue("instance", new class extends Config
         {
-            protected array $content = [
-                "hub" => [
-                    "apis" => []
-                ],
-                "dir" => [
-                    "path" => __DIR__,
-                ]
-            ];
+            public function __construct()
+            {
+                $this->logic = new class implements Proxy
+                {
+                    // @phpstan-ignore-next-line
+                    public function __construct(string $root = "", array &$lazy = [], array $config = []) {}
+                    public function build(): void {}
+                    public function get(string ...$breadcrumb): mixed
+                    {
+                        if ($breadcrumb == ["hub"])
+                            return [
+                                "apis" => []
+                            ];
 
-            public function __construct() {}
-            public function __destruct() {}
-
+                        return __DIR__;
+                    }
+                    public function getLazy(): array {return [];}
+                    public function hasLazy(string $class): bool {return false;}
+                };
+            }
         });
     }
 
