@@ -17,11 +17,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Image;
+namespace Valvoid\Fusion\Tests\Tasks\Image\Mocks;
 
 use ReflectionClass;
-use ReflectionException;
 use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Config\Proxy\Proxy;
 
 /**
  * Mocked image test config.
@@ -31,25 +31,30 @@ use Valvoid\Fusion\Config\Config;
  */
 class ConfigMock
 {
-    private Config $config;
-
     private ReflectionClass $reflection;
 
-    /**
-     * @throws ReflectionException
-     */
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Config::class);
-        $this->config = $this->reflection->newInstanceWithoutConstructor();
-        $this->reflection->setStaticPropertyValue("instance", $this->config);
-        $content = $this->reflection->getProperty('content');
+        $this->reflection->setStaticPropertyValue("instance", new class extends Config
+        {
+            public function __construct()
+            {
+                $this->logic = new class() implements Proxy
+                {
+                    public function get(string ...$breadcrumb): mixed
+                    {
+                        return __DIR__ . "/package";
+                    }
 
-        $content->setValue($this->config, [
-            "dir" => [
-                "path" => __DIR__ . "/package"
-            ]
-        ]);
+                    // @phpstan-ignore-next-line
+                    public function __construct(string $root = "", array &$lazy = [], array $config = []) {}
+                    public function build(): void {}
+                    public function getLazy(): array {return [];}
+                    public function hasLazy(string $class): bool {return false;}
+                };
+            }
+        });
     }
 
     public function destroy(): void

@@ -20,8 +20,8 @@
 namespace Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks;
 
 use ReflectionClass;
-use ReflectionException;
 use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Config\Proxy\Proxy;
 
 /**
  * Mocked config.
@@ -33,17 +33,27 @@ class ConfigMock
 {
     private ReflectionClass $reflection;
 
-    /**
-     * @throws ReflectionException
-     */
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Config::class);
         $this->reflection->setStaticPropertyValue("instance", new class extends Config
         {
-            public function __construct() {}
-            public function __destruct() {}
-
+            public function __construct()
+            {
+                $this->logic = new class implements Proxy
+                {
+                    // @phpstan-ignore-next-line
+                    public function __construct(string $root = "", array &$lazy = [], array $config = []) {}
+                    public function build(): void {}
+                    public function get(string ...$breadcrumb): mixed {return 0;}
+                    public function getLazy(): array {return [];}
+                    public function hasLazy(string $class): bool
+                    {
+                        // no custom parser
+                        return false;
+                    }
+                };
+            }
         });
     }
 
@@ -51,13 +61,22 @@ class ConfigMock
     {
         $this->reflection->setStaticPropertyValue("instance", new class extends Config
         {
-            protected array $lazy = [
-                'Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\Config\Parser' => '/tests/Config/Parser/Tasks/Mocks/Config/Parser.php',
-            ];
-
-            public function __construct() {}
-            public function __destruct() {}
-
+            public function __construct()
+            {
+                $this->logic = new class implements Proxy
+                {
+                    // @phpstan-ignore-next-line
+                    public function __construct(string $root = "", array &$lazy = [], array $config = []) {}
+                    public function build(): void {}
+                    public function get(string ...$breadcrumb): mixed {return 0;}
+                    public function getLazy(): array {return [];}
+                    public function hasLazy(string $class): bool
+                    {
+                        // has custom parser
+                        return true;
+                    }
+                };
+            }
         });
     }
 

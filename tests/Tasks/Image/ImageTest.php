@@ -22,8 +22,8 @@ namespace Valvoid\Fusion\Tests\Tasks\Image;
 use Exception;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Image\Image;
-use Valvoid\Fusion\Tests\Image\ConfigMock;
 use Valvoid\Fusion\Tests\Tasks\Image\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Image\Mocks\ConfigMock;
 use Valvoid\Fusion\Tests\Tasks\Image\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -59,15 +59,10 @@ class ImageTest extends Test
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
 
-            if (isset($group))
-                $group->destroy();
-
-            if (isset($config))
-                $config->destroy();
-
-                $bus->destroy();
-
-                $log->destroy();
+            $group->destroy();
+            $config->destroy();
+            $bus->destroy();
+            $log->destroy();
 
             $this->result = false;
         }
