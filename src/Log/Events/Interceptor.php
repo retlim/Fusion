@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Log\Events;
 /**
  * Interceptor to extend event before log.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 interface Interceptor

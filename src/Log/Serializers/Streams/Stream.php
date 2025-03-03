@@ -25,7 +25,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * Stream serializer.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 interface Stream

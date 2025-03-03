@@ -28,7 +28,7 @@ use Valvoid\Fusion\Log\Serializers\Files\Text\Text;
 /**
  * Text file log config interpreter.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Interpreter extends ConfigInterpreter

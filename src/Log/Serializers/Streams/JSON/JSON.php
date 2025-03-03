@@ -37,7 +37,7 @@ use Valvoid\Fusion\Log\Serializers\Streams\Stream;
 /**
  * JSON stream serializer.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class JSON implements Stream

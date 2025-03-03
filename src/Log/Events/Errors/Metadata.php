@@ -25,7 +25,7 @@ use Valvoid\Fusion\Log\Events\Event;
 /**
  * Exception to handle static metadata error.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Metadata extends Exception implements Event

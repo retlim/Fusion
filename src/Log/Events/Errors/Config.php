@@ -25,7 +25,7 @@ use Valvoid\Fusion\Log\Events\Event;
 /**
  * Config error exception.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Config extends Exception implements Event

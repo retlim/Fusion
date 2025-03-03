@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Log\Events;
 /**
  * Event level.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 enum Level: int

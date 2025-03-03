@@ -24,7 +24,7 @@ use Valvoid\Fusion\Log\Events\Event;
 /**
  * Triggered task or task group ID info.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Id implements Event
