@@ -26,7 +26,7 @@ use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 /**
  * Hub.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 interface Proxy

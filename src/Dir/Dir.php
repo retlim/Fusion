@@ -24,7 +24,7 @@ use Valvoid\Fusion\Dir\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 
 /**
- * Current package directory proxy.
+ * Static current package directory proxy.
  *
  * @copyright Valvoid
  * @license GNU GPLv3

@@ -34,7 +34,7 @@ use function exec;
 /**
  * Git hub to get local OS packages.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Git extends LocalOffsetApi

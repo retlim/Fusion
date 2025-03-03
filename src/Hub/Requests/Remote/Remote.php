@@ -29,7 +29,7 @@ use Valvoid\Fusion\Log\Log;
 /**
  * Remote synchronizations request.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 abstract class Remote extends Request

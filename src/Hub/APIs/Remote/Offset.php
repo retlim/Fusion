@@ -24,7 +24,7 @@ use Valvoid\Fusion\Hub\Responses\Remote\Offset as OffsetResponse;
 /**
  * Remote offset API.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 abstract class Offset extends Remote

@@ -26,7 +26,7 @@ use Valvoid\Fusion\Hub\Responses\Local\References;
 /**
  * Local API.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 abstract class Local

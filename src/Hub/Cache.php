@@ -30,7 +30,7 @@ use Valvoid\Fusion\Util\Version\Parser;
 /**
  * Hub cache.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Cache

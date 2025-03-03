@@ -24,7 +24,7 @@ use Valvoid\Fusion\Hub\Responses\Remote\References;
 /**
  * Remote API.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 abstract class Remote

@@ -30,7 +30,7 @@ use Valvoid\Fusion\Log\Log;
 /**
  * Remote archive synchronization request.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Archive extends Remote

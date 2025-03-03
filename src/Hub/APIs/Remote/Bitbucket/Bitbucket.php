@@ -27,7 +27,7 @@ use Valvoid\Fusion\Hub\Responses\Remote\References;
 /**
  * Bitbucket API.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Bitbucket extends RemoteOffsetApi

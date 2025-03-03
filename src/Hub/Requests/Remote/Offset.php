@@ -29,7 +29,7 @@ use Valvoid\Fusion\Log\Log;
 /**
  * Remote offset synchronization request.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Offset extends Remote

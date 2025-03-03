@@ -24,7 +24,7 @@ use Valvoid\Fusion\Hub\Responses\Local\Offset as OffsetResponse;
 /**
  * Local offset API.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 abstract class Offset extends Local

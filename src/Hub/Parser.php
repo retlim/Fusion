@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Hub;
 /**
  * Hub parser.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Parser

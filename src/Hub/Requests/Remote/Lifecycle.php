@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Hub\Requests\Remote;
 /**
  * Remote synchronization request lifecycle.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 enum Lifecycle

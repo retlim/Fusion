@@ -101,7 +101,7 @@ class Fusion
 
         $this->dir = Container::get(Dir::class);
         $this->log = Container::get(Log::class);
-        $this->hub = Hub::___init();
+        $this->hub = Container::get(Hub::class);
 
         Bus::addReceiver(self::class, $this->handleBusEvent(...),
             Root::class);
