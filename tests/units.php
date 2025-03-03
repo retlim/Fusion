@@ -17,7 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 
 $root = dirname(__DIR__);
 $lazy = require "$root/cache/loadable/lazy.php";
@@ -30,6 +33,14 @@ spl_autoload_register(function (string $loadable) use ($root, $lazy)
 {
     require $root . $lazy[$loadable];
 });
+
+try {
+    $container = (new Logic)->get(Container::class);
+
+} catch (Error $error) {
+    echo $error->getMessage() . "\n";
+    exit(1);
+}
 
 /** @var Test[] $tests */
 $tests = [
@@ -123,6 +134,8 @@ try {
 } catch (ReflectionException $e) {
     echo $e->getMessage();
 }
+
+$container->destroy();
 
 // strict
 // zero tolerance

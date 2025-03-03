@@ -23,7 +23,6 @@ use Exception;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Container\Container;
-use Valvoid\Fusion\Container\Proxy\Instance;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Config\Config;
@@ -93,7 +92,7 @@ class Fusion
 
         // build proxies
         $this->container = (new Logic)->get(Container::class);
-        $this->bus = Bus::___init();
+        $this->bus = Container::get(Bus::class);
         $this->config = Config::___init($this->root, $this->lazy, $config);
         $this->dir = Dir::___init();
         $this->log = Log::___init();

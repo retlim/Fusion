@@ -25,7 +25,7 @@ use Valvoid\Fusion\Bus\Events\Event;
 /**
  * Event bus.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 interface Proxy

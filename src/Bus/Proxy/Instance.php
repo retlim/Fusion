@@ -25,7 +25,7 @@ use Valvoid\Fusion\Bus\Events\Event;
 /**
  * Default event bus proxy instance.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Instance implements Proxy

@@ -25,7 +25,7 @@ use Valvoid\Fusion\Bus\Events\Event;
 /**
  * Default event bus implementation.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Logic implements Proxy
