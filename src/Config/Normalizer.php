@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Config;
 /**
  * Config normalizer.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 abstract class Normalizer

@@ -30,7 +30,7 @@ use Valvoid\Fusion\Log\Serializers\Streams\Stream;
 /**
  * Log config interpreter.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Log

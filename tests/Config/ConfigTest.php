@@ -52,9 +52,11 @@ class ConfigTest extends Test
             $this->root = dirname(__DIR__, 2);
             $this->lazy = require $this->root . "/cache/loadable/lazy.php";
             $bus = Container::get(Bus::class);
-            $this->config = Config::___init($this->root, $this->lazy, []);
+            $this->config = Container::get(Config::class,
+                root: $this->root,
+                lazy: $this->lazy,
+                config: []);
 
-            $this->testLockedSingletonInstance();
             $this->testInstanceDestruction();
 
             $this->config->destroy();
@@ -71,27 +73,14 @@ class ConfigTest extends Test
      * @throws Metadata
      * @throws ConfigError
      */
-    public function testLockedSingletonInstance(): void
-    {
-        $instance = Config::___init($this->root, $this->lazy, []);
-
-        // assert indicator for locked and consumed instance
-        if ($instance !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-    }
-
-    /**
-     * @throws Metadata
-     * @throws ConfigError
-     */
     public function testInstanceDestruction(): void
     {
         $instance = $this->config;
         $this->config->destroy();
-        $this->config = Config::___init($this->root, $this->lazy, []);
+        $this->config = Container::get(Config::class,
+            root: $this->root,
+            lazy: $this->lazy,
+            config: []);
 
         // assert different instances
         if ($instance === $this->config) {

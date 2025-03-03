@@ -28,7 +28,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * Tasks config normalizer.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Tasks

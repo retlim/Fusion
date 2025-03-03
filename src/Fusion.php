@@ -93,7 +93,12 @@ class Fusion
         // build proxies
         $this->container = (new Logic)->get(Container::class);
         $this->bus = Container::get(Bus::class);
-        $this->config = Config::___init($this->root, $this->lazy, $config);
+        $this->config = Container::get(Config::class,
+            root: $this->root,
+            lazy: $this->lazy,
+            config: $config
+        );
+
         $this->dir = Dir::___init();
         $this->log = Log::___init();
         $this->hub = Hub::___init();
