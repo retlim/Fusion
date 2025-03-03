@@ -41,13 +41,13 @@ class Config
     /**
      * Constructs the config.
      *
-     * @param Proxy|Instance $logic Logic.
+     * @param Proxy|Instance $logic Any or default instance logic..
      * @throws ConfigError Invalid config exception.
      * @throws Metadata Invalid meta exception.
      */
     private function __construct(Proxy|Instance $logic)
     {
-        self::$instance = $this;
+        self::$instance ??= $this;
         $this->logic = $logic;
 
         // lazy boot due to self reference

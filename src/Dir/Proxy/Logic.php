@@ -29,7 +29,7 @@ use Valvoid\Fusion\Log\Events\Errors\Metadata;
 /**
  * Default current package directory implementation.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Logic implements Proxy

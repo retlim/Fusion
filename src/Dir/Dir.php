@@ -26,7 +26,7 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
 /**
  * Current package directory proxy.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Dir
@@ -40,26 +40,13 @@ class Dir
     /**
      * Constructs the directory.
      *
-     * @param Proxy $logic Logic.
+     * @param Proxy|Instance $logic Any or default instance logic.
      */
-    private function __construct(Proxy $logic)
+    private function __construct(Proxy|Instance $logic)
     {
+        // singleton
+        self::$instance ??= $this;
         $this->logic = $logic;
-    }
-
-    /**
-     * Returns initial instance or true for recycled instance.
-     *
-     * @return Dir|bool Instance or recycled.
-     */
-    public static function ___init(): bool|Dir
-    {
-        if (self::$instance)
-            return true;
-
-        self::$instance = new self(new Instance);
-
-        return self::$instance;
     }
 
     /**

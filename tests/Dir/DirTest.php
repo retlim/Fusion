@@ -28,7 +28,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Hub test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class DirTest extends Test
@@ -42,9 +42,8 @@ class DirTest extends Test
         try {
             $configMock = new ConfigMock;
             $bus = Container::get(Bus::class);
-            $this->dir = Dir::___init();
+            $this->dir = Container::get(Dir::class);
 
-            $this->testLockedSingletonInstance();
             $this->testInstanceDestruction();
 
             $configMock->destroy();
@@ -58,23 +57,11 @@ class DirTest extends Test
         }
     }
 
-    public function testLockedSingletonInstance(): void
-    {
-        $instance = Dir::___init();
-
-        // assert indicator for locked and consumed instance
-        if ($instance !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-    }
-
     public function testInstanceDestruction(): void
     {
         $instance = $this->dir;
         $this->dir->destroy();
-        $this->dir = Dir::___init();
+        $this->dir = Container::get(Dir::class);
 
         // assert different instances
         if ($instance === $this->dir) {
