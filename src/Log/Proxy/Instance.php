@@ -25,7 +25,7 @@ use Valvoid\Fusion\Tasks\Task;
 /**
  * Default event log proxy instance.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Instance implements Proxy
@@ -33,10 +33,14 @@ class Instance implements Proxy
     /** @var Proxy Implementation. */
     protected Proxy $logic;
 
-    /** Constructs the log. */
-    public function __construct()
+    /**
+     * Constructs the log.
+     *
+     *  @param Proxy|Logic $logic Any or default logic implementation.
+     */
+    public function __construct(Proxy|Logic $logic)
     {
-        $this->logic = new Logic;
+        $this->logic = $logic;
     }
 
     /**

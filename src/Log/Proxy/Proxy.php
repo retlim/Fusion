@@ -25,7 +25,7 @@ use Valvoid\Fusion\Tasks\Task;
 /**
  * Event log.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 interface Proxy

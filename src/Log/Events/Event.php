@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Log\Events;
 /**
  * Event.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 interface Event

@@ -25,7 +25,7 @@ use Valvoid\Fusion\Log\Events\Event;
 /**
  * Error event.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Error extends Exception implements Event

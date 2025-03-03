@@ -38,7 +38,7 @@ use Valvoid\Fusion\Log\Serializers\Files\File;
 /**
  * JSON file serializer.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class JSON implements File

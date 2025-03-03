@@ -24,7 +24,7 @@ use Valvoid\Fusion\Log\Events\Event;
 /**
  * Parsed metadata content info.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Content implements Event

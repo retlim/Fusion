@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Log;
 
 use ReflectionException;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Tests\Test;
 
@@ -39,9 +40,8 @@ class LogTest extends Test
     {
         try {
             $configMock = new ConfigMock;
-            $this->log = Log::___init();
+            $this->log = Container::get(Log::class);
 
-            $this->testLockedSingletonInstance();
             $this->testInstanceDestruction();
 
             $configMock->destroy();
@@ -54,23 +54,11 @@ class LogTest extends Test
         }
     }
 
-    public function testLockedSingletonInstance(): void
-    {
-        $instance = Log::___init();
-
-        // assert indicator for locked and consumed instance
-        if ($instance !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-    }
-
     public function testInstanceDestruction(): void
     {
         $instance = $this->log;
         $this->log->destroy();
-        $this->log = Log::___init();
+        $this->log = Container::get(Log::class);
 
         // assert different instances
         if ($instance === $this->log) {

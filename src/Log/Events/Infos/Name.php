@@ -24,7 +24,7 @@ use Valvoid\Fusion\Log\Events\Event;
 /**
  * Current group task name info.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Name implements Event

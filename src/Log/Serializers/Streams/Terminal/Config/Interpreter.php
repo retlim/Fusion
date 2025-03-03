@@ -28,7 +28,7 @@ use Valvoid\Fusion\Log\Serializers\Streams\Terminal\Terminal;
 /**
  * Terminal stream log config interpreter.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Interpreter extends ConfigInterpreter

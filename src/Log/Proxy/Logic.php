@@ -31,7 +31,7 @@ use Valvoid\Fusion\Tasks\Task;
 /**
  * Default event log implementation.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Logic implements Proxy

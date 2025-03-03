@@ -25,7 +25,7 @@ use Valvoid\Fusion\Log\Events\Event;
 /**
  * Exception to handle runtime source error.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Lifecycle extends Exception implements Event
