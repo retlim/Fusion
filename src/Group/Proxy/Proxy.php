@@ -25,7 +25,7 @@ use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 /**
  * Task group.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 interface Proxy

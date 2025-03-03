@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Download;
 
 use Exception;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Download\Download;
 use Valvoid\Fusion\Tasks\Group;
@@ -32,7 +33,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Integration test case for the download task.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class DownloadTest extends Test
@@ -49,7 +50,7 @@ class DownloadTest extends Test
             $log = new LogMock;
             $dir = new DirMock;
             $hub = new HubMock;
-            $group = Group::___init();
+            $group = Container::get(Group::class);
             MetadataMock::addMockedMetadata();
 
             $this->testTargetCacheDirectory();
@@ -62,7 +63,7 @@ class DownloadTest extends Test
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-
+            if (isset($group))
                 $group->destroy();
 
 

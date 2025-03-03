@@ -19,13 +19,14 @@
 
 namespace Valvoid\Fusion\Tests\Tasks;
 
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tests\Test;
 
 /**
  * Test case for the task group.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class GroupTest extends Test
@@ -36,31 +37,18 @@ class GroupTest extends Test
 
     public function __construct()
     {
-        $this->group = Group::___init();
+        $this->group = Container::get(Group::class);
 
-        $this->testLockedSingletonInstance();
         $this->testInstanceDestruction();
 
         $this->group->destroy();
-    }
-
-    public function testLockedSingletonInstance(): void
-    {
-        $instance = Group::___init();
-
-        // assert indicator for locked and consumed instance
-        if ($instance !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
     }
 
     public function testInstanceDestruction(): void
     {
         $instance = $this->group;
         $this->group->destroy();
-        $this->group = Group::___init();
+        $this->group = Container::get(Group::class);
 
         // assert different instances
         if ($instance === $this->group) {

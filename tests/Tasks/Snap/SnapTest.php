@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Snap;
 
 use Exception;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Snap\Snap;
@@ -31,7 +32,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Integration test case for the snap task.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class SnapTest extends Test
@@ -45,13 +46,13 @@ class SnapTest extends Test
 
             $log = new LogMock;
             $dir = new DirMock;
-            $group = Group::___init();
+            $group = Container::get(Group::class);
 
             MetadataMock::addRedundantMockedMetadata();
             $this->testRedundantCacheRefresh();
             $group->destroy();
 
-            $group = Group::___init();
+            $group = Container::get(Group::class);
 
             MetadataMock::addDownloadableMockedMetadata();
             $this->testDownloadableCacheUpdate();
@@ -63,6 +64,7 @@ class SnapTest extends Test
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
+            if (isset($group))
                 $group->destroy();
 
                 $log->destroy();

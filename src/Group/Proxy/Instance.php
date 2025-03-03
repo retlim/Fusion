@@ -25,7 +25,7 @@ use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 /**
  * Default task group proxy instance.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Instance implements Proxy
@@ -33,10 +33,14 @@ class Instance implements Proxy
     /** @var Proxy Implementation. */
     protected Proxy $logic;
 
-    /** Constructs the bus. */
-    public function __construct()
+    /**
+     * Constructs the task group.
+     *
+     *  @param Proxy|Logic $logic Any or default logic implementation.
+     */
+    public function __construct(Proxy|Logic $logic)
     {
-        $this->logic = new Logic;
+        $this->logic = $logic;
     }
 
     /**

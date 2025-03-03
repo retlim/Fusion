@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Image;
 
 use Exception;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Image\Image;
 use Valvoid\Fusion\Tests\Tasks\Image\Mocks\BusMock;
@@ -30,7 +31,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Integration test case for the image task.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class ImageTest extends Test
@@ -43,7 +44,7 @@ class ImageTest extends Test
             $log = new LogMock;
             $bus = new BusMock;
             $config = new ConfigMock;
-            $group = Group::___init();
+            $group = Container::get(Group::class);
 
             $task = new Image(["group" => true]);
 
@@ -59,7 +60,9 @@ class ImageTest extends Test
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
 
-            $group->destroy();
+            if (isset($group))
+                $group->destroy();
+
             $config->destroy();
             $bus->destroy();
             $log->destroy();
