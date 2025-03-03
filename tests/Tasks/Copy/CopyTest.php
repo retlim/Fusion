@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Copy;
 
 use Exception;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Copy\Copy;
 use Valvoid\Fusion\Tasks\Group;
@@ -31,7 +32,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Integration test case for the copy task.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class CopyTest extends Test
@@ -45,7 +46,7 @@ class CopyTest extends Test
         try {
             $log = new LogMock;
             $dir = new DirMock;
-            $group = Group::___init();
+            $group = Container::get(Group::class);
             MetadataMock::addMockedMetadata();
 
             $this->testTargetCacheDirectory();
@@ -57,7 +58,9 @@ class CopyTest extends Test
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-            $group->destroy();
+            if (isset($group))
+                $group->destroy();
+
             $log->destroy();
             $dir->destroy();
 

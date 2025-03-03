@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Replicate;
 
 use Exception;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Replicate\Replicate;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\BusMock;
@@ -32,7 +33,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Integration test case for the replicate task.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class ReplicateTest extends Test
@@ -63,7 +64,7 @@ class ReplicateTest extends Test
             $log = new LogMock;
             $hub = new HubMock;
             $bus = new BusMock;
-            $group = Group::___init();
+            $group = Container::get(Group::class);
             $task = new Replicate([
                 "source" => false,
                 "environment" => $this->environment
@@ -83,7 +84,7 @@ class ReplicateTest extends Test
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
 
-
+            if (isset($group))
                 $group->destroy();
 
 

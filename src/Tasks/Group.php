@@ -25,9 +25,9 @@ use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
 
 /**
- * Task group proxy.
+ * Static task group proxy.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Group
@@ -41,26 +41,13 @@ class Group
     /**
      * Constructs the task group.
      *
-     * @param Proxy $logic Logic.
+     * @param Proxy|Instance $logic Any or default instance logic.
      */
-    private function __construct(Proxy $logic)
+    private function __construct(Proxy|Instance $logic)
     {
+        // singleton
+        self::$instance ??= $this;
         $this->logic = $logic;
-    }
-
-    /**
-     * Returns initial instance or true for recycled instance.
-     *
-     * @return Group|bool Instance or recycled.
-     */
-    public static function ___init(): bool|Group
-    {
-        if (self::$instance)
-            return true;
-
-        self::$instance = new self(new Instance);
-
-        return self::$instance;
     }
 
     /**

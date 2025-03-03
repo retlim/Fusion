@@ -28,7 +28,7 @@ use Valvoid\Fusion\Util\Metadata\Structure;
 /**
  * Default task group implementation.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Logic implements Proxy

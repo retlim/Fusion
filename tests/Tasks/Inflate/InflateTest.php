@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Inflate;
 
 use Exception;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Inflate\Inflate;
 use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\LogMock;
@@ -30,7 +31,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Integration test case for the inflate task.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class InflateTest extends Test
@@ -49,7 +50,7 @@ class InflateTest extends Test
             $this->time = time();
             $dir = new DirMock;
             $log = new LogMock;
-            $group = Group::___init();
+            $group = Container::get(Group::class);
             $task = new Inflate([]);
 
             MetadataMock::addRefreshMetadata();
@@ -60,7 +61,7 @@ class InflateTest extends Test
             $this->testRefreshTrait();
             $group->destroy();
 
-            $group = Group::___init();
+            $group = Container::get(Group::class);
 
             MetadataMock::addNewStateMetadata();
             $task = new Inflate([]);
@@ -76,7 +77,7 @@ class InflateTest extends Test
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-
+            if (isset($group))
                 $group->destroy();
 
 

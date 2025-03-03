@@ -204,7 +204,7 @@ class Fusion
                 $fusion->log->removeInterceptor();
 
             } else {
-                $group = Group::___init();
+                $group = Container::get(Group::class);
 
                 foreach ($entry as $taskId => $task) {
                     Log::info(new Name($taskId));

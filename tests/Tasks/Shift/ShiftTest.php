@@ -49,7 +49,7 @@ class ShiftTest extends Test
             $log = new LogMock;
             $bus = Container::get(Bus::class);
             $dir = new DirMock;
-            $group = Group::___init();
+            $group = Container::get(Group::class);
 
             // new root version
             $this->testShiftRecursive();
@@ -57,7 +57,7 @@ class ShiftTest extends Test
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = Group::___init();
+            $group = Container::get(Group::class);
 
             // new root with new cache dir
             $this->testShiftRecursiveCache();
@@ -65,14 +65,14 @@ class ShiftTest extends Test
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = Group::___init();
+            $group = Container::get(Group::class);
 
             $this->testShiftNested();
             $group->destroy(); // clear
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = Group::___init();
+            $group = Container::get(Group::class);
 
             // check if persisted inside "other" dir
             $this->testShiftRecursiveWithExecutedFiles();
@@ -80,7 +80,7 @@ class ShiftTest extends Test
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = Group::___init();
+            $group = Container::get(Group::class);
 
             $this->testShiftNestedWithExecutedFiles();
             $group->destroy();
