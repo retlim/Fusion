@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Hub\Responses\Cache;
 /**
  * Archive response.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Archive extends Cache

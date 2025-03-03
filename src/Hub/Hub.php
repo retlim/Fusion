@@ -26,9 +26,9 @@ use Valvoid\Fusion\Log\Events\Errors\Error as HubError;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 
 /**
- * Hub proxy.
+ * Static hub proxy.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Hub
@@ -42,26 +42,13 @@ class Hub
     /**
      * Constructs the hub.
      *
-     * @param Proxy $logic Logic.
+     * @param Proxy|Instance $logic Any or default instance logic.
      */
-    private function __construct(Proxy $logic)
+    private function __construct(Proxy|Instance $logic)
     {
+        // singleton
+        self::$instance ??= $this;
         $this->logic = $logic;
-    }
-
-    /**
-     * Returns initial instance or true for recycled instance.
-     *
-     * @return Hub|bool Instance or recycled.
-     */
-    public static function ___init(): bool|Hub
-    {
-        if (self::$instance)
-            return true;
-
-        self::$instance = new self(new Instance);
-
-        return self::$instance;
     }
 
     /**

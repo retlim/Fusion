@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Hub\Responses\Cache;
 /**
  * Production metadata file content response.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Metadata extends Cache

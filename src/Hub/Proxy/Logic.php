@@ -52,7 +52,7 @@ use Valvoid\Fusion\Log\Log;
 /**
  * Default hub implementation.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Logic implements Proxy

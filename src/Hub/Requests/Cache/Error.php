@@ -25,7 +25,7 @@ use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 /**
  * Error request.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Error extends Cache

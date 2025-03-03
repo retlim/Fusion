@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Hub\Responses\Cache;
 /**
  * Versions response.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Versions extends Cache

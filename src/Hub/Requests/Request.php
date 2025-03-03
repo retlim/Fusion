@@ -24,7 +24,7 @@ use Valvoid\Fusion\Hub\Cache;
 /**
  * Hub request.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 abstract class Request

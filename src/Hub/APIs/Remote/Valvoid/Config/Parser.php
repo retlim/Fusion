@@ -24,7 +24,7 @@ use Valvoid\Fusion\Config\Parser as ConfigParser;
 /**
  * Valvoid config parser.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Parser extends ConfigParser

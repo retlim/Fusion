@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Hub\Responses\Remote;
 /**
  * References response.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class References

@@ -29,7 +29,7 @@ use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 /**
  * Cache request.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 abstract class Cache extends Request

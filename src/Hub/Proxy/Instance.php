@@ -26,7 +26,7 @@ use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 /**
  * Default hub proxy instance.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Instance implements Proxy
@@ -34,10 +34,14 @@ class Instance implements Proxy
     /** @var Proxy Implementation. */
     protected Proxy $logic;
 
-    /** Constructs the hub. */
-    public function __construct()
+    /**
+     * Constructs the hub.
+     *
+     *  @param Proxy|Logic $logic Any or default logic implementation.
+     */
+    public function __construct(Proxy|Logic $logic)
     {
-        $this->logic = new Logic;
+        $this->logic = $logic;
     }
 
     /**

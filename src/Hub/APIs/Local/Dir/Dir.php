@@ -29,7 +29,7 @@ use Valvoid\Fusion\Hub\Responses\Local\Archive;
 /**
  * Directory hub to get local OS packages.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Dir extends LocalApi

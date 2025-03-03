@@ -30,7 +30,7 @@ use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 /**
  * File request.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class File extends Cache

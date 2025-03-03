@@ -27,7 +27,7 @@ use Valvoid\Fusion\Log\Events\Errors\Request;
 /**
  * Local file synchronization request.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class File extends Local

@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Hub\APIs\Remote;
 /**
  * Common remote API status codes.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 enum Status

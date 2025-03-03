@@ -27,7 +27,7 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
 /**
  * Cache archive request.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Archive extends Cache

@@ -25,7 +25,7 @@ use Valvoid\Fusion\Log\Proxy\Proxy;
 use Valvoid\Fusion\Tasks\Task;
 
 /**
- * Event log proxy.
+ * Static event log proxy.
  *
  * @copyright Valvoid
  * @license GNU GPLv3

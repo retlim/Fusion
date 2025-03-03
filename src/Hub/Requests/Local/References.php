@@ -27,7 +27,7 @@ use Valvoid\Fusion\Util\Version\Interpreter;
 /**
  * Local references synchronization request.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class References extends Local

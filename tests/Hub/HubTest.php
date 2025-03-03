@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Hub;
 
 use ReflectionException;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Tests\Test;
 
@@ -39,9 +40,8 @@ class HubTest extends Test
     {
         try {
             $configMock = new ConfigMock;
-            $this->hub = Hub::___init();
+            $this->hub = Container::get(Hub::class);
 
-            $this->testLockedSingletonInstance();
             $this->testInstanceDestruction();
 
             $configMock->destroy();
@@ -54,23 +54,11 @@ class HubTest extends Test
         }
     }
 
-    public function testLockedSingletonInstance(): void
-    {
-        $instance = Hub::___init();
-
-        // assert indicator for locked and consumed instance
-        if ($instance !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-    }
-
     public function testInstanceDestruction(): void
     {
         $instance = $this->hub;
         $this->hub->destroy();
-        $this->hub = Hub::___init();
+        $this->hub = Container::get(Hub::class);
 
         // assert different instances
         if ($instance === $this->hub) {
