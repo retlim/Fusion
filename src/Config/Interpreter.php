@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Config;
 /**
  * Config interpreter.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 abstract class Interpreter

@@ -36,7 +36,7 @@ use Valvoid\Fusion\Log\Log;
 /**
  * Default config implementation.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Logic implements Proxy
@@ -63,7 +63,7 @@ class Logic implements Proxy
      * @param array $lazy
      * @param array $config Runtime config layer.
      */
-    public function __construct(string $root, array &$lazy, array $config)
+    public function __construct(string $root, array $lazy, array $config)
     {
         Bus::addReceiver(static::class, $this->handleBusEvent(...),
             ConfigEvent::class);

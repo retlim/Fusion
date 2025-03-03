@@ -28,7 +28,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * Log config parser.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Log

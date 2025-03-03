@@ -26,7 +26,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * Working directory config parser.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Dir

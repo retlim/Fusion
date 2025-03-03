@@ -25,20 +25,11 @@ use Valvoid\Fusion\Log\Events\Errors\Metadata;
 /**
  * Config.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 interface Proxy
 {
-    /**
-     * Constructs the config.
-     *
-     * @param string $root
-     * @param array $lazy
-     * @param array $config Runtime config layer.
-     */
-    public function __construct(string $root, array &$lazy, array $config);
-
     /**
      * Builds the config.
      *

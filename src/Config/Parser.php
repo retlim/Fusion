@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Config;
 /**
  * Config parser.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 abstract class Parser

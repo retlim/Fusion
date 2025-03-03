@@ -33,10 +33,14 @@ class Instance implements Proxy
     /** @var Proxy Implementation. */
     protected Proxy $logic;
 
-    /** Constructs the bus. */
-    public function __construct()
+    /**
+     * Constructs the bus.
+     *
+     *  @param Proxy|Logic $logic Any or default logic implementation.
+     */
+    public function __construct(Proxy|Logic $logic)
     {
-        $this->logic = new Logic;
+        $this->logic = $logic;
     }
 
     /**

@@ -27,7 +27,7 @@ use Valvoid\Fusion\Log\Events\Errors\Metadata;
 /**
  * Package manager configuration proxy.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Config
@@ -41,34 +41,17 @@ class Config
     /**
      * Constructs the config.
      *
-     * @param Proxy $logic Logic.
+     * @param Proxy|Instance $logic Logic.
      * @throws ConfigError Invalid config exception.
      * @throws Metadata Invalid meta exception.
      */
-    private function __construct(Proxy $logic)
+    private function __construct(Proxy|Instance $logic)
     {
         self::$instance = $this;
         $this->logic = $logic;
 
         // lazy boot due to self reference
         $this->logic->build();
-    }
-
-    /**
-     * Returns initial instance or true for recycled instance.
-     *
-     * @return Config|bool Instance or recycled.
-     * @throws ConfigError Invalid config exception.
-     * @throws Metadata Invalid meta exception.
-     */
-    public static function ___init(string $root, array &$lazy, array $config): bool|Config
-    {
-        if (self::$instance)
-            return true;
-
-        new self(new Instance($root, $lazy, $config));
-
-        return self::$instance;
     }
 
     /**

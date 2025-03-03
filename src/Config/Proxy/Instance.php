@@ -25,7 +25,7 @@ use Valvoid\Fusion\Log\Events\Errors\Metadata;
 /**
  * Default config instance.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Instance implements Proxy
@@ -36,13 +36,11 @@ class Instance implements Proxy
     /**
      * Constructs the config.
      *
-     * @param string $root
-     * @param array $lazy
-     * @param array $config Runtime config layer.
+     * @param Proxy|Logic $logic Any or default logic implementation.
      */
-    public function __construct(string $root, array &$lazy, array $config)
+    public function __construct(Proxy|Logic $logic)
     {
-        $this->logic = new Logic($root, $lazy, $config);
+        $this->logic = $logic;
     }
 
     /**

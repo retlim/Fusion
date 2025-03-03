@@ -29,7 +29,7 @@ use Valvoid\Fusion\Tasks\Task;
 /**
  * Tasks config parser.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Tasks

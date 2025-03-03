@@ -30,7 +30,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * Hub config interpreter.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Hub
