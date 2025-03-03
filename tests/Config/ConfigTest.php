@@ -19,6 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Config;
 
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Config;
@@ -50,7 +51,7 @@ class ConfigTest extends Test
         try {
             $this->root = dirname(__DIR__, 2);
             $this->lazy = require $this->root . "/cache/loadable/lazy.php";
-            $bus = Bus::___init();
+            $bus = Container::get(Bus::class);
             $this->config = Config::___init($this->root, $this->lazy, []);
 
             $this->testLockedSingletonInstance();

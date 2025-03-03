@@ -21,6 +21,7 @@ namespace Valvoid\Fusion\Tests\Dir;
 
 use ReflectionException;
 use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Tests\Test;
 
@@ -40,7 +41,7 @@ class DirTest extends Test
     {
         try {
             $configMock = new ConfigMock;
-            $bus = Bus::___init();
+            $bus = Container::get(Bus::class);
             $this->dir = Dir::___init();
 
             $this->testLockedSingletonInstance();

@@ -21,6 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Image\Config;
 
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Tasks\Image\Image;
 use Valvoid\Fusion\Tasks\Image\Config\Interpreter;
@@ -41,7 +42,7 @@ class InterpreterTest extends Test
 
     public function __construct()
     {
-        $bus = Bus::___init();
+        $bus = Container::get(Bus::class);
 
         $this->testReset();
         $this->testInvalidType();

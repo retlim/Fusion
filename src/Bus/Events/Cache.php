@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Bus\Events;
 /**
  * Cache event.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Cache implements Event

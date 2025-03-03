@@ -24,6 +24,7 @@ use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Events\Config;
 use Valvoid\Fusion\Bus\Events\Metadata;
 use Valvoid\Fusion\Bus\Events\Root;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -49,31 +50,19 @@ class BusTest extends Test
 
     public function __construct()
     {
-        $this->bus = Bus::___init();
+        $this->bus = Container::get(Bus::class);
 
-        $this->testLockedSingletonInstance();
         $this->testInstanceDestruction();
 
         $this->bus->destroy();
     }
 
-    public function testLockedSingletonInstance(): void
-    {
-        $instance = Bus::___init();
-
-        // assert indicator for locked and consumed instance
-        if ($instance !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-    }
 
     public function testInstanceDestruction(): void
     {
         $instance = $this->bus;
         $this->bus->destroy();
-        $this->bus = Bus::___init();
+        $this->bus = Container::get(Bus::class);
 
         // assert different instances
         if ($instance === $this->bus) {

@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Bus\Events;
 /**
  * Bus event.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 interface Event {}

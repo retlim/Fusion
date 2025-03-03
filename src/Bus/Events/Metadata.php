@@ -24,7 +24,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * Metadata event.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Metadata implements Event

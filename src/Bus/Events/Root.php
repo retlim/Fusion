@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Bus\Events;
 /**
  * Package manager root event.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Root implements Event
