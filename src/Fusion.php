@@ -22,6 +22,9 @@ namespace Valvoid\Fusion;
 use Exception;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Root;
+use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Instance;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Hub\Hub;
@@ -38,7 +41,7 @@ use Valvoid\Fusion\Tasks\Task;
 /**
  * Package manager for PHP-based projects.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Fusion
@@ -49,6 +52,12 @@ class Fusion
     /** @var string Source root directory. */
     private string $root;
 
+    /** @var Container Dependency container. */
+    private Container $container;
+
+    /** @var Bus Event bus. */
+    private Bus $bus;
+
     /** @var Config Composite settings. */
     private Config $config;
 
@@ -57,9 +66,6 @@ class Fusion
 
     /** @var Log Log. */
     private Log $log;
-
-    /** @var Bus Event bus. */
-    private Bus $bus;
 
     /** @var Hub Hub. */
     private Hub $hub;
@@ -76,14 +82,17 @@ class Fusion
      * @param array $config Runtime config layer.
      * @throws ConfigError Invalid config exception.
      * @throws MetadataError Invalid metadata exception.
+     * @throws InternalError Internal error.
      */
     private function __construct(array $config)
     {
         $this->root = dirname(__DIR__);
-        $this->lazy = require $this->root . "/cache/loadable/lazy.php";
+        $this->lazy = require "$this->root/cache/loadable/lazy.php";
 
         spl_autoload_register($this->loadLazyLoadable(...));
 
+        // build proxies
+        $this->container = (new Logic)->get(Container::class);
         $this->bus = Bus::___init();
         $this->config = Config::___init($this->root, $this->lazy, $config);
         $this->dir = Dir::___init();
@@ -101,6 +110,7 @@ class Fusion
      * @return bool True for success. False for has destroyable instance.
      * @throws ConfigError Invalid config exception.
      * @throws MetadataError Invalid metadata exception.
+     * @throws InternalError Internal error.
      */
     public static function init(array $config = []): bool
     {
@@ -148,6 +158,7 @@ class Fusion
         $fusion->config->destroy();
         $fusion->hub->destroy();
         $fusion->bus->destroy();
+        $fusion->container->destroy();
 
         $fusion = null;
 
