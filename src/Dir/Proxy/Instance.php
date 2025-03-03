@@ -24,7 +24,7 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
 /**
  * Default current packager directory instance.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Instance implements Proxy
@@ -32,10 +32,14 @@ class Instance implements Proxy
     /** @var Proxy Implementation. */
     protected Proxy $logic;
 
-    /** Constructs the directory. */
-    public function __construct()
+    /**
+     * Constructs the directory.
+     *
+     *  @param Proxy|Logic $logic Any or default logic implementation.
+     */
+    public function __construct(Proxy|Logic $logic)
     {
-        $this->logic = new Logic;
+        $this->logic = $logic;
     }
 
     /**

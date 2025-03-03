@@ -27,7 +27,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * Placeholder to prevent empty working directory.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Placeholder

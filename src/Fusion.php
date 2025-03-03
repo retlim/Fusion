@@ -99,7 +99,7 @@ class Fusion
             config: $config
         );
 
-        $this->dir = Dir::___init();
+        $this->dir = Container::get(Dir::class);
         $this->log = Log::___init();
         $this->hub = Hub::___init();
 
