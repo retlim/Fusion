@@ -25,7 +25,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Solver test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class SolverTest extends Test

@@ -28,7 +28,7 @@ use Valvoid\Fusion\Bus\Proxy\Proxy;
 /**
  * Mocked bus.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class BusMock

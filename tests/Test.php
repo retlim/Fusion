@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Tests;
 /**
  * Test case.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 abstract class Test

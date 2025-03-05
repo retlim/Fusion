@@ -28,7 +28,7 @@ use Valvoid\Fusion\Tasks\Task;
 /**
  * Mocked log.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class LogMock

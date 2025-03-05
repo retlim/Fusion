@@ -28,7 +28,7 @@ use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
 /**
  * Mocked log.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class HubMock

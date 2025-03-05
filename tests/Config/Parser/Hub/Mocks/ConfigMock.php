@@ -26,7 +26,7 @@ use Valvoid\Fusion\Config\Proxy\Proxy;
 /**
  * Mocked config.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class ConfigMock

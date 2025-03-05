@@ -22,6 +22,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Replicate\Config;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Tasks\Replicate\Replicate;
 use Valvoid\Fusion\Tasks\Replicate\Config\Interpreter;
@@ -30,7 +31,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Config interpreter test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class InterpreterTest extends Test
@@ -42,7 +43,7 @@ class InterpreterTest extends Test
 
     public function __construct()
     {
-        $bus = Container::get(Bus::class);
+        $bus = (new Logic)->get(Bus::class);
 
         $this->testReset();
         $this->testInvalidType();

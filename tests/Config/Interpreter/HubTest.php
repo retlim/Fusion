@@ -23,6 +23,7 @@ use Exception;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Config\Interpreter\Hub as HubInterpreter;
 use Valvoid\Fusion\Tests\Test;
@@ -30,7 +31,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Config interpreter test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class HubTest extends Test
@@ -45,7 +46,7 @@ class HubTest extends Test
 
     public function __construct()
     {
-        $bus = Container::get(Bus::class);
+        $bus = (new Logic)->get(Bus::class);
 
         $this->testReset();
         $this->testInvalidType();

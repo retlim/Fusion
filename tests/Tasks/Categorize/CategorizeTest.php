@@ -21,6 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Categorize;
 
 use ReflectionException;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
 use Valvoid\Fusion\Tasks\Categorize\Categorize;
@@ -32,7 +33,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Test case for the categorize task.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class CategorizeTest extends Test
@@ -43,7 +44,7 @@ class CategorizeTest extends Test
     {
         try {
             $log = new LogMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
             MetadataMock::addMockedMetadata();
 
             $this->testEfficientCategorization();

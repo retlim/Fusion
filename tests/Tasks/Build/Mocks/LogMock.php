@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Inflate\Mocks;
+namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
 
 use ReflectionClass;
 use Valvoid\Fusion\Log\Events\Event;
@@ -26,7 +26,7 @@ use Valvoid\Fusion\Log\Proxy\Proxy;
 use Valvoid\Fusion\Tasks\Task;
 
 /**
- * Mocked log.
+ * Mocked log proxy.
  *
  * @copyright Valvoid
  * @license GNU GPLv3
@@ -42,22 +42,15 @@ class LogMock
         {
             public function __construct()
             {
-                $this->logic = new class implements Proxy {
-
-                    public function addInterceptor(Task $task): void{}
-
-                    public function removeInterceptor(): void{}
-
+                $this->logic = new class implements Proxy
+                {
+                    public function addInterceptor(Task $task): void {}
+                    public function removeInterceptor(): void {}
                     public function error(string|Event $event): void {}
-
                     public function warning(string|Event $event): void {}
-
                     public function notice(string|Event $event): void {}
-
                     public function info(string|Event $event): void {}
-
                     public function verbose(string|Event $event): void {}
-
                     public function debug(string|Event $event): void {}
                 };
             }

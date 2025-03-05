@@ -22,6 +22,7 @@ namespace Valvoid\Fusion\Tests\Dir;
 use ReflectionException;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Tests\Test;
 
@@ -41,8 +42,8 @@ class DirTest extends Test
     {
         try {
             $configMock = new ConfigMock;
-            $bus = Container::get(Bus::class);
-            $this->dir = Container::get(Dir::class);
+            $bus = (new Logic)->get(Bus::class);
+            $this->dir = (new Logic)->get(Dir::class);
 
             $this->testInstanceDestruction();
 
@@ -61,7 +62,7 @@ class DirTest extends Test
     {
         $instance = $this->dir;
         $this->dir->destroy();
-        $this->dir = Container::get(Dir::class);
+        $this->dir = (new Logic)->get(Dir::class);
 
         // assert different instances
         if ($instance === $this->dir) {

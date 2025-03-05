@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks;
 
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tests\Test;
 
@@ -37,7 +38,7 @@ class GroupTest extends Test
 
     public function __construct()
     {
-        $this->group = Container::get(Group::class);
+        $this->group = (new Logic)->get(Group::class);
 
         $this->testInstanceDestruction();
 
@@ -48,7 +49,7 @@ class GroupTest extends Test
     {
         $instance = $this->group;
         $this->group->destroy();
-        $this->group = Container::get(Group::class);
+        $this->group = (new Logic)->get(Group::class);
 
         // assert different instances
         if ($instance === $this->group) {

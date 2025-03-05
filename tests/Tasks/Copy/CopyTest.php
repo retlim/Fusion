@@ -21,6 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Copy;
 
 use Exception;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Copy\Copy;
 use Valvoid\Fusion\Tasks\Group;
@@ -46,7 +47,7 @@ class CopyTest extends Test
         try {
             $log = new LogMock;
             $dir = new DirMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
             MetadataMock::addMockedMetadata();
 
             $this->testTargetCacheDirectory();

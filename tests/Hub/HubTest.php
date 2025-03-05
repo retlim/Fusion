@@ -21,13 +21,14 @@ namespace Valvoid\Fusion\Tests\Hub;
 
 use ReflectionException;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Tests\Test;
 
 /**
  * Hub test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class HubTest extends Test
@@ -40,7 +41,7 @@ class HubTest extends Test
     {
         try {
             $configMock = new ConfigMock;
-            $this->hub = Container::get(Hub::class);
+            $this->hub = (new Logic)->get(Hub::class);
 
             $this->testInstanceDestruction();
 
@@ -58,7 +59,7 @@ class HubTest extends Test
     {
         $instance = $this->hub;
         $this->hub->destroy();
-        $this->hub = Container::get(Hub::class);
+        $this->hub = (new Logic)->get(Hub::class);
 
         // assert different instances
         if ($instance === $this->hub) {

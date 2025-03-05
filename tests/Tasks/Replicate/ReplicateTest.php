@@ -21,6 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Replicate;
 
 use Exception;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Replicate\Replicate;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\BusMock;
@@ -64,7 +65,7 @@ class ReplicateTest extends Test
             $log = new LogMock;
             $hub = new HubMock;
             $bus = new BusMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
             $task = new Replicate([
                 "source" => false,
                 "environment" => $this->environment

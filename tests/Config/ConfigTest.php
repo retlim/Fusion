@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Config;
 
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Config;
@@ -29,7 +30,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Config test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class ConfigTest extends Test
@@ -51,8 +52,8 @@ class ConfigTest extends Test
         try {
             $this->root = dirname(__DIR__, 2);
             $this->lazy = require $this->root . "/cache/loadable/lazy.php";
-            $bus = Container::get(Bus::class);
-            $this->config = Container::get(Config::class,
+            $bus = (new Logic)->get(Bus::class);
+            $this->config = (new Logic)->get(Config::class,
                 root: $this->root,
                 lazy: $this->lazy,
                 config: []);
@@ -77,7 +78,7 @@ class ConfigTest extends Test
     {
         $instance = $this->config;
         $this->config->destroy();
-        $this->config = Container::get(Config::class,
+        $this->config = (new Logic)->get(Config::class,
             root: $this->root,
             lazy: $this->lazy,
             config: []);
