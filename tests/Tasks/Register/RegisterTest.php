@@ -21,6 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Register;
 
 use Exception;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Register\Register;
 use Valvoid\Fusion\Tests\Tasks\Register\Mocks\LogMock;
@@ -46,7 +47,7 @@ class RegisterTest extends Test
             $this->time = time();
             $dir = new DirMock;
             $log = new LogMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
             $task = new Register([]);
 
             MetadataMock::addRefreshMetadata();
@@ -55,7 +56,7 @@ class RegisterTest extends Test
             $this->testRefreshAutoloader();
             $group->destroy();
 
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
 
             MetadataMock::addNewStateMetadata();
             $task = new Register([]);

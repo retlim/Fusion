@@ -25,7 +25,7 @@ use Valvoid\Fusion\Util\Pattern\Interpreter;
 /**
  * Hub cache interpreter test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class InterpreterTest extends Test

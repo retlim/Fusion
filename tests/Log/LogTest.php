@@ -21,13 +21,14 @@ namespace Valvoid\Fusion\Tests\Log;
 
 use ReflectionException;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Tests\Test;
 
 /**
  * Log test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class LogTest extends Test
@@ -40,7 +41,7 @@ class LogTest extends Test
     {
         try {
             $configMock = new ConfigMock;
-            $this->log = Container::get(Log::class);
+            $this->log = (new Logic)->get(Log::class);
 
             $this->testInstanceDestruction();
 
@@ -58,7 +59,7 @@ class LogTest extends Test
     {
         $instance = $this->log;
         $this->log->destroy();
-        $this->log = Container::get(Log::class);
+        $this->log = (new Logic)->get(Log::class);
 
         // assert different instances
         if ($instance === $this->log) {

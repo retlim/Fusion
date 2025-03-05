@@ -19,6 +19,7 @@
 
 namespace Valvoid\Fusion\Tasks\Build;
 
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Fusion;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata as MetadataResponse;
@@ -45,7 +46,7 @@ use Valvoid\Fusion\Util\Reference\Normalizer;
 /**
  * Build task to get external package metas.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Build extends Task implements Interceptor
@@ -125,8 +126,11 @@ class Build extends Task implements Interceptor
         Log::info("...");
 
         // parse inline source
-        $builder = new ExternalMetadataBuilder("", $source);
         $versions = [];
+        $builder = Container::get(ExternalMetadataBuilder::class,
+            source: $source,
+            dir: ""
+        );
 
         // get all versions
         $reqId = Hub::addVersionsRequest($builder->getParsedSource());
@@ -179,7 +183,11 @@ class Build extends Task implements Interceptor
             $id = $metadata->getId();
             $version = $metadata->getVersion();
 
-            $solver = new Solver($id, $version, $this->implication[$id]["implication"][$version]);
+            $solver = Container::get(Solver::class,
+                implication: $this->implication[$id]["implication"][$version],
+                version: $version,
+                id: $id,
+            );
 
             if ($solver->isStructureSatisfiable()) {
                 $this->extractStructure($solver->getPath());
@@ -241,11 +249,13 @@ class Build extends Task implements Interceptor
                         "metas" => []
                     ];
 
-                    $builder = new ExternalMetadataBuilder(
+                    $builder = Container::get(ExternalMetadataBuilder::class,
 
                         // inherit or
                         // direct directory
-                        $directory ?: $dir, $source);
+                        dir: $directory ?: $dir,
+                        source: $source
+                    );
 
                     // clear fake entry
                     unset($versions["version"]);
@@ -285,7 +295,11 @@ class Build extends Task implements Interceptor
         $this->buildRequests();
         $this->buildImplication();
 
-        $solver = new Solver($id, $version, $this->implication);
+        $solver = Container::get(Solver::class,
+            implication: $this->implication,
+            version: $version,
+            id: $id,
+        );
 
         if ($solver->isStructureSatisfiable()) {
             $path = $solver->getPath();
@@ -325,7 +339,7 @@ class Build extends Task implements Interceptor
                     // replace pattern
                     $builder->normalizeReference($version);
 
-                    $metasId = Hub::addMetadataRequest($builder->getParsedSource());
+                    $metasId = Hub::addMetadataRequest($builder->getNormalizedSource());
                     $this->requests[$id]["metas"][] = $metasId;
                     $this->requests[$metasId] = [
                         "builder" => $builder,

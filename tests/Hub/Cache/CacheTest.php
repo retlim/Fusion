@@ -25,7 +25,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Hub cache test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class CacheTest extends Test

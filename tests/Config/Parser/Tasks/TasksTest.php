@@ -29,7 +29,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Config tasks parser test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class TasksTest extends Test

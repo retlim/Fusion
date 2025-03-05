@@ -25,7 +25,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Config parser test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class ParserTest extends Test

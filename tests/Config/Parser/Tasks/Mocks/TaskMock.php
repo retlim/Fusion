@@ -26,7 +26,7 @@ use Valvoid\Fusion\Log\Serializers\Streams\Stream;
 /**
  * Mocked task.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class TaskMock implements Stream

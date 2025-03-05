@@ -25,7 +25,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Config dir parser test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class DirTest extends Test

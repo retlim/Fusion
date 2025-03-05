@@ -23,6 +23,7 @@ use Exception;
 use ReflectionClass;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Shift\Shift;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\BusMock;
@@ -34,7 +35,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Integration test case for the shift task.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class ShiftTest extends Test
@@ -47,9 +48,9 @@ class ShiftTest extends Test
     {
         try {
             $log = new LogMock;
-            $bus = Container::get(Bus::class);
+            $bus = (new Logic)->get(Bus::class);
             $dir = new DirMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
 
             // new root version
             $this->testShiftRecursive();
@@ -57,7 +58,7 @@ class ShiftTest extends Test
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
 
             // new root with new cache dir
             $this->testShiftRecursiveCache();
@@ -65,14 +66,14 @@ class ShiftTest extends Test
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
 
             $this->testShiftNested();
             $group->destroy(); // clear
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
 
             // check if persisted inside "other" dir
             $this->testShiftRecursiveWithExecutedFiles();
@@ -80,7 +81,7 @@ class ShiftTest extends Test
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
 
             $this->testShiftNestedWithExecutedFiles();
             $group->destroy();

@@ -26,7 +26,7 @@ use Valvoid\Fusion\Log\Serializers\Streams\Stream;
 /**
  * Mocked serializer.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class SerializerMock implements Stream

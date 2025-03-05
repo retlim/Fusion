@@ -21,6 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Image;
 
 use Exception;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Image\Image;
 use Valvoid\Fusion\Tests\Tasks\Image\Mocks\BusMock;
@@ -44,7 +45,7 @@ class ImageTest extends Test
             $log = new LogMock;
             $bus = new BusMock;
             $config = new ConfigMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
 
             $task = new Image(["group" => true]);
 

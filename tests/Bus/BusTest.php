@@ -25,12 +25,13 @@ use Valvoid\Fusion\Bus\Events\Config;
 use Valvoid\Fusion\Bus\Events\Metadata;
 use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tests\Test;
 
 /**
  * Bus test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class BusTest extends Test
@@ -50,7 +51,7 @@ class BusTest extends Test
 
     public function __construct()
     {
-        $this->bus = Container::get(Bus::class);
+        $this->bus = (new Logic)->get(Bus::class);
 
         $this->testInstanceDestruction();
 
@@ -62,7 +63,7 @@ class BusTest extends Test
     {
         $instance = $this->bus;
         $this->bus->destroy();
-        $this->bus = Container::get(Bus::class);
+        $this->bus = (new Logic)->get(Bus::class);
 
         // assert different instances
         if ($instance === $this->bus) {

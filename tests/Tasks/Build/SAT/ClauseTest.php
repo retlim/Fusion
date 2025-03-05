@@ -26,7 +26,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Implication graph test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class ClauseTest extends Test

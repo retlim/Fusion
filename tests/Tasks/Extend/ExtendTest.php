@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Extend;
 
 use Exception;
-use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Extend\Extend;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\DirMock;
@@ -31,7 +31,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Integration test case for the extend task.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class ExtendTest extends Test
@@ -66,7 +66,7 @@ class ExtendTest extends Test
             $this->time = time();
             $log = new LogMock;
             $dir = new DirMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
             $ballast = "$this->dir/metadata3";
             $task = new Extend([]);
 
@@ -88,7 +88,7 @@ class ExtendTest extends Test
             // clear previous metadata
             $group->destroy();
 
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
             $from = "$this->cache/metadata3/dependencies/metadata2/extensions/metadata3";
             $to = "$this->cache/metadata2/extensions/metadata3";
             $ballast = "$this->cache/metadata2/extensions/metadata6";

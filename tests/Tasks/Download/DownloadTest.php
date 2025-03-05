@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Download;
 
 use Exception;
-use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Download\Download;
 use Valvoid\Fusion\Tasks\Group;
@@ -50,7 +50,7 @@ class DownloadTest extends Test
             $log = new LogMock;
             $dir = new DirMock;
             $hub = new HubMock;
-            $group = Container::get(Group::class);
+            $group = (new Logic)->get(Group::class);
             MetadataMock::addMockedMetadata();
 
             $this->testTargetCacheDirectory();

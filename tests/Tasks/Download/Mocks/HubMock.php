@@ -29,7 +29,7 @@ use Valvoid\Fusion\Hub\Responses\Cache\Archive as ArchiveResponse;
 /**
  * Mocked log.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class HubMock

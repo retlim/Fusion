@@ -28,7 +28,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  * Config hub parser test.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class HubTest extends Test

@@ -26,7 +26,7 @@ use Valvoid\Fusion\Dir\Proxy\Logic;
 /**
  * Mocked dir.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class DirMock

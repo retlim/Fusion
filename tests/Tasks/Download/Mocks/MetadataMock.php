@@ -23,14 +23,12 @@ use ReflectionClass;
 use ReflectionException;
 use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Metadata\External\External;
-use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
-use Valvoid\Fusion\Metadata\Internal\Internal;
 use Valvoid\Fusion\Tasks\Group;
 
 /**
  * Mocked internal and external metadata.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class MetadataMock

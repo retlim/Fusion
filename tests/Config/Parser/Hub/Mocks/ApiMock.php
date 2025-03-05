@@ -27,7 +27,7 @@ use Valvoid\Fusion\Hub\Responses\Local\References;
 /**
  * Mocked APi.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class ApiMock extends Local

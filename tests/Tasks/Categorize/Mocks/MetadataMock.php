@@ -28,7 +28,7 @@ use Valvoid\Fusion\Tasks\Group;
 /**
  * Mocked internal and external metadata.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class MetadataMock
