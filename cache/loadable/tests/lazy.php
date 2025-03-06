@@ -37,6 +37,7 @@ return [
 	'Valvoid\Fusion\Tests\Metadata\Interpreter\StructureTest' => '/tests/Metadata/Interpreter/StructureTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\BuildTest' => '/tests/Tasks/Build/BuildTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\Config\InterpreterTest' => '/tests/Tasks/Build/Config/InterpreterTest.php',
+	'Valvoid\Fusion\Tests\Tasks\Build\Config\NormalizerTest' => '/tests/Tasks/Build/Config/NormalizerTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\Config\ParserTest' => '/tests/Tasks/Build/Config/ParserTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\Mocks\ContainerMock' => '/tests/Tasks/Build/Mocks/ContainerMock.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\Mocks\GroupMock' => '/tests/Tasks/Build/Mocks/GroupMock.php',

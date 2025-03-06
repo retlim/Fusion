@@ -57,6 +57,7 @@ $tests = [
     new Valvoid\Fusion\Tests\Util\Version\InterpreterTest,
     new Valvoid\Fusion\Tests\Util\Pattern\InterpreterTest,
     new Valvoid\Fusion\Tests\Tasks\Build\Config\InterpreterTest,
+    new Valvoid\Fusion\Tests\Tasks\Build\Config\NormalizerTest,
     new Valvoid\Fusion\Tests\Tasks\Build\Config\ParserTest,
     new Valvoid\Fusion\Tests\Tasks\Build\SAT\GraphTest,
     new Valvoid\Fusion\Tests\Tasks\Build\SAT\ClauseTest,
