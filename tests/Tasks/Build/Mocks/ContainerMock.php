@@ -43,6 +43,12 @@ class ContainerMock
         $this->reflection = new ReflectionClass(Container::class);
     }
 
+    public function setUpRecursiveMetadataImplication(): void
+    {
+        // same as
+        $this->setUpExternalRootSourceImplication();
+    }
+
     public function setUpExternalRootSourceImplication(): void
     {
         $this->logic = new class implements Proxy
@@ -185,6 +191,7 @@ class ContainerMock
                 };
             }
         };
+
         $this->reflection->setStaticPropertyValue("instance", new class($this->logic) extends Container
         {
             public function __construct(protected Proxy $logic) {}

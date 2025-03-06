@@ -38,6 +38,10 @@ class GroupMock
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Group::class);
+    }
+
+    public function setUpRecursiveMetadataImplication(): void
+    {
         $this->reflection->setStaticPropertyValue("instance", new class extends Group
         {
             public function __construct()
@@ -72,9 +76,19 @@ class GroupMock
                     public function getExternalRootMetadata(): ?ExternalMeta {
                         return null;
                     }
-                    public function getInternalRootMetadata(): InternalMeta {
-                        return $this->metas[-1];
+                    public function getInternalRootMetadata(): InternalMeta
+                    {
+                        return new class extends InternalMeta {
+                            public function __construct() {}
+                            public function getStructureSources(): array
+                            {
+                                return [
+                                    "" => ["metadata1"] // recursive
+                                ];
+                            }
+                        };
                     }
+
                     public function getRootMetadata(): ExternalMeta|InternalMeta {
                         return $this->metas[-1];
                     }
@@ -89,7 +103,69 @@ class GroupMock
                         return [];
                     }
                     public function getSourcePath(array $implication, string $source): array {
-                       return [];
+                        return [];
+                    }
+                };
+            }
+        });
+    }
+
+    public function setUpExternalRootSourceImplication(): void
+    {
+        $this->reflection->setStaticPropertyValue("instance", new class extends Group
+        {
+            public function __construct()
+            {
+                $this->logic = new class implements Proxy {
+
+                    private array $implication;
+                    private array $metas;
+
+                    public function setImplication(array $implication): void
+                    {
+                        $this->implication = $implication;
+                    }
+
+                    public function setExternalMetas(array $metas): void
+                    {
+                        $this->metas = $metas;
+                    }
+
+                    public function getExternalMetas(): array
+                    {
+                        return $this->metas;
+                    }
+
+                    public function getImplication(): array
+                    {
+                        return $this->implication;
+                    }
+
+                    public function setInternalMetas(array $metas): void {}
+
+                    public function getExternalRootMetadata(): ?ExternalMeta {
+                        return null;
+                    }
+                    public function getInternalRootMetadata(): InternalMeta
+                    {
+                        return $this->metas[-1];
+                    }
+
+                    public function getRootMetadata(): ExternalMeta|InternalMeta {
+                        return $this->metas[-1];
+                    }
+                    public function hasDownloadable(): bool {
+                        return false;
+                    }
+                    public function getInternalMetas(): array {
+                        return [];
+                    }
+                    public function setImplicationBreadcrumb(array $breadcrumb): void {}
+                    public function getPath(string $source): array {
+                        return [];
+                    }
+                    public function getSourcePath(array $implication, string $source): array {
+                        return [];
                     }
                 };
             }

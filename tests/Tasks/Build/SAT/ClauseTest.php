@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Build\SAT;
 
 use Valvoid\Fusion\Tasks\Build\SAT\Clause\Clause;
+use Valvoid\Fusion\Tasks\Build\SAT\Clause\Literal;
 use Valvoid\Fusion\Tasks\Build\SAT\Clause\State;
 use Valvoid\Fusion\Tests\Test;
 
@@ -31,7 +32,12 @@ use Valvoid\Fusion\Tests\Test;
  */
 class ClauseTest extends Test
 {
-    protected string|array $coverage = Clause::class;
+    protected string|array $coverage = [
+        Clause::class,
+
+        // ballast
+        Literal::class
+    ];
 
     public function __construct()
     {
