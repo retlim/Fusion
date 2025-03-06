@@ -41,6 +41,12 @@ class HubMock
         $this->reflection = new ReflectionClass(Hub::class);
     }
 
+    public function setUpRecursiveMetadataImplication(): void
+    {
+        // same as
+        $this->setUpExternalRootSourceImplication();
+    }
+
     public function setUpExternalRootSourceImplication(): void
     {
         $this->reflection->setStaticPropertyValue("instance", new class extends Hub
