@@ -21,7 +21,6 @@ namespace Valvoid\Fusion\Tests\Tasks\Build\Config;
 
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Tasks\Build\Build;

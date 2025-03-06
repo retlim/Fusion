@@ -49,6 +49,12 @@ class ContainerMock
         $this->setUpExternalRootSourceImplication();
     }
 
+    public function setUpNestedMetadataImplication(): void
+    {
+        // same as
+        $this->setUpExternalRootSourceImplication();
+    }
+
     public function setUpExternalRootSourceImplication(): void
     {
         $this->logic = new class implements Proxy
@@ -69,6 +75,8 @@ class ContainerMock
 
                         public function getPath(): array
                         {
+                            // superset
+                            // internal or external root
                             return [
                                 "metadata1" => "1.0.0",
                                 "metadata2" => "1.0.0",
