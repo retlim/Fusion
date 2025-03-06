@@ -19,6 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Build\SAT;
 
+use Valvoid\Fusion\Tasks\Build\SAT\Formula;
 use Valvoid\Fusion\Tasks\Build\SAT\Solver;
 use Valvoid\Fusion\Tests\Test;
 
@@ -30,7 +31,10 @@ use Valvoid\Fusion\Tests\Test;
  */
 class SolverTest extends Test
 {
-    protected string|array $coverage = Solver::class;
+    protected string|array $coverage = [
+        Solver::class,
+        Formula::class
+    ];
 
     private array $structure = [
         "mosaic" => [
