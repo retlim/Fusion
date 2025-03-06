@@ -83,6 +83,7 @@ return [
 	'Valvoid\Fusion\Tests\Tasks\Register\Mocks\MetadataMock' => '/tests/Tasks/Register/Mocks/MetadataMock.php',
 	'Valvoid\Fusion\Tests\Tasks\Register\RegisterTest' => '/tests/Tasks/Register/RegisterTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Replicate\Config\InterpreterTest' => '/tests/Tasks/Replicate/Config/InterpreterTest.php',
+	'Valvoid\Fusion\Tests\Tasks\Replicate\Config\NormalizerTest' => '/tests/Tasks/Replicate/Config/NormalizerTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Replicate\Config\ParserTest' => '/tests/Tasks/Replicate/Config/ParserTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\BusMock' => '/tests/Tasks/Replicate/Mocks/BusMock.php',
 	'Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\DirMock' => '/tests/Tasks/Replicate/Mocks/DirMock.php',

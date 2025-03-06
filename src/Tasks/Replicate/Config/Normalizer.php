@@ -24,7 +24,7 @@ use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
 /**
  * Replicate task config normalizer.
  *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Normalizer extends ConfigNormalizer
