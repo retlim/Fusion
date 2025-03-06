@@ -12,7 +12,7 @@ stages:
 analyze code:
   stage: lint
   image:
-    name: ghcr.io/phpstan/phpstan
+    name: ghcr.io/phpstan/phpstan:2.1.6
     entrypoint: [""]
   script:
     - phpstan analyse -c phpstan.neon --error-format gitlab > phpstan.json
