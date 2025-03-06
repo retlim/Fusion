@@ -53,6 +53,7 @@ class BuildTest extends Test
 
             $this->testExternalRootSourceImplication();
             $this->testRecursiveMetadataImplication();
+            $this->testNestedMetadataImplication();
 
             $this->containerMock->destroy();
             $this->groupMock->destroy();
@@ -74,6 +75,257 @@ class BuildTest extends Test
 
             if (isset($log))
                 $log->destroy();
+        }
+    }
+
+    public function testNestedMetadataImplication(): void
+    {
+        $this->hubMock->setUpNestedMetadataImplication();
+        $this->containerMock->setUpNestedMetadataImplication();
+        $this->groupMock->setUpNestedMetadataImplication();
+
+        // get nested deps from root metadata
+        $task = new Build([
+            "environment" => [
+                "php" => [
+                    "version" => [
+                        "major" => 8,
+                        "minor" => 1,
+                        "patch" => 0
+                    ]
+                ]
+            ]]);
+
+        $task->execute();
+
+        // invalid raw version implication passed to solver
+        if ($this->containerMock->logic->implication != [
+                "metadata2" => [
+                    "source" => "metadata2",
+                    "implication" => [
+                        "1.0.0" => []
+                    ],
+                ],
+                "metadata4" => [
+                    "source" => "metadata4",
+                    "implication" => [
+                        "1.0.0" => []
+                    ]
+                ],
+                "metadata3" => [
+                    "source" => "metadata3",
+                    "implication"=> [
+                        "2.30.1"=> [
+                            "metadata5" => [
+                                "source" => "metadata5",
+                                "implication" => [
+                                    "1.0.0" => [
+                                        "metadata6" => [
+                                            "source"=> "metadata6",
+                                            "implication" => [
+                                                "1.0.0" => []
+                                            ]
+                                        ],
+                                        "metadata7"=> [
+                                            "source" => "metadata7",
+                                            "implication" => [
+                                                "1.0.0" => []
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            "metadata2"=> [
+                                "source" => "metadata2",
+                                "implication" => [
+                                    "1.0.0" =>[]
+                                ]
+                            ]
+                        ],
+                        "2.0.0:offset"=> [
+                            "metadata5" => [
+                                "source" => "metadata5",
+                                "implication" => [
+                                    "1.0.0" => [
+                                        "metadata6" => [
+                                            "source"=> "metadata6",
+                                            "implication" => [
+                                                "1.0.0" => []
+                                            ]
+                                        ],
+                                        "metadata7" => [
+                                            "source" => "metadata7",
+                                            "implication" => [
+                                                "1.0.0" => []
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            "metadata2" => [
+                                "source" => "metadata2",
+                                "implication" => [
+                                    "1.0.0" => []
+                                ]
+                            ]
+                        ],
+                        "1.0.0" => [
+                            "metadata5" => [
+                                "source" => "metadata5",
+                                "implication" => [
+                                    "1.0.0" => [
+                                        "metadata6"=> [
+                                            "source" => "metadata6",
+                                            "implication"=> [
+                                                "1.0.0"=> []
+                                            ]
+                                        ],
+                                        "metadata7" => [
+                                            "source" => "metadata7",
+                                            "implication" => [
+                                                "1.0.0"=> []
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            "metadata2" => [
+                                "source" => "metadata2",
+                                "implication" => [
+                                    "1.0.0" => []
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]) {
+            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
+
+            $this->result = false;
+        }
+
+        // invalid implication
+        // without internal root
+        if (Group::getImplication() != [
+                "metadata2" => [
+                    "source" => "metadata2",
+                    "implication"=> []
+                ],
+                "metadata4" => [
+                    "source" => "metadata4",
+                    "implication" => []
+                ],
+                "metadata3" => [
+                    "source" => "metadata3",
+                    "implication" => [
+                        "metadata5" => [
+                            "source" => "metadata5",
+                            "implication" => [
+                                "metadata6" => [
+                                    "source" => "metadata6",
+                                    "implication" => []
+                                ],
+                                "metadata7" => [
+                                    "source" => "metadata7",
+                                    "implication" => []
+                                ]
+                            ]
+                        ],
+                        "metadata2" => [
+                            "source" => "metadata2",
+                            "implication" => []
+                        ]
+                    ]
+                ]
+            ]) {
+            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
+
+            $this->result = false;
+        }
+
+        $metas = Group::getExternalMetas();
+        $line = "";
+
+        // missing identifier
+        if (array_diff([
+            "metadata2",
+            "metadata3",
+            "metadata4",
+            "metadata5",
+            "metadata6",
+            "metadata7"
+        ], array_keys($metas))) {
+            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
+
+            $this->result = false;
+        }
+
+        // ids equal solver path
+        // stacked dirs
+        foreach ($metas as $id => $metadata) {
+            switch ($id) {
+                case "metadata2":
+                    // from metadata3 parent
+                    if ($metadata->getDir() == "/dir2/dir3") {
+                        if ($metadata->getVersion() == "1.0.0")
+                            continue 2;
+
+                        else $line = __LINE__;
+
+                    } else $line = __LINE__;
+
+                case "metadata3":
+                    if ($metadata->getDir() == "/dir2/dir3") {
+                        if ($metadata->getVersion() == "2.0.0:offset")
+                            continue 2;
+
+                        else $line = __LINE__;
+
+                    } else $line = __LINE__;
+
+                case "metadata4":
+                    if ($metadata->getDir() == "/dir1") {
+                        if ($metadata->getVersion() == "1.0.0")
+                            continue 2;
+
+                        else $line = __LINE__;
+
+                    } else $line = __LINE__;
+
+                case "metadata5":
+                    // from metadata3 parent
+                    if ($metadata->getDir() == "/dir2/dir3") {
+                        if ($metadata->getVersion() == "1.0.0")
+                            continue 2;
+
+                        else $line = __LINE__;
+
+                    } else $line = __LINE__;
+
+                case "metadata6":
+                    // from metadata5 to metadata3 parent
+                    if ($metadata->getDir() == "/dir2/dir3") {
+                        if ($metadata->getVersion() == "1.0.0")
+                            continue 2;
+
+                        else $line = __LINE__;
+
+                    } else $line = __LINE__;
+
+                case "metadata7":
+                    // from metadata5 to metadata3 parent
+                    if ($metadata->getDir() == "/dir2/dir3") {
+                        if ($metadata->getVersion() == "1.0.0")
+                            continue 2;
+
+                        else $line = __LINE__;
+
+                    } else $line = __LINE__;
+            }
+
+            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | $line";
+
+            $this->result = false;
         }
     }
 
@@ -250,7 +502,7 @@ class BuildTest extends Test
         $line = "";
 
         // missing identifier
-        if (array_diff(array_keys($metas), [
+        if (array_diff([
             "metadata1",
             "metadata2",
             "metadata3",
@@ -258,7 +510,7 @@ class BuildTest extends Test
             "metadata5",
             "metadata6",
             "metadata7"
-        ])) {
+        ], array_keys($metas))) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
 
             $this->result = false;
@@ -266,7 +518,7 @@ class BuildTest extends Test
 
         // ids equal solver path
         // stacked dirs
-        foreach (Group::getExternalMetas() as $id => $metadata) {
+        foreach ($metas as $id => $metadata) {
             switch ($id) {
                 case "metadata1":
                     if ($metadata->getDir() == "") {
@@ -516,7 +768,7 @@ class BuildTest extends Test
         $line = "";
 
         // missing identifier
-        if (array_diff(array_keys($metas), [
+        if (array_diff([
             "metadata1",
             "metadata2",
             "metadata3",
@@ -524,7 +776,7 @@ class BuildTest extends Test
             "metadata5",
             "metadata6",
             "metadata7"
-        ])) {
+        ], array_keys($metas))) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
 
             $this->result = false;
@@ -532,7 +784,7 @@ class BuildTest extends Test
 
         // ids equal solver path
         // stacked dirs
-        foreach (Group::getExternalMetas() as $id => $metadata) {
+        foreach ($metas as $id => $metadata) {
             switch ($id) {
                 case "metadata1":
                     if ($metadata->getDir() == "") {

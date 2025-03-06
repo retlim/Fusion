@@ -40,6 +40,103 @@ class GroupMock
         $this->reflection = new ReflectionClass(Group::class);
     }
 
+    public function setUpNestedMetadataImplication(): void
+    {
+        $this->reflection->setStaticPropertyValue("instance", new class extends Group
+        {
+            public function __construct()
+            {
+                $this->logic = new class implements Proxy {
+
+                    private array $implication;
+                    private array $metas;
+
+                    public function setImplication(array $implication): void
+                    {
+                        $this->implication = $implication;
+                    }
+
+                    public function setExternalMetas(array $metas): void
+                    {
+                        $this->metas = $metas;
+                    }
+
+                    public function getExternalMetas(): array
+                    {
+                        return $this->metas;
+                    }
+
+                    public function getImplication(): array
+                    {
+                        return $this->implication;
+                    }
+
+                    public function setInternalMetas(array $metas): void {}
+
+                    public function getExternalRootMetadata(): ?ExternalMeta {
+                        return null;
+                    }
+                    public function getInternalRootMetadata(): InternalMeta
+                    {
+                        return new class extends InternalMeta {
+                            public function __construct()
+                            {
+                                $this->content = [
+                                    "id" => "metadata1",
+                                    "name" => "", // log
+                                    "description" => "", // log
+                                    "version" => "1.0.0",
+                                    "dir" => "",  // log
+                                    "source" => "",  // log
+                                    "structure" => [
+
+                                        // nested deps
+                                        "sources" => [
+                                            "/dir1" => [
+                                                "metadata2",
+                                                "metadata4"
+                                            ],
+                                            "/dir2/dir3" => [
+                                                "metadata3"
+                                            ]
+                                        ]
+                                    ],
+                                    "environment" => [
+                                        "php" => [
+                                            "version" => [[
+                                                "major" => 8,
+                                                "minor" => 1,
+                                                "patch" => 0,
+                                                "sign" => "" // default >=
+                                            ]]
+                                        ]
+                                    ],
+                                ];
+                            }
+                        };
+                    }
+
+                    public function getRootMetadata(): ExternalMeta|InternalMeta {
+                        return $this->metas[-1];
+                    }
+                    public function hasDownloadable(): bool {
+                        return false;
+                    }
+                    public function getInternalMetas(): array {
+                        return [];
+                    }
+                    public function setImplicationBreadcrumb(array $breadcrumb): void {}
+                    public function getPath(string $source): array {
+                        return [];
+                    }
+                    public function getSourcePath(array $implication, string $source): array {
+                        return [];
+                    }
+                };
+            }
+        });
+    }
+
     public function setUpRecursiveMetadataImplication(): void
     {
         $this->reflection->setStaticPropertyValue("instance", new class extends Group
