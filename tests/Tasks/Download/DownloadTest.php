@@ -50,21 +50,18 @@ class DownloadTest extends Test
             $log = new LogMock;
             $dir = new DirMock;
             $hub = new HubMock;
-            $group = (new Logic)->get(Group::class);
+            (new Logic)->get(Group::class);
             MetadataMock::addMockedMetadata();
 
             $this->testTargetCacheDirectory();
 
-            $group->destroy();
+            (new Logic)->unset(Group::class);
             $hub->destroy();
             $log->destroy();
             $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            if (isset($group))
-                $group->destroy();
 
 
                 $log->destroy();

@@ -44,7 +44,7 @@ class ImageTest extends Test
             $log = new LogMock;
             $bus = new BusMock;
             $config = new ConfigMock;
-            $group = (new Logic)->get(Group::class);
+            (new Logic)->get(Group::class);
 
             $task = new Image(["group" => true]);
 
@@ -52,16 +52,13 @@ class ImageTest extends Test
             $this->testMetas();
             $this->testRootMetadata();
             $bus->destroy();
-            $group->destroy();
+            (new Logic)->unset(Group::class);
             $config->destroy();
             $log->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
-
-            if (isset($group))
-                $group->destroy();
 
             $config->destroy();
             $bus->destroy();

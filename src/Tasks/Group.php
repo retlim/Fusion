@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Tasks;
 
-use Valvoid\Fusion\Group\Proxy\Instance;
+use Valvoid\Fusion\Group\Proxy\Logic;
 use Valvoid\Fusion\Group\Proxy\Proxy;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
@@ -36,30 +36,18 @@ class Group
     private static ?Group $instance = null;
 
     /** @var Proxy Decoupled logic. */
-    protected Proxy $logic;
+    protected Proxy $proxy;
 
     /**
      * Constructs the task group.
      *
-     * @param Proxy|Instance $logic Any or default instance logic.
+     * @param Proxy|Logic $proxy Any or default logic.
      */
-    private function __construct(Proxy|Instance $logic)
+    private function __construct(Proxy|Logic $proxy)
     {
         // singleton
         self::$instance ??= $this;
-        $this->logic = $logic;
-    }
-
-    /**
-     * Destroys the instance.
-     *
-     * @return bool True for success.
-     */
-    public function destroy(): bool
-    {
-        self::$instance = null;
-
-        return true;
+        $this->proxy = $proxy;
     }
 
     /**
@@ -69,7 +57,7 @@ class Group
      */
     public static function setInternalMetas(array $metas): void
     {
-        self::$instance->logic->setInternalMetas($metas);
+        self::$instance->proxy->setInternalMetas($metas);
     }
 
     /**
@@ -79,7 +67,7 @@ class Group
      */
     public static function setImplication(array $implication): void
     {
-        self::$instance->logic->setImplication($implication);
+        self::$instance->proxy->setImplication($implication);
     }
 
     /**
@@ -89,7 +77,7 @@ class Group
      */
     public static function setExternalMetas(array $metas): void
     {
-        self::$instance->logic->setExternalMetas($metas);
+        self::$instance->proxy->setExternalMetas($metas);
     }
 
     /**
@@ -99,7 +87,7 @@ class Group
      */
     public static function getExternalRootMetadata(): ?ExternalMeta
     {
-        return self::$instance->logic->getExternalRootMetadata();
+        return self::$instance->proxy->getExternalRootMetadata();
     }
 
     /**
@@ -109,7 +97,7 @@ class Group
      */
     public static function getInternalRootMetadata(): InternalMeta
     {
-        return self::$instance->logic->getInternalRootMetadata();
+        return self::$instance->proxy->getInternalRootMetadata();
     }
 
     /**
@@ -119,7 +107,7 @@ class Group
      */
     public static function getRootMetadata(): ExternalMeta|InternalMeta
     {
-        return self::$instance->logic->getRootMetadata();
+        return self::$instance->proxy->getRootMetadata();
     }
 
     /**
@@ -129,7 +117,7 @@ class Group
      */
     public static function hasDownloadable(): bool
     {
-        return self::$instance->logic->hasDownloadable();
+        return self::$instance->proxy->hasDownloadable();
     }
 
     /**
@@ -139,7 +127,7 @@ class Group
      */
     public static function getExternalMetas(): array
     {
-        return self::$instance->logic->getExternalMetas();
+        return self::$instance->proxy->getExternalMetas();
     }
 
     /**
@@ -149,7 +137,7 @@ class Group
      */
     public static function getInternalMetas(): array
     {
-        return self::$instance->logic->getInternalMetas();
+        return self::$instance->proxy->getInternalMetas();
     }
 
     /**
@@ -160,7 +148,7 @@ class Group
      */
     public static function setImplicationBreadcrumb(array $breadcrumb): void
     {
-        self::$instance->logic->setImplicationBreadcrumb($breadcrumb);
+        self::$instance->proxy->setImplicationBreadcrumb($breadcrumb);
     }
 
     /**
@@ -170,7 +158,7 @@ class Group
      */
     public static function getImplication(): array
     {
-        return self::$instance->logic->getImplication();
+        return self::$instance->proxy->getImplication();
     }
 
     /**
@@ -181,7 +169,7 @@ class Group
      */
     public static function getPath(string $source): array
     {
-        return self::$instance->logic->getPath($source);
+        return self::$instance->proxy->getPath($source);
     }
 
     /**
@@ -193,6 +181,6 @@ class Group
      */
     public static function getSourcePath(array $implication, string $source): array
     {
-        return self::$instance->logic->getSourcePath($implication, $source);
+        return self::$instance->proxy->getSourcePath($implication, $source);
     }
 }

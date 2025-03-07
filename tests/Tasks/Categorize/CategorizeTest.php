@@ -43,19 +43,18 @@ class CategorizeTest extends Test
     {
         try {
             $log = new LogMock;
-            $group = (new Logic)->get(Group::class);
+            (new Logic)->get(Group::class);
             MetadataMock::addMockedMetadata();
 
             $this->testEfficientCategorization();
             $this->testRedundantCategorization();
 
-            $group->destroy();
+            (new Logic)->unset(Group::class);
             $log->destroy();
 
         } catch (ReflectionException $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-            $group->destroy();
             $log->destroy();
 
             $this->result = false;

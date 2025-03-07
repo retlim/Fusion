@@ -64,7 +64,7 @@ class ReplicateTest extends Test
             $log = new LogMock;
             $hub = new HubMock;
             $bus = new BusMock;
-            $group = (new Logic)->get(Group::class);
+            (new Logic)->get(Group::class);
             $task = new Replicate([
                 "source" => false,
                 "environment" => $this->environment
@@ -74,7 +74,7 @@ class ReplicateTest extends Test
 
             $task->execute();
             $this->testCachedSnapshotFiles();
-            $group->destroy();
+            (new Logic)->unset(Group::class);
             $log->destroy();
             $dir->destroy();
             $hub->destroy();
@@ -84,8 +84,6 @@ class ReplicateTest extends Test
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
 
-            if (isset($group))
-                $group->destroy();
 
 
                 $dir->destroy();
