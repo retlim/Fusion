@@ -53,20 +53,8 @@ class Logic implements Proxy
                 );
 
         // normalize error
-        } catch (ReflectionException $e) {
-            $message = $e->getMessage();
-
-            while (true) {
-                $prev = $e->getPrevious();
-
-                if ($prev === null)
-                    break;
-
-                $message .= $prev->getMessage();
-                $e = $prev;
-            }
-
-            throw new Error($message);
+        } catch (ReflectionException $exception) {
+            $this->throwNormalizedError($exception);
         }
     }
 
@@ -152,5 +140,49 @@ class Logic implements Proxy
             $constructor->invoke($object);
 
         return $object;
+    }
+
+    /**
+     * Unsets static properties by setting default values.
+     *
+     * @param string $class Class name.
+     * @throws Error Internal error.
+     */
+    public function unset(string $class): void
+    {
+        try {
+            $reflection = new ReflectionClass($class);
+
+            foreach ($reflection->getProperties() as $property)
+                if ($property->isStatic())
+                    $property->setValue($property->getDefaultValue());
+
+        // normalize error
+        } catch (ReflectionException $exception) {
+            $this->throwNormalizedError($exception);
+        }
+    }
+
+    /**
+     * Throws loggable error.
+     *
+     * @param ReflectionException $exception Exception.
+     * @throws Error Internal error.
+     */
+    protected function throwNormalizedError(ReflectionException $exception): void
+    {
+        $message = $exception->getMessage();
+
+        while (true) {
+            $prev = $exception->getPrevious();
+
+            if ($prev === null)
+                break;
+
+            $message .= $prev->getMessage();
+            $exception = $prev;
+        }
+
+        throw new Error($message);
     }
 }

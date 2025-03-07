@@ -19,12 +19,15 @@
 
 namespace Valvoid\Fusion\Tests\Container;
 
+use Exception;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tests\Container\Mocks\ArgMock;
 use Valvoid\Fusion\Tests\Container\Mocks\DependencyMock;
 use Valvoid\Fusion\Tests\Container\Mocks\NonPublicMock;
 use Valvoid\Fusion\Tests\Container\Mocks\PublicMock;
+use Valvoid\Fusion\Tests\Container\Mocks\UnsetMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -44,14 +47,46 @@ class ContainerTest extends Test
 
     public function __construct()
     {
-        $this->logic = new Logic;
+        try {
+            $this->logic = new Logic;
 
-        $this->testPublicInstance();
-        $this->testNonPublicInstance();
-        $this->testArguments();
-        $this->testNestedDependency();
+            $this->testPublicInstance();
+            $this->testNonPublicInstance();
+            $this->testArguments();
+            $this->testNestedDependency();
+            $this->testUnset();
+
+        } catch (Exception $e) {
+            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
+
+            $this->result = false;
+        }
     }
 
+    /**
+     * @throws Error
+     */
+    public function testUnset(): void
+    {
+        $instance = $this->logic->get(UnsetMock::class);
+
+        if ($instance instanceof UnsetMock &&
+            $instance === $instance::$instance) {
+
+            $this->logic->unset(UnsetMock::class);
+
+            if ($instance::$instance === null)
+                return;
+        }
+
+        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
+
+        $this->result = false;
+    }
+
+    /**
+     * @throws Error
+     */
     public function testPublicInstance(): void
     {
         $instance = $this->logic->get(PublicMock::class);
@@ -64,6 +99,9 @@ class ContainerTest extends Test
         $this->result = false;
     }
 
+    /**
+     * @throws Error
+     */
     public function testNonPublicInstance(): void
     {
         $instance = $this->logic->get(NonPublicMock::class);
@@ -76,6 +114,9 @@ class ContainerTest extends Test
         $this->result = false;
     }
 
+    /**
+     * @throws Error
+     */
     public function testArguments(): void
     {
         $instance = $this->logic->get(ArgMock::class, value: "test");
@@ -89,6 +130,9 @@ class ContainerTest extends Test
         $this->result = false;
     }
 
+    /**
+     * @throws Error
+     */
     public function testNestedDependency(): void
     {
         $instance = $this->logic->get(DependencyMock::class, value: "test");
