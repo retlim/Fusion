@@ -41,13 +41,13 @@ class Bus
     /**
      * Constructs the bus.
      *
-     * @param Proxy|Logic $logic Any or default logic.
+     * @param Proxy|Logic $proxy Any or default logic.
      */
-    private function __construct(Proxy|Logic $logic)
+    private function __construct(Proxy|Logic $proxy)
     {
         // singleton
         self::$instance ??= $this;
-        $this->proxy = $logic;
+        $this->proxy = $proxy;
     }
 
     /**
