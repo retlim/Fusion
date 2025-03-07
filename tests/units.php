@@ -34,6 +34,7 @@ spl_autoload_register(function (string $loadable) use ($root, $lazy)
 /** @var Test[] $tests */
 $tests = [
     new Valvoid\Fusion\Tests\Bus\BusTest,
+    new Valvoid\Fusion\Tests\Container\ContainerTest,
     new Valvoid\Fusion\Tests\Config\ConfigTest,
     new Valvoid\Fusion\Tests\Config\Parser\DirTest,
     new Valvoid\Fusion\Tests\Config\Parser\Hub\HubTest,
