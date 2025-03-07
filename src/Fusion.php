@@ -51,9 +51,6 @@ class Fusion
     /** @var string Source root directory. */
     private string $root;
 
-    /** @var Dir Current package directory. */
-    private Dir $dir;
-
     /** @var Log Log. */
     private Log $log;
 
@@ -87,7 +84,7 @@ class Fusion
             config: $config
         );
 
-        $this->dir = Container::get(Dir::class);
+        Container::get(Dir::class);
         $this->log = Container::get(Log::class);
         Container::get(Hub::class);
 
@@ -181,7 +178,7 @@ class Fusion
                 );
 
             Log::info(new Id($id));
-            $fusion->dir->normalize();
+            $fusion->normalize();
 
             /** @var Task $task */
             if (isset($entry["task"])) {
@@ -211,10 +208,23 @@ class Fusion
             Log::error($error);
         }
 
-        $fusion->dir->normalize();
+        $fusion->normalize();
         $fusion->busy = false;
 
         return !isset($error);
+    }
+
+    /**
+     * Normalizes working directory.
+     *
+     * @throws InternalError Internal error.
+     */
+    public function normalize(): void
+    {
+        Dir::delete(Dir::getStateDir());
+        Dir::delete(Dir::getTaskDir());
+        Dir::delete(Dir::getPackagesDir());
+        Dir::delete(Dir::getOtherDir());
     }
 
     /**

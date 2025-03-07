@@ -207,19 +207,6 @@ class Logic implements Proxy
     }
 
     /**
-     * Normalizes working directory.
-     *
-     * @throws Error Internal error.
-     */
-    public function normalize(): void
-    {
-        $this->delete("$this->cache/state");
-        $this->delete("$this->cache/task");
-        $this->delete("$this->cache/packages");
-        $this->delete("$this->cache/other");
-    }
-
-    /**
      * Returns root directory.
      *
      * @return string Root dir.

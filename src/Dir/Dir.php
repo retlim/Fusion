@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Dir;
 
-use Valvoid\Fusion\Dir\Proxy\Instance;
+use Valvoid\Fusion\Dir\Proxy\Logic;
 use Valvoid\Fusion\Dir\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 
@@ -35,30 +35,18 @@ class Dir
     private static ?Dir $instance = null;
 
     /** @var Proxy Decoupled logic. */
-    protected Proxy $logic;
+    protected Proxy $proxy;
 
     /**
      * Constructs the directory.
      *
-     * @param Proxy|Instance $logic Any or default instance logic.
+     * @param Proxy|Logic $proxy Any or default logic.
      */
-    private function __construct(Proxy|Instance $logic)
+    private function __construct(Proxy|Logic $proxy)
     {
         // singleton
         self::$instance ??= $this;
-        $this->logic = $logic;
-    }
-
-    /**
-     * Destroys the cache instance.
-     *
-     * @return bool True for success.
-     */
-    public function destroy(): bool
-    {
-        self::$instance = null;
-
-        return true;
+        $this->proxy = $proxy;
     }
 
     /**
@@ -68,7 +56,7 @@ class Dir
      */
     public static function getTaskDir(): string
     {
-        return self::$instance->logic->getTaskDir();
+        return self::$instance->proxy->getTaskDir();
     }
 
     /**
@@ -78,7 +66,7 @@ class Dir
      */
     public static function getStateDir(): string
     {
-        return self::$instance->logic->getStateDir();
+        return self::$instance->proxy->getStateDir();
     }
 
     /**
@@ -88,7 +76,7 @@ class Dir
      */
     public static function getCacheDir(): string
     {
-        return self::$instance->logic->getCacheDir();
+        return self::$instance->proxy->getCacheDir();
     }
 
     /**
@@ -98,7 +86,7 @@ class Dir
      */
     public static function getOtherDir(): string
     {
-        return self::$instance->logic->getOtherDir();
+        return self::$instance->proxy->getOtherDir();
     }
 
     /**
@@ -108,17 +96,7 @@ class Dir
      */
     public static function getPackagesDir(): string
     {
-        return self::$instance->logic->getPackagesDir();
-    }
-
-    /**
-     * Normalizes working directory.
-     *
-     * @throws Error Internal error.
-     */
-    public function normalize(): void
-    {
-        $this->logic->normalize();
+        return self::$instance->proxy->getPackagesDir();
     }
 
     /**
@@ -128,7 +106,7 @@ class Dir
      */
     public static function getRootDir(): string
     {
-        return self::$instance->logic->getRootDir();
+        return self::$instance->proxy->getRootDir();
     }
 
     /**
@@ -140,7 +118,7 @@ class Dir
      */
     public static function createDir(string $dir, int $permissions = 0755): void
     {
-        self::$instance->logic->createDir($dir, $permissions);
+        self::$instance->proxy->createDir($dir, $permissions);
     }
 
     /**
@@ -152,7 +130,7 @@ class Dir
      */
     public static function rename(string $from, string $to): void
     {
-        self::$instance->logic->rename($from, $to);
+        self::$instance->proxy->rename($from, $to);
     }
 
     /**
@@ -164,7 +142,7 @@ class Dir
      */
     public static function copy(string $from, string $to): void
     {
-        self::$instance->logic->copy($from, $to);
+        self::$instance->proxy->copy($from, $to);
     }
 
     /**
@@ -175,7 +153,7 @@ class Dir
      */
     public static function delete(string $file): void
     {
-        self::$instance->logic->delete($file);
+        self::$instance->proxy->delete($file);
     }
 
     /**
@@ -187,6 +165,6 @@ class Dir
      */
     public static function clear(string $dir, string $path): void
     {
-        self::$instance->logic->clear($dir, $path);
+        self::$instance->proxy->clear($dir, $path);
     }
 }
