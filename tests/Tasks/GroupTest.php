@@ -41,13 +41,13 @@ class GroupTest extends Test
 
         $this->testInstanceDestruction();
 
-        $this->group->destroy();
+        (new Logic)->unset(Group::class);
     }
 
     public function testInstanceDestruction(): void
     {
         $instance = $this->group;
-        $this->group->destroy();
+        (new Logic)->unset(Group::class);
         $this->group = (new Logic)->get(Group::class);
 
         // assert different instances

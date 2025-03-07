@@ -48,41 +48,41 @@ class ShiftTest extends Test
             $log = new LogMock;
             (new Logic)->get(Bus::class);
             $dir = new DirMock;
-            $group = (new Logic)->get(Group::class);
+            (new Logic)->get(Group::class);
 
             // new root version
             $this->testShiftRecursive();
-            $group->destroy();
+            (new Logic)->unset(Group::class);
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = (new Logic)->get(Group::class);
+            (new Logic)->get(Group::class);
 
             // new root with new cache dir
             $this->testShiftRecursiveCache();
-            $group->destroy(); // clear
+            (new Logic)->unset(Group::class);// clear
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = (new Logic)->get(Group::class);
+            (new Logic)->get(Group::class);
 
             $this->testShiftNested();
-            $group->destroy(); // clear
+            (new Logic)->unset(Group::class);// clear
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = (new Logic)->get(Group::class);
+            (new Logic)->get(Group::class);
 
             // check if persisted inside "other" dir
             $this->testShiftRecursiveWithExecutedFiles();
-            $group->destroy(); // clear
+            (new Logic)->unset(Group::class);// clear
             $dir->destroy();
 
             $dir = new DirMock;
-            $group = (new Logic)->get(Group::class);
+            (new Logic)->get(Group::class);
 
             $this->testShiftNestedWithExecutedFiles();
-            $group->destroy();
+            (new Logic)->unset(Group::class);
             $log->destroy();
             $dir->destroy();
             (new Logic)->unset(Bus::class);
@@ -90,8 +90,6 @@ class ShiftTest extends Test
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-            if (isset($group))
-                $group->destroy();
 
                 $log->destroy();
 

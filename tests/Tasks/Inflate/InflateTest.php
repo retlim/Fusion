@@ -59,9 +59,9 @@ class InflateTest extends Test
             $this->testRefreshClassAndFunction();
             $this->testRefreshInterface();
             $this->testRefreshTrait();
-            $group->destroy();
+            (new Logic)->unset(Group::class);
 
-            $group = (new Logic)->get(Group::class);
+            (new Logic)->get(Group::class);
 
             MetadataMock::addNewStateMetadata();
             $task = new Inflate([]);
@@ -70,15 +70,13 @@ class InflateTest extends Test
             $this->testNewStateFinalClass();
             $this->testNewStateAbstractClass();
             $this->testNewStateEnum();
-            $group->destroy();
+            (new Logic)->unset(Group::class);
             $log->destroy();
             $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-            if (isset($group))
-                $group->destroy();
 
 
                 $dir->destroy();

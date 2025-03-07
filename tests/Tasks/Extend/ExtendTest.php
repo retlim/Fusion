@@ -86,9 +86,9 @@ class ExtendTest extends Test
             $this->testRefreshBallast();
 
             // clear previous metadata
-            $group->destroy();
+            (new Logic)->unset(Group::class);
 
-            $group = (new Logic)->get(Group::class);
+            (new Logic)->get(Group::class);
             $from = "$this->cache/metadata3/dependencies/metadata2/extensions/metadata3";
             $to = "$this->cache/metadata2/extensions/metadata3";
             $ballast = "$this->cache/metadata2/extensions/metadata6";
@@ -119,16 +119,13 @@ class ExtendTest extends Test
             $this->testNewStateExtensionsOrder();
             $this->testNewStateBallast();
             $this->testNewStateExtension();
-            $group->destroy();
+            (new Logic)->unset(Group::class);
             $log->destroy();
             $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
-
-            if (isset($group))
-                $group->destroy();
 
             if (isset($log))
                 $log->destroy();

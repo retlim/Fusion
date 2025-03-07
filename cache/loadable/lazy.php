@@ -41,7 +41,6 @@ return [
 	'Valvoid\Fusion\Dir\Proxy\Logic' => '/src/Dir/Proxy/Logic.php',
 	'Valvoid\Fusion\Dir\Proxy\Proxy' => '/src/Dir/Proxy/Proxy.php',
 	'Valvoid\Fusion\Fusion' => '/src/Fusion.php',
-	'Valvoid\Fusion\Group\Proxy\Instance' => '/src/Group/Proxy/Instance.php',
 	'Valvoid\Fusion\Group\Proxy\Logic' => '/src/Group/Proxy/Logic.php',
 	'Valvoid\Fusion\Group\Proxy\Proxy' => '/src/Group/Proxy/Proxy.php',
 	'Valvoid\Fusion\Hub\APIs\Local\Dir\Config\Interpreter' => '/src/Hub/APIs/Local/Dir/Config/Interpreter.php',

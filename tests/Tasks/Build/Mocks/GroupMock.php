@@ -46,7 +46,7 @@ class GroupMock
         {
             public function __construct()
             {
-                $this->logic = new class implements Proxy {
+                $this->proxy = new class implements Proxy {
 
                     private array $implication;
                     private array $metas;
@@ -143,7 +143,7 @@ class GroupMock
         {
             public function __construct()
             {
-                $this->logic = new class implements Proxy {
+                $this->proxy = new class implements Proxy {
 
                     private array $implication;
                     private array $metas;
@@ -213,7 +213,7 @@ class GroupMock
         {
             public function __construct()
             {
-                $this->logic = new class implements Proxy {
+                $this->proxy = new class implements Proxy {
 
                     private array $implication;
                     private array $metas;
