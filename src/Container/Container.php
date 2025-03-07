@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Container;
 
-use Valvoid\Fusion\Container\Proxy\Instance;
+use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Container\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 
@@ -31,26 +31,26 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
  */
 class Container
 {
-    /** @var ?Container Runtime instance. */
+    /** @var ?Container Sharable instance. */
     private static ?Container $instance = null;
 
     /** @var Proxy Decoupled logic. */
-    protected Proxy $logic;
+    protected Proxy $proxy;
 
     /**
      * Constructs the container.
      *
-     * @param Proxy|Instance $logic Any or default instance logic.
+     * @param Proxy|Logic $proxy Any or default logic.
      */
-    private function __construct(Proxy|Instance $logic)
+    private function __construct(Proxy|Logic $proxy)
     {
-        // singleton
+        // sharable
         self::$instance ??= $this;
-        $this->logic = $logic;
+        $this->proxy = $proxy;
     }
 
     /**
-     * Destroys the bus instance.
+     * Destroys the container.
      *
      * @return bool True for success.
      */
@@ -72,6 +72,6 @@ class Container
      */
     public static function get(string $class, mixed ...$args): object
     {
-        return self::$instance->logic->get($class, ...$args);
+        return self::$instance->proxy->get($class, ...$args);
     }
 }

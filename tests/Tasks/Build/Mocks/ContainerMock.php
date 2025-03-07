@@ -202,7 +202,7 @@ class ContainerMock
 
         $this->reflection->setStaticPropertyValue("instance", new class($this->logic) extends Container
         {
-            public function __construct(protected Proxy $logic) {}
+            public function __construct(protected Proxy $proxy) {}
         });
     }
 
