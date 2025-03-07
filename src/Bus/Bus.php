@@ -21,7 +21,7 @@ namespace Valvoid\Fusion\Bus;
 
 use Closure;
 use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Instance;
+use Valvoid\Fusion\Bus\Proxy\Logic;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
 
 /**
@@ -36,30 +36,18 @@ class Bus
     private static ?Bus $instance = null;
 
     /** @var Proxy Decoupled logic. */
-    protected Proxy $logic;
+    protected Proxy $proxy;
 
     /**
      * Constructs the bus.
      *
-     * @param Proxy|Instance $logic Any or default instance logic.
+     * @param Proxy|Logic $logic Any or default logic.
      */
-    private function __construct(Proxy|Instance $logic)
+    private function __construct(Proxy|Logic $logic)
     {
         // singleton
         self::$instance ??= $this;
-        $this->logic = $logic;
-    }
-
-    /**
-     * Destroys the bus instance.
-     *
-     * @return bool True for success.
-     */
-    public function destroy(): bool
-    {
-        self::$instance = null;
-
-        return true;
+        $this->proxy = $logic;
     }
 
     /**
@@ -71,7 +59,7 @@ class Bus
      */
     public static function addReceiver(string $id, Closure $callback, string ...$events): void
     {
-        self::$instance->logic->addReceiver($id, $callback, ...$events);
+        self::$instance->proxy->addReceiver($id, $callback, ...$events);
     }
 
     /**
@@ -81,7 +69,7 @@ class Bus
      */
     public static function broadcast(Event $event): void
     {
-        self::$instance->logic->broadcast($event);
+        self::$instance->proxy->broadcast($event);
     }
 
     /**
@@ -92,6 +80,6 @@ class Bus
      */
     public static function removeReceiver(string $id, string ...$events): void
     {
-        self::$instance->logic->removeReceiver($id, ...$events);
+        self::$instance->proxy->removeReceiver($id, ...$events);
     }
 }

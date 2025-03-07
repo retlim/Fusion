@@ -22,11 +22,9 @@ namespace Valvoid\Fusion\Tests\Tasks\Shift;
 use Exception;
 use ReflectionClass;
 use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Shift\Shift;
-use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\MetadataMock;
@@ -48,7 +46,7 @@ class ShiftTest extends Test
     {
         try {
             $log = new LogMock;
-            $bus = (new Logic)->get(Bus::class);
+            (new Logic)->get(Bus::class);
             $dir = new DirMock;
             $group = (new Logic)->get(Group::class);
 
@@ -87,7 +85,7 @@ class ShiftTest extends Test
             $group->destroy();
             $log->destroy();
             $dir->destroy();
-            $bus->destroy();
+            (new Logic)->unset(Bus::class);
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
@@ -99,9 +97,6 @@ class ShiftTest extends Test
 
             if (isset($dir))
                 $dir->destroy();
-
-            if (isset($bus))
-                $bus->destroy();
 
             $this->result = false;
         }

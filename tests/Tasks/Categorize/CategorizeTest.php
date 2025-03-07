@@ -20,7 +20,6 @@
 namespace Valvoid\Fusion\Tests\Tasks\Categorize;
 
 use ReflectionException;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;

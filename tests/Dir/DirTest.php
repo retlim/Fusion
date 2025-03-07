@@ -21,7 +21,6 @@ namespace Valvoid\Fusion\Tests\Dir;
 
 use ReflectionException;
 use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Tests\Test;
@@ -49,7 +48,7 @@ class DirTest extends Test
 
             $configMock->destroy();
             $this->dir->destroy();
-            $bus->destroy();
+            (new Logic)->unset(Bus::class);
 
         } catch (ReflectionException $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;

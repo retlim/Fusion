@@ -22,7 +22,6 @@ namespace Valvoid\Fusion\Tests\Metadata\Interpreter;
 use Exception;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Metadata\Interpreter\Structure;
@@ -51,7 +50,7 @@ class StructureTest extends Test
         $this->testReset();
         $this->testInvalidType();
 
-        $bus->destroy();
+        (new Logic)->unset(Bus::class);
     }
 
     public function testReset(): void

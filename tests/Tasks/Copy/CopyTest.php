@@ -20,7 +20,6 @@
 namespace Valvoid\Fusion\Tests\Tasks\Copy;
 
 use Exception;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Copy\Copy;

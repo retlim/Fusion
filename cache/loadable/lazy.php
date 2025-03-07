@@ -8,7 +8,6 @@ return [
 	'Valvoid\Fusion\Bus\Events\Event' => '/src/Bus/Events/Event.php',
 	'Valvoid\Fusion\Bus\Events\Metadata' => '/src/Bus/Events/Metadata.php',
 	'Valvoid\Fusion\Bus\Events\Root' => '/src/Bus/Events/Root.php',
-	'Valvoid\Fusion\Bus\Proxy\Instance' => '/src/Bus/Proxy/Instance.php',
 	'Valvoid\Fusion\Bus\Proxy\Logic' => '/src/Bus/Proxy/Logic.php',
 	'Valvoid\Fusion\Bus\Proxy\Proxy' => '/src/Bus/Proxy/Proxy.php',
 	'Valvoid\Fusion\Config\Config' => '/src/Config/Config.php',

@@ -42,14 +42,14 @@ class InterpreterTest extends Test
 
     public function __construct()
     {
-        $bus = (new Logic)->get(Bus::class);
+        (new Logic)->get(Bus::class);
 
         $this->testReset();
         $this->testInvalidType();
         $this->testDefault();
         $this->testInflated();
 
-        $bus->destroy();
+        (new Logic)->unset(Bus::class);
     }
 
     public function testReset(): void

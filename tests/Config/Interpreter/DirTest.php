@@ -22,7 +22,6 @@ namespace Valvoid\Fusion\Tests\Config\Interpreter;
 use Exception;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Config\Interpreter\Dir as DirInterpreter;
@@ -53,7 +52,7 @@ class DirTest extends Test
         $this->testInvalidType();
         $this->testInvalidKey();
 
-        $bus->destroy();
+        (new Logic)->unset(Bus::class);
     }
 
     public function testRootPath(): void
