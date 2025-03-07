@@ -40,7 +40,7 @@ class ConfigMock
         {
             public function __construct()
             {
-                $this->logic = new class implements Proxy
+                $this->proxy = new class implements Proxy
                 {
                     // @phpstan-ignore-next-line
                     public function __construct(string $root = "", array &$lazy = [], array $config = []) {}
@@ -63,7 +63,7 @@ class ConfigMock
         {
             public function __construct()
             {
-                $this->logic = new class implements Proxy
+                $this->proxy = new class implements Proxy
                 {
                     // @phpstan-ignore-next-line
                     public function __construct(string $root = "", array &$lazy = [], array $config = []) {}

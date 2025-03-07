@@ -51,9 +51,6 @@ class Fusion
     /** @var string Source root directory. */
     private string $root;
 
-    /** @var Config Composite settings. */
-    private Config $config;
-
     /** @var Dir Current package directory. */
     private Dir $dir;
 
@@ -84,7 +81,7 @@ class Fusion
         // build proxies
         (new Logic)->get(Container::class);
         Container::get(Bus::class);
-        $this->config = Container::get(Config::class,
+        Container::get(Config::class,
             root: $this->root,
             lazy: $this->lazy,
             config: $config
@@ -178,7 +175,7 @@ class Fusion
         $fusion->busy = true;
 
         try {
-            $entry = $fusion->config::get("tasks", $id) ??
+            $entry = Config::get("tasks", $id) ??
                 throw new InternalError(
                     "Task id \"$id\" does not exist."
                 );

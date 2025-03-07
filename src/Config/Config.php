@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Config;
 
-use Valvoid\Fusion\Config\Proxy\Instance;
+use Valvoid\Fusion\Config\Proxy\Logic;
 use Valvoid\Fusion\Config\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
 use Valvoid\Fusion\Log\Events\Errors\Metadata;
@@ -36,34 +36,22 @@ class Config
     private static ?Config $instance = null;
 
     /** @var Proxy Decoupled logic. */
-    protected Proxy $logic;
+    protected Proxy $proxy;
 
     /**
      * Constructs the config.
      *
-     * @param Proxy|Instance $logic Any or default instance logic..
+     * @param Proxy|Logic $logic Any or default logic.
      * @throws ConfigError Invalid config exception.
      * @throws Metadata Invalid meta exception.
      */
-    private function __construct(Proxy|Instance $logic)
+    private function __construct(Proxy|Logic $logic)
     {
         self::$instance ??= $this;
-        $this->logic = $logic;
+        $this->proxy = $logic;
 
         // lazy boot due to self reference
-        $this->logic->build();
-    }
-
-    /**
-     * Destroys the cache instance.
-     *
-     * @return bool True for success.
-     */
-    public function destroy(): bool
-    {
-        self::$instance = null;
-
-        return true;
+        $this->proxy->build();
     }
 
     /**
@@ -74,7 +62,7 @@ class Config
      */
     public static function get(string ...$breadcrumb): mixed
     {
-        return self::$instance->logic->get(...$breadcrumb);
+        return self::$instance->proxy->get(...$breadcrumb);
     }
 
     /**
@@ -84,7 +72,7 @@ class Config
      */
     public static function getLazy(): array
     {
-        return self::$instance->logic->getLazy();
+        return self::$instance->proxy->getLazy();
     }
 
     /**
@@ -95,6 +83,6 @@ class Config
      */
     public static function hasLazy(string $class): bool
     {
-        return self::$instance->logic->hasLazy($class);
+        return self::$instance->proxy->hasLazy($class);
     }
 }
