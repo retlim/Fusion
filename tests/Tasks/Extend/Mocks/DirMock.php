@@ -40,7 +40,7 @@ class DirMock
         {
             public function __construct()
             {
-                $this->logic = new class extends Logic
+                $this->proxy = new class extends Logic
                 {
                     public function __construct()
                     {

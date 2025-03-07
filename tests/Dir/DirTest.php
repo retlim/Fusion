@@ -41,13 +41,13 @@ class DirTest extends Test
     {
         try {
             $configMock = new ConfigMock;
-            $bus = (new Logic)->get(Bus::class);
+            (new Logic)->get(Bus::class);
             $this->dir = (new Logic)->get(Dir::class);
 
             $this->testInstanceDestruction();
 
             $configMock->destroy();
-            $this->dir->destroy();
+            (new Logic)->unset(Dir::class);
             (new Logic)->unset(Bus::class);
 
         } catch (ReflectionException $exception) {
@@ -60,7 +60,7 @@ class DirTest extends Test
     public function testInstanceDestruction(): void
     {
         $instance = $this->dir;
-        $this->dir->destroy();
+        (new Logic)->unset(Dir::class);
         $this->dir = (new Logic)->get(Dir::class);
 
         // assert different instances

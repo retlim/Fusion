@@ -37,7 +37,6 @@ return [
 	'Valvoid\Fusion\Container\Proxy\Proxy' => '/src/Container/Proxy/Proxy.php',
 	'Valvoid\Fusion\Dir\Dir' => '/src/Dir/Dir.php',
 	'Valvoid\Fusion\Dir\Placeholder' => '/src/Dir/Placeholder.php',
-	'Valvoid\Fusion\Dir\Proxy\Instance' => '/src/Dir/Proxy/Instance.php',
 	'Valvoid\Fusion\Dir\Proxy\Logic' => '/src/Dir/Proxy/Logic.php',
 	'Valvoid\Fusion\Dir\Proxy\Proxy' => '/src/Dir/Proxy/Proxy.php',
 	'Valvoid\Fusion\Fusion' => '/src/Fusion.php',

@@ -65,13 +65,6 @@ interface Proxy
     public function getPackagesDir(): string;
 
     /**
-     * Normalizes working directory.
-     *
-     * @throws Error Internal error.
-     */
-    public function normalize(): void;
-
-    /**
      * Returns root directory.
      *
      * @return string Root dir.
