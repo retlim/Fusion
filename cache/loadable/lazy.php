@@ -31,7 +31,6 @@ return [
 	'Valvoid\Fusion\Config\Parser\Parser' => '/src/Config/Parser/Parser.php',
 	'Valvoid\Fusion\Config\Parser\Tasks' => '/src/Config/Parser/Tasks.php',
 	'Valvoid\Fusion\Config\Parser' => '/src/Config/Parser.php',
-	'Valvoid\Fusion\Config\Proxy\Instance' => '/src/Config/Proxy/Instance.php',
 	'Valvoid\Fusion\Config\Proxy\Logic' => '/src/Config/Proxy/Logic.php',
 	'Valvoid\Fusion\Config\Proxy\Proxy' => '/src/Config/Proxy/Proxy.php',
 	'Valvoid\Fusion\Container\Container' => '/src/Container/Container.php',

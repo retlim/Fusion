@@ -40,7 +40,7 @@ class ConfigMock
         {
             public function __construct()
             {
-                $this->logic = new class implements Proxy
+                $this->proxy = new class implements Proxy
                 {
                     public function get(string ...$breadcrumb): mixed
                     {

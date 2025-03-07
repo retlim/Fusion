@@ -19,12 +19,11 @@
 
 namespace Valvoid\Fusion\Tests\Config;
 
-use Valvoid\Fusion\Container\Container;
-use Valvoid\Fusion\Container\Proxy\Logic;
-use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
+use Exception;
+use Valvoid\Fusion\Container\Proxy\Logic as ContainerLogic;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Config;
-use Valvoid\Fusion\Log\Events\Errors\Metadata;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -44,26 +43,24 @@ class ConfigTest extends Test
     private Config $config;
 
     /**
-     * @throws Metadata
-     * @throws ConfigError
      */
     public function __construct()
     {
         try {
             $this->root = dirname(__DIR__, 2);
-            $this->lazy = require $this->root . "/cache/loadable/lazy.php";
-            $bus = (new Logic)->get(Bus::class);
-            $this->config = (new Logic)->get(Config::class,
+            $this->lazy = require "$this->root/cache/loadable/lazy.php";
+            $bus = (new ContainerLogic)->get(Bus::class);
+            $this->config = (new ContainerLogic)->get(Config::class,
                 root: $this->root,
                 lazy: $this->lazy,
                 config: []);
 
             $this->testInstanceDestruction();
 
-            $this->config->destroy();
+            (new ContainerLogic)->unset(Config::class);
             $bus->destroy();
 
-        } catch (ConfigError $exception) {
+        } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
             $this->result = false;
@@ -71,14 +68,14 @@ class ConfigTest extends Test
     }
 
     /**
-     * @throws Metadata
-     * @throws ConfigError
+     * @return void
+     * @throws Error
      */
     public function testInstanceDestruction(): void
     {
         $instance = $this->config;
-        $this->config->destroy();
-        $this->config = (new Logic)->get(Config::class,
+        (new ContainerLogic)->unset(Config::class);
+        $this->config = (new ContainerLogic)->get(Config::class,
             root: $this->root,
             lazy: $this->lazy,
             config: []);
