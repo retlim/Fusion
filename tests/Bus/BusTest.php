@@ -24,7 +24,6 @@ use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Events\Config;
 use Valvoid\Fusion\Bus\Events\Metadata;
 use Valvoid\Fusion\Bus\Events\Root;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tests\Test;
 
@@ -55,14 +54,14 @@ class BusTest extends Test
 
         $this->testInstanceDestruction();
 
-        $this->bus->destroy();
+        (new Logic)->unset(Bus::class);
     }
 
 
     public function testInstanceDestruction(): void
     {
         $instance = $this->bus;
-        $this->bus->destroy();
+        (new Logic)->unset(Bus::class);
         $this->bus = (new Logic)->get(Bus::class);
 
         // assert different instances

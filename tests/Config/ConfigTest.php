@@ -58,7 +58,7 @@ class ConfigTest extends Test
             $this->testInstanceDestruction();
 
             (new ContainerLogic)->unset(Config::class);
-            $bus->destroy();
+            (new ContainerLogic)->unset(Bus::class);
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;

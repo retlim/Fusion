@@ -30,7 +30,7 @@ use Valvoid\Fusion\Bus\Events\Event;
  */
 class Logic implements Proxy
 {
-    /** @var Closure Event receivers. */
+    /** @var array<string, array<string, Closure>> Event receivers. */
     protected array $receivers = [];
 
     /**

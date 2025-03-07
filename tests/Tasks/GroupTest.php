@@ -19,7 +19,6 @@
 
 namespace Valvoid\Fusion\Tests\Tasks;
 
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tests\Test;

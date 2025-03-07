@@ -20,7 +20,6 @@
 namespace Valvoid\Fusion\Tests\Log;
 
 use ReflectionException;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Tests\Test;

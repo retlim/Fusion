@@ -41,7 +41,7 @@ class BusMock
         $this->reflection->setStaticPropertyValue("instance", new class extends Bus {
             public function __construct()
             {
-                $this->logic = new class implements Proxy {
+                $this->proxy = new class implements Proxy {
 
                     public function addReceiver(string $id, Closure $callback, string ...$events): void{}
 
