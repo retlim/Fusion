@@ -72,7 +72,6 @@ return [
 	'Valvoid\Fusion\Hub\Cache' => '/src/Hub/Cache.php',
 	'Valvoid\Fusion\Hub\Hub' => '/src/Hub/Hub.php',
 	'Valvoid\Fusion\Hub\Parser' => '/src/Hub/Parser.php',
-	'Valvoid\Fusion\Hub\Proxy\Instance' => '/src/Hub/Proxy/Instance.php',
 	'Valvoid\Fusion\Hub\Proxy\Logic' => '/src/Hub/Proxy/Logic.php',
 	'Valvoid\Fusion\Hub\Proxy\Proxy' => '/src/Hub/Proxy/Proxy.php',
 	'Valvoid\Fusion\Hub\Requests\Cache\Archive' => '/src/Hub/Requests/Cache/Archive.php',

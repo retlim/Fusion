@@ -45,7 +45,7 @@ class HubTest extends Test
             $this->testInstanceDestruction();
 
             $configMock->destroy();
-            $this->hub->destroy();
+            (new Logic)->unset(Hub::class);
 
         } catch (ReflectionException $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
@@ -57,7 +57,7 @@ class HubTest extends Test
     public function testInstanceDestruction(): void
     {
         $instance = $this->hub;
-        $this->hub->destroy();
+        (new Logic)->unset(Hub::class);
         $this->hub = (new Logic)->get(Hub::class);
 
         // assert different instances
