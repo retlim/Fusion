@@ -51,12 +51,6 @@ class Fusion
     /** @var string Source root directory. */
     private string $root;
 
-    /** @var Container Dependency container. */
-    private Container $container;
-
-    /** @var Bus Event bus. */
-    private Bus $bus;
-
     /** @var Config Composite settings. */
     private Config $config;
 
@@ -65,9 +59,6 @@ class Fusion
 
     /** @var Log Log. */
     private Log $log;
-
-    /** @var Hub Hub. */
-    private Hub $hub;
 
     /** @var bool Lock indicator. */
     private bool $busy = false;
@@ -91,8 +82,8 @@ class Fusion
         spl_autoload_register($this->loadLazyLoadable(...));
 
         // build proxies
-        $this->container = (new Logic)->get(Container::class);
-        $this->bus = Container::get(Bus::class);
+        (new Logic)->get(Container::class);
+        Container::get(Bus::class);
         $this->config = Container::get(Config::class,
             root: $this->root,
             lazy: $this->lazy,
@@ -101,7 +92,7 @@ class Fusion
 
         $this->dir = Container::get(Dir::class);
         $this->log = Container::get(Log::class);
-        $this->hub = Container::get(Hub::class);
+        Container::get(Hub::class);
 
         Bus::addReceiver(self::class, $this->handleBusEvent(...),
             Root::class);
@@ -144,6 +135,7 @@ class Fusion
      * Destroys the package manager instance.
      *
      * @return bool True for success.
+     * @throws InternalError Internal error.
      */
     public static function destroy(): bool
     {
@@ -155,14 +147,13 @@ class Fusion
         if ($fusion->busy)
             return false;
 
-        $fusion->bus::removeReceiver(self::class);
-
-        $fusion->dir->destroy();
-        $fusion->log->destroy();
-        $fusion->config->destroy();
-        $fusion->hub->destroy();
-        $fusion->bus->destroy();
-        $fusion->container->destroy();
+        Bus::removeReceiver(self::class);
+        Container::unset(Dir::class);
+        Container::unset(Log::class);
+        Container::unset(Config::class);
+        Container::unset(Hub::class);
+        Container::unset(Bus::class);
+        Container::unset(Container::class);
 
         $fusion = null;
 

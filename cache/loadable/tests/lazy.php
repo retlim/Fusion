@@ -29,6 +29,7 @@ return [
 	'Valvoid\Fusion\Tests\Container\Mocks\DependencyMock' => '/tests/Container/Mocks/DependencyMock.php',
 	'Valvoid\Fusion\Tests\Container\Mocks\NonPublicMock' => '/tests/Container/Mocks/NonPublicMock.php',
 	'Valvoid\Fusion\Tests\Container\Mocks\PublicMock' => '/tests/Container/Mocks/PublicMock.php',
+	'Valvoid\Fusion\Tests\Container\Mocks\UnsetMock' => '/tests/Container/Mocks/UnsetMock.php',
 	'Valvoid\Fusion\Tests\Dir\ConfigMock' => '/tests/Dir/ConfigMock.php',
 	'Valvoid\Fusion\Tests\Dir\DirTest' => '/tests/Dir/DirTest.php',
 	'Valvoid\Fusion\Tests\Hub\Cache\CacheTest' => '/tests/Hub/Cache/CacheTest.php',

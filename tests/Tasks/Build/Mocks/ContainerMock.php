@@ -198,6 +198,8 @@ class ContainerMock
                     }
                 };
             }
+
+            public function unset(string $class): void {}
         };
 
         $this->reflection->setStaticPropertyValue("instance", new class($this->logic) extends Container

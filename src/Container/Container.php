@@ -50,18 +50,6 @@ class Container
     }
 
     /**
-     * Destroys the container.
-     *
-     * @return bool True for success.
-     */
-    public function destroy(): bool
-    {
-        self::$instance = null;
-
-        return true;
-    }
-
-    /**
      * Returns an instantiated dependency.
      *
      * @template T
@@ -73,5 +61,16 @@ class Container
     public static function get(string $class, mixed ...$args): object
     {
         return self::$instance->proxy->get($class, ...$args);
+    }
+
+    /**
+     * Unsets static properties by setting default values.
+     *
+     * @param string $class Class name.
+     * @throws Error Internal error.
+     */
+    public static function unset(string $class): void
+    {
+        self::$instance->proxy->unset($class);
     }
 }

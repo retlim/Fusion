@@ -17,34 +17,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Container\Proxy;
-
-use Valvoid\Fusion\Log\Events\Errors\Error;
+namespace Valvoid\Fusion\Tests\Container\Mocks;
 
 /**
- * Dependency container.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-interface Proxy
+class UnsetMock
 {
-    /**
-     * Returns an instantiated dependency.
-     *
-     * @template T
-     * @param class-string<T> $class Class name.
-     * @param mixed $args Static arguments.
-     * @return T Instantiated dependency.
-     * @throws Error Internal error.
-     */
-    public function get(string $class, mixed ...$args): object;
+    public static ?UnsetMock $instance = null;
 
-    /**
-     * Unsets static properties by setting default values.
-     *
-     * @param string $class Class name.
-     * @throws Error Internal error.
-     */
-    public function unset(string $class): void;
+    protected function __construct()
+    {
+        self::$instance = $this;
+    }
 }
