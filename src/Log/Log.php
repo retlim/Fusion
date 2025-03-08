@@ -20,9 +20,9 @@
 namespace Valvoid\Fusion\Log;
 
 use Valvoid\Fusion\Log\Events\Event;
-use Valvoid\Fusion\Log\Proxy\Instance;
+use Valvoid\Fusion\Log\Events\Interceptor;
+use Valvoid\Fusion\Log\Proxy\Logic;
 use Valvoid\Fusion\Log\Proxy\Proxy;
-use Valvoid\Fusion\Tasks\Task;
 
 /**
  * Static event log proxy.
@@ -32,50 +32,38 @@ use Valvoid\Fusion\Tasks\Task;
  */
 class Log
 {
-    /** @var ?Log Runtime instance. */
+    /** @var ?Log Sharable instance. */
     private static ?Log $instance = null;
 
     /** @var Proxy Decoupled logic. */
-    protected Proxy $logic;
+    protected Proxy $proxy;
 
     /**
-     * Constructs the log.
+     * Constructs the event log.
      *
-     * @param Proxy|Instance $logic Any or default instance logic.
+     * @param Proxy|Logic $proxy Any or default logic.
      */
-    private function __construct(Proxy|Instance $logic)
+    private function __construct(Proxy|Logic $proxy)
     {
-        // singleton
+        // sharable
         self::$instance ??= $this;
-        $this->logic = $logic;
+        $this->proxy = $proxy;
     }
 
     /**
-     * Destroys the log instance.
+     * Adds event interceptor.
      *
-     * @return bool True for success.
+     * @param Interceptor $interceptor Interceptor.
      */
-    public function destroy(): bool
+    public static function addInterceptor(Interceptor $interceptor): void
     {
-        self::$instance = null;
-
-        return true;
-    }
-
-    /**
-     * Adds task as event interceptor.
-     *
-     * @param Task $task Task.
-     */
-    public function addInterceptor(Task $task): void
-    {
-        self::$instance->logic->addInterceptor($task);
+        self::$instance->proxy->addInterceptor($interceptor);
     }
 
     /** Removes event interceptor. */
-    public function removeInterceptor(): void
+    public static function removeInterceptor(): void
     {
-        self::$instance->logic->removeInterceptor();
+        self::$instance->proxy->removeInterceptor();
     }
 
     /**
@@ -85,7 +73,7 @@ class Log
      */
     public static function error(Event|string $event): void
     {
-        self::$instance->logic->error($event);
+        self::$instance->proxy->error($event);
     }
 
     /**
@@ -95,7 +83,7 @@ class Log
      */
     public static function warning(Event|string $event): void
     {
-        self::$instance->logic->warning($event);
+        self::$instance->proxy->warning($event);
     }
 
     /**
@@ -105,7 +93,7 @@ class Log
      */
     public static function notice(Event|string $event): void
     {
-        self::$instance->logic->notice($event);
+        self::$instance->proxy->notice($event);
     }
 
     /**
@@ -115,7 +103,7 @@ class Log
      */
     public static function info(Event|string $event): void
     {
-        self::$instance->logic->info($event);
+        self::$instance->proxy->info($event);
     }
 
     /**
@@ -125,7 +113,7 @@ class Log
      */
     public static function verbose(Event|string $event): void
     {
-        self::$instance->logic->verbose($event);
+        self::$instance->proxy->verbose($event);
     }
 
     /**
@@ -135,6 +123,6 @@ class Log
      */
     public static function debug(Event|string $event): void
     {
-        self::$instance->logic->debug($event);
+        self::$instance->proxy->debug($event);
     }
 }

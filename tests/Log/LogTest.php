@@ -45,7 +45,7 @@ class LogTest extends Test
             $this->testInstanceDestruction();
 
             $configMock->destroy();
-            $this->log->destroy();
+            (new Logic)->unset(Log::class);
 
         } catch (ReflectionException $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
@@ -57,7 +57,7 @@ class LogTest extends Test
     public function testInstanceDestruction(): void
     {
         $instance = $this->log;
-        $this->log->destroy();
+        (new Logic)->unset(Log::class);
         $this->log = (new Logic)->get(Log::class);
 
         // assert different instances
