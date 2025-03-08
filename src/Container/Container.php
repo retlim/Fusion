@@ -64,6 +64,17 @@ class Container
     }
 
     /**
+     * Creates a sharable instance reference.
+     *
+     * @param string $id Identifier.
+     * @param string $class Implementation.
+     */
+    public static function refer(string $id, string $class): void
+    {
+        self::$instance->proxy->refer($id, $class);
+    }
+
+    /**
      * Unsets static properties by setting default values.
      *
      * @param string $class Class name.

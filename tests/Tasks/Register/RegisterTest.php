@@ -23,7 +23,7 @@ use Exception;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Register\Register;
-use Valvoid\Fusion\Tests\Tasks\Register\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Register\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Register\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Register\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
@@ -45,7 +45,7 @@ class RegisterTest extends Test
         try {
             $this->time = time();
             $dir = new DirMock;
-            $log = new LogMock;
+            $containerMock = new ContainerMock;
             $group = (new Logic)->get(Group::class);
             $task = new Register([]);
 
@@ -63,7 +63,7 @@ class RegisterTest extends Test
             $task->execute();
             $this->testNewStateAutoloader();
             (new Logic)->unset(Group::class);
-            $log->destroy();
+            $containerMock->destroy();
             $dir->destroy();
 
         } catch (Exception $exception) {
@@ -74,7 +74,7 @@ class RegisterTest extends Test
                 $dir->destroy();
 
 
-                $log->destroy();
+                $containerMock->destroy();
 
             $this->result = false;
         }

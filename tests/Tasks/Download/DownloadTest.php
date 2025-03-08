@@ -26,7 +26,7 @@ use Valvoid\Fusion\Tasks\Download\Download;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tests\Tasks\Download\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Download\Mocks\HubMock;
-use Valvoid\Fusion\Tests\Tasks\Download\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Download\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Download\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -47,7 +47,7 @@ class DownloadTest extends Test
         try {
             $this->delete($this->cache);
 
-            $log = new LogMock;
+            $containerMock = new ContainerMock;
             $dir = new DirMock;
             $hub = new HubMock;
             (new Logic)->get(Group::class);
@@ -57,14 +57,14 @@ class DownloadTest extends Test
 
             (new Logic)->unset(Group::class);
             $hub->destroy();
-            $log->destroy();
+            $containerMock->destroy();
             $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
 
-                $log->destroy();
+                $containerMock->destroy();
 
 
                 $dir->destroy();

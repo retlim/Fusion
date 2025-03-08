@@ -41,6 +41,14 @@ interface Proxy
     public function get(string $class, mixed ...$args): object;
 
     /**
+     * Creates a sharable instance reference.
+     *
+     * @param string $id Identifier.
+     * @param string $class Implementation.
+     */
+    public function refer(string $id, string $class): void;
+
+    /**
      * Unsets static properties by setting default values.
      *
      * @param string $class Class name.

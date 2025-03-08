@@ -24,7 +24,7 @@ use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Extend\Extend;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\DirMock;
-use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -64,7 +64,7 @@ class ExtendTest extends Test
                         );
 
             $this->time = time();
-            $log = new LogMock;
+            $containerMock = new ContainerMock;
             $dir = new DirMock;
             $group = (new Logic)->get(Group::class);
             $ballast = "$this->dir/metadata3";
@@ -120,15 +120,15 @@ class ExtendTest extends Test
             $this->testNewStateBallast();
             $this->testNewStateExtension();
             (new Logic)->unset(Group::class);
-            $log->destroy();
+            $containerMock->destroy();
             $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
 
-            if (isset($log))
-                $log->destroy();
+            if (isset($containerMock))
+                $containerMock->destroy();
 
             if (isset($dir))
                 $dir->destroy();

@@ -23,7 +23,7 @@ use Exception;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Inflate\Inflate;
-use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
@@ -49,7 +49,7 @@ class InflateTest extends Test
         try {
             $this->time = time();
             $dir = new DirMock;
-            $log = new LogMock;
+            $containerMock = new ContainerMock;
             $group = (new Logic)->get(Group::class);
             $task = new Inflate([]);
 
@@ -71,7 +71,7 @@ class InflateTest extends Test
             $this->testNewStateAbstractClass();
             $this->testNewStateEnum();
             (new Logic)->unset(Group::class);
-            $log->destroy();
+            $containerMock->destroy();
             $dir->destroy();
 
         } catch (Exception $exception) {
@@ -82,7 +82,7 @@ class InflateTest extends Test
                 $dir->destroy();
 
 
-                $log->destroy();
+                $containerMock->destroy();
 
             $this->result = false;
         }

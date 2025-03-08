@@ -22,6 +22,8 @@ namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
+use Valvoid\Fusion\Log\Events\Event;
+use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Metadata\External\Builder;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Tasks\Build\SAT\Solver;
@@ -64,6 +66,19 @@ class ContainerMock
 
             public function get(string $class, ...$args): object
             {
+                if ($class === \Valvoid\Fusion\Log\Proxy\Proxy::class)
+                    return new class implements \Valvoid\Fusion\Log\Proxy\Proxy
+                    {
+                        public function addInterceptor(Interceptor $interceptor): void {}
+                        public function removeInterceptor(): void {}
+                        public function error(string|Event $event): void {}
+                        public function warning(string|Event $event): void {}
+                        public function notice(string|Event $event): void {}
+                        public function info(string|Event $event): void {}
+                        public function verbose(string|Event $event): void {}
+                        public function debug(string|Event $event): void {}
+                    };
+
                 if ($class === Solver::class) {
                     $this->implication = $args["implication"];
                     return new class extends Solver {
@@ -172,11 +187,14 @@ class ContainerMock
                             "structure" => $structure,
                             "environment" => [
                                 "php" => [
+                                    "modules" => [],
                                     "version" => [[
                                         "major" => 8,
                                         "minor" => 1,
                                         "patch" => 0,
-                                        "sign" => "" // default >=
+                                        "sign" => "", // default >=
+                                        "release" => "",
+                                        "build" => ""
                                     ]]
                                 ]
                             ],
@@ -200,6 +218,8 @@ class ContainerMock
             }
 
             public function unset(string $class): void {}
+
+            public function refer(string $id, string $class): void {}
         };
 
         $this->reflection->setStaticPropertyValue("instance", new class($this->logic) extends Container

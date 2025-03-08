@@ -25,7 +25,7 @@ use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Image\Image;
 use Valvoid\Fusion\Tests\Tasks\Image\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Tasks\Image\Mocks\ConfigMock;
-use Valvoid\Fusion\Tests\Tasks\Image\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Image\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -41,7 +41,7 @@ class ImageTest extends Test
     public function __construct()
     {
         try {
-            $log = new LogMock;
+            $containerMock = new ContainerMock;
             $bus = new BusMock;
             $config = new ConfigMock;
             (new Logic)->get(Group::class);
@@ -54,7 +54,7 @@ class ImageTest extends Test
             $bus->destroy();
             (new Logic)->unset(Group::class);
             $config->destroy();
-            $log->destroy();
+            $containerMock->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
@@ -62,7 +62,7 @@ class ImageTest extends Test
 
             $config->destroy();
             $bus->destroy();
-            $log->destroy();
+            $containerMock->destroy();
 
             $this->result = false;
         }

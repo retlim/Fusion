@@ -19,9 +19,10 @@
 
 namespace Valvoid\Fusion\Log;
 
+use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Proxy\Logic;
 use Valvoid\Fusion\Log\Proxy\Proxy;
 
 /**
@@ -32,97 +33,98 @@ use Valvoid\Fusion\Log\Proxy\Proxy;
  */
 class Log
 {
-    /** @var ?Log Sharable instance. */
-    private static ?Log $instance = null;
-
-    /** @var Proxy Decoupled logic. */
-    protected Proxy $proxy;
-
-    /**
-     * Constructs the event log.
-     *
-     * @param Proxy|Logic $proxy Any or default logic.
-     */
-    private function __construct(Proxy|Logic $proxy)
-    {
-        // sharable
-        self::$instance ??= $this;
-        $this->proxy = $proxy;
-    }
-
     /**
      * Adds event interceptor.
      *
      * @param Interceptor $interceptor Interceptor.
+     * @throws Error Internal error.
      */
     public static function addInterceptor(Interceptor $interceptor): void
     {
-        self::$instance->proxy->addInterceptor($interceptor);
+        Container::get(Proxy::class)
+            ->addInterceptor($interceptor);
     }
 
-    /** Removes event interceptor. */
+    /**
+     * Removes event interceptor.
+     *
+     * @throws Error Internal error.
+     */
     public static function removeInterceptor(): void
     {
-        self::$instance->proxy->removeInterceptor();
+        Container::get(Proxy::class)
+            ->removeInterceptor();
     }
 
     /**
      * Logs error event.
      *
      * @param Event|string $event Event.
+     * @throws Error Internal error.
      */
     public static function error(Event|string $event): void
     {
-        self::$instance->proxy->error($event);
+        Container::get(Proxy::class)
+            ->error($event);
     }
 
     /**
      * Logs warning event.
      *
      * @param Event|string $event Event.
+     * @throws Error Internal error.
      */
     public static function warning(Event|string $event): void
     {
-        self::$instance->proxy->warning($event);
+        Container::get(Proxy::class)
+            ->warning($event);
     }
 
     /**
      * Logs notice event.
      *
      * @param Event|string $event Event.
+     * @throws Error Internal error.
      */
     public static function notice(Event|string $event): void
     {
-        self::$instance->proxy->notice($event);
+        Container::get(Proxy::class)
+            ->notice($event);
     }
 
     /**
      * Logs info event.
      *
      * @param Event|string $event Event.
+     * @throws Error Internal error.
      */
     public static function info(Event|string $event): void
     {
-        self::$instance->proxy->info($event);
+        Container::get(Proxy::class)
+            ->info($event);
     }
 
     /**
      * Logs verbose event.
      *
      * @param Event|string $event Event.
+     * @throws Error Internal error.
      */
     public static function verbose(Event|string $event): void
     {
-        self::$instance->proxy->verbose($event);
+        Container::get(Proxy::class)
+            ->verbose($event);
     }
 
     /**
      * Logs debug event.
      *
      * @param Event|string $event Event.
+     * @throws Error Internal error.
      */
     public static function debug(Event|string $event): void
     {
-        self::$instance->proxy->debug($event);
+        Container::get(Proxy::class)
+            ->debug($event);
     }
 }

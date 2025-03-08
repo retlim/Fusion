@@ -35,6 +35,7 @@ use Valvoid\Fusion\Log\Events\Infos\Id;
 use Valvoid\Fusion\Log\Events\Infos\Name;
 use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Log\Proxy\Proxy;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 
@@ -75,6 +76,7 @@ class Fusion
 
         // build proxies
         (new Logic)->get(Container::class);
+        Container::refer(Proxy::class, \Valvoid\Fusion\Log\Proxy\Logic::class);
         Container::get(Bus::class);
         Container::get(Config::class,
             root: $this->root,
@@ -83,7 +85,6 @@ class Fusion
         );
 
         Container::get(Dir::class);
-        Container::get(Log::class);
         Container::get(Hub::class);
 
         Bus::addReceiver(self::class, $this->handleBusEvent(...),
@@ -141,7 +142,6 @@ class Fusion
 
         Bus::removeReceiver(self::class);
         Container::unset(Dir::class);
-        Container::unset(Log::class);
         Container::unset(Config::class);
         Container::unset(Hub::class);
         Container::unset(Bus::class);
