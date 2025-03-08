@@ -21,9 +21,9 @@ namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
 
 use ReflectionClass;
 use Valvoid\Fusion\Log\Events\Event;
+use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Log\Proxy\Proxy;
-use Valvoid\Fusion\Tasks\Task;
 
 /**
  * Mocked log.
@@ -42,9 +42,9 @@ class LogMock
         {
             public function __construct()
             {
-                $this->logic = new class implements Proxy {
+                $this->proxy = new class implements Proxy {
 
-                    public function addInterceptor(Task $task): void{}
+                    public function addInterceptor(Interceptor $interceptor): void{}
 
                     public function removeInterceptor(): void{}
 

@@ -26,7 +26,6 @@ use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Log\Serializers\Files\File;
 use Valvoid\Fusion\Log\Serializers\Streams\Stream;
-use Valvoid\Fusion\Tasks\Task;
 
 /**
  * Default event log implementation.
@@ -72,14 +71,13 @@ class Logic implements Proxy
     }
 
     /**
-     * Adds task as event interceptor.
+     * Adds event interceptor.
      *
-     * @param Task $task Task.
+     * @param Interceptor $interceptor Interceptor.
      */
-    public function addInterceptor(Task $task): void
+    public function addInterceptor(Interceptor $interceptor): void
     {
-        if (is_subclass_of($task, Interceptor::class))
-            $this->interceptor = $task;
+        $this->interceptor = $interceptor;
     }
 
     /** Removes event interceptor. */

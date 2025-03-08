@@ -33,6 +33,7 @@ use Valvoid\Fusion\Log\Events\Errors\Metadata as MetadataError;
 use Valvoid\Fusion\Log\Events\Event as LogEvent;
 use Valvoid\Fusion\Log\Events\Infos\Id;
 use Valvoid\Fusion\Log\Events\Infos\Name;
+use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
@@ -50,9 +51,6 @@ class Fusion
 
     /** @var string Source root directory. */
     private string $root;
-
-    /** @var Log Log. */
-    private Log $log;
 
     /** @var bool Lock indicator. */
     private bool $busy = false;
@@ -85,7 +83,7 @@ class Fusion
         );
 
         Container::get(Dir::class);
-        $this->log = Container::get(Log::class);
+        Container::get(Log::class);
         Container::get(Hub::class);
 
         Bus::addReceiver(self::class, $this->handleBusEvent(...),
@@ -184,9 +182,13 @@ class Fusion
             if (isset($entry["task"])) {
                 $task = new $entry["task"]($entry);
 
-                $fusion->log->addInterceptor($task);
-                $task->execute();
-                $fusion->log->removeInterceptor();
+                if (is_subclass_of($task, Interceptor::class)) {
+                    Log::addInterceptor($task);
+                    $task->execute();
+                    Log::removeInterceptor();
+
+                } else
+                    $task->execute();
 
             } else {
                 Container::get(Group::class);
@@ -196,9 +198,13 @@ class Fusion
 
                     $task = new $task["task"]($task);
 
-                    $fusion->log->addInterceptor($task);
-                    $task->execute();
-                    $fusion->log->removeInterceptor();
+                    if (is_subclass_of($task, Interceptor::class)) {
+                        Log::addInterceptor($task);
+                        $task->execute();
+                        Log::removeInterceptor();
+
+                    } else
+                        $task->execute();
                 }
 
                 Container::unset(Group::class);

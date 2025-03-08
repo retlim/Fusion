@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Log\Proxy;
 
 use Valvoid\Fusion\Log\Events\Event;
-use Valvoid\Fusion\Tasks\Task;
+use Valvoid\Fusion\Log\Events\Interceptor;
 
 /**
  * Event log.
@@ -31,11 +31,11 @@ use Valvoid\Fusion\Tasks\Task;
 interface Proxy
 {
     /**
-     * Adds task as event interceptor.
+     * Adds event interceptor.
      *
-     * @param Task $task Task.
+     * @param Interceptor $interceptor Interceptor.
      */
-    public function addInterceptor(Task $task): void;
+    public function addInterceptor(Interceptor $interceptor): void;
 
     /** Removes event interceptor. */
     public function removeInterceptor(): void;

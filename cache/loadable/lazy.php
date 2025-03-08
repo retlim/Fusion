@@ -115,7 +115,6 @@ return [
 	'Valvoid\Fusion\Log\Events\Interceptor' => '/src/Log/Events/Interceptor.php',
 	'Valvoid\Fusion\Log\Events\Level' => '/src/Log/Events/Level.php',
 	'Valvoid\Fusion\Log\Log' => '/src/Log/Log.php',
-	'Valvoid\Fusion\Log\Proxy\Instance' => '/src/Log/Proxy/Instance.php',
 	'Valvoid\Fusion\Log\Proxy\Logic' => '/src/Log/Proxy/Logic.php',
 	'Valvoid\Fusion\Log\Proxy\Proxy' => '/src/Log/Proxy/Proxy.php',
 	'Valvoid\Fusion\Log\Serializers\Files\File' => '/src/Log/Serializers/Files/File.php',
