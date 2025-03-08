@@ -22,7 +22,6 @@ namespace Valvoid\Fusion\Tests\Tasks\Snap;
 use Exception;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Snap\Snap;
-use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
@@ -43,7 +42,6 @@ class SnapTest extends Test
             $this->delete(__DIR__ . "/Mocks/package");
 
             $containerMock = new ContainerMock;
-            $dir = new DirMock;
 
             MetadataMock::addRedundantMockedMetadata();
             $this->testRedundantCacheRefresh();
@@ -55,15 +53,12 @@ class SnapTest extends Test
             $this->testDownloadableCacheUpdate();
 
             $containerMock->destroy();
-            $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
 
                 $containerMock->destroy();
-
-                $dir->destroy();
 
             $this->result = false;
         }

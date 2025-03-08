@@ -43,19 +43,17 @@ class CopyTest extends Test
     {
         try {
             $container = new ContainerMock;
-            $dir = new DirMock;
+
             MetadataMock::addMockedMetadata();
 
             $this->testTargetCacheDirectory();
 
             $container->destroy();
-            $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
             $container->destroy();
-            $dir->destroy();
 
             $this->result = false;
         }
