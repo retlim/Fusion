@@ -24,8 +24,6 @@ use Valvoid\Fusion\Tasks\Build\Build;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tests\Tasks\Build\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Build\Mocks\GroupMock;
-use Valvoid\Fusion\Tests\Tasks\Build\Mocks\HubMock;
-use Valvoid\Fusion\Tests\Tasks\Build\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -38,7 +36,6 @@ class BuildTest extends Test
 {
     protected string|array $coverage = Build::class;
 
-    private HubMock $hubMock;
     private ContainerMock $containerMock;
 
     private GroupMock $groupMock;
@@ -46,7 +43,6 @@ class BuildTest extends Test
     public function __construct()
     {
         try {
-            $this->hubMock = new HubMock;
             $this->groupMock = new GroupMock;
             $this->containerMock = new ContainerMock;
 
@@ -56,7 +52,6 @@ class BuildTest extends Test
 
             $this->containerMock->destroy();
             $this->groupMock->destroy();
-            $this->hubMock->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
@@ -67,15 +62,11 @@ class BuildTest extends Test
 
             if (isset($this->groupMock))
                 $this->groupMock->destroy();
-
-            if (isset($this->hubMock))
-                $this->hubMock->destroy();
         }
     }
 
     public function testNestedMetadataImplication(): void
     {
-        $this->hubMock->setUpNestedMetadataImplication();
         $this->containerMock->setUpNestedMetadataImplication();
         $this->groupMock->setUpNestedMetadataImplication();
 
@@ -329,7 +320,6 @@ class BuildTest extends Test
 
     public function testRecursiveMetadataImplication(): void
     {
-        $this->hubMock->setUpRecursiveMetadataImplication();
         $this->containerMock->setUpRecursiveMetadataImplication();
         $this->groupMock->setUpRecursiveMetadataImplication();
 
@@ -598,7 +588,6 @@ class BuildTest extends Test
     public function testExternalRootSourceImplication(): void
     {
         // recursive runtime layer source arg
-        $this->hubMock->setUpExternalRootSourceImplication();
         $this->containerMock->setUpExternalRootSourceImplication();
         $this->groupMock->setUpExternalRootSourceImplication();
 

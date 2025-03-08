@@ -19,9 +19,12 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
 
+use Closure;
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
+use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
+use Valvoid\Fusion\Hub\Responses\Cache\Versions;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Metadata\External\Builder;
@@ -63,6 +66,7 @@ class ContainerMock
         {
             public $metas = [];
             public $implication = [];
+            public $hub;
 
             public function get(string $class, ...$args): object
             {
@@ -77,6 +81,52 @@ class ContainerMock
                         public function info(string|Event $event): void {}
                         public function verbose(string|Event $event): void {}
                         public function debug(string|Event $event): void {}
+                    };
+
+                if ($class === \Valvoid\Fusion\Hub\Proxy\Proxy::class)
+                    return $this->hub ??= new class implements \Valvoid\Fusion\Hub\Proxy\Proxy
+                    {
+                        private int $counter = 0;
+                        private array $versionRequests = [];
+                        private array $metaRequest = [];
+
+                        public function addVersionsRequest(array $source): int
+                        {
+                            $this->versionRequests[$this->counter] = $source;
+
+                            return $this->counter++;
+                        }
+
+                        public function addMetadataRequest(array $source): int
+                        {
+                            $this->metaRequest[$this->counter] = $source;
+
+                            return $this->counter++;
+                        }
+
+                        public function executeRequests(Closure $callback): void
+                        {
+                            while ($this->versionRequests || $this->metaRequest) {
+                                foreach ($this->versionRequests as $id => $versionRequest) {
+                                    unset($this->versionRequests[$id]);
+
+                                    if ($versionRequest[0] == "metadata3")
+                                        $callback(new Versions($id, ["2.30.1", "2.0.0:offset", "1.0.0"]));
+
+                                    else
+                                        $callback(new Versions($id, ["1.0.0"]));
+                                }
+
+                                foreach ($this->metaRequest as $id => $metaRequest) {
+                                    unset($this->metaRequest[$id]);
+
+                                    $callback(new Metadata($id, "", json_encode($metaRequest)));
+                                }
+                            }
+                        }
+
+                        public function addSnapshotRequest(array $source, string $path): int { return 0; }
+                        public function addArchiveRequest(array $source): int { return 0; }
                     };
 
                 if ($class === Solver::class) {
