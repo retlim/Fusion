@@ -20,8 +20,11 @@
 namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
 
 use ReflectionClass;
+use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
+use Valvoid\Fusion\Dir\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
 
@@ -44,7 +47,7 @@ class ContainerMock
 
             public $group;
             public $bus;
-
+            public $dir;
             public function get(string $class, ...$args): object
             {
                 if ($class === \Valvoid\Fusion\Group\Proxy\Proxy::class)
@@ -52,6 +55,29 @@ class ContainerMock
 
                 if ($class === \Valvoid\Fusion\Bus\Proxy\Proxy::class)
                     return $this->bus ??= new \Valvoid\Fusion\Bus\Proxy\Logic();
+
+                if ($class === \Valvoid\Fusion\Dir\Proxy\Proxy::class)
+                    return $this->dir ??= new class extends Logic
+                    {
+                        public function __construct()
+                        {
+                            $this->root = dirname(__DIR__) . "/cache";
+                            $this->cache = dirname(__DIR__) . "/cache/cache";
+
+                            Bus::addReceiver("whatever", $this->handleBusEvent(...),
+                                Cache::class);
+                        }
+
+                        /**
+                         * Handles bus event.
+                         *
+                         * @param Cache $event Event.
+                         */
+                        protected function handleBusEvent(Cache $event): void
+                        {
+                            $this->cache = $event->getDir();
+                        }
+                    };
 
                 return new class implements \Valvoid\Fusion\Log\Proxy\Proxy
                 {

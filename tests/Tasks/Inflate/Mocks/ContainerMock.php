@@ -22,6 +22,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Inflate\Mocks;
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
+use Valvoid\Fusion\Dir\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
 
@@ -53,54 +54,34 @@ class ContainerMock
                 if ($class === \Valvoid\Fusion\Bus\Proxy\Proxy::class)
                     return $this->bus ??= new \Valvoid\Fusion\Bus\Proxy\Logic();
 
+                if ($class === \Valvoid\Fusion\Dir\Proxy\Proxy::class)
+                    return new class extends Logic
+                    {
+                        public function __construct()
+                        {
+                            $this->root = __DIR__ . "/package";
+                            $this->cache = __DIR__ . "/package/cache";
+                        }
+                    };
+
                 return new class implements \Valvoid\Fusion\Log\Proxy\Proxy {
-                    public function addInterceptor(Interceptor $interceptor): void
-                    {
-                    }
-
-                    public function removeInterceptor(): void
-                    {
-                    }
-
-                    public function error(string|Event $event): void
-                    {
-                    }
-
-                    public function warning(string|Event $event): void
-                    {
-                    }
-
-                    public function notice(string|Event $event): void
-                    {
-                    }
-
-                    public function info(string|Event $event): void
-                    {
-                    }
-
-                    public function verbose(string|Event $event): void
-                    {
-                    }
-
-                    public function debug(string|Event $event): void
-                    {
-                    }
+                    public function addInterceptor(Interceptor $interceptor): void {}
+                    public function removeInterceptor(): void {}
+                    public function error(string|Event $event): void {}
+                    public function warning(string|Event $event): void {}
+                    public function notice(string|Event $event): void {}
+                    public function info(string|Event $event): void {}
+                    public function verbose(string|Event $event): void {}
+                    public function debug(string|Event $event): void {}
                 };
             }
 
-            public function refer(string $id, string $class): void
-            {
-            }
-
-            public function unset(string $class): void
-            {
-            }
+            public function refer(string $id, string $class): void {}
+            public function unset(string $class): void {}
         };
 
         $this->reflection->setStaticPropertyValue("instance", new class($this->logic) extends Container {
-            public function __construct(protected Proxy $proxy)
-            {
-            }
+            public function __construct(protected Proxy $proxy){}
         });
     }
 

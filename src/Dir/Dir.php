@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Dir;
 
-use Valvoid\Fusion\Dir\Proxy\Logic;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Dir\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 
@@ -31,82 +31,76 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
  */
 class Dir
 {
-    /** @var ?Dir Runtime instance. */
-    private static ?Dir $instance = null;
-
-    /** @var Proxy Decoupled logic. */
-    protected Proxy $proxy;
-
-    /**
-     * Constructs the directory.
-     *
-     * @param Proxy|Logic $proxy Any or default logic.
-     */
-    private function __construct(Proxy|Logic $proxy)
-    {
-        // singleton
-        self::$instance ??= $this;
-        $this->proxy = $proxy;
-    }
-
     /**
      * Returns current (locked) task cache directory.
      *
      * @return string Directory.
+     * @throws Error Internal error.
      */
     public static function getTaskDir(): string
     {
-        return self::$instance->proxy->getTaskDir();
+        return Container::get(Proxy::class)
+            ->getTaskDir();
     }
 
     /**
      * Returns current (locked) task cache directory.
      *
      * @return string Directory.
+     * @throws Error Internal error.
      */
     public static function getStateDir(): string
     {
-        return self::$instance->proxy->getStateDir();
+        return Container::get(Proxy::class)
+            ->getStateDir();
     }
 
     /**
      * Returns absolute cache directory.
      *
      * @return string Directory.
+     * @throws Error Internal error.
      */
     public static function getCacheDir(): string
     {
-        return self::$instance->proxy->getCacheDir();
+        return Container::get(Proxy::class)
+            ->getCacheDir();
     }
 
     /**
      * Returns other directory.
      *
      * @return string Directory.
+     * @throws Error Internal error.
      */
     public static function getOtherDir(): string
     {
-        return self::$instance->proxy->getOtherDir();
+        return Container::get(Proxy::class)
+            ->getOtherDir();
     }
 
     /**
      * Returns packages directory.
      *
      * @return string Directory.
+     * @throws Error Internal error.
      */
     public static function getPackagesDir(): string
     {
-        return self::$instance->proxy->getPackagesDir();
+        return Container::get(Proxy::class)
+            ->getPackagesDir();
     }
 
     /**
      * Returns root directory.
      *
      * @return string Root dir.
+     * @throws Error Internal error.
      */
     public static function getRootDir(): string
     {
-        return self::$instance->proxy->getRootDir();
+        return Container::get(Proxy::class)
+            ->getRootDir();
     }
 
     /**
@@ -118,7 +112,8 @@ class Dir
      */
     public static function createDir(string $dir, int $permissions = 0755): void
     {
-        self::$instance->proxy->createDir($dir, $permissions);
+        Container::get(Proxy::class)
+            ->createDir($dir, $permissions);
     }
 
     /**
@@ -130,7 +125,8 @@ class Dir
      */
     public static function rename(string $from, string $to): void
     {
-        self::$instance->proxy->rename($from, $to);
+        Container::get(Proxy::class)
+            ->rename($from, $to);
     }
 
     /**
@@ -142,7 +138,8 @@ class Dir
      */
     public static function copy(string $from, string $to): void
     {
-        self::$instance->proxy->copy($from, $to);
+        Container::get(Proxy::class)
+            ->copy($from, $to);
     }
 
     /**
@@ -153,7 +150,8 @@ class Dir
      */
     public static function delete(string $file): void
     {
-        self::$instance->proxy->delete($file);
+        Container::get(Proxy::class)
+            ->delete($file);
     }
 
     /**
@@ -161,10 +159,11 @@ class Dir
      *
      * @param string $dir Directory.
      * @param string $path Path.
-     * @throws Error
+     * @throws Error Internal error.
      */
     public static function clear(string $dir, string $path): void
     {
-        self::$instance->proxy->clear($dir, $path);
+        Container::get(Proxy::class)
+            ->clear($dir, $path);
     }
 }

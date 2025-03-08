@@ -23,6 +23,7 @@ use Closure;
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
+use Valvoid\Fusion\Dir\Proxy\Logic;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
@@ -56,6 +57,16 @@ class ContainerMock
 
                         if ($class === \Valvoid\Fusion\Bus\Proxy\Proxy::class)
                             return $this->bus ??= new \Valvoid\Fusion\Bus\Proxy\Logic();
+
+                        if ($class === \Valvoid\Fusion\Dir\Proxy\Proxy::class)
+                            return new class extends Logic
+                            {
+                                public function __construct()
+                                {
+                                    $this->root = __DIR__ . "/package";
+                                    $this->cache = __DIR__ . "/package/cache";
+                                }
+                            };
 
                         if ($class === \Valvoid\Fusion\Hub\Proxy\Proxy::class)
                             return new class implements \Valvoid\Fusion\Hub\Proxy\Proxy

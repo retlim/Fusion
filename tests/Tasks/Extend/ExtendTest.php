@@ -21,7 +21,6 @@ namespace Valvoid\Fusion\Tests\Tasks\Extend;
 
 use Exception;
 use Valvoid\Fusion\Tasks\Extend\Extend;
-use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
@@ -63,7 +62,6 @@ class ExtendTest extends Test
 
             $this->time = time();
             $containerMock = new ContainerMock;
-            $dir = new DirMock;
             $ballast = "$this->dir/metadata3";
             $task = new Extend([]);
 
@@ -116,7 +114,6 @@ class ExtendTest extends Test
             $this->testNewStateBallast();
             $this->testNewStateExtension();
             $containerMock->destroy();
-            $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
@@ -124,9 +121,6 @@ class ExtendTest extends Test
 
             if (isset($containerMock))
                 $containerMock->destroy();
-
-            if (isset($dir))
-                $dir->destroy();
 
             $this->result = false;
         }

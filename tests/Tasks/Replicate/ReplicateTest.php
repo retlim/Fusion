@@ -22,9 +22,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Replicate;
 use Exception;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Replicate\Replicate;
-use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\ContainerMock;
-use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -58,7 +56,6 @@ class ReplicateTest extends Test
     {
         try {
             $this->time = time();
-            $dir = new DirMock;
             $containerMock = new ContainerMock;
             $task = new Replicate([
                 "source" => false,
@@ -70,15 +67,10 @@ class ReplicateTest extends Test
             $task->execute();
             $this->testCachedSnapshotFiles();
             $containerMock->destroy();
-            $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
-
-
-
-                $dir->destroy();
 
 
                 $containerMock->destroy();

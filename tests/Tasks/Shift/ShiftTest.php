@@ -22,7 +22,6 @@ namespace Valvoid\Fusion\Tests\Tasks\Shift;
 use Exception;
 use ReflectionClass;
 use Valvoid\Fusion\Tasks\Shift\Shift;
-use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
@@ -43,47 +42,37 @@ class ShiftTest extends Test
     {
         try {
             $containerMock = new ContainerMock;
-            $dir = new DirMock;
 
             // new root version
             $this->testShiftRecursive();
             unset($containerMock->logic->group);
-            $dir->destroy();
-
-            $dir = new DirMock;
+            unset($containerMock->logic->dir);// clear
 
             // new root with new cache dir
             $this->testShiftRecursiveCache();
             unset($containerMock->logic->group);// clear
-            $dir->destroy();
-
-            $dir = new DirMock;
+            unset($containerMock->logic->dir);// clear
 
             $this->testShiftNested();
             unset($containerMock->logic->group);// clear
-            $dir->destroy();
-
-            $dir = new DirMock;
+            unset($containerMock->logic->dir);// clear
 
             // check if persisted inside "other" dir
             $this->testShiftRecursiveWithExecutedFiles();
             unset($containerMock->logic->group);// clear
-            $dir->destroy();
-
-            $dir = new DirMock;
+            unset($containerMock->logic->dir);// clear
 
             $this->testShiftNestedWithExecutedFiles();
             $containerMock->destroy();
-            $dir->destroy();
+
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
 
+            if (isset($containerMock))
                 $containerMock->destroy();
 
-            if (isset($dir))
-                $dir->destroy();
 
             $this->result = false;
         }

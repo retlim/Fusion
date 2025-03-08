@@ -20,11 +20,8 @@
 namespace Valvoid\Fusion\Tests\Tasks\Register;
 
 use Exception;
-use Valvoid\Fusion\Container\Proxy\Logic;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Register\Register;
 use Valvoid\Fusion\Tests\Tasks\Register\Mocks\ContainerMock;
-use Valvoid\Fusion\Tests\Tasks\Register\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Register\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -44,7 +41,6 @@ class RegisterTest extends Test
     {
         try {
             $this->time = time();
-            $dir = new DirMock;
             $containerMock = new ContainerMock;
             $task = new Register([]);
 
@@ -61,14 +57,10 @@ class RegisterTest extends Test
             $task->execute();
             $this->testNewStateAutoloader();
             $containerMock->destroy();
-            $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
-
-
-                $dir->destroy();
 
 
                 $containerMock->destroy();

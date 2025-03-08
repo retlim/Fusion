@@ -22,7 +22,6 @@ namespace Valvoid\Fusion\Tests\Tasks\Inflate;
 use Exception;
 use Valvoid\Fusion\Tasks\Inflate\Inflate;
 use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\ContainerMock;
-use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -46,7 +45,6 @@ class InflateTest extends Test
     {
         try {
             $this->time = time();
-            $dir = new DirMock;
             $containerMock = new ContainerMock;
             $task = new Inflate([]);
 
@@ -67,14 +65,9 @@ class InflateTest extends Test
             $this->testNewStateAbstractClass();
             $this->testNewStateEnum();
             $containerMock->destroy();
-            $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-
-
-                $dir->destroy();
 
 
                 $containerMock->destroy();
