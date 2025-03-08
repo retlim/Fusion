@@ -46,7 +46,6 @@ return [
 	'Valvoid\Fusion\Tests\Tasks\Build\Config\NormalizerTest' => '/tests/Tasks/Build/Config/NormalizerTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\Config\ParserTest' => '/tests/Tasks/Build/Config/ParserTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\Mocks\ContainerMock' => '/tests/Tasks/Build/Mocks/ContainerMock.php',
-	'Valvoid\Fusion\Tests\Tasks\Build\Mocks\GroupMock' => '/tests/Tasks/Build/Mocks/GroupMock.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\SAT\ClauseTest' => '/tests/Tasks/Build/SAT/ClauseTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\SAT\GraphTest' => '/tests/Tasks/Build/SAT/GraphTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\SAT\SolverTest' => '/tests/Tasks/Build/SAT/SolverTest.php',

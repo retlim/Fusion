@@ -46,6 +46,7 @@ class ContainerMock
             {
                 $this->proxy = new class implements Proxy {
 
+                    public $group;
                     public function get(string $class, ...$args): object
                     {
                         if ($class === \Valvoid\Fusion\Group\Proxy\Proxy::class)
