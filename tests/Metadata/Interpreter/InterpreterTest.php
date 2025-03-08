@@ -25,6 +25,7 @@ use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Metadata\Interpreter\Interpreter;
+use Valvoid\Fusion\Tests\Metadata\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -45,13 +46,13 @@ class InterpreterTest extends Test
 
     public function __construct()
     {
-        $bus = (new Logic)->get(Bus::class);
+        $containerMock = new ContainerMock;
 
         $this->testReset();
         $this->testInvalidType();
         $this->testInvalidKey();
 
-        (new Logic)->unset(Bus::class);
+        $containerMock->destroy();
     }
 
     public function testReset(): void

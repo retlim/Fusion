@@ -21,8 +21,6 @@ namespace Valvoid\Fusion\Tests\Tasks\Shift;
 
 use Exception;
 use ReflectionClass;
-use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Shift\Shift;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\ContainerMock;
@@ -45,7 +43,6 @@ class ShiftTest extends Test
     {
         try {
             $containerMock = new ContainerMock;
-            (new Logic)->get(Bus::class);
             $dir = new DirMock;
 
             // new root version
@@ -78,7 +75,6 @@ class ShiftTest extends Test
             $this->testShiftNestedWithExecutedFiles();
             $containerMock->destroy();
             $dir->destroy();
-            (new Logic)->unset(Bus::class);
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;

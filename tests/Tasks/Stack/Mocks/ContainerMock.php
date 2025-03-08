@@ -17,13 +17,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
+namespace Valvoid\Fusion\Tests\Tasks\Stack\Mocks;
 
-use Closure;
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
-use Valvoid\Fusion\Hub\Responses\Cache\Archive as ArchiveResponse;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
 
@@ -54,36 +52,6 @@ class ContainerMock
 
                         if ($class === \Valvoid\Fusion\Bus\Proxy\Proxy::class)
                             return $this->bus ??= new \Valvoid\Fusion\Bus\Proxy\Logic();
-
-                        if ($class === \Valvoid\Fusion\Hub\Proxy\Proxy::class)
-                            return new class implements \Valvoid\Fusion\Hub\Proxy\Proxy
-                            {
-                                public function addVersionsRequest(array $source): int
-                                {
-                                    return 0;
-                                }
-
-                                public function addMetadataRequest(array $source): int
-                                {
-                                    return 0;
-                                }
-
-                                public function addSnapshotRequest(array $source, string $path): int
-                                {
-                                    return 0;
-                                }
-
-                                public function addArchiveRequest(array $source): int
-                                {
-                                    // fake request id
-                                    return 1;
-                                }
-
-                                public function executeRequests(Closure $callback): void
-                                {
-                                    $callback(new ArchiveResponse(1, __DIR__));
-                                }
-                            };
 
                         return new class implements \Valvoid\Fusion\Log\Proxy\Proxy
                         {

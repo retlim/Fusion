@@ -24,8 +24,6 @@ use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
-use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 
 /**
  * Mocked container.
@@ -46,10 +44,14 @@ class ContainerMock
             {
                 $this->proxy = new class implements Proxy {
                     public $group;
+                    public $bus;
                     public function get(string $class, ...$args): object
                     {
                         if ($class === \Valvoid\Fusion\Group\Proxy\Proxy::class)
                             return $this->group ??= new \Valvoid\Fusion\Group\Proxy\Logic();
+
+                        if ($class === \Valvoid\Fusion\Bus\Proxy\Proxy::class)
+                            return $this->bus ??= new \Valvoid\Fusion\Bus\Proxy\Logic();
 
                         return new class implements \Valvoid\Fusion\Log\Proxy\Proxy
                         {

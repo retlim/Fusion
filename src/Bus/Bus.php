@@ -21,8 +21,9 @@ namespace Valvoid\Fusion\Bus;
 
 use Closure;
 use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Logic;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 
 /**
  * Static event bus proxy.
@@ -32,44 +33,30 @@ use Valvoid\Fusion\Bus\Proxy\Proxy;
  */
 class Bus
 {
-    /** @var ?Bus Runtime instance. */
-    private static ?Bus $instance = null;
-
-    /** @var Proxy Decoupled logic. */
-    protected Proxy $proxy;
-
-    /**
-     * Constructs the bus.
-     *
-     * @param Proxy|Logic $proxy Any or default logic.
-     */
-    private function __construct(Proxy|Logic $proxy)
-    {
-        // singleton
-        self::$instance ??= $this;
-        $this->proxy = $proxy;
-    }
-
     /**
      * Adds event receiver.
      *
      * @param string $id Receiver ID.
      * @param Closure $callback Receiver callback.
      * @param string ...$events Event class name IDs.
+     * @throws Error Internal error.
      */
     public static function addReceiver(string $id, Closure $callback, string ...$events): void
     {
-        self::$instance->proxy->addReceiver($id, $callback, ...$events);
+        Container::get(Proxy::class)
+            ->addReceiver($id, $callback, ...$events);
     }
 
     /**
      * Sends the event to all receivers.
      *
      * @param Event $event Event.
+     * @throws Error Internal error.
      */
     public static function broadcast(Event $event): void
     {
-        self::$instance->proxy->broadcast($event);
+        Container::get(Proxy::class)
+            ->broadcast($event);
     }
 
     /**
@@ -77,9 +64,11 @@ class Bus
      *
      * @param string $id Receiver ID.
      * @param string ...$events Event class name IDs.
+     * @throws Error Internal error.
      */
     public static function removeReceiver(string $id, string ...$events): void
     {
-        self::$instance->proxy->removeReceiver($id, ...$events);
+        Container::get(Proxy::class)
+            ->removeReceiver($id, ...$events);
     }
 }

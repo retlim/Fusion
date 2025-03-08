@@ -17,39 +17,38 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
+namespace Valvoid\Fusion\Tests\Dir\Mocks;
 
-use Closure;
 use ReflectionClass;
-use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Proxy;
 
 /**
- * Mocked bus.
+ * Mocked container.
  *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BusMock
+class ContainerMock
 {
     private ReflectionClass $reflection;
 
-    /**
-     */
     public function __construct()
     {
-        $this->reflection = new ReflectionClass(Bus::class);
-        $this->reflection->setStaticPropertyValue("instance", new class extends Bus {
+        $this->reflection = new ReflectionClass(Container::class);
+        $this->reflection->setStaticPropertyValue("instance", new class extends Container
+        {
             public function __construct()
             {
                 $this->proxy = new class implements Proxy {
 
-                    public function addReceiver(string $id, Closure $callback, string ...$events): void{}
+                    public function get(string $class, ...$args): object
+                    {
+                        return new \Valvoid\Fusion\Bus\Proxy\Logic();
+                    }
 
-                    public function broadcast(Event $event): void{}
-
-                    public function removeReceiver(string $id, string ...$events): void{}
+                    public function refer(string $id, string $class): void {}
+                    public function unset(string $class): void {}
                 };
             }
         });

@@ -24,6 +24,7 @@ use Valvoid\Fusion\Container\Proxy\Logic as ContainerLogic;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Log\Events\Errors\Error;
+use Valvoid\Fusion\Tests\Config\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -47,9 +48,10 @@ class ConfigTest extends Test
     public function __construct()
     {
         try {
+            $containerMock = new ContainerMock;
             $this->root = dirname(__DIR__, 2);
             $this->lazy = require "$this->root/cache/loadable/lazy.php";
-            $bus = (new ContainerLogic)->get(Bus::class);
+
             $this->config = (new ContainerLogic)->get(Config::class,
                 root: $this->root,
                 lazy: $this->lazy,
@@ -58,7 +60,7 @@ class ConfigTest extends Test
             $this->testInstanceDestruction();
 
             (new ContainerLogic)->unset(Config::class);
-            (new ContainerLogic)->unset(Bus::class);
+            $containerMock->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;

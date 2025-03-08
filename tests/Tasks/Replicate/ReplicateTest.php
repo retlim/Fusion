@@ -60,7 +60,6 @@ class ReplicateTest extends Test
             $this->time = time();
             $dir = new DirMock;
             $containerMock = new ContainerMock;
-            $bus = new BusMock;
             $task = new Replicate([
                 "source" => false,
                 "environment" => $this->environment
@@ -72,7 +71,6 @@ class ReplicateTest extends Test
             $this->testCachedSnapshotFiles();
             $containerMock->destroy();
             $dir->destroy();
-            $bus->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
@@ -81,9 +79,6 @@ class ReplicateTest extends Test
 
 
                 $dir->destroy();
-
-
-                $bus->destroy();
 
 
                 $containerMock->destroy();

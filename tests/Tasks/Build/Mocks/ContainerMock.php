@@ -50,6 +50,26 @@ class ContainerMock
         $this->reflection = new ReflectionClass(Container::class);
     }
 
+    public function setUpInterpreter(): void
+    {
+        $this->logic = new class implements Proxy
+        {
+            public $bus;
+            public function get(string $class, ...$args): object
+            {
+                return $this->bus ??= new \Valvoid\Fusion\Bus\Proxy\Logic;
+            }
+
+            public function refer(string $id, string $class): void {}
+            public function unset(string $class): void {}
+        };
+
+        $this->reflection->setStaticPropertyValue("instance", new class($this->logic) extends Container
+        {
+            public function __construct(protected Proxy $proxy) {}
+        });
+    }
+
     public function setUpRecursiveMetadataImplication(): void
     {
         $this->logic = new class implements Proxy

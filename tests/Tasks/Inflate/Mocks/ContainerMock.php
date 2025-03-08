@@ -43,11 +43,15 @@ class ContainerMock
         $this->logic = new class implements Proxy {
 
             public $group;
+            public $bus;
 
             public function get(string $class, ...$args): object
             {
                 if ($class === \Valvoid\Fusion\Group\Proxy\Proxy::class)
                     return $this->group ??= new \Valvoid\Fusion\Group\Proxy\Logic();
+
+                if ($class === \Valvoid\Fusion\Bus\Proxy\Proxy::class)
+                    return $this->bus ??= new \Valvoid\Fusion\Bus\Proxy\Logic();
 
                 return new class implements \Valvoid\Fusion\Log\Proxy\Proxy {
                     public function addInterceptor(Interceptor $interceptor): void
