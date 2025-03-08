@@ -41,6 +41,9 @@ use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
 use Valvoid\Fusion\Hub\Proxy\Logic as HubLogic;
 use Valvoid\Fusion\Group\Proxy\Proxy as GroupProxy;
 use Valvoid\Fusion\Group\Proxy\Logic as GroupLogic;
+use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Proxy\Logic as BusLogic;
+
 /**
  * Package manager for PHP-based projects.
  *
@@ -79,7 +82,7 @@ class Fusion
         // build proxies
         (new Logic)->get(Container::class);
         Container::refer(LogProxy::class, LogLogic::class);
-        Container::get(Bus::class);
+        Container::refer(BusProxy::class, BusLogic::class);
         Container::get(Config::class,
             root: $this->root,
             lazy: $this->lazy,
@@ -146,7 +149,6 @@ class Fusion
         Bus::removeReceiver(self::class);
         Container::unset(Dir::class);
         Container::unset(Config::class);
-        Container::unset(Bus::class);
         Container::unset(Container::class);
 
         $fusion = null;

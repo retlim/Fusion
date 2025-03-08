@@ -41,7 +41,6 @@ class ImageTest extends Test
     {
         try {
             $containerMock = new ContainerMock;
-            $bus = new BusMock;
             $config = new ConfigMock;
 
             $task = new Image(["group" => true]);
@@ -49,7 +48,6 @@ class ImageTest extends Test
             $task->execute();
             $this->testMetas();
             $this->testRootMetadata();
-            $bus->destroy();
             $config->destroy();
             $containerMock->destroy();
 
@@ -58,7 +56,6 @@ class ImageTest extends Test
             echo "\n " . $exception->getMessage();
 
             $config->destroy();
-            $bus->destroy();
             $containerMock->destroy();
 
             $this->result = false;

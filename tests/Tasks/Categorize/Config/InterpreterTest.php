@@ -25,6 +25,7 @@ use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Tasks\Categorize\Categorize;
 use Valvoid\Fusion\Tasks\Categorize\Config\Interpreter;
+use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -42,14 +43,14 @@ class InterpreterTest extends Test
 
     public function __construct()
     {
-        (new Logic)->get(Bus::class);
+        $containerMock = new ContainerMock;
 
         $this->testReset();
         $this->testInvalidType();
         $this->testDefault();
         $this->testInflated();
 
-        (new Logic)->unset(Bus::class);
+        $containerMock->destroy();
     }
 
     public function testReset(): void

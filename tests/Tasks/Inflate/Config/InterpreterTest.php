@@ -21,10 +21,10 @@ namespace Valvoid\Fusion\Tests\Tasks\Inflate\Config;
 
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Tasks\Inflate\Inflate;
 use Valvoid\Fusion\Tasks\Inflate\Config\Interpreter;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -42,14 +42,14 @@ class InterpreterTest extends Test
 
     public function __construct()
     {
-        (new Logic)->get(Bus::class);
+        $containerMock = new ContainerMock;
 
         $this->testReset();
         $this->testInvalidType();
         $this->testDefault();
         $this->testInflated();
 
-        (new Logic)->unset(Bus::class);
+        $containerMock->destroy();
     }
 
     public function testReset(): void

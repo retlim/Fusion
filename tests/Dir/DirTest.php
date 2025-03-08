@@ -23,6 +23,7 @@ use ReflectionException;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Dir\Dir;
+use Valvoid\Fusion\Tests\Dir\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -40,15 +41,15 @@ class DirTest extends Test
     public function __construct()
     {
         try {
+            $containerMock = new ContainerMock;
             $configMock = new ConfigMock;
-            (new Logic)->get(Bus::class);
             $this->dir = (new Logic)->get(Dir::class);
 
             $this->testInstanceDestruction();
 
             $configMock->destroy();
             (new Logic)->unset(Dir::class);
-            (new Logic)->unset(Bus::class);
+            $containerMock->destroy();
 
         } catch (ReflectionException $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
