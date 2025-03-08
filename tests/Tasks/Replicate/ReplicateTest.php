@@ -20,7 +20,6 @@
 namespace Valvoid\Fusion\Tests\Tasks\Replicate;
 
 use Exception;
-use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Replicate\Replicate;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\BusMock;
@@ -62,7 +61,6 @@ class ReplicateTest extends Test
             $dir = new DirMock;
             $containerMock = new ContainerMock;
             $bus = new BusMock;
-            (new Logic)->get(Group::class);
             $task = new Replicate([
                 "source" => false,
                 "environment" => $this->environment
@@ -72,7 +70,6 @@ class ReplicateTest extends Test
 
             $task->execute();
             $this->testCachedSnapshotFiles();
-            (new Logic)->unset(Group::class);
             $containerMock->destroy();
             $dir->destroy();
             $bus->destroy();

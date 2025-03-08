@@ -20,9 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Extend;
 
 use Exception;
-use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Extend\Extend;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\MetadataMock;
@@ -66,7 +64,6 @@ class ExtendTest extends Test
             $this->time = time();
             $containerMock = new ContainerMock;
             $dir = new DirMock;
-            $group = (new Logic)->get(Group::class);
             $ballast = "$this->dir/metadata3";
             $task = new Extend([]);
 
@@ -86,9 +83,8 @@ class ExtendTest extends Test
             $this->testRefreshBallast();
 
             // clear previous metadata
-            (new Logic)->unset(Group::class);
+            unset($containerMock->logic->group);
 
-            (new Logic)->get(Group::class);
             $from = "$this->cache/metadata3/dependencies/metadata2/extensions/metadata3";
             $to = "$this->cache/metadata2/extensions/metadata3";
             $ballast = "$this->cache/metadata2/extensions/metadata6";
@@ -119,7 +115,6 @@ class ExtendTest extends Test
             $this->testNewStateExtensionsOrder();
             $this->testNewStateBallast();
             $this->testNewStateExtension();
-            (new Logic)->unset(Group::class);
             $containerMock->destroy();
             $dir->destroy();
 

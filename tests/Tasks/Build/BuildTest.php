@@ -23,7 +23,6 @@ use Exception;
 use Valvoid\Fusion\Tasks\Build\Build;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tests\Tasks\Build\Mocks\ContainerMock;
-use Valvoid\Fusion\Tests\Tasks\Build\Mocks\GroupMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -38,12 +37,10 @@ class BuildTest extends Test
 
     private ContainerMock $containerMock;
 
-    private GroupMock $groupMock;
 
     public function __construct()
     {
         try {
-            $this->groupMock = new GroupMock;
             $this->containerMock = new ContainerMock;
 
             $this->testExternalRootSourceImplication();
@@ -51,7 +48,6 @@ class BuildTest extends Test
             $this->testNestedMetadataImplication();
 
             $this->containerMock->destroy();
-            $this->groupMock->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
@@ -68,7 +64,6 @@ class BuildTest extends Test
     public function testNestedMetadataImplication(): void
     {
         $this->containerMock->setUpNestedMetadataImplication();
-        $this->groupMock->setUpNestedMetadataImplication();
 
         // get nested deps from root metadata
         $task = new Build([
@@ -321,7 +316,6 @@ class BuildTest extends Test
     public function testRecursiveMetadataImplication(): void
     {
         $this->containerMock->setUpRecursiveMetadataImplication();
-        $this->groupMock->setUpRecursiveMetadataImplication();
 
         // get source from root metadata
         $task = new Build([
@@ -589,7 +583,6 @@ class BuildTest extends Test
     {
         // recursive runtime layer source arg
         $this->containerMock->setUpExternalRootSourceImplication();
-        $this->groupMock->setUpExternalRootSourceImplication();
 
         $task = new Build([
             "source" => "metadata1", // runtime layer

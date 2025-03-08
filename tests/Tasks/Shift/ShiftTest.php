@@ -23,7 +23,6 @@ use Exception;
 use ReflectionClass;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Container\Proxy\Logic;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Shift\Shift;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\ContainerMock;
@@ -48,41 +47,35 @@ class ShiftTest extends Test
             $containerMock = new ContainerMock;
             (new Logic)->get(Bus::class);
             $dir = new DirMock;
-            (new Logic)->get(Group::class);
 
             // new root version
             $this->testShiftRecursive();
-            (new Logic)->unset(Group::class);
+            unset($containerMock->logic->group);
             $dir->destroy();
 
             $dir = new DirMock;
-            (new Logic)->get(Group::class);
 
             // new root with new cache dir
             $this->testShiftRecursiveCache();
-            (new Logic)->unset(Group::class);// clear
+            unset($containerMock->logic->group);// clear
             $dir->destroy();
 
             $dir = new DirMock;
-            (new Logic)->get(Group::class);
 
             $this->testShiftNested();
-            (new Logic)->unset(Group::class);// clear
+            unset($containerMock->logic->group);// clear
             $dir->destroy();
 
             $dir = new DirMock;
-            (new Logic)->get(Group::class);
 
             // check if persisted inside "other" dir
             $this->testShiftRecursiveWithExecutedFiles();
-            (new Logic)->unset(Group::class);// clear
+            unset($containerMock->logic->group);// clear
             $dir->destroy();
 
             $dir = new DirMock;
-            (new Logic)->get(Group::class);
 
             $this->testShiftNestedWithExecutedFiles();
-            (new Logic)->unset(Group::class);
             $containerMock->destroy();
             $dir->destroy();
             (new Logic)->unset(Bus::class);

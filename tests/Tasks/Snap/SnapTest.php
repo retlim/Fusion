@@ -20,9 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Snap;
 
 use Exception;
-use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Errors\Error;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Snap\Snap;
 use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\ContainerMock;
@@ -46,18 +44,16 @@ class SnapTest extends Test
 
             $containerMock = new ContainerMock;
             $dir = new DirMock;
-            (new Logic)->get(Group::class);
 
             MetadataMock::addRedundantMockedMetadata();
             $this->testRedundantCacheRefresh();
-            (new Logic)->unset(Group::class);
 
-            (new Logic)->get(Group::class);
+            // clear
+            unset($containerMock->logic->group);
 
             MetadataMock::addDownloadableMockedMetadata();
             $this->testDownloadableCacheUpdate();
 
-            (new Logic)->unset(Group::class);
             $containerMock->destroy();
             $dir->destroy();
 
