@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Hub;
 
 use Closure;
-use Valvoid\Fusion\Hub\Proxy\Logic;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Errors\Error as HubError;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
@@ -33,24 +33,6 @@ use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
  */
 class Hub
 {
-    /** @var ?Hub Runtime instance. */
-    private static ?Hub $instance = null;
-
-    /** @var Proxy Decoupled logic. */
-    protected Proxy $proxy;
-
-    /**
-     * Constructs the hub.
-     *
-     * @param Proxy|Logic $proxy Any or default logic.
-     */
-    private function __construct(Proxy|Logic $proxy)
-    {
-        // singleton
-        self::$instance ??= $this;
-        $this->proxy = $proxy;
-    }
-
     /**
      * Enqueues versions request.
      *
@@ -61,7 +43,8 @@ class Hub
      */
     public static function addVersionsRequest(array $source): int
     {
-        return self::$instance->proxy->addVersionsRequest($source);
+        return Container::get(Proxy::class)
+            ->addVersionsRequest($source);
     }
 
     /**
@@ -73,7 +56,8 @@ class Hub
      */
     public static function addMetadataRequest(array $source): int
     {
-        return self::$instance->proxy->addMetadataRequest($source);
+        return Container::get(Proxy::class)
+            ->addMetadataRequest($source);
     }
 
     /**
@@ -86,7 +70,8 @@ class Hub
      */
     public static function addSnapshotRequest(array $source, string $path): int
     {
-        return self::$instance->proxy->addSnapshotRequest($source, $path);
+        return Container::get(Proxy::class)
+            ->addSnapshotRequest($source, $path);
     }
 
     /**
@@ -98,7 +83,8 @@ class Hub
      */
     public static function addArchiveRequest(array $source): int
     {
-        return self::$instance->proxy->addArchiveRequest($source);
+        return Container::get(Proxy::class)
+            ->addArchiveRequest($source);
     }
 
     /**
@@ -110,6 +96,7 @@ class Hub
      */
     public static function executeRequests(Closure $callback): void
     {
-        self::$instance->proxy->executeRequests($callback);
+        Container::get(Proxy::class)
+            ->executeRequests($callback);
     }
 }

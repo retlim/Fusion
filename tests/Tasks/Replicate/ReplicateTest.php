@@ -24,7 +24,6 @@ use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Replicate\Replicate;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\BusMock;
-use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\HubMock;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\MetadataMock;
@@ -62,7 +61,6 @@ class ReplicateTest extends Test
             $this->time = time();
             $dir = new DirMock;
             $containerMock = new ContainerMock;
-            $hub = new HubMock;
             $bus = new BusMock;
             (new Logic)->get(Group::class);
             $task = new Replicate([
@@ -77,7 +75,6 @@ class ReplicateTest extends Test
             (new Logic)->unset(Group::class);
             $containerMock->destroy();
             $dir->destroy();
-            $hub->destroy();
             $bus->destroy();
 
         } catch (Exception $exception) {
@@ -90,9 +87,6 @@ class ReplicateTest extends Test
 
 
                 $bus->destroy();
-
-
-                $hub->destroy();
 
 
                 $containerMock->destroy();

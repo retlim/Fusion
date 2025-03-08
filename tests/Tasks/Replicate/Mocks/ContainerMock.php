@@ -19,9 +19,11 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
 
+use Closure;
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
+use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
 
@@ -46,6 +48,59 @@ class ContainerMock
 
                     public function get(string $class, ...$args): object
                     {
+                        if ($class === \Valvoid\Fusion\Hub\Proxy\Proxy::class)
+                            return new class implements \Valvoid\Fusion\Hub\Proxy\Proxy
+                            {
+                                public function addVersionsRequest(array $source): int
+                                {
+                                    return 0;
+                                }
+
+                                public function addMetadataRequest(array $source): int
+                                {
+                                    return $this->addFileRequest($source,
+
+                                        // allow only json and
+                                        // only important file request
+                                        // block dynamic files
+                                        "","/fusion.json");
+                                }
+
+                                public function addSnapshotRequest(array $source, string $path): int
+                                {
+                                    return $this->addFileRequest($source,
+
+                                        // allow only json and
+                                        // only important file request
+                                        // block dynamic files
+                                        $path, "/snapshot.json");
+                                }
+
+                                public function addArchiveRequest(array $source): int
+                                {
+                                    return 0;
+                                }
+
+                                protected function addFileRequest(array $source, string $path, string $file): int
+                                {
+                                    // fake request id
+                                    return match ($source['path']) {
+                                        "/test/local" => 1,
+                                        "/test/development" => 2,
+
+                                        // /test/production
+                                        default => 3
+                                    };
+                                }
+
+                                public function executeRequests(Closure $callback): void
+                                {
+                                    $callback(new Metadata(1, __DIR__, MetadataMock::get("local")));
+                                    $callback(new Metadata(2, __DIR__, MetadataMock::get("development")));
+                                    $callback(new Metadata(3, __DIR__, MetadataMock::get("production")));
+                                }
+                            };
+
                         return new class implements \Valvoid\Fusion\Log\Proxy\Proxy
                         {
                             public function addInterceptor(Interceptor $interceptor): void {}

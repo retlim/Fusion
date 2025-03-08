@@ -26,7 +26,6 @@ use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Config\Config;
-use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Errors\Metadata as MetadataError;
@@ -35,9 +34,12 @@ use Valvoid\Fusion\Log\Events\Infos\Id;
 use Valvoid\Fusion\Log\Events\Infos\Name;
 use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Log\Log;
-use Valvoid\Fusion\Log\Proxy\Proxy;
+use Valvoid\Fusion\Log\Proxy\Proxy as LogProxy;
+use Valvoid\Fusion\Log\Proxy\Logic as LogLogic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
+use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
+use Valvoid\Fusion\Hub\Proxy\Logic as HubLogic;
 
 /**
  * Package manager for PHP-based projects.
@@ -76,7 +78,7 @@ class Fusion
 
         // build proxies
         (new Logic)->get(Container::class);
-        Container::refer(Proxy::class, \Valvoid\Fusion\Log\Proxy\Logic::class);
+        Container::refer(LogProxy::class, LogLogic::class);
         Container::get(Bus::class);
         Container::get(Config::class,
             root: $this->root,
@@ -85,7 +87,7 @@ class Fusion
         );
 
         Container::get(Dir::class);
-        Container::get(Hub::class);
+        Container::refer(HubProxy::class, HubLogic::class);
 
         Bus::addReceiver(self::class, $this->handleBusEvent(...),
             Root::class);
@@ -143,7 +145,6 @@ class Fusion
         Bus::removeReceiver(self::class);
         Container::unset(Dir::class);
         Container::unset(Config::class);
-        Container::unset(Hub::class);
         Container::unset(Bus::class);
         Container::unset(Container::class);
 
