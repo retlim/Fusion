@@ -25,7 +25,7 @@ use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Replicate\Replicate;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\HubMock;
-use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
@@ -61,7 +61,7 @@ class ReplicateTest extends Test
         try {
             $this->time = time();
             $dir = new DirMock;
-            $log = new LogMock;
+            $containerMock = new ContainerMock;
             $hub = new HubMock;
             $bus = new BusMock;
             (new Logic)->get(Group::class);
@@ -75,7 +75,7 @@ class ReplicateTest extends Test
             $task->execute();
             $this->testCachedSnapshotFiles();
             (new Logic)->unset(Group::class);
-            $log->destroy();
+            $containerMock->destroy();
             $dir->destroy();
             $hub->destroy();
             $bus->destroy();
@@ -95,7 +95,7 @@ class ReplicateTest extends Test
                 $hub->destroy();
 
 
-                $log->destroy();
+                $containerMock->destroy();
 
             $this->result = false;
         }

@@ -20,45 +20,47 @@
 namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
 
 use ReflectionClass;
+use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Container\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Log;
-use Valvoid\Fusion\Log\Proxy\Proxy;
 
 /**
- * Mocked log.
+ * Mocked container.
  *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class LogMock
+class ContainerMock
 {
     private ReflectionClass $reflection;
 
     public function __construct()
     {
-        $this->reflection = new ReflectionClass(Log::class);
-        $this->reflection->setStaticPropertyValue("instance", new class extends Log
+        $this->reflection = new ReflectionClass(Container::class);
+        $this->reflection->setStaticPropertyValue("instance", new class extends Container
         {
             public function __construct()
             {
                 $this->proxy = new class implements Proxy {
 
-                    public function addInterceptor(Interceptor $interceptor): void{}
+                    public function get(string $class, ...$args): object
+                    {
+                        return new class implements \Valvoid\Fusion\Log\Proxy\Proxy
+                        {
+                            public function addInterceptor(Interceptor $interceptor): void {}
+                            public function removeInterceptor(): void {}
+                            public function error(string|Event $event): void {}
+                            public function warning(string|Event $event): void {}
+                            public function notice(string|Event $event): void {}
+                            public function info(string|Event $event): void {}
+                            public function verbose(string|Event $event): void {}
+                            public function debug(string|Event $event): void {}
+                        };
+                    }
 
-                    public function removeInterceptor(): void{}
-
-                    public function error(string|Event $event): void {}
-
-                    public function warning(string|Event $event): void {}
-
-                    public function notice(string|Event $event): void {}
-
-                    public function info(string|Event $event): void {}
-
-                    public function verbose(string|Event $event): void {}
-
-                    public function debug(string|Event $event): void {}
+                    public function refer(string $id, string $class): void {}
+                    public function unset(string $class): void {}
                 };
             }
         });

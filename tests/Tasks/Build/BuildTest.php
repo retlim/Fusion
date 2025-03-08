@@ -46,7 +46,6 @@ class BuildTest extends Test
     public function __construct()
     {
         try {
-            $log = new LogMock;
             $this->hubMock = new HubMock;
             $this->groupMock = new GroupMock;
             $this->containerMock = new ContainerMock;
@@ -58,7 +57,6 @@ class BuildTest extends Test
             $this->containerMock->destroy();
             $this->groupMock->destroy();
             $this->hubMock->destroy();
-            $log->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
@@ -72,9 +70,6 @@ class BuildTest extends Test
 
             if (isset($this->hubMock))
                 $this->hubMock->destroy();
-
-            if (isset($log))
-                $log->destroy();
         }
     }
 
@@ -86,12 +81,15 @@ class BuildTest extends Test
 
         // get nested deps from root metadata
         $task = new Build([
+            "source" => false,
             "environment" => [
                 "php" => [
                     "version" => [
                         "major" => 8,
                         "minor" => 1,
-                        "patch" => 0
+                        "patch" => 0,
+                        "build" => "",
+                        "release" => ""
                     ]
                 ]
             ]]);
@@ -337,12 +335,15 @@ class BuildTest extends Test
 
         // get source from root metadata
         $task = new Build([
+            "source" => false,
             "environment" => [
                 "php" => [
                     "version" => [
                         "major" => 8,
                         "minor" => 1,
-                        "patch" => 0
+                        "patch" => 0,
+                        "build" => "",
+                        "release" => ""
                     ]
                 ]
             ]]);
@@ -608,7 +609,9 @@ class BuildTest extends Test
                     "version" => [
                         "major" => 8,
                         "minor" => 1,
-                        "patch" => 0
+                        "patch" => 0,
+                        "build" => "",
+                        "release" => ""
                     ]
                 ]
             ]]);

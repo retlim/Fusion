@@ -34,6 +34,9 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
  */
 class Logic implements Proxy
 {
+    /** @var array<string, string|object>  */
+    protected array $references = [];
+
     /**
      * Returns an instantiated dependency.
      *
@@ -46,7 +49,18 @@ class Logic implements Proxy
     public function get(string $class, mixed ...$args): object
     {
         try {
-            return $this->getObject($class, ...$args) ??
+            if (isset($this->references[$class])) {
+                $object = $this->references[$class];
+
+                if (is_string($object)) {
+                    $object = $this->getObject($object, ...$args);
+                    $this->references[$class] = $object;
+                }
+
+            } else
+                $object = $this->getObject($class, ...$args);
+
+            return $object ??
                 throw new Error(
                     "Can't instantiate dependency class " .
                     "\"$class\". No constructor found."
@@ -56,6 +70,17 @@ class Logic implements Proxy
         } catch (ReflectionException $exception) {
             $this->throwNormalizedError($exception);
         }
+    }
+
+    /**
+     * Creates a sharable instance reference.
+     *
+     * @param string $id Identifier.
+     * @param string $class Implementation.
+     */
+    public function refer(string $id, string $class): void
+    {
+        $this->references[$id] = $class;
     }
 
     /**

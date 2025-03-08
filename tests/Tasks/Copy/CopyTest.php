@@ -24,8 +24,8 @@ use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Copy\Copy;
 use Valvoid\Fusion\Tasks\Group;
+use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\DirMock;
-use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -44,7 +44,7 @@ class CopyTest extends Test
     public function __construct()
     {
         try {
-            $log = new LogMock;
+            $container = new ContainerMock;
             $dir = new DirMock;
             (new Logic)->get(Group::class);
             MetadataMock::addMockedMetadata();
@@ -52,13 +52,13 @@ class CopyTest extends Test
             $this->testTargetCacheDirectory();
 
             (new Logic)->unset(Group::class);
-            $log->destroy();
+            $container->destroy();
             $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-            $log->destroy();
+            $container->destroy();
             $dir->destroy();
 
             $this->result = false;

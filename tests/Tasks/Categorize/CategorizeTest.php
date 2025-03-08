@@ -25,7 +25,7 @@ use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
 use Valvoid\Fusion\Tasks\Categorize\Categorize;
 use Valvoid\Fusion\Tasks\Group;
-use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -42,7 +42,7 @@ class CategorizeTest extends Test
     public function __construct()
     {
         try {
-            $log = new LogMock;
+            $containerMock = new ContainerMock;
             (new Logic)->get(Group::class);
             MetadataMock::addMockedMetadata();
 
@@ -50,12 +50,12 @@ class CategorizeTest extends Test
             $this->testRedundantCategorization();
 
             (new Logic)->unset(Group::class);
-            $log->destroy();
+            $containerMock->destroy();
 
         } catch (ReflectionException $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
-            $log->destroy();
+            $containerMock->destroy();
 
             $this->result = false;
         }

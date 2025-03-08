@@ -26,7 +26,7 @@ use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Shift\Shift;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\DirMock;
-use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -45,7 +45,7 @@ class ShiftTest extends Test
     public function __construct()
     {
         try {
-            $log = new LogMock;
+            $containerMock = new ContainerMock;
             (new Logic)->get(Bus::class);
             $dir = new DirMock;
             (new Logic)->get(Group::class);
@@ -83,7 +83,7 @@ class ShiftTest extends Test
 
             $this->testShiftNestedWithExecutedFiles();
             (new Logic)->unset(Group::class);
-            $log->destroy();
+            $containerMock->destroy();
             $dir->destroy();
             (new Logic)->unset(Bus::class);
 
@@ -91,7 +91,7 @@ class ShiftTest extends Test
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
 
-                $log->destroy();
+                $containerMock->destroy();
 
             if (isset($dir))
                 $dir->destroy();

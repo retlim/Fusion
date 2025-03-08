@@ -25,7 +25,7 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Snap\Snap;
 use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\DirMock;
-use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -44,7 +44,7 @@ class SnapTest extends Test
         try {
             $this->delete(__DIR__ . "/Mocks/package");
 
-            $log = new LogMock;
+            $containerMock = new ContainerMock;
             $dir = new DirMock;
             (new Logic)->get(Group::class);
 
@@ -58,14 +58,14 @@ class SnapTest extends Test
             $this->testDownloadableCacheUpdate();
 
             (new Logic)->unset(Group::class);
-            $log->destroy();
+            $containerMock->destroy();
             $dir->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
 
-                $log->destroy();
+                $containerMock->destroy();
 
                 $dir->destroy();
 
