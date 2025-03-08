@@ -35,33 +35,67 @@ class ContainerMock
 {
     private ReflectionClass $reflection;
 
+    public $logic;
+
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Container::class);
-        $this->reflection->setStaticPropertyValue("instance", new class extends Container
-        {
-            public function __construct()
-            {
-                $this->proxy = new class implements Proxy {
+        $this->logic = new class implements Proxy {
 
-                    public function get(string $class, ...$args): object
+            public $group;
+
+            public function get(string $class, ...$args): object
+            {
+                if ($class === \Valvoid\Fusion\Group\Proxy\Proxy::class)
+                    return $this->group ??= new \Valvoid\Fusion\Group\Proxy\Logic();
+
+                return new class implements \Valvoid\Fusion\Log\Proxy\Proxy {
+                    public function addInterceptor(Interceptor $interceptor): void
                     {
-                        return new class implements \Valvoid\Fusion\Log\Proxy\Proxy
-                        {
-                            public function addInterceptor(Interceptor $interceptor): void {}
-                            public function removeInterceptor(): void {}
-                            public function error(string|Event $event): void {}
-                            public function warning(string|Event $event): void {}
-                            public function notice(string|Event $event): void {}
-                            public function info(string|Event $event): void {}
-                            public function verbose(string|Event $event): void {}
-                            public function debug(string|Event $event): void {}
-                        };
                     }
 
-                    public function refer(string $id, string $class): void {}
-                    public function unset(string $class): void {}
+                    public function removeInterceptor(): void
+                    {
+                    }
+
+                    public function error(string|Event $event): void
+                    {
+                    }
+
+                    public function warning(string|Event $event): void
+                    {
+                    }
+
+                    public function notice(string|Event $event): void
+                    {
+                    }
+
+                    public function info(string|Event $event): void
+                    {
+                    }
+
+                    public function verbose(string|Event $event): void
+                    {
+                    }
+
+                    public function debug(string|Event $event): void
+                    {
+                    }
                 };
+            }
+
+            public function refer(string $id, string $class): void
+            {
+            }
+
+            public function unset(string $class): void
+            {
+            }
+        };
+
+        $this->reflection->setStaticPropertyValue("instance", new class($this->logic) extends Container {
+            public function __construct(protected Proxy $proxy)
+            {
             }
         });
     }

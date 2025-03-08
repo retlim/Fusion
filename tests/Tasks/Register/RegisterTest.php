@@ -46,23 +46,20 @@ class RegisterTest extends Test
             $this->time = time();
             $dir = new DirMock;
             $containerMock = new ContainerMock;
-            $group = (new Logic)->get(Group::class);
             $task = new Register([]);
 
             MetadataMock::addRefreshMetadata();
 
             $task->execute();
             $this->testRefreshAutoloader();
-            (new Logic)->unset(Group::class);
 
-            (new Logic)->get(Group::class);
+            unset($containerMock->logic->group);
 
             MetadataMock::addNewStateMetadata();
             $task = new Register([]);
 
             $task->execute();
             $this->testNewStateAutoloader();
-            (new Logic)->unset(Group::class);
             $containerMock->destroy();
             $dir->destroy();
 

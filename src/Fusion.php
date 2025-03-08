@@ -36,11 +36,11 @@ use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Log\Proxy\Proxy as LogProxy;
 use Valvoid\Fusion\Log\Proxy\Logic as LogLogic;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
 use Valvoid\Fusion\Hub\Proxy\Logic as HubLogic;
-
+use Valvoid\Fusion\Group\Proxy\Proxy as GroupProxy;
+use Valvoid\Fusion\Group\Proxy\Logic as GroupLogic;
 /**
  * Package manager for PHP-based projects.
  *
@@ -88,6 +88,7 @@ class Fusion
 
         Container::get(Dir::class);
         Container::refer(HubProxy::class, HubLogic::class);
+        Container::refer(GroupProxy::class, GroupLogic::class);
 
         Bus::addReceiver(self::class, $this->handleBusEvent(...),
             Root::class);
@@ -192,8 +193,6 @@ class Fusion
                     $task->execute();
 
             } else {
-                Container::get(Group::class);
-
                 foreach ($entry as $taskId => $task) {
                     Log::info(new Name($taskId));
 
@@ -207,8 +206,6 @@ class Fusion
                     } else
                         $task->execute();
                 }
-
-                Container::unset(Group::class);
             }
 
         } catch (LogEvent $error) {

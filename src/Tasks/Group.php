@@ -19,8 +19,9 @@
 
 namespace Valvoid\Fusion\Tasks;
 
-use Valvoid\Fusion\Group\Proxy\Logic;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Group\Proxy\Proxy;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
 
@@ -32,112 +33,112 @@ use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
  */
 class Group
 {
-    /** @var ?Group Runtime instance. */
-    private static ?Group $instance = null;
-
-    /** @var Proxy Decoupled logic. */
-    protected Proxy $proxy;
-
-    /**
-     * Constructs the task group.
-     *
-     * @param Proxy|Logic $proxy Any or default logic.
-     */
-    private function __construct(Proxy|Logic $proxy)
-    {
-        // singleton
-        self::$instance ??= $this;
-        $this->proxy = $proxy;
-    }
-
     /**
      * Sets internal metas.
      *
      * @param array<string, InternalMeta> $metas Metas.
+     * @throws Error Internal error.
      */
     public static function setInternalMetas(array $metas): void
     {
-        self::$instance->proxy->setInternalMetas($metas);
+        Container::get(Proxy::class)
+            ->setInternalMetas($metas);
     }
 
     /**
      * Sets implication.
      *
      * @param array $implication Implication.
+     * @throws Error Internal error.
      */
     public static function setImplication(array $implication): void
     {
-        self::$instance->proxy->setImplication($implication);
+        Container::get(Proxy::class)
+            ->setImplication($implication);
     }
 
     /**
      * Sets external metas.
      *
      * @param array<string, ExternalMeta> $metas Metas.
+     * @throws Error Internal error.
      */
     public static function setExternalMetas(array $metas): void
     {
-        self::$instance->proxy->setExternalMetas($metas);
+        Container::get(Proxy::class)
+            ->setExternalMetas($metas);
     }
 
     /**
      * Returns optional external root meta.
      *
      * @return ExternalMeta|null Meta.
+     * @throws Error Internal error.
      */
     public static function getExternalRootMetadata(): ?ExternalMeta
     {
-        return self::$instance->proxy->getExternalRootMetadata();
+        return Container::get(Proxy::class)
+            ->getExternalRootMetadata();
     }
 
     /**
      * Returns internal root meta.
      *
      * @return InternalMeta Meta.
+     * @throws Error Internal error.
      */
     public static function getInternalRootMetadata(): InternalMeta
     {
-        return self::$instance->proxy->getInternalRootMetadata();
+        return Container::get(Proxy::class)
+            ->getInternalRootMetadata();
     }
 
     /**
      * Returns root metadata.
      *
      * @return ExternalMeta|InternalMeta Meta.
+     * @throws Error Internal error.
      */
     public static function getRootMetadata(): ExternalMeta|InternalMeta
     {
-        return self::$instance->proxy->getRootMetadata();
+        return Container::get(Proxy::class)
+            ->getRootMetadata();
     }
 
     /**
      * Returns indicator for loadable meta.
      *
      * @return bool Indicator.
+     * @throws Error Internal error.
      */
     public static function hasDownloadable(): bool
     {
-        return self::$instance->proxy->hasDownloadable();
+        return Container::get(Proxy::class)
+            ->hasDownloadable();
     }
 
     /**
      * Returns external metas.
      *
      * @return array<string, ExternalMeta> Metas.
+     * @throws Error Internal error.
      */
     public static function getExternalMetas(): array
     {
-        return self::$instance->proxy->getExternalMetas();
+        return Container::get(Proxy::class)
+            ->getExternalMetas();
     }
 
     /**
      * Returns internal metas.
      *
      * @return array<string, InternalMeta> Metas.
+     * @throws Error Internal error.
      */
     public static function getInternalMetas(): array
     {
-        return self::$instance->proxy->getInternalMetas();
+        return Container::get(Proxy::class)
+            ->getInternalMetas();
     }
 
     /**
@@ -145,20 +146,24 @@ class Group
      * at runtime layer passed to the Fusion object.
      *
      * @param string[] $breadcrumb Breadcrumb.
+     * @throws Error Internal error.
      */
     public static function setImplicationBreadcrumb(array $breadcrumb): void
     {
-        self::$instance->proxy->setImplicationBreadcrumb($breadcrumb);
+        Container::get(Proxy::class)
+            ->setImplicationBreadcrumb($breadcrumb);
     }
 
     /**
      * Returns implication.
      *
      * @return array Implication.
+     * @throws Error Internal error.
      */
     public static function getImplication(): array
     {
-        return self::$instance->proxy->getImplication();
+        return Container::get(Proxy::class)
+            ->getImplication();
     }
 
     /**
@@ -166,10 +171,12 @@ class Group
      *
      * @param string $source Source.
      * @return array Path.
+     * @throws Error Internal error.
      */
     public static function getPath(string $source): array
     {
-        return self::$instance->proxy->getPath($source);
+        return Container::get(Proxy::class)
+            ->getPath($source);
     }
 
     /**
@@ -178,9 +185,11 @@ class Group
      * @param array $implication Implication.
      * @param string $source Source.
      * @return array Path.
+     * @throws Error Internal error.
      */
     public static function getSourcePath(array $implication, string $source): array
     {
-        return self::$instance->proxy->getSourcePath($implication, $source);
+        return Container::get(Proxy::class)
+            ->getSourcePath($implication, $source);
     }
 }

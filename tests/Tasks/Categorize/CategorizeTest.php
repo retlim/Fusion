@@ -43,13 +43,11 @@ class CategorizeTest extends Test
     {
         try {
             $containerMock = new ContainerMock;
-            (new Logic)->get(Group::class);
             MetadataMock::addMockedMetadata();
 
             $this->testEfficientCategorization();
             $this->testRedundantCategorization();
 
-            (new Logic)->unset(Group::class);
             $containerMock->destroy();
 
         } catch (ReflectionException $exception) {

@@ -20,7 +20,6 @@
 namespace Valvoid\Fusion\Tests\Tasks\Image;
 
 use Exception;
-use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Image\Image;
 use Valvoid\Fusion\Tests\Tasks\Image\Mocks\BusMock;
@@ -44,7 +43,6 @@ class ImageTest extends Test
             $containerMock = new ContainerMock;
             $bus = new BusMock;
             $config = new ConfigMock;
-            (new Logic)->get(Group::class);
 
             $task = new Image(["group" => true]);
 
@@ -52,7 +50,6 @@ class ImageTest extends Test
             $this->testMetas();
             $this->testRootMetadata();
             $bus->destroy();
-            (new Logic)->unset(Group::class);
             $config->destroy();
             $containerMock->destroy();
 

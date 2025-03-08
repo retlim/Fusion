@@ -20,8 +20,6 @@
 namespace Valvoid\Fusion\Tests\Tasks\Inflate;
 
 use Exception;
-use Valvoid\Fusion\Container\Proxy\Logic;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Inflate\Inflate;
 use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\DirMock;
@@ -50,7 +48,6 @@ class InflateTest extends Test
             $this->time = time();
             $dir = new DirMock;
             $containerMock = new ContainerMock;
-            $group = (new Logic)->get(Group::class);
             $task = new Inflate([]);
 
             MetadataMock::addRefreshMetadata();
@@ -59,9 +56,8 @@ class InflateTest extends Test
             $this->testRefreshClassAndFunction();
             $this->testRefreshInterface();
             $this->testRefreshTrait();
-            (new Logic)->unset(Group::class);
 
-            (new Logic)->get(Group::class);
+            unset($containerMock->logic->group);
 
             MetadataMock::addNewStateMetadata();
             $task = new Inflate([]);
@@ -70,7 +66,6 @@ class InflateTest extends Test
             $this->testNewStateFinalClass();
             $this->testNewStateAbstractClass();
             $this->testNewStateEnum();
-            (new Logic)->unset(Group::class);
             $containerMock->destroy();
             $dir->destroy();
 
