@@ -3,6 +3,8 @@
 // Do not modify.
 return [
 	'Valvoid\Fusion\Tests\Bus\BusTest' => '/tests/Bus/BusTest.php',
+	'Valvoid\Fusion\Tests\Bus\Mocks\ContainerMock' => '/tests/Bus/Mocks/ContainerMock.php',
+	'Valvoid\Fusion\Tests\Bus\Mocks\EventMock' => '/tests/Bus/Mocks/EventMock.php',
 	'Valvoid\Fusion\Tests\Config\ConfigTest' => '/tests/Config/ConfigTest.php',
 	'Valvoid\Fusion\Tests\Config\Interpreter\DirTest' => '/tests/Config/Interpreter/DirTest.php',
 	'Valvoid\Fusion\Tests\Config\Interpreter\HubTest' => '/tests/Config/Interpreter/HubTest.php',

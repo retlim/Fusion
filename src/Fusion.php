@@ -81,10 +81,10 @@ class Fusion
 
         spl_autoload_register($this->loadLazyLoadable(...));
 
-        // build proxies
+        // set up proxies
         (new Logic)->get(Container::class);
-        Container::refer(LogProxy::class, LogLogic::class);
         Container::refer(BusProxy::class, BusLogic::class);
+        Container::refer(LogProxy::class, LogLogic::class);
         Container::get(Config::class,
             root: $this->root,
             lazy: $this->lazy,
