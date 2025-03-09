@@ -44,8 +44,7 @@ class Container
      */
     private function __construct(Proxy|Logic $proxy)
     {
-        // sharable
-        self::$instance ??= $this;
+        self::$instance = $this;
         $this->proxy = $proxy;
     }
 
