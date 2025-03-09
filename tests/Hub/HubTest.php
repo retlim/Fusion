@@ -19,9 +19,8 @@
 
 namespace Valvoid\Fusion\Tests\Hub;
 
-use ReflectionException;
-use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Hub\Hub;
+use Valvoid\Fusion\Tests\Hub\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -34,34 +33,33 @@ class HubTest extends Test
 {
     protected string|array $coverage = Hub::class;
 
-    private Hub $hub;
+    private ContainerMock $container;
 
     public function __construct()
     {
-        try {
-            $configMock = new ConfigMock;
-            $this->hub = (new Logic)->get(Hub::class);
+        $this->container = new ContainerMock;
 
-            $this->testInstanceDestruction();
-
-            $configMock->destroy();
-            (new Logic)->unset(Hub::class);
-
-        } catch (ReflectionException $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        // static
+        $this->testStaticInterface();
+        $this->container->destroy();
     }
 
-    public function testInstanceDestruction(): void
+    public function testStaticInterface(): void
     {
-        $instance = $this->hub;
-        (new Logic)->unset(Hub::class);
-        $this->hub = (new Logic)->get(Hub::class);
+        Hub::addVersionsRequest([]);
+        Hub::addMetadataRequest([]);
+        Hub::addSnapshotRequest([],"");
+        Hub::addArchiveRequest([]);
+        Hub::executeRequests(function (){});
 
-        // assert different instances
-        if ($instance === $this->hub) {
+        // static functions connected to same non-static functions
+        if ($this->container->logic->hub->calls !== [
+                "addVersionsRequest",
+                "addMetadataRequest",
+                "addSnapshotRequest",
+                "addArchiveRequest",
+                "executeRequests",]) {
+
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
             $this->result = false;
