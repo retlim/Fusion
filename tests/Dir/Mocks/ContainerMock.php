@@ -32,25 +32,89 @@ use Valvoid\Fusion\Container\Proxy\Proxy;
 class ContainerMock
 {
     private ReflectionClass $reflection;
-
+    public Proxy $logic;
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Container::class);
-        $this->reflection->setStaticPropertyValue("instance", new class extends Container
+        $this->logic = new class implements Proxy
         {
-            public function __construct()
+            public \Valvoid\Fusion\Dir\Proxy\Proxy $dir;
+            public function get(string $class, ...$args): object
             {
-                $this->proxy = new class implements Proxy {
+                return $this->dir ??= new class implements \Valvoid\Fusion\Dir\Proxy\Proxy
+                {
+                    public $calls = [];
 
-                    public function get(string $class, ...$args): object
+                    public function getTaskDir(): string
                     {
-                        return new \Valvoid\Fusion\Bus\Proxy\Logic();
+                        $this->calls[] = __FUNCTION__;
+                        return "";
                     }
 
-                    public function refer(string $id, string $class): void {}
-                    public function unset(string $class): void {}
+                    public function getStateDir(): string
+                    {
+                        $this->calls[] = __FUNCTION__;
+                        return "";
+                    }
+
+                    public function getCacheDir(): string
+                    {
+                        $this->calls[] = __FUNCTION__;
+                        return "";
+                    }
+
+                    public function getOtherDir(): string
+                    {
+                        $this->calls[] = __FUNCTION__;
+                        return "";
+                    }
+
+                    public function getPackagesDir(): string
+                    {
+                        $this->calls[] = __FUNCTION__;
+                        return "";
+                    }
+
+                    public function getRootDir(): string
+                    {
+                        $this->calls[] = __FUNCTION__;
+                        return "";
+                    }
+
+                    public function createDir(string $dir, int $permissions): void
+                    {
+                        $this->calls[] = __FUNCTION__;
+                    }
+
+                    public function rename(string $from, string $to): void
+                    {
+                        $this->calls[] = __FUNCTION__;
+                    }
+
+                    public function copy(string $from, string $to): void
+                    {
+                        $this->calls[] = __FUNCTION__;
+                    }
+
+                    public function delete(string $file): void
+                    {
+                        $this->calls[] = __FUNCTION__;
+                    }
+
+                    public function clear(string $dir, string $path): void
+                    {
+                        $this->calls[] = __FUNCTION__;
+                    }
                 };
             }
+
+            public function refer(string $id, string $class): void {}
+            public function unset(string $class): void {}
+        };
+
+        $this->reflection->setStaticPropertyValue("instance", new class($this->logic) extends Container
+        {
+            public function __construct(protected Proxy $proxy) {}
         });
     }
 
