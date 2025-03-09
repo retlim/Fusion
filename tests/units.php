@@ -87,7 +87,7 @@ $tests = [
     new Valvoid\Fusion\Tests\Tasks\Snap\Config\InterpreterTest,
     new Valvoid\Fusion\Tests\Tasks\Snap\SnapTest,
     new Valvoid\Fusion\Tests\Tasks\Stack\Config\InterpreterTest,
-    new Valvoid\Fusion\Tests\Tasks\GroupTest
+    new \Valvoid\Fusion\Tests\Group\GroupTest
 ];
 
 foreach ($tests as $test) {
