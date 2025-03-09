@@ -22,8 +22,6 @@ namespace Valvoid\Fusion\Tests\Tasks\Image;
 use Exception;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Image\Image;
-use Valvoid\Fusion\Tests\Tasks\Image\Mocks\BusMock;
-use Valvoid\Fusion\Tests\Tasks\Image\Mocks\ConfigMock;
 use Valvoid\Fusion\Tests\Tasks\Image\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -41,21 +39,18 @@ class ImageTest extends Test
     {
         try {
             $containerMock = new ContainerMock;
-            $config = new ConfigMock;
 
             $task = new Image(["group" => true]);
 
             $task->execute();
             $this->testMetas();
             $this->testRootMetadata();
-            $config->destroy();
             $containerMock->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
 
-            $config->destroy();
             $containerMock->destroy();
 
             $this->result = false;

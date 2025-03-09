@@ -19,60 +19,41 @@
 
 namespace Valvoid\Fusion\Config;
 
-use Valvoid\Fusion\Config\Proxy\Logic;
 use Valvoid\Fusion\Config\Proxy\Proxy;
-use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
-use Valvoid\Fusion\Log\Events\Errors\Metadata;
+use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 
 /**
- * Package manager configuration proxy.
+ * Static config proxy.
  *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Config
 {
-    /** @var ?Config Active instance. */
-    private static ?Config $instance = null;
-
-    /** @var Proxy Decoupled logic. */
-    protected Proxy $proxy;
-
-    /**
-     * Constructs the config.
-     *
-     * @param Proxy|Logic $proxy Any or default logic.
-     * @throws ConfigError Invalid config exception.
-     * @throws Metadata Invalid meta exception.
-     */
-    private function __construct(Proxy|Logic $proxy)
-    {
-        self::$instance ??= $this;
-        $this->proxy = $proxy;
-
-        // lazy boot due to self reference
-        $this->proxy->build();
-    }
-
     /**
      * Returns composite settings.
      *
      * @param string ...$breadcrumb Index path inside config.
      * @return mixed Config.
+     * @throws Error Internal error.
      */
     public static function get(string ...$breadcrumb): mixed
     {
-        return self::$instance->proxy->get(...$breadcrumb);
+        return Container::get(Proxy::class)
+            ->get(...$breadcrumb);
     }
 
     /**
      * Returns lazy code registry.
      *
      * @return array Lazy.
+     * @throws Error Internal error.
      */
     public static function getLazy(): array
     {
-        return self::$instance->proxy->getLazy();
+        return Container::get(Proxy::class)
+            ->getLazy();
     }
 
     /**
@@ -80,9 +61,11 @@ class Config
      *
      * @param string $class Class.
      * @return bool Indicator.
+     * @throws Error Internal error.
      */
     public static function hasLazy(string $class): bool
     {
-        return self::$instance->proxy->hasLazy($class);
+        return Container::get(Proxy::class)
+            ->hasLazy($class);
     }
 }

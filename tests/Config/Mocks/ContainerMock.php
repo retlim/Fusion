@@ -32,27 +32,49 @@ use Valvoid\Fusion\Container\Proxy\Proxy;
 class ContainerMock
 {
     private ReflectionClass $reflection;
+    public Proxy $logic;
 
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Container::class);
-        $this->reflection->setStaticPropertyValue("instance", new class extends Container
-        {
-            public function __construct()
+        $this->logic = new class implements Proxy {
+
+            public $bus;
+            public $config;
+
+            public function get(string $class, ...$args): object
             {
-                $this->proxy = new class implements Proxy {
-
-                    public $bus;
-
-                    public function get(string $class, ...$args): object
+                if ($class == \Valvoid\Fusion\Config\Proxy\Proxy::class)
+                    return $this->config ??= new class implements \Valvoid\Fusion\Config\Proxy\Proxy
                     {
-                        return $this->bus ??= new \Valvoid\Fusion\Bus\Proxy\Logic();
-                    }
+                        public $calls = [];
 
-                    public function refer(string $id, string $class): void {}
-                    public function unset(string $class): void {}
-                };
+                        public function get(string ...$breadcrumb): mixed
+                        {
+                            $this->calls[] = __FUNCTION__;
+                            return 0;
+                        }
+                        public function getLazy(): array {
+                            $this->calls[] = __FUNCTION__;
+                            return [];
+                        }
+                        public function hasLazy(string $class): bool
+                        {$this->calls[] = __FUNCTION__;
+
+                            return false;
+                        }
+                    };
+
+                return $this->bus ??= new \Valvoid\Fusion\Bus\Proxy\Logic();
             }
+
+            public function refer(string $id, string $class): void {}
+            public function unset(string $class): void {}
+        };
+
+        $this->reflection->setStaticPropertyValue("instance", new class($this->logic) extends Container
+        {
+            public function __construct(protected Proxy $proxy) {}
         });
     }
 

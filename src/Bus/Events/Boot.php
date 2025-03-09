@@ -17,36 +17,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Config\Proxy;
+namespace Valvoid\Fusion\Bus\Events;
 
 /**
- * Config.
+ * Boot event.
  *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-interface Proxy
+class Boot implements Event
 {
-    /**
-     * Returns composite settings.
-     *
-     * @param string ...$breadcrumb Index path inside config.
-     * @return mixed Config.
-     */
-    public function get(string ...$breadcrumb): mixed;
-
-    /**
-     * Returns lazy code registry.
-     *
-     * @return array Lazy.
-     */
-    public function getLazy(): array;
-
-    /**
-     * Returns indicator for existing lazy code.
-     *
-     * @param string $class Class.
-     * @return bool Indicator.
-     */
-    public function hasLazy(string $class): bool;
+    // just trigger
 }

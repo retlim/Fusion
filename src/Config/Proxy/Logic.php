@@ -21,6 +21,7 @@ namespace Valvoid\Fusion\Config\Proxy;
 
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
+use Valvoid\Fusion\Bus\Events\Boot;
 use Valvoid\Fusion\Config\Interpreter\Dir as DirectoryInterpreter;
 use Valvoid\Fusion\Config\Interpreter\Interpreter;
 use Valvoid\Fusion\Config\Normalizer\Dir as DirectoryNormalizer;
@@ -29,6 +30,7 @@ use Valvoid\Fusion\Config\Parser\Dir as DirectoryParser;
 use Valvoid\Fusion\Config\Parser\Parser;
 use Valvoid\Fusion\Fusion;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Metadata;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Log\Log;
@@ -62,12 +64,10 @@ class Logic implements Proxy
      * @param string $root
      * @param array $lazy
      * @param array $config Runtime config layer.
+     * @throws Error Internal error.
      */
     public function __construct(string $root, array $lazy, array $config)
     {
-        Bus::addReceiver(static::class, $this->handleBusEvent(...),
-            ConfigEvent::class);
-
         $this->root = $root;
         $this->lazy = $lazy;
         $this->configs = [
@@ -75,6 +75,17 @@ class Logic implements Proxy
             "persistence" => [],
             "default" => []
         ];
+
+        Bus::addReceiver(self::class, function () {
+            Bus::addReceiver(self::class, $this->handleBusEvent(...),
+
+                // parser, interpreter, normalizer
+                ConfigEvent::class);
+
+            $this->build();
+
+            // lazy build due to self reference
+        }, Boot::class);
     }
 
     /**
@@ -83,7 +94,7 @@ class Logic implements Proxy
      * @throws ConfigError Invalid config exception.
      * @throws Metadata Invalid meta exception.
      */
-    public function build(): void
+    protected function build(): void
     {
         $config = $this->configs["runtime"];
 
@@ -145,8 +156,8 @@ class Logic implements Proxy
                 Parser::parse($content);
                 Normalizer::overlay($this->content, $content);
 
-                // null
-                // reset and keep root
+            // null
+            // reset and keep root
             } else
                 $this->content = [];
         }

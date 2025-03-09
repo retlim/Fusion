@@ -3,6 +3,7 @@
 // Do not modify.
 return [
 	'Valvoid\Fusion\Bus\Bus' => '/src/Bus/Bus.php',
+	'Valvoid\Fusion\Bus\Events\Boot' => '/src/Bus/Events/Boot.php',
 	'Valvoid\Fusion\Bus\Events\Cache' => '/src/Bus/Events/Cache.php',
 	'Valvoid\Fusion\Bus\Events\Config' => '/src/Bus/Events/Config.php',
 	'Valvoid\Fusion\Bus\Events\Event' => '/src/Bus/Events/Event.php',

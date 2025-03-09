@@ -19,11 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Config;
 
-use Exception;
-use Valvoid\Fusion\Container\Proxy\Logic as ContainerLogic;
-use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Config;
-use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tests\Config\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -36,54 +32,29 @@ use Valvoid\Fusion\Tests\Test;
 class ConfigTest extends Test
 {
     protected string|array $coverage = Config::class;
+    private ContainerMock $container;
 
-    private string $root;
-
-    private array $lazy;
-
-    private Config $config;
-
-    /**
-     */
     public function __construct()
     {
-        try {
-            $containerMock = new ContainerMock;
-            $this->root = dirname(__DIR__, 2);
-            $this->lazy = require "$this->root/cache/loadable/lazy.php";
+        $this->container = new ContainerMock;
 
-            $this->config = (new ContainerLogic)->get(Config::class,
-                root: $this->root,
-                lazy: $this->lazy,
-                config: []);
-
-            $this->testInstanceDestruction();
-
-            (new ContainerLogic)->unset(Config::class);
-            $containerMock->destroy();
-
-        } catch (Exception $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        // static
+        $this->testStaticInterface();
+        $this->container->destroy();
     }
 
-    /**
-     * @return void
-     * @throws Error
-     */
-    public function testInstanceDestruction(): void
+    public function testStaticInterface(): void
     {
-        $instance = $this->config;
-        (new ContainerLogic)->unset(Config::class);
-        $this->config = (new ContainerLogic)->get(Config::class,
-            root: $this->root,
-            lazy: $this->lazy,
-            config: []);
+        Config::get();
+        Config::getLazy();
+        Config::hasLazy("");
 
-        // assert different instances
-        if ($instance === $this->config) {
+        // static functions connected to same non-static functions
+        if ($this->container->logic->config->calls !== [
+            "get",
+            "getLazy",
+            "hasLazy"]) {
+
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
             $this->result = false;
