@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Dir;
+namespace Valvoid\Fusion\Tests\Dir\Mocks;
 
 use ReflectionClass;
 use Valvoid\Fusion\Config\Config;

@@ -19,9 +19,6 @@
 
 namespace Valvoid\Fusion\Tests\Dir;
 
-use ReflectionException;
-use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Tests\Dir\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
@@ -36,36 +33,46 @@ class DirTest extends Test
 {
     protected string|array $coverage = Dir::class;
 
-    private Dir $dir;
+    private ContainerMock $container;
 
     public function __construct()
     {
-        try {
-            $containerMock = new ContainerMock;
-            $configMock = new ConfigMock;
-            $this->dir = (new Logic)->get(Dir::class);
+        $this->container = new ContainerMock;
 
-            $this->testInstanceDestruction();
+        // static
+        $this->testStaticInterface();
+        $this->container->destroy();
 
-            $configMock->destroy();
-            (new Logic)->unset(Dir::class);
-            $containerMock->destroy();
-
-        } catch (ReflectionException $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
     }
 
-    public function testInstanceDestruction(): void
+    public function testStaticInterface(): void
     {
-        $instance = $this->dir;
-        (new Logic)->unset(Dir::class);
-        $this->dir = (new Logic)->get(Dir::class);
+        Dir::getTaskDir();
+        Dir::getStateDir();
+        Dir::getCacheDir();
+        Dir::getOtherDir();
+        Dir::getPackagesDir();
+        Dir::getRootDir();
+        Dir::createDir("",1);
+        Dir::rename("","");
+        Dir::copy("","");
+        Dir::delete("");
+        Dir::clear("", "");
 
-        // assert different instances
-        if ($instance === $this->dir) {
+        // static functions connected to same non-static functions
+        if ($this->container->logic->dir->calls !== [
+                "getTaskDir",
+                "getStateDir",
+                "getCacheDir",
+                "getOtherDir",
+                "getPackagesDir",
+                "getRootDir",
+                "createDir",
+                "rename",
+                "copy",
+                "delete",
+                "clear"]) {
+
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
             $this->result = false;
