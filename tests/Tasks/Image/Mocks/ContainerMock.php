@@ -47,6 +47,21 @@ class ContainerMock
                     public $bus;
                     public function get(string $class, ...$args): object
                     {
+                        if ($class === \Valvoid\Fusion\Config\Proxy\Proxy::class)
+                            return  new class implements \Valvoid\Fusion\Config\Proxy\Proxy
+                            {
+                                public function get(string ...$breadcrumb): mixed
+                                {
+                                    return __DIR__ . "/package";
+                                }
+
+                                // @phpstan-ignore-next-line
+                                public function __construct(string $root = "", array &$lazy = [], array $config = []) {}
+                                public function build(): void {}
+                                public function getLazy(): array {return [];}
+                                public function hasLazy(string $class): bool {return false;}
+                            };
+
                         if ($class === \Valvoid\Fusion\Group\Proxy\Proxy::class)
                             return $this->group ??= new \Valvoid\Fusion\Group\Proxy\Logic();
 

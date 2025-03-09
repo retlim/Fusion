@@ -20,6 +20,7 @@
 namespace Valvoid\Fusion\Tests\Bus;
 
 use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Bus\Events\Boot;
 use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Events\Config;
 use Valvoid\Fusion\Bus\Events\Metadata;
@@ -45,7 +46,8 @@ class BusTest extends Test
         Cache::class,
         Config::class,
         Metadata::class,
-        Root::class
+        Root::class,
+        Boot::class
     ];
 
     private ContainerMock $container;

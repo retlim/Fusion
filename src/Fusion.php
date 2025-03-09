@@ -22,6 +22,7 @@ namespace Valvoid\Fusion;
 use Exception;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Root;
+use Valvoid\Fusion\Bus\Events\Boot;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Dir\Dir;
@@ -45,6 +46,8 @@ use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
 use Valvoid\Fusion\Bus\Proxy\Logic as BusLogic;
 use Valvoid\Fusion\Dir\Proxy\Proxy as DirProxy;
 use Valvoid\Fusion\Dir\Proxy\Logic as DirLogic;
+use Valvoid\Fusion\Config\Proxy\Proxy as ConfigProxy;
+use Valvoid\Fusion\Config\Proxy\Logic as ConfigLogic;
 
 /**
  * Package manager for PHP-based projects.
@@ -85,17 +88,24 @@ class Fusion
         (new Logic)->get(Container::class);
         Container::refer(BusProxy::class, BusLogic::class);
         Container::refer(LogProxy::class, LogLogic::class);
-        Container::get(Config::class,
+        Container::refer(ConfigProxy::class, ConfigLogic::class);
+        Container::refer(GroupProxy::class, GroupLogic::class);
+        Container::refer(DirProxy::class, DirLogic::class);
+        Container::refer(HubProxy::class, HubLogic::class);
+
+        // init sharable config instance
+        Container::get(ConfigProxy::class,
             root: $this->root,
             lazy: $this->lazy,
             config: $config
         );
 
-        Container::refer(DirProxy::class, DirLogic::class);
-        Container::refer(HubProxy::class, HubLogic::class);
-        Container::refer(GroupProxy::class, GroupLogic::class);
-
+        // trigger lazy config build due to self reference
+        Bus::broadcast(new Boot);
         Bus::addReceiver(self::class, $this->handleBusEvent(...),
+
+            // keep session active if
+            // recursive or nested update/upgrade
             Root::class);
     }
 
@@ -149,7 +159,6 @@ class Fusion
             return false;
 
         Bus::removeReceiver(self::class);
-        Container::unset(Config::class);
         Container::unset(Container::class);
 
         $fusion = null;
