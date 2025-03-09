@@ -17,12 +17,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Log\Mocks;
+namespace Valvoid\Fusion\Tests\Group\Mocks;
 
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
-use Valvoid\Fusion\Log\Events\Interceptor;
+use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
+use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 
 /**
  * Mocked container.
@@ -39,51 +40,87 @@ class ContainerMock
         $this->reflection = new ReflectionClass(Container::class);
         $this->logic = new class implements Proxy
         {
-            public \Valvoid\Fusion\Log\Proxy\Proxy $log;
+            public \Valvoid\Fusion\Group\Proxy\Proxy $group;
             public function get(string $class, ...$args): object
             {
-                return $this->log ??= new class implements \Valvoid\Fusion\Log\Proxy\Proxy
+                return $this->group ??= new class implements \Valvoid\Fusion\Group\Proxy\Proxy
                 {
                     public $calls = [];
 
-                    public function addInterceptor(Interceptor $interceptor): void
+                    public function setInternalMetas(array $metas): void
                     {
                         $this->calls[] = __FUNCTION__;
                     }
 
-                    public function removeInterceptor(): void
+                    public function setImplication(array $implication): void
                     {
                         $this->calls[] = __FUNCTION__;
                     }
 
-                    public function error(string|\Valvoid\Fusion\Log\Events\Event $event): void
+                    public function setExternalMetas(array $metas): void
                     {
                         $this->calls[] = __FUNCTION__;
                     }
 
-                    public function warning(string|\Valvoid\Fusion\Log\Events\Event $event): void
+                    public function getExternalRootMetadata(): ?ExternalMeta
+                    {
+                        $this->calls[] = __FUNCTION__;
+
+                        return null;
+                    }
+
+                    public function getInternalRootMetadata(): InternalMeta
+                    {
+                        $this->calls[] = __FUNCTION__;
+
+                        return new InternalMeta([],[]);
+                    }
+
+                    public function getRootMetadata(): ExternalMeta|InternalMeta
+                    {
+                        $this->calls[] = __FUNCTION__;
+                        return new InternalMeta([],[]);
+                    }
+
+                    public function hasDownloadable(): bool
+                    {
+                        $this->calls[] = __FUNCTION__;
+                        return true;
+                    }
+
+                    public function getExternalMetas(): array
+                    {
+                        $this->calls[] = __FUNCTION__;
+                        return [];
+                    }
+
+                    public function getInternalMetas(): array
+                    {
+                        $this->calls[] = __FUNCTION__;
+                        return [];
+                    }
+
+                    public function setImplicationBreadcrumb(array $breadcrumb): void
                     {
                         $this->calls[] = __FUNCTION__;
                     }
 
-                    public function notice(string|\Valvoid\Fusion\Log\Events\Event $event): void
+                    public function getImplication(): array
                     {
                         $this->calls[] = __FUNCTION__;
+                        return [];
                     }
 
-                    public function info(string|\Valvoid\Fusion\Log\Events\Event $event): void
+                    public function getPath(string $source): array
                     {
                         $this->calls[] = __FUNCTION__;
+                        return [];
                     }
 
-                    public function verbose(string|\Valvoid\Fusion\Log\Events\Event $event): void
+                    public function getSourcePath(array $implication, string $source): array
                     {
                         $this->calls[] = __FUNCTION__;
-                    }
-
-                    public function debug(string|\Valvoid\Fusion\Log\Events\Event $event): void
-                    {
-                        $this->calls[] = __FUNCTION__;
+                        return [];
                     }
                 };
             }
