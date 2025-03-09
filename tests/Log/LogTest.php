@@ -19,9 +19,20 @@
 
 namespace Valvoid\Fusion\Tests\Log;
 
-use ReflectionException;
-use Valvoid\Fusion\Container\Proxy\Logic;
+use Valvoid\Fusion\Log\Events\Errors\Config;
+use Valvoid\Fusion\Log\Events\Errors\Deadlock;
+use Valvoid\Fusion\Log\Events\Errors\Environment;
+use Valvoid\Fusion\Log\Events\Errors\Error;
+use Valvoid\Fusion\Log\Events\Errors\Lifecycle;
+use Valvoid\Fusion\Log\Events\Errors\Metadata;
+use Valvoid\Fusion\Log\Events\Errors\Request;
+use Valvoid\Fusion\Log\Events\Infos\Content;
+use Valvoid\Fusion\Log\Events\Infos\Error as InfoError;
+use Valvoid\Fusion\Log\Events\Infos\Id;
+use Valvoid\Fusion\Log\Events\Infos\Name;
 use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Tests\Log\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Log\Mocks\InterceptorMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -32,36 +43,58 @@ use Valvoid\Fusion\Tests\Test;
  */
 class LogTest extends Test
 {
-    protected string|array $coverage = Log::class;
+    protected string|array $coverage = [
+        Log::class,
 
-    private Log $log;
+        // ballast
+        Name::class,
+        Id::class,
+        InfoError::class,
+        Content::class,
+        Config::class,
+        Deadlock::class,
+        Environment::class,
+        Error::class,
+        Lifecycle::class,
+        Metadata::class,
+        Request::class
+    ];
+
+    private ContainerMock $container;
+    private InterceptorMock $interceptor;
 
     public function __construct()
     {
-        try {
-            $configMock = new ConfigMock;
-            $this->log = (new Logic)->get(Log::class);
+        $this->container = new ContainerMock;
+        $this->interceptor = new InterceptorMock;
 
-            $this->testInstanceDestruction();
-
-            $configMock->destroy();
-            (new Logic)->unset(Log::class);
-
-        } catch (ReflectionException $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        // static
+        $this->testStaticInterface();
+        $this->container->destroy();
     }
 
-    public function testInstanceDestruction(): void
+    public function testStaticInterface(): void
     {
-        $instance = $this->log;
-        (new Logic)->unset(Log::class);
-        $this->log = (new Logic)->get(Log::class);
+        Log::removeInterceptor();
+        Log::addInterceptor($this->interceptor);
+        Log::debug("");
+        Log::error("");
+        Log::warning("");
+        Log::notice("");
+        Log::info("");
+        Log::debug("");
 
-        // assert different instances
-        if ($instance === $this->log) {
+        // static functions connected to same non-static functions
+        if ($this->container->logic->log->calls !== [
+                "removeInterceptor",
+                "addInterceptor",
+                "debug",
+                "error",
+                "warning",
+                "notice",
+                "info",
+                "debug"]) {
+
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
             $this->result = false;
