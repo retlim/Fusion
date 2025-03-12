@@ -24,7 +24,7 @@ use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Tasks\Stack\Stack;
 use Valvoid\Fusion\Tasks\Stack\Config\Interpreter;
-use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Tasks\Stack\Config\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**

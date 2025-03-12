@@ -17,9 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Stack\Mocks;
+namespace Valvoid\Fusion\Tests\Tasks\Stack\Config\Mocks;
 
 use ReflectionClass;
+use Valvoid\Fusion\Bus\Proxy\Logic;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
 
@@ -29,38 +30,30 @@ use Valvoid\Fusion\Container\Proxy\Proxy;
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ContainerMock implements Proxy
+class ContainerMock
 {
     private ReflectionClass $reflection;
-    public GroupMock $group;
-    public DirMock $dir;
-    public LogMock $log;
 
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Container::class);
-        $this->group = new GroupMock;
-        $this->log = new LogMock;
-        $this->dir = new DirMock;
-
-        $this->reflection->setStaticPropertyValue("instance",
-            new class($this) extends Container
+        $this->reflection->setStaticPropertyValue("instance", new class extends Container
+        {
+            public function __construct()
             {
-                public function __construct(protected Proxy $proxy) {}
-            });
-    }
+                $this->proxy = new class implements Proxy {
+                    public $bus;
+                    public function get(string $class, ...$args): object
+                    {
+                        return $this->bus ??= new Logic;
+                    }
 
-    public function get(string $class, ...$args): object
-    {
-        return match ($class) {
-            \Valvoid\Fusion\Group\Proxy\Proxy::class => $this->group,
-            \Valvoid\Fusion\Dir\Proxy\Proxy::class => $this->dir,
-            default => $this->log
-        };
+                    public function refer(string $id, string $class): void {}
+                    public function unset(string $class): void {}
+                };
+            }
+        });
     }
-
-    public function refer(string $id, string $class): void {}
-    public function unset(string $class): void {}
 
     public function destroy(): void
     {
