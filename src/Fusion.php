@@ -235,7 +235,7 @@ class Fusion
      *
      * @throws InternalError Internal error.
      */
-    public function normalize(): void
+    protected function normalize(): void
     {
         Dir::delete(Dir::getStateDir());
         Dir::delete(Dir::getTaskDir());
