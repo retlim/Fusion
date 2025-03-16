@@ -23,6 +23,7 @@ use Closure;
 use CurlMultiHandle;
 use CurlShareHandle;
 use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Offset as RemoteOffsetApi;
@@ -97,7 +98,9 @@ class Logic implements Proxy
         // local API root
         $root = Config::get("dir", "path");
         $root = dirname($root);
-        $this->cache = new Cache($root);
+        $this->cache = Container::get(Cache::class,
+            root: $root
+        );
 
         foreach ($config["apis"] as $id => $api)
             $this->apis[$id] = (is_subclass_of($api["api"], LocalApi::class)) ?

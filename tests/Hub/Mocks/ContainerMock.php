@@ -19,10 +19,11 @@
 
 namespace Valvoid\Fusion\Tests\Hub\Mocks;
 
-use Closure;
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
+use Valvoid\Fusion\Hub\Proxy\Logic;
+use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
 
 /**
  * Mocked container.
@@ -30,62 +31,52 @@ use Valvoid\Fusion\Container\Proxy\Proxy;
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ContainerMock
+class ContainerMock implements Proxy
 {
     private ReflectionClass $reflection;
-    public Proxy $logic;
+    public HubProxy $hub;
+    public ConfigMock $config;
+    public CacheMock $cache;
+
+    public array $classes = [
+        "Valvoid\Fusion\Hub\Cache" => CacheMock::class,
+        "Valvoid\Fusion\Config\Proxy\Proxy" => ConfigMock::class,
+    ];
+
     public function __construct()
     {
         $this->reflection = new ReflectionClass(Container::class);
-        $this->logic = new class implements Proxy
-        {
-            public \Valvoid\Fusion\Hub\Proxy\Proxy $hub;
-            public function get(string $class, ...$args): object
+        $this->reflection->setStaticPropertyValue("instance",
+            new class($this) extends Container
             {
-                return $this->hub ??= new class implements \Valvoid\Fusion\Hub\Proxy\Proxy
-                {
-                    public $calls = [];
-
-                    public function addVersionsRequest(array $source): int
-                    {
-                        $this->calls[] = __FUNCTION__;
-                        return 0;
-                    }
-
-                    public function addMetadataRequest(array $source): int
-                    {
-                        $this->calls[] = __FUNCTION__;
-                        return 0;
-                    }
-
-                    public function addSnapshotRequest(array $source, string $path): int
-                    {
-                        $this->calls[] = __FUNCTION__;
-                        return 0;
-                    }
-
-                    public function addArchiveRequest(array $source): int
-                    {
-                        $this->calls[] = __FUNCTION__;
-                        return 0;
-                    }
-
-                    public function executeRequests(Closure $callback): void
-                    {
-                        $this->calls[] = __FUNCTION__;
-                    }
-                };
-            }
-
-            public function refer(string $id, string $class): void {}
-            public function unset(string $class): void {}
-        };
-
-        $this->reflection->setStaticPropertyValue("instance", new class($this->logic) extends Container
-        {
-            public function __construct(protected Proxy $proxy) {}
-        });
+                public function __construct(protected Proxy $proxy) {}
+            });
     }
+
+    public function setUpStaticTests(): void
+    {
+        $this->classes["Valvoid\Fusion\Hub\Proxy\Proxy"] = ProxyMock::class;
+    }
+
+    public function setUpLogicTests(): void
+    {
+        // reset
+        unset($this->hub);
+
+        $this->classes["Valvoid\Fusion\Hub\Proxy\Proxy"] = Logic::class;
+    }
+
+    public function get(string $class, ...$args): object
+    {
+        return match ($class) {
+            "Valvoid\Fusion\Config\Proxy\Proxy" => $this->config ??= new ($this->classes[$class]),
+            "Valvoid\Fusion\Hub\Proxy\Proxy" => $this->hub ??= new ($this->classes[$class]),
+            "Valvoid\Fusion\Hub\Cache" => $this->cache ??= new ($this->classes[$class]),
+        };
+    }
+
+    public function refer(string $id, string $class): void {}
+    public function unset(string $class): void {}
 
     public function destroy(): void
     {
