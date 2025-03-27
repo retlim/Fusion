@@ -11,7 +11,7 @@ repetitive micromanagement tasks, such as:
 ## Documentation
 
 The separated [documentation repository](https://gitlab.com/valvoid/fusion/php/docs)
-also has the [user-friendly output](https://valvoid.com/registry/packages/1/fusion/docs) and contains content such as:
+also has the [user-friendly output](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/prologue/fusion) and contains content such as:
 
 ### Architecture
 
@@ -31,7 +31,7 @@ others, the following automated key features are possible:
 
 ### Integration
 
-As mentioned above, Fusion is also a [package](https://valvoid.com/registry/packages/1/fusion) itself, and in addition, it 
+As mentioned above, Fusion is also a [package](https://valvoid.com/registry/packages/1/fusion-php-package-manager) itself, and in addition, it 
 provides the interface-based config for custom implementations, such as:
 
 - Management logic.
