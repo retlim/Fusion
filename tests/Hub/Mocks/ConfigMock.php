@@ -29,7 +29,6 @@ use Valvoid\Fusion\Config\Proxy\Proxy;
  */
 class ConfigMock implements Proxy
 {
-
     public function get(string ...$breadcrumb): mixed
     {
         if ($breadcrumb[0] == "hub")
