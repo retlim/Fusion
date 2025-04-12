@@ -93,7 +93,7 @@ class Bitbucket extends RemoteOffsetApi
 
         // data center API 1.0
         $path = substr($path, 1);
-        $path = str_replace('/', "/repos", $path);
+        $path = str_replace('/', "/repos/", $path);
 
         return $this->config["url"] .
 
@@ -166,7 +166,7 @@ class Bitbucket extends RemoteOffsetApi
 
         // data center API 1.0
         $path = substr($path, 1);
-        $path = str_replace('/', "/repos", $path);
+        $path = str_replace('/', "/repos/", $path);
 
         return $this->config["url"] .
 
@@ -225,7 +225,7 @@ class Bitbucket extends RemoteOffsetApi
 
         // data center API 1.0
         $path = substr($path, 1);
-        $path = str_replace('/', "/repos", $path);
+        $path = str_replace('/', "/repos/", $path);
 
         return $this->config["url"] .
 
@@ -261,7 +261,7 @@ class Bitbucket extends RemoteOffsetApi
 
         // data center API 1.0
         $path = substr($path, 1);
-        $path = str_replace('/', "/repos", $path);
+        $path = str_replace('/', "/repos/", $path);
 
         return $this->config["url"] .
 
