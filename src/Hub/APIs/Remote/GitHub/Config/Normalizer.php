@@ -37,7 +37,7 @@ class Normalizer extends ConfigNormalizer
         $config["domain"] ??= end($breadcrumb);
         $config["url"] = $config["protocol"] .
             (($config["domain"] != "github.com") ?
-                "://" . $config["domain"] . "/APIs/v3/repos" :
+                "://" . $config["domain"] . "/api/v3/repos" :
                 "://api." . $config["domain"] . "/repos");
     }
 }
