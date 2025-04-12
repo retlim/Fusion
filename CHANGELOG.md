@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.4](/../../compare/1.0.3...1.0.4) - Apr 13, 2025
+
+- Fix Bitbucket Data Center path ([#7](https://gitlab.com/valvoid/fusion/php/code/-/issues/7))
+- Fix GitHub Enterprise Server URL ([#8](https://gitlab.com/valvoid/fusion/php/code/-/issues/8))
+
 ## [1.0.3](/../../compare/1.0.2...1.0.3) - Feb 20, 2025
 
 - Fixes self-update/upgrade bug  ([#4](https://gitlab.com/valvoid/fusion/php/code/-/issues/4)) on Windows.
