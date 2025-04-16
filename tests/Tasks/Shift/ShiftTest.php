@@ -53,6 +53,11 @@ class ShiftTest extends Test
             unset($containerMock->logic->group);// clear
             unset($containerMock->logic->dir);// clear
 
+            // new root with new cache dir intersection
+            $this->testShiftRecursiveCacheIntersection();
+            unset($containerMock->logic->group);// clear
+            unset($containerMock->logic->dir);// clear
+
             $this->testShiftNested();
             unset($containerMock->logic->group);// clear
             unset($containerMock->logic->dir);// clear
@@ -103,6 +108,21 @@ class ShiftTest extends Test
             !file_exists("$this->cache/new") ||
             !file_exists("$this->cache/che/new") ||
             !file_exists("$this->cache/che/log/keep")) {
+            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
+
+            $this->result = false;
+        }
+    }
+
+    public function testShiftRecursiveCacheIntersection(): void
+    {
+        $this->setUp(__DIR__ . '/Mocks/package/cache_intersecion');
+        MetadataMock::addRecursiveCacheIntersection();
+       (new Shift([]))->execute();
+
+        if (!file_exists("$this->cache/cache/new") ||
+            !file_exists("$this->cache/cache/new/new") ||
+            !file_exists("$this->cache/cache/new/log/keep")) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
             $this->result = false;
