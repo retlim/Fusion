@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.5](/../../compare/1.0.4...1.0.5) - Apr 16, 2025
+
+- Fix renaming for intersecting cache dirs ([#9](https://gitlab.com/valvoid/fusion/php/code/-/issues/9))
+
 ## [1.0.4](/../../compare/1.0.3...1.0.4) - Apr 13, 2025
 
 - Fix Bitbucket Data Center path ([#7](https://gitlab.com/valvoid/fusion/php/code/-/issues/7))
