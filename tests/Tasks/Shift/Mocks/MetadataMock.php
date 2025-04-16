@@ -136,6 +136,55 @@ class MetadataMock
     /**
      * @throws ReflectionException
      */
+    public static function addRecursiveCacheIntersection(): void
+    {
+        $reflection = new ReflectionClass(Internal::class);
+        $metadata = $reflection->newInstanceWithoutConstructor();
+        $content = $reflection->getProperty('content');
+
+        $metadata->setCategory(InternalCategory::OBSOLETE);
+        $content->setValue($metadata, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "dir" => "",
+            "source" => "",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
+
+        Group::setInternalMetas(["metadata1" => $metadata]);
+
+        $reflection = new ReflectionClass(External::class);
+        $metadata = $reflection->newInstanceWithoutConstructor();
+        $content = $reflection->getProperty('content');
+
+        $metadata->setCategory(Category::DOWNLOADABLE);
+        $content->setValue($metadata, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "source" => [
+                "api" => "",
+                "path" => "",
+                "prefix" => "",
+                "reference" => ""
+            ],
+            "dir" => "",
+            "structure" => [
+                "cache" => "/cache/new"
+            ]
+        ]);
+
+        Group::setExternalMetas(["metadata1" => $metadata]);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
     public static function addNested(): void
     {
         $internal = [];

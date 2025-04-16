@@ -138,21 +138,52 @@ class Shift extends Task
         // executed files
         $this->cleanUpDir($this->root);
 
-        //  new cache directory
+        // new cache directory
         if ($internalCachePath != $externalCachePath) {
+            $oldCacheDir = $this->root . $internalCachePath;
+            $newCacheDir = $this->root . $externalCachePath;
 
             // notify new cache directory change
-            Bus::broadcast(new Cache($this->root . $externalCachePath));
+            Bus::broadcast(new Cache($newCacheDir));
 
-            // keep current code session alive
+            // keep current code session alive for next tasks
             if ($hasInternalFusion)
                 Bus::broadcast(new Root(Dir::getOtherDir() .
                     "/valvoid/fusion"));
 
-            Dir::rename(
-                $this->root . $internalCachePath,
-                $this->root . $externalCachePath
-            );
+            // [0] is empty due to leading slash
+            $internalCachePathParts = explode('/', $internalCachePath);
+            $cachePrefix = "/$internalCachePathParts[1]";
+            $cachePrefixDir = $this->root . $cachePrefix;
+
+            // handle intersection
+            if (str_starts_with($externalCachePath, $cachePrefix)) {
+                $tempCacheDir = $cachePrefixDir;
+
+                do {
+                    $tempCacheDir .= "-";
+
+                // search temp non-existing cache dir
+                } while (file_exists($tempCacheDir));
+
+                // rename old to temp
+                // clear old ballast leading dirs
+                // parent dir must exist
+                // rename temp to new
+                Dir::rename($oldCacheDir, $tempCacheDir);
+                Dir::delete($cachePrefixDir);
+                Dir::createDir($newCacheDir);
+                Dir::rename($tempCacheDir, $newCacheDir);
+
+            } else {
+
+                // parent dir must exist
+                // rename old to new
+                // clear old ballast leading dirs
+                Dir::createDir($newCacheDir);
+                Dir::rename($oldCacheDir, $newCacheDir);
+                Dir::delete($cachePrefixDir);
+            }
 
             // update changed
             $this->state = Dir::getStateDir();
