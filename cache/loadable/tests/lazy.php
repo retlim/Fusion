@@ -128,6 +128,7 @@ return [
 	'Valvoid\Fusion\Tests\Tasks\Stack\Mocks\LogMock' => '/tests/Tasks/Stack/Mocks/LogMock.php',
 	'Valvoid\Fusion\Tests\Tasks\Stack\StackTest' => '/tests/Tasks/Stack/StackTest.php',
 	'Valvoid\Fusion\Tests\Test' => '/tests/Test.php',
+	'Valvoid\Fusion\Tests\Util\Metadata\StructureTest' => '/tests/Util/Metadata/StructureTest.php',
 	'Valvoid\Fusion\Tests\Util\Pattern\InterpreterTest' => '/tests/Util/Pattern/InterpreterTest.php',
 	'Valvoid\Fusion\Tests\Util\Reference\NormalizerTest' => '/tests/Util/Reference/NormalizerTest.php',
 	'Valvoid\Fusion\Tests\Util\Version\InterpreterTest' => '/tests/Util/Version/InterpreterTest.php',
