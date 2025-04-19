@@ -73,6 +73,7 @@ $tests = [
     new Valvoid\Fusion\Tests\Log\LogTest,
     new Valvoid\Fusion\Tests\Util\Version\InterpreterTest,
     new Valvoid\Fusion\Tests\Util\Reference\NormalizerTest,
+    new Valvoid\Fusion\Tests\Util\Metadata\StructureTest,
     new Valvoid\Fusion\Tests\Util\Pattern\InterpreterTest,
     new Valvoid\Fusion\Tests\Tasks\Build\Config\InterpreterTest,
     new Valvoid\Fusion\Tests\Tasks\Build\Config\NormalizerTest,
