@@ -418,10 +418,18 @@ class Cache
         // by inflated values
         uasort($versions,
             function (array $a, array $b) {
-                return VersionInterpreter::isBiggerThan(
 
+                // 0 = equal
+                if ($a == $b)
+                    return 0;
+
+                // 1 = $b > $a
+                // -1 = $a > $b
+                return (VersionInterpreter::isBiggerThan(
+
+                    // descending
                     // ($a, $b) switch params for ascending
-                    $b, $a);
+                    $b, $a)) ? 1 : -1;
             });
 
         // references
