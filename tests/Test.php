@@ -53,4 +53,20 @@ abstract class Test
         return $this->coverage ??
             null;
     }
+
+    /**
+     * Handles failed test.
+     */
+    protected function handleFailedTest(): void
+    {
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+
+        // 0 = self
+        // 1 = inheritor
+        echo "\n[x] " . $trace[1]["class"] . " | " . $trace[1]["function"] .
+            " | " . $trace[0]["line"];
+
+        // strict
+        $this->result = false;
+    }
 }
