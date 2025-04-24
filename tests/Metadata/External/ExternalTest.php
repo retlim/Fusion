@@ -17,11 +17,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Metadata\Internal;
+namespace Valvoid\Fusion\Tests\Metadata\External;
 
-use Valvoid\Fusion\Metadata\Internal\Category;
-use Valvoid\Fusion\Metadata\Internal\Internal;
-use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\ContainerMock;
+use Valvoid\Fusion\Metadata\External\Category;
+use Valvoid\Fusion\Metadata\External\External;
+use Valvoid\Fusion\Tests\Metadata\External\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -29,32 +29,37 @@ use Valvoid\Fusion\Tests\Test;
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class InternalTest extends Test
+class ExternalTest extends Test
 {
     /** @var string|array  */
-    protected string|array $coverage = Internal::class;
+    protected string|array $coverage = External::class;
 
     /** @var ContainerMock  */
     protected ContainerMock $container;
 
-    /** @var Internal  */
-    protected Internal $metadata;
+    /** @var External  */
+    protected External $metadata;
 
     /** @var array  */
     protected array $layers = [
-        "layers"
+
+        // runtime helper layer
+        "object" => [
+            "source" => __DIR__ ."/Mocks"
+        ]
     ];
 
     /** @var array  */
     protected array $content = [
         "id" => "identifier",
-        "source" => __DIR__ ."/Mocks",
+        "source" => ["src"],
         "dir" => "/",
         "version" => "version",
         "environment" => ["environment"],
         "dependencies" => [
-            "local" => null,
-            "development" => null,
+
+            // external = production only
+            // fusion.json
             "production" => ["id"],
         ],
         "structure" => [
@@ -66,25 +71,19 @@ class InternalTest extends Test
         ],
         "lifecycle" => [
             "copy" => "/copy.php",
-            "migrate" => "/migrate.php",
-            "delete" => "/delete.php",
-            "update" => "/update.php"
+            "migrate" => "/migrate.php"
         ]
     ];
 
     public function __construct()
     {
-        $this->metadata = new Internal($this->layers, $this->content);
+        $this->metadata = new External($this->layers, $this->content);
         $this->container = new ContainerMock;
 
         $this->testVersion();
         $this->testDir();
         $this->testId();
         $this->testProductionIds();
-        $this->testDevelopmentIds();
-        $this->testOptionalDevelopmentIds();
-        $this->testLocalIds();
-        $this->testOptionalLocalIds();
         $this->testCategory();
         $this->testSource();
         $this->testStructure();
@@ -97,8 +96,6 @@ class InternalTest extends Test
         $this->testContent();
         $this->testLayers();
         $this->testLifecycleCopy();
-        $this->testLifecycleUpdate();
-        $this->testLifecycleDelete();
         $this->testLifecycleMigrate();
 
         $this->container->destroy();
@@ -113,23 +110,11 @@ class InternalTest extends Test
 
     public function testLifecycleMigrate(): void
     {
-        // dir + version of external package
+        // dir + version of internal package
         if ($this->metadata->onMigrate() !== true ||
-            $this->container->proxy->log->event !== "migrate:/identifier:version")
-            $this->handleFailedTest();
-    }
-
-    public function testLifecycleUpdate(): void
-    {
-        if ($this->metadata->onUpdate() !== true ||
-            $this->container->proxy->log->event !== "update")
-            $this->handleFailedTest();
-    }
-
-    public function testLifecycleDelete(): void
-    {
-        if ($this->metadata->onDelete() !== true ||
-            $this->container->proxy->log->event !== "delete")
+            $this->container->proxy->log->event !==
+            "migrate:/home/retlim/Desktop/dev/fusion/php/code/tests" .
+            "/Metadata/External/Mocks:version")
             $this->handleFailedTest();
     }
 
@@ -207,7 +192,7 @@ class InternalTest extends Test
     public function testSource(): void
     {
         // internal source is a dir
-        if ($this->metadata->getSource() !== __DIR__ ."/Mocks")
+        if ($this->metadata->getSource() !== ["src"])
             $this->handleFailedTest();
     }
 
@@ -226,44 +211,9 @@ class InternalTest extends Test
         // lazy
         // categorize task or
         // custom
-        $this->metadata->setCategory(Category::RECYCLABLE);
+        $this->metadata->setCategory(Category::DOWNLOADABLE);
 
-        if ($this->metadata->getCategory() !== Category::RECYCLABLE)
-            $this->handleFailedTest();
-    }
-
-    public function testOptionalLocalIds(): void
-    {
-        // package has no "fusion.local.json"
-        if ($this->metadata->getLocalIds() !== null)
-            $this->handleFailedTest();
-    }
-
-    public function testLocalIds(): void
-    {
-        // package has "fusion.local.json" and
-        // dependencies in it
-        $metadata = new Internal([], ["dependencies" => [
-            "local" => ["id"]
-        ]]);
-
-        if ($metadata->getLocalIds() !== ["id"])
-            $this->handleFailedTest();
-    }
-
-    public function testOptionalDevelopmentIds(): void
-    {
-        if ($this->metadata->getDevelopmentIds() !== null)
-            $this->handleFailedTest();
-    }
-
-    public function testDevelopmentIds(): void
-    {
-        $metadata = new Internal([], ["dependencies" => [
-            "development" => ["id"]
-        ]]);
-
-        if ($metadata->getDevelopmentIds() !== ["id"])
+        if ($this->metadata->getCategory() !== Category::DOWNLOADABLE)
             $this->handleFailedTest();
     }
 
