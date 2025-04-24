@@ -82,6 +82,7 @@ $tests = [
     new Valvoid\Fusion\Tests\Metadata\Parser\StructureTest,
     new Valvoid\Fusion\Tests\Metadata\Internal\InternalTest,
     new Valvoid\Fusion\Tests\Metadata\External\ExternalTest,
+    new Valvoid\Fusion\Tests\Metadata\External\Normalizer\ReferenceTest,
     new Valvoid\Fusion\Tests\Log\LogTest,
     new Valvoid\Fusion\Tests\Util\Version\InterpreterTest,
     new Valvoid\Fusion\Tests\Util\Reference\NormalizerTest,
