@@ -69,6 +69,7 @@ return [
 	'Valvoid\Fusion\Tests\Metadata\External\ExternalTest' => '/tests/Metadata/External/ExternalTest.php',
 	'Valvoid\Fusion\Tests\Metadata\External\Mocks\ContainerMock' => '/tests/Metadata/External/Mocks/ContainerMock.php',
 	'Valvoid\Fusion\Tests\Metadata\External\Normalizer\ReferenceTest' => '/tests/Metadata/External/Normalizer/ReferenceTest.php',
+	'Valvoid\Fusion\Tests\Metadata\External\Parser\SourceTest' => '/tests/Metadata/External/Parser/SourceTest.php',
 	'Valvoid\Fusion\Tests\Metadata\Internal\InternalTest' => '/tests/Metadata/Internal/InternalTest.php',
 	'Valvoid\Fusion\Tests\Metadata\Internal\Mocks\ContainerMock' => '/tests/Metadata/Internal/Mocks/ContainerMock.php',
 	'Valvoid\Fusion\Tests\Metadata\Interpreter\EnvironmentTest' => '/tests/Metadata/Interpreter/EnvironmentTest.php',
