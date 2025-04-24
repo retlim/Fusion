@@ -112,9 +112,8 @@ class ExternalTest extends Test
     {
         // dir + version of internal package
         if ($this->metadata->onMigrate() !== true ||
-            $this->container->proxy->log->event !==
-            "migrate:/home/retlim/Desktop/dev/fusion/php/code/tests" .
-            "/Metadata/External/Mocks:version")
+            $this->container->proxy->log->event !== "migrate:" .
+            __DIR__ . "/Mocks:version")
             $this->handleFailedTest();
     }
 
