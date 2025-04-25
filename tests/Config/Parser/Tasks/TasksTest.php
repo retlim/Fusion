@@ -87,11 +87,8 @@ class TasksTest extends Test
         Tasks::parse($config);
 
         // no custom parser
-        if (class_exists(Parser::class, false)) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if (Parser::$config !== [])
+            $this->handleFailedTest();
     }
 
     public function testConfiguredParsableTaskConfig(): void
@@ -108,10 +105,7 @@ class TasksTest extends Test
         Tasks::parse($config);
 
         // passed to custom parser
-        if (!class_exists(Parser::class, false)) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if (Parser::$config !== $config["test"])
+            $this->handleFailedTest();
     }
 }

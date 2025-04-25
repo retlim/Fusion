@@ -29,5 +29,10 @@ use Valvoid\Fusion\Config\Parser as ConfigParser;
  */
 class Parser extends ConfigParser
 {
-    public static function parse(array $breadcrumb, array &$config): void {}
+    public static $config = [];
+
+    public static function parse(array $breadcrumb, array &$config): void
+    {
+        self::$config = $config;
+    }
 }
