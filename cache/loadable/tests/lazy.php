@@ -66,6 +66,8 @@ return [
 	'Valvoid\Fusion\Tests\Log\LogTest' => '/tests/Log/LogTest.php',
 	'Valvoid\Fusion\Tests\Log\Mocks\ContainerMock' => '/tests/Log/Mocks/ContainerMock.php',
 	'Valvoid\Fusion\Tests\Log\Mocks\InterceptorMock' => '/tests/Log/Mocks/InterceptorMock.php',
+	'Valvoid\Fusion\Tests\Metadata\External\Builder\BuilderTest' => '/tests/Metadata/External/Builder/BuilderTest.php',
+	'Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\ContainerMock' => '/tests/Metadata/External/Builder/Mocks/ContainerMock.php',
 	'Valvoid\Fusion\Tests\Metadata\External\ExternalTest' => '/tests/Metadata/External/ExternalTest.php',
 	'Valvoid\Fusion\Tests\Metadata\External\Mocks\ContainerMock' => '/tests/Metadata/External/Mocks/ContainerMock.php',
 	'Valvoid\Fusion\Tests\Metadata\External\Normalizer\ReferenceTest' => '/tests/Metadata/External/Normalizer/ReferenceTest.php',
