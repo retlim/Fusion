@@ -108,7 +108,7 @@ class InterpreterTest extends Test
         Bus::addReceiver(self::class, $this->handleBusEvent(...), MetadataEvent::class);
         Interpreter::interpret("", ["key" => true]);
 
-        if ($this->event === null || $this->event->getLevel() !== Level::ERROR) {
+        if ($this->event === null || $this->event->getLevel() !== Level::NOTICE) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
 
             $this->result = false;
