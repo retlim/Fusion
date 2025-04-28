@@ -54,10 +54,10 @@ class Interpreter
                 "environment" => Environment::interpret($value),
                 "id" => self::interpretId($layer, $value),
                 default => Bus::broadcast(new MetadataEvent(
-                    "The unknown \"$key\" index must be " .
-                    "\"name\", \"description\", \"lifecycle\", \"id\", \"version\", " .
-                    "\"structure\" or \"environment\" string.",
-                    Level::ERROR,
+                    "The metadata contains an unknown key \"$key\". " .
+                    "If it is a valid optional key, updating the package " .
+                    "manager may add support for it.",
+                    Level::NOTICE,
                     [$key]
                 ))
             };
