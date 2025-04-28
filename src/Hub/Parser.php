@@ -58,7 +58,7 @@ class Parser
                     $result = self::getOffsets($entry);
 
                     if ($result)
-                        $offsets += $result;
+                        $offsets = array_merge($offsets, $result);
                 }
 
         return $offsets;

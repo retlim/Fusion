@@ -63,6 +63,7 @@ return [
 	'Valvoid\Fusion\Tests\Hub\Mocks\ConfigMock' => '/tests/Hub/Mocks/ConfigMock.php',
 	'Valvoid\Fusion\Tests\Hub\Mocks\ContainerMock' => '/tests/Hub/Mocks/ContainerMock.php',
 	'Valvoid\Fusion\Tests\Hub\Mocks\ProxyMock' => '/tests/Hub/Mocks/ProxyMock.php',
+	'Valvoid\Fusion\Tests\Hub\ParserTest' => '/tests/Hub/ParserTest.php',
 	'Valvoid\Fusion\Tests\Log\LogTest' => '/tests/Log/LogTest.php',
 	'Valvoid\Fusion\Tests\Log\Mocks\ContainerMock' => '/tests/Log/Mocks/ContainerMock.php',
 	'Valvoid\Fusion\Tests\Log\Mocks\InterceptorMock' => '/tests/Log/Mocks/InterceptorMock.php',
