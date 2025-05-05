@@ -76,7 +76,7 @@ class File extends Remote
 
         $cache->lockFile($source, $filename, $id);
         $this->setOptions($api->getFileOptions());
-        curl_setopt_array($this->handle, [
+        $this->curl->setOptions([
             CURLOPT_URL => $this->url,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 10,
@@ -109,13 +109,13 @@ class File extends Remote
             }
 
             $this->throwError(
-                curl_strerror($result),
+                $this->curl->getErrorMessage($result),
                 $this->url
             );
         }
 
         $this->attempts = 0;
-        $code = curl_getinfo($this->handle, CURLINFO_RESPONSE_CODE);
+        $code = $this->curl->getInfo(CURLINFO_RESPONSE_CODE);
         $headers = $this->headers["response"];
 
         Log::debug(new Request(
@@ -133,7 +133,7 @@ class File extends Remote
 
                 // clear callback
                 // enable destruct
-                curl_reset($this->handle);
+                $this->curl->reset();
                 $this->cache->unlockFile($this->source, $this->filename);
 
                 return Lifecycle::DONE;

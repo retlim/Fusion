@@ -23,6 +23,7 @@ use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Status;
 use Valvoid\Fusion\Hub\Cache;
 use Valvoid\Fusion\Hub\Requests\Remote\Remote as RemoteRequest;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Util\Version\Interpreter;
@@ -45,6 +46,7 @@ class References extends RemoteRequest
      * @param Cache $cache Hub cache.
      * @param array $source Structure source.
      * @param RemoteApi $api API.
+     * @throws Error Internal error.
      */
     public function __construct(int $id, Cache $cache, array $source, RemoteApi $api)
     {
@@ -55,7 +57,7 @@ class References extends RemoteRequest
 
         $this->cache->lockReferences($source, $id);
         $this->setOptions($this->api->getReferencesOptions());
-        curl_setopt_array($this->handle, [
+        $this->curl->setOptions([
             CURLOPT_URL => $this->url,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 10,
@@ -87,13 +89,13 @@ class References extends RemoteRequest
             }
 
             $this->throwError(
-                curl_strerror($result),
+                $this->curl->getErrorMessage($result),
                 $this->url
             );
         }
 
         $this->attempts = 0;
-        $code = curl_getinfo($this->handle, CURLINFO_RESPONSE_CODE);
+        $code = $this->curl->getInfo(CURLINFO_RESPONSE_CODE);
         $headers = $this->headers["response"];
 
         Log::debug(new Request(
@@ -136,7 +138,7 @@ class References extends RemoteRequest
                 }
 
                 if ($next) {
-                    curl_setopt($this->handle, CURLOPT_URL, $next);
+                    $this->curl->setOption(CURLOPT_URL, $next);
 
                     // keep cache lock and
                     // get next chunk
@@ -145,7 +147,7 @@ class References extends RemoteRequest
 
                 // clear callback
                 // enable destruct
-                curl_reset($this->handle);
+                $this->curl->reset();
                 $this->cache->unlockReferences($this->source);
 
                 return Lifecycle::DONE;

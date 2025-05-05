@@ -20,9 +20,11 @@
 namespace Valvoid\Fusion\Hub\Requests\Remote;
 
 use CurlHandle;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\Cache;
 use Valvoid\Fusion\Hub\Requests\Request;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 use Valvoid\Fusion\Log\Log;
 
@@ -40,8 +42,8 @@ abstract class Remote extends Request
     /** @var int Connection attempts. */
     protected int $attempts = 0;
 
-    /** @var CurlHandle Curl handle. */
-    protected CurlHandle $handle;
+    /** @var Curl Curl handle. */
+    protected Curl $curl;
 
     /** @var int[] Cache request ID. */
     protected array $cacheIds;
@@ -71,6 +73,7 @@ abstract class Remote extends Request
      * @param Cache $cache Hub cache.
      * @param int $id Request ID.
      * @param array $source Structure source.
+     * @throws Error Internal error.
      */
     public function __construct(int $id, Cache $cache, array $source, RemoteApi $api)
     {
@@ -79,9 +82,9 @@ abstract class Remote extends Request
         $this->api = $api;
         $this->tokens = $api->getTokens($source["path"]);
         $this->auth = $api->getAuthHeaderPrefix();
-        $this->handle = curl_init();
+        $this->curl = Container::get(Curl::class);
 
-        curl_setopt_array($this->handle, [
+        $this->curl->setOptions([
             CURLOPT_PRIVATE => $id,
             CURLOPT_HEADERFUNCTION => function (CurlHandle $handle, string $header)
             {
@@ -111,7 +114,7 @@ abstract class Remote extends Request
     {
         foreach ($options as $option => $value)
             if ($option != CURLOPT_HTTPHEADER)
-                curl_setopt($this->handle, $option, $value);
+                $this->curl->setOption($option, $value);
 
             else foreach ($value as $header)
                 if (!str_starts_with($this->auth, $header))
@@ -123,7 +126,7 @@ abstract class Remote extends Request
         if ($token)
             $headers[] = $this->auth . $token;
 
-        curl_setopt($this->handle, CURLOPT_HTTPHEADER,
+        $this->curl->setOption(CURLOPT_HTTPHEADER,
 
             // optional
             $headers);
@@ -156,7 +159,7 @@ abstract class Remote extends Request
             $headers = $this->headers["request"];
             $headers[] = $this->auth . reset($this->tokens);
 
-            curl_setopt($this->handle, CURLOPT_HTTPHEADER, $headers);
+            $this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
 
         } else
             $this->throwError(
@@ -191,7 +194,7 @@ abstract class Remote extends Request
             $headers = $this->headers["request"];
             $headers[] = $this->auth . reset($this->tokens);
 
-            curl_setopt($this->handle, CURLOPT_HTTPHEADER, $headers);
+            $this->curl->setOption(CURLOPT_HTTPHEADER, $headers);
 
         } else
             $this->throwError(
@@ -235,15 +238,7 @@ abstract class Remote extends Request
      */
     public function getHandle(): CurlHandle
     {
-        return $this->handle;
-    }
-
-    /**
-     * Destroys the request.
-     */
-    public function __destruct()
-    {
-        curl_close($this->handle);
+        return $this->curl->getHandle();
     }
 
     /**
