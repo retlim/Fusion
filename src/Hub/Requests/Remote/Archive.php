@@ -77,7 +77,7 @@ class Archive extends Remote
 
         $cache->lockFile($source, "/archive.zip", $id);
         $this->setOptions($api->getArchiveOptions());
-        curl_setopt_array($this->handle, [
+        $this->curl->setOptions([
             CURLOPT_URL => $this->url,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 10,
@@ -115,13 +115,13 @@ class Archive extends Remote
             }
 
             $this->throwError(
-                curl_strerror($result),
+                $this->curl->getErrorMessage($result),
                 $this->url
             );
         }
 
         $this->attempts = 0;
-        $code = curl_getinfo($this->handle, CURLINFO_RESPONSE_CODE);
+        $code = $this->curl->getInfo(CURLINFO_RESPONSE_CODE);
         $headers = $this->headers["response"];
 
         switch ($this->api->getStatus($code, $headers)) {
@@ -133,7 +133,7 @@ class Archive extends Remote
 
                 // clear header callback
                 // enable destruct
-                curl_reset($this->handle);
+                $this->curl->reset();
                 Dir::rename("$this->dir/archive", "$this->dir/archive.zip");
                 $this->cache->unlockFile($this->source, "/archive.zip");
 

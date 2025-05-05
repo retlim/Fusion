@@ -84,6 +84,7 @@ return [
 	'Valvoid\Fusion\Hub\Requests\Local\Offset' => '/src/Hub/Requests/Local/Offset.php',
 	'Valvoid\Fusion\Hub\Requests\Local\References' => '/src/Hub/Requests/Local/References.php',
 	'Valvoid\Fusion\Hub\Requests\Remote\Archive' => '/src/Hub/Requests/Remote/Archive.php',
+	'Valvoid\Fusion\Hub\Requests\Remote\Curl' => '/src/Hub/Requests/Remote/Curl.php',
 	'Valvoid\Fusion\Hub\Requests\Remote\File' => '/src/Hub/Requests/Remote/File.php',
 	'Valvoid\Fusion\Hub\Requests\Remote\Lifecycle' => '/src/Hub/Requests/Remote/Lifecycle.php',
 	'Valvoid\Fusion\Hub\Requests\Remote\Offset' => '/src/Hub/Requests/Remote/Offset.php',
