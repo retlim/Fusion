@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Local\References\Mocks;
+namespace Valvoid\Fusion\Tests\Hub\Requests\Local\Offset\Mocks;
 
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;

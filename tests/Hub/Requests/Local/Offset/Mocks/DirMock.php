@@ -17,32 +17,29 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks;
+namespace Valvoid\Fusion\Tests\Hub\Requests\Local\Offset\Mocks;
 
-use Valvoid\Fusion\Hub\Cache;
+use Valvoid\Fusion\Dir\Proxy\Proxy;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class CacheMock extends Cache
+class DirMock implements Proxy
 {
-    public string $offset = "";
-    public string $lock = "";
-
-    public function __construct() {}
-
-    public function lockOffset(array $source, string $version, string $offset, int $id): bool
+    public function getRootDir(): string
     {
-        $this->lock = $offset;
-
-        return true;
+        return "/root";
     }
 
-    public function addOffset(array $source, string $inline, array $inflated, string $id): bool
-    {
-        $this->offset = $inline;
-
-        return true;
-    }
+    public function getTaskDir(): string {return "";}
+    public function getStateDir(): string {return "";}
+    public function getCacheDir(): string {return "";}
+    public function getOtherDir(): string {return "";}
+    public function getPackagesDir(): string {return "";}
+    public function createDir(string $dir, int $permissions): void {}
+    public function rename(string $from, string $to): void {}
+    public function copy(string $from, string $to): void{}
+    public function delete(string $file): void {}
+    public function clear(string $dir, string $path): void {}
 }
