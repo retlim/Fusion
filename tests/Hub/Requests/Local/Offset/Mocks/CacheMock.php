@@ -17,24 +17,33 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Local\References\Mocks;
+namespace Valvoid\Fusion\Tests\Hub\Requests\Local\Offset\Mocks;
 
-use Valvoid\Fusion\Log\Events\Event;
-use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Proxy\Proxy;
+use Valvoid\Fusion\Hub\Cache;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class LogMock implements Proxy
+class CacheMock extends Cache
 {
-    public function addInterceptor(Interceptor $interceptor): void {}
-    public function removeInterceptor(): void {}
-    public function error(string|Event $event): void {}
-    public function warning(string|Event $event): void {}
-    public function notice(string|Event $event): void {}
-    public function info(string|Event $event): void {}
-    public function verbose(string|Event $event): void {}
-    public function debug(string|Event $event): void {}
+    public string $offset = "";
+    public string $lock = "";
+    public bool $conflict = false;
+
+    public function __construct() {}
+
+    public function lockOffset(array $source, string $version, string $offset, int $id): bool
+    {
+        $this->lock = $offset;
+
+        return true;
+    }
+
+    public function addOffset(array $source, string $inline, array $inflated, string $id): bool
+    {
+        $this->offset = $inline;
+
+        return !$this->conflict;
+    }
 }
