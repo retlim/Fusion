@@ -120,8 +120,14 @@ class Offset extends Remote
 
         switch ($this->api->getStatus($code, $headers)) {
             case Status::OK:
+                $content = json_decode($content, true);
 
-                $content = json_decode($content,true);
+                if ($content === null)
+                    $this->throwError(
+                        json_last_error_msg(),
+                        $this->url
+                    );
+
                 $response = $this->api->getOffset($content);
 
                 // override locked (unlock)
