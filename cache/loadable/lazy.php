@@ -91,6 +91,7 @@ return [
 	'Valvoid\Fusion\Hub\Requests\Remote\Remote' => '/src/Hub/Requests/Remote/Remote.php',
 	'Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl' => '/src/Hub/Requests/Remote/Wrappers/Curl.php',
 	'Valvoid\Fusion\Hub\Requests\Remote\Wrappers\File' => '/src/Hub/Requests/Remote/Wrappers/File.php',
+	'Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Stream' => '/src/Hub/Requests/Remote/Wrappers/Stream.php',
 	'Valvoid\Fusion\Hub\Requests\Request' => '/src/Hub/Requests/Request.php',
 	'Valvoid\Fusion\Hub\Responses\Cache\Archive' => '/src/Hub/Responses/Cache/Archive.php',
 	'Valvoid\Fusion\Hub\Responses\Cache\Cache' => '/src/Hub/Responses/Cache/Cache.php',
