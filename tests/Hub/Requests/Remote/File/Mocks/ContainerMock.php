@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks;
+namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks;
 
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;
@@ -39,10 +39,12 @@ class ContainerMock
         {
             public Curl $curl;
             public \Valvoid\Fusion\Log\Proxy\Proxy $log;
+            public FileMock $file;
 
             public function __construct(CurlMock $curlMock)
             {
                 $this->log = new LogMock;
+                $this->file = new FileMock;
                 $this->curl = $curlMock;
             }
 
@@ -50,6 +52,9 @@ class ContainerMock
             {
                 if ("Valvoid\Fusion\Log\Proxy\Proxy" === $class)
                     return $this->log;
+
+                if ("Valvoid\Fusion\Hub\Requests\Remote\Wrappers\File" === $class)
+                    return $this->file;
 
                 return $this->curl;
             }

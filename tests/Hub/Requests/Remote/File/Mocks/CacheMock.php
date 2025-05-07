@@ -17,28 +17,37 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks;
+namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks;
 
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl;
+use Valvoid\Fusion\Hub\Cache;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class CurlMock extends Curl
+class CacheMock extends Cache
 {
-    public int $code = 0;
-    public mixed $optionValue = "";
+    public int $lock = -1; // request ID
 
-    public function getInfo(?int $option): int
+    public function __construct() {}
+
+    public function isOffset(array $source): bool
     {
-        return $this->code;
+        return false;
     }
 
-    public function setOption(int $option, mixed $value): bool
+    public function getRemoteDir(array $source): string
     {
-        $this->optionValue = $value;
+        return "";
+    }
 
-        return true;
+    public function lockFile(array $source, string $filename, int $id): void
+    {
+        $this->lock = $id;
+    }
+
+    public function unlockFile(array $source, string $filename): void
+    {
+        $this->lock = -1;
     }
 }

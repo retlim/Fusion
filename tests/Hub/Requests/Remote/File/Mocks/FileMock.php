@@ -17,28 +17,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks;
+namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks;
 
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl;
+use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\File;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class CurlMock extends Curl
+class FileMock extends File
 {
-    public int $code = 0;
-    public mixed $optionValue = "";
-
-    public function getInfo(?int $option): int
+    public function put(string $file, mixed $data): int|false
     {
-        return $this->code;
-    }
-
-    public function setOption(int $option, mixed $value): bool
-    {
-        $this->optionValue = $value;
-
-        return true;
+        return 3; // written length
     }
 }

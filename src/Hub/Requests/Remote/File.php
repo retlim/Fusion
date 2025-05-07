@@ -19,9 +19,11 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Remote;
 
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Status;
 use Valvoid\Fusion\Hub\Cache;
+use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\File as  Wrapper;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Log;
@@ -126,7 +128,9 @@ class File extends Remote
 
         switch ($this->api->getStatus($code, $headers)) {
             case Status::OK:
-                if (file_put_contents($this->file, $content) === false)
+                $wrapper = Container::get(Wrapper::class);
+
+                if ($wrapper->put($this->file, $content) === false)
                     throw new Error(
                         "Can't write file \"$this->file\"."
                     );

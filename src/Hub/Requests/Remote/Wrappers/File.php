@@ -17,28 +17,26 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks;
-
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl;
+namespace Valvoid\Fusion\Hub\Requests\Remote\Wrappers;
 
 /**
+ * File wrapper.
+ *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class CurlMock extends Curl
+class File
 {
-    public int $code = 0;
-    public mixed $optionValue = "";
-
-    public function getInfo(?int $option): int
+    /**
+     * Writes data to file.
+     *
+     * @param string $file File.
+     * @param mixed $data Data.
+     * @return int|false The function returns the number of
+     * bytes that were written to the file, or false on failure.
+     */
+    public function put(string $file, mixed $data): int|false
     {
-        return $this->code;
-    }
-
-    public function setOption(int $option, mixed $value): bool
-    {
-        $this->optionValue = $value;
-
-        return true;
+        return file_put_contents($file, $data);
     }
 }

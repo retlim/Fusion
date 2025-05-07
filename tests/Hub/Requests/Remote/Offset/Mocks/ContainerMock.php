@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks;
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
-use Valvoid\Fusion\Hub\Requests\Remote\Curl;
+use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl;
 
 /**
  * @copyright Valvoid

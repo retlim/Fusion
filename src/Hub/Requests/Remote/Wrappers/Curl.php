@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Hub\Requests\Remote;
+namespace Valvoid\Fusion\Hub\Requests\Remote\Wrappers;
 
 use CurlHandle;
 
@@ -73,7 +73,7 @@ class Curl
      * @param int|null $option
      * @return mixed
      */
-    function getInfo(?int $option): mixed
+    public function getInfo(?int $option): mixed
     {
         return curl_getinfo($this->handle, $option);
     }
