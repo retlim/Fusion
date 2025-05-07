@@ -19,10 +19,12 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Remote;
 
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Status;
 use Valvoid\Fusion\Hub\Cache;
+use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Stream;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Log;
@@ -38,8 +40,8 @@ class Archive extends Remote
     /** @var string Absolute cache archive file directory. */
     private string $dir;
 
-    /** @var resource Archive file stream. */
-    private $stream;
+    /** @var Stream Archive file stream wrapper. */
+    private Stream $stream;
 
     /**
      * Constructs the request.
@@ -63,13 +65,13 @@ class Archive extends Remote
         // use temp name
         // enable cache to clear broken files
         $this->dir = $cache->getRemoteDir($source);
-        $this->stream = fopen("$this->dir/archive", "w+");
+        $this->stream = Container::get(Stream::class, dir: $this->dir);
         $this->url = $api->getArchiveUrl(
             $source["path"],
             $reference
         );
 
-        if ($this->stream === false)
+        if ($this->stream->get() === false)
             throw new Error(
                 "Can't create temp archive file " .
                 "\"$this->dir/archive\" stream."
@@ -85,7 +87,7 @@ class Archive extends Remote
             // keep order
             // works only if set before CURLOPT_FILE
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FILE => $this->stream
+            CURLOPT_FILE => $this->stream->get()
         ]);
     }
 
@@ -126,7 +128,7 @@ class Archive extends Remote
 
         switch ($this->api->getStatus($code, $headers)) {
             case Status::OK:
-                if (!fclose($this->stream))
+                if (!$this->stream->close())
                     throw new Error(
                         "Can't close the stream \"$this->dir/archive\"."
                     );
@@ -201,7 +203,7 @@ class Archive extends Remote
     {
         // pointer and read
         $this->rewindStream();
-        $content = stream_get_contents($this->stream);
+        $content = $this->stream->getContents();
 
         if ($content === false)
             throw new Error(
@@ -227,7 +229,7 @@ class Archive extends Remote
      */
     private function rewindStream(): void
     {
-        if (rewind($this->stream) === false)
+        if ($this->stream->rewind() === false)
             throw new Error(
                 "Can't reset the stream " .
                 "\"$this->dir/archive.zip\"."

@@ -17,34 +17,34 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File;
+namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive;
 
 use Throwable;
-use Valvoid\Fusion\Hub\Requests\Remote\File;
+use Valvoid\Fusion\Hub\Requests\Remote\Archive;
 use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\File as Wrapper;
+use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Stream;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
-use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\APIMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\CacheMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\ContainerMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\CurlMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\CacheMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\CurlMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class FileTest extends Test
+class ArchiveTest extends Test
 {
     protected string|array $coverage = [
-        File::class,
+        Archive::class,
 
         // ballast
-        Wrapper::class
+        Stream::class
     ];
 
-    protected File $file;
+    protected Archive $archive;
     protected APIMock $apiMock;
     protected CurlMock $curlMock;
     protected CacheMock $cacheMock;
@@ -70,12 +70,12 @@ class FileTest extends Test
             // sync data before
 
             // sync request
-            $this->file = new File(2, $this->cacheMock, $this->source,
-                "/nested", "/filename", $this->apiMock);
+            $this->archive = new Archive(2, $this->cacheMock,
+                $this->source, $this->apiMock);
 
             // async cache request
             // after sync done
-            $this->file->addCacheId(1);
+            $this->archive->addCacheId(1);
 
             $this->testInit();
             $this->testBadConnection();
@@ -86,16 +86,18 @@ class FileTest extends Test
             $this->testForbiddenStatus();
             $this->testErrorStatus();
 
-        } catch (Throwable) {
+        } catch (Throwable $e) {
+            var_dump($e->getMessage());
             $this->handleFailedTest();
         }
 
         $container->destroy();
     }
 
+
     public function testInit(): void
     {
-        if ($this->file->getUrl() !== "api/path/nested/filename/1.0.0")
+        if ($this->archive->getUrl() !== "api/path/1.0.0")
             $this->handleFailedTest();
 
         // sync lock
@@ -103,9 +105,9 @@ class FileTest extends Test
             $this->handleFailedTest();
 
         // add and get cache IDs waiting for this sync
-        $this->file->addCacheId(5);
+        $this->archive->addCacheId(5);
 
-        if ($this->file->getCacheIds() !== [1, 5])
+        if ($this->archive->getCacheIds() !== [1, 5])
             $this->handleFailedTest();
     }
 
@@ -113,10 +115,11 @@ class FileTest extends Test
     {
         $this->curlMock->code = 200;
 
-        if ($this->file->getLifecycle(
+        // last page
+        if ($this->archive->getLifecycle(
 
-                // good connection code and
-                // metadata or snapshot json response
+            // good connection code and
+            // metadata or snapshot json response
                 0, "{}") !==
 
             // multi hub curl close this request handle
@@ -134,7 +137,7 @@ class FileTest extends Test
         $this->curlMock->code = 894854;
 
         try {
-            $this->file->getLifecycle(
+            $this->archive->getLifecycle(
 
                 // good connection code
                 0, "");
@@ -153,10 +156,10 @@ class FileTest extends Test
     public function testUnauthorizedStatus(): void
     {
         // reset request tokens
-        $this->file = new File(2, $this->cacheMock, $this->source,
-            "/path", "filename", $this->apiMock);
+        $this->archive = new Archive(2, $this->cacheMock,
+            $this->source, $this->apiMock);
 
-        $this->file->addCacheId(1);
+        $this->archive->addCacheId(1);
         $this->curlMock->code = 401;
 
         try {
@@ -167,7 +170,7 @@ class FileTest extends Test
             // test two tokens and
             // drop error
             for ($i = 1; $i < 3; ++$i)
-                if ($this->file->getLifecycle(
+                if ($this->archive->getLifecycle(
 
                     // good connection code
                         0, "") !==
@@ -196,10 +199,10 @@ class FileTest extends Test
     public function testNotFoundStatus(): void
     {
         // reset request tokens
-        $this->file = new File(2, $this->cacheMock, $this->source,
-            "/path", "filename", $this->apiMock);
+        $this->archive = new Archive(2, $this->cacheMock,
+            $this->source, $this->apiMock);
 
-        $this->file->addCacheId(1);
+        $this->archive->addCacheId(1);
         $this->curlMock->code = 404;
 
         try {
@@ -210,7 +213,7 @@ class FileTest extends Test
             // test two tokens and
             // drop error
             for ($i = 1; $i < 3; ++$i)
-                if ($this->file->getLifecycle(
+                if ($this->archive->getLifecycle(
 
                     // good connection code
                         0, "") !==
@@ -234,10 +237,10 @@ class FileTest extends Test
     public function testForbiddenStatus(): void
     {
         // reset request tokens
-        $this->file = new File(2, $this->cacheMock, $this->source,
-            "/path", "filename", $this->apiMock);
+        $this->archive = new Archive(2, $this->cacheMock,
+            $this->source, $this->apiMock);
 
-        $this->file->addCacheId(1);
+        $this->archive->addCacheId(1);
         $this->curlMock->code = 403;
 
         try {
@@ -248,7 +251,7 @@ class FileTest extends Test
             // test two tokens and
             // drop error
             for ($i = 1; $i < 3; ++$i)
-                if ($this->file->getLifecycle(
+                if ($this->archive->getLifecycle(
 
                     // good connection code
                         0, "") !==
@@ -272,7 +275,7 @@ class FileTest extends Test
     {
         $this->curlMock->code = 429;
 
-        if ($this->file->getLifecycle(
+        if ($this->archive->getLifecycle(
 
             // good connection code
                 0, "") !==
@@ -292,9 +295,9 @@ class FileTest extends Test
             // retry up to 10 times and
             // drop request error
             for ($i = 0; $i < 10; ++$i)
-                if ($this->file->getLifecycle(
+                if ($this->archive->getLifecycle(
 
-                    // something was not ok code
+                        // something was not ok code
                         -1, "") !==
 
                     // multi hub curl reload this request handle
