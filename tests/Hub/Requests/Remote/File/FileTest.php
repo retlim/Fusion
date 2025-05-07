@@ -17,41 +17,41 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\References;
+namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File;
 
 use Throwable;
+use Valvoid\Fusion\Hub\Requests\Remote\File;
 use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
-use Valvoid\Fusion\Hub\Requests\Remote\References;
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl;
+use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\File as Wrapper;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
-use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\APIMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\CacheMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\ContainerMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\CurlMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\CacheMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\CurlMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ReferencesTest extends Test
+class FileTest extends Test
 {
     protected string|array $coverage = [
-        References::class,
+        File::class,
 
         // ballast
-        Curl::class
+        Wrapper::class
     ];
 
-    protected References $references;
+    protected File $file;
     protected APIMock $apiMock;
     protected CurlMock $curlMock;
     protected CacheMock $cacheMock;
-
     protected array $source = [
         "api" => "test",
         "path" => "/path",
+        "reference" => "1.0.0",
         "prefix" => ""
     ];
 
@@ -70,12 +70,12 @@ class ReferencesTest extends Test
             // sync data before
 
             // sync request
-            $this->references = new References(2,
-                $this->cacheMock, $this->source, $this->apiMock);
+            $this->file = new File(2, $this->cacheMock, $this->source,
+                "/nested", "/filename", $this->apiMock);
 
             // async cache request
             // after sync done
-            $this->references->addCacheId(1);
+            $this->file->addCacheId(1);
 
             $this->testInit();
             $this->testBadConnection();
@@ -85,7 +85,6 @@ class ReferencesTest extends Test
             $this->testNotFoundStatus();
             $this->testForbiddenStatus();
             $this->testErrorStatus();
-            $this->testOkStatusWithPrefix();
 
         } catch (Throwable) {
             $this->handleFailedTest();
@@ -96,57 +95,17 @@ class ReferencesTest extends Test
 
     public function testInit(): void
     {
-         if ($this->references->getUrl() !== "api/path/references")
-             $this->handleFailedTest();
+        if ($this->file->getUrl() !== "api/path/nested/filename/1.0.0")
+            $this->handleFailedTest();
 
         // sync lock
         if ($this->cacheMock->lock !== 2)
             $this->handleFailedTest();
 
         // add and get cache IDs waiting for this sync
-        $this->references->addCacheId(5);
+        $this->file->addCacheId(5);
 
-        if ($this->references->getCacheIds() !== [1, 5])
-            $this->handleFailedTest();
-    }
-
-    public function testOkStatusWithPrefix(): void
-    {
-        // set source prefix
-        $this->source["prefix"] = "v";
-        $this->references = new References(2,
-            $this->cacheMock, $this->source, $this->apiMock);
-
-        $this->references->addCacheId(1);
-        $this->curlMock->code = 200;
-        $this->apiMock->prefix = "v";
-        $this->apiMock->next = ["asdfsdf"];
-        $this->cacheMock->versions = [];
-
-        // has next
-        if ($this->references->getLifecycle(
-
-            // good connection code
-            // json response with next page link
-                0, "{}") !==
-
-            // multi hub curl reload this request handle
-            Lifecycle::RELOAD)
-            $this->handleFailedTest();
-
-        // last page
-        if ($this->references->getLifecycle(
-
-            // good connection code and
-            // json response without next link
-                0, "{}") !==
-
-            // multi hub curl close this request handle
-            Lifecycle::DONE)
-            $this->handleFailedTest();
-
-        // all versions passed to cache without prefix
-        if ($this->cacheMock->versions !== ["4.5.6", "1.0.0", "3.4.5"])
+        if ($this->file->getCacheIds() !== [1, 5])
             $this->handleFailedTest();
     }
 
@@ -154,22 +113,11 @@ class ReferencesTest extends Test
     {
         $this->curlMock->code = 200;
 
-        // has next
-        if ($this->references->getLifecycle(
-
-                // good connection code
-                // json response with next page link
-                0, "{}") !==
-
-            // multi hub curl reload this request handle
-            Lifecycle::RELOAD)
-            $this->handleFailedTest();
-
         // last page
-        if ($this->references->getLifecycle(
+        if ($this->file->getLifecycle(
 
                 // good connection code and
-                // json response without next link
+                // metadata or snapshot json response
                 0, "{}") !==
 
             // multi hub curl close this request handle
@@ -179,24 +127,6 @@ class ReferencesTest extends Test
         // all synchronized unlock
         if ($this->cacheMock->lock !== -1)
             $this->handleFailedTest();
-
-        // all versions passed to cache
-        if ($this->cacheMock->versions !== ["4.5.6", "1.0.0", "3.4.5"])
-            $this->handleFailedTest();
-
-        try {
-            $this->references->getLifecycle(
-
-                // good connection code and
-                // invalid content - must be json
-                0, "invalid");
-
-        } catch(Request) {
-            return;
-        }
-
-        // no error drop
-        $this->handleFailedTest();
     }
 
     public function testErrorStatus(): void
@@ -205,7 +135,7 @@ class ReferencesTest extends Test
         $this->curlMock->code = 894854;
 
         try {
-            $this->references->getLifecycle(
+            $this->file->getLifecycle(
 
                 // good connection code
                 0, "");
@@ -224,10 +154,10 @@ class ReferencesTest extends Test
     public function testUnauthorizedStatus(): void
     {
         // reset request tokens
-        $this->references = new References(2,
-            $this->cacheMock, $this->source, $this->apiMock);
+        $this->file = new File(2, $this->cacheMock, $this->source,
+            "/path", "filename", $this->apiMock);
 
-        $this->references->addCacheId(1);
+        $this->file->addCacheId(1);
         $this->curlMock->code = 401;
 
         try {
@@ -238,9 +168,9 @@ class ReferencesTest extends Test
             // test two tokens and
             // drop error
             for ($i = 1; $i < 3; ++$i)
-                if ($this->references->getLifecycle(
+                if ($this->file->getLifecycle(
 
-                        // good connection code
+                    // good connection code
                         0, "") !==
 
                     // multi hub curl reload this request handle
@@ -267,10 +197,10 @@ class ReferencesTest extends Test
     public function testNotFoundStatus(): void
     {
         // reset request tokens
-        $this->references = new References(2,
-            $this->cacheMock, $this->source, $this->apiMock);
+        $this->file = new File(2, $this->cacheMock, $this->source,
+            "/path", "filename", $this->apiMock);
 
-        $this->references->addCacheId(1);
+        $this->file->addCacheId(1);
         $this->curlMock->code = 404;
 
         try {
@@ -281,9 +211,9 @@ class ReferencesTest extends Test
             // test two tokens and
             // drop error
             for ($i = 1; $i < 3; ++$i)
-                if ($this->references->getLifecycle(
+                if ($this->file->getLifecycle(
 
-                        // good connection code
+                    // good connection code
                         0, "") !==
 
                     // multi hub curl reload this request handle
@@ -301,16 +231,14 @@ class ReferencesTest extends Test
         $this->handleFailedTest();
     }
 
-    /**
-     * @throws Error
-     */
+
     public function testForbiddenStatus(): void
     {
         // reset request tokens
-        $this->references = new References(2,
-            $this->cacheMock, $this->source, $this->apiMock);
+        $this->file = new File(2, $this->cacheMock, $this->source,
+            "/path", "filename", $this->apiMock);
 
-        $this->references->addCacheId(1);
+        $this->file->addCacheId(1);
         $this->curlMock->code = 403;
 
         try {
@@ -321,9 +249,9 @@ class ReferencesTest extends Test
             // test two tokens and
             // drop error
             for ($i = 1; $i < 3; ++$i)
-                if ($this->references->getLifecycle(
+                if ($this->file->getLifecycle(
 
-                        // good connection code
+                    // good connection code
                         0, "") !==
 
                     // multi hub curl reload this request handle
@@ -345,9 +273,9 @@ class ReferencesTest extends Test
     {
         $this->curlMock->code = 429;
 
-        if ($this->references->getLifecycle(
+        if ($this->file->getLifecycle(
 
-                // good connection code
+            // good connection code
                 0, "") !==
 
             // multi hub curl pause this request handle and
@@ -365,10 +293,10 @@ class ReferencesTest extends Test
             // retry up to 10 times and
             // drop request error
             for ($i = 0; $i < 10; ++$i)
-                if ($this->references->getLifecycle(
+                if ($this->file->getLifecycle(
 
                     // something was not ok code
-                    -1, "") !==
+                        -1, "") !==
 
                     // multi hub curl reload this request handle
                     Lifecycle::RELOAD)

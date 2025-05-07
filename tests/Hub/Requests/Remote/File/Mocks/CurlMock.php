@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks;
+namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks;
 
 use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl;
 

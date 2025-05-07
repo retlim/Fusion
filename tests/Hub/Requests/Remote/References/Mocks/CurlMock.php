@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks;
 
-use Valvoid\Fusion\Hub\Requests\Remote\Curl;
+use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl;
 
 /**
  * @copyright Valvoid

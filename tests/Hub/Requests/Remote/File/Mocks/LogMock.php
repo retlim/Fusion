@@ -17,28 +17,24 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks;
+namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks;
 
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl;
+use Valvoid\Fusion\Log\Events\Event;
+use Valvoid\Fusion\Log\Events\Interceptor;
+use Valvoid\Fusion\Log\Proxy\Proxy;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class CurlMock extends Curl
+class LogMock implements Proxy
 {
-    public int $code = 0;
-    public mixed $optionValue = "";
-
-    public function getInfo(?int $option): int
-    {
-        return $this->code;
-    }
-
-    public function setOption(int $option, mixed $value): bool
-    {
-        $this->optionValue = $value;
-
-        return true;
-    }
+    public function addInterceptor(Interceptor $interceptor): void {}
+    public function removeInterceptor(): void {}
+    public function error(string|Event $event): void {}
+    public function warning(string|Event $event): void {}
+    public function notice(string|Event $event): void {}
+    public function info(string|Event $event): void {}
+    public function verbose(string|Event $event): void {}
+    public function debug(string|Event $event): void {}
 }
