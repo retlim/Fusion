@@ -180,7 +180,7 @@ class Logic implements Proxy
 
             foreach ($reflection->getProperties() as $property)
                 if ($property->isStatic())
-                    $property->setValue($property->getDefaultValue());
+                    $property->setValue($reflection, $property->getDefaultValue());
 
         // normalize error
         } catch (ReflectionException $exception) {
