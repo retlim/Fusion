@@ -284,7 +284,7 @@ class Text implements File
 
         foreach (array_reverse($error->getTrace()) as $entry)
             $content .= "\nin: " . $entry["line"] . " - " . $entry["file"] .
-                "\nat: " . $entry["class"] . $entry["type"] . $entry["function"] . "()" ;
+                "\nat: " . ($entry["class"] ?? "") . ($entry["type"] ?? "") . $entry["function"] . "()" ;
 
         $content .= "\nin: " . $error->getLine() . " - " . $error->getFile() .
             "\nis: " . $error->getMessage() . "\n";
@@ -306,7 +306,7 @@ class Text implements File
 
         foreach (array_reverse($info->getPath()) as $entry)
             $content .= "\nin: " . $entry["line"] . " - " . $entry["file"] .
-                "\nat: " . $entry["class"] . $entry["type"] . $entry["function"] . "()" ;
+                "\nat: " . ($entry["class"] ?? "") . ($entry["type"] ?? "") . $entry["function"] . "()" ;
 
         $content .= "\nis: " . $info->getMessage() . " | code: " . $info->getCode() . "\n";
 

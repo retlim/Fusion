@@ -139,7 +139,7 @@ class Terminal implements Stream
 
         foreach (array_reverse($error->getTrace()) as $entry)
             echo "\n\033[4min\033[0m: \033[0;4m" . $entry["line"] . " - " . $entry["file"] .
-                "\n\033[0mat: " . $entry["class"] . $entry["type"] . $entry["function"] . "()" ;
+                "\n\033[0mat: " . ($entry["class"] ?? "") . ($entry["type"] ?? "") . $entry["function"] . "()" ;
 
         echo "\n\033[4min\033[0m: \033[0;4m" . $error->getLine() . " - " . $error->getFile() .
             "\n\033[0mis: " . $error->getMessage();
