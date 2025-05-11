@@ -23,10 +23,10 @@ use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Status;
 use Valvoid\Fusion\Hub\Cache;
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\File as  Wrapper;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Wrappers\File as Wrapper;
 
 /**
  * Remote file synchronization request.

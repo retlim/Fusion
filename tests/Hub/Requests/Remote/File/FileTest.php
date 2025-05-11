@@ -22,7 +22,6 @@ namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File;
 use Throwable;
 use Valvoid\Fusion\Hub\Requests\Remote\File;
 use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\File as Wrapper;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\APIMock;
@@ -30,6 +29,7 @@ use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\CacheMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\CurlMock;
 use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Wrappers\File as Wrapper;
 
 /**
  * @copyright Valvoid

@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks;
 
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Stream;
+use Valvoid\Fusion\Wrappers\Stream;
 
 /**
  * @copyright Valvoid

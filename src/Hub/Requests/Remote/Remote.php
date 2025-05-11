@@ -23,11 +23,11 @@ use CurlHandle;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\Cache;
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl;
 use Valvoid\Fusion\Hub\Requests\Request;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Wrappers\Curl;
 
 /**
  * Remote synchronizations request.

@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Hub\Requests\Remote\Wrappers;
+namespace Valvoid\Fusion\Wrappers;
 
 /**
  * File wrapper.
@@ -38,5 +38,28 @@ class File
     public function put(string $file, mixed $data): int|false
     {
         return file_put_contents($file, $data);
+    }
+
+    /**
+     * Checks whether a file or directory exists.
+     *
+     * @param string $file File.
+     * @return bool True if the file exists, false otherwise.
+     */
+    public function exists(string $file): bool
+    {
+        return file_exists($file);
+    }
+
+    /**
+     * Reads entire file into a string.
+     *
+     * @param string $file File.
+     * @return string|false The function returns the read
+     * data or false on failure.
+     */
+    public function get(string $file): string|false
+    {
+        return file_get_contents($file);
     }
 }

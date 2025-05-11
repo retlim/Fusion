@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Hub\Requests\Remote\Wrappers;
+namespace Valvoid\Fusion\Wrappers;
 
 use CurlHandle;
 
