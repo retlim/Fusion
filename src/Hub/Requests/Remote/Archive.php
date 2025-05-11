@@ -24,10 +24,10 @@ use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Status;
 use Valvoid\Fusion\Hub\Cache;
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Stream;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Wrappers\Stream;
 
 /**
  * Remote archive synchronization request.
@@ -65,7 +65,11 @@ class Archive extends Remote
         // use temp name
         // enable cache to clear broken files
         $this->dir = $cache->getRemoteDir($source);
-        $this->stream = Container::get(Stream::class, dir: $this->dir);
+        $this->stream = Container::get(Stream::class,
+            file: "$this->dir/archive",
+            mode: "w+"
+        );
+
         $this->url = $api->getArchiveUrl(
             $source["path"],
             $reference

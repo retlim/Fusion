@@ -89,9 +89,6 @@ return [
 	'Valvoid\Fusion\Hub\Requests\Remote\Offset' => '/src/Hub/Requests/Remote/Offset.php',
 	'Valvoid\Fusion\Hub\Requests\Remote\References' => '/src/Hub/Requests/Remote/References.php',
 	'Valvoid\Fusion\Hub\Requests\Remote\Remote' => '/src/Hub/Requests/Remote/Remote.php',
-	'Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl' => '/src/Hub/Requests/Remote/Wrappers/Curl.php',
-	'Valvoid\Fusion\Hub\Requests\Remote\Wrappers\File' => '/src/Hub/Requests/Remote/Wrappers/File.php',
-	'Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Stream' => '/src/Hub/Requests/Remote/Wrappers/Stream.php',
 	'Valvoid\Fusion\Hub\Requests\Request' => '/src/Hub/Requests/Request.php',
 	'Valvoid\Fusion\Hub\Responses\Cache\Archive' => '/src/Hub/Responses/Cache/Archive.php',
 	'Valvoid\Fusion\Hub\Responses\Cache\Cache' => '/src/Hub/Responses/Cache/Cache.php',
@@ -206,4 +203,7 @@ return [
 	'Valvoid\Fusion\Util\Reference\Normalizer' => '/src/Util/Reference/Normalizer.php',
 	'Valvoid\Fusion\Util\Version\Interpreter' => '/src/Util/Version/Interpreter.php',
 	'Valvoid\Fusion\Util\Version\Parser' => '/src/Util/Version/Parser.php',
+	'Valvoid\Fusion\Wrappers\Curl' => '/src/Wrappers/Curl.php',
+	'Valvoid\Fusion\Wrappers\File' => '/src/Wrappers/File.php',
+	'Valvoid\Fusion\Wrappers\Stream' => '/src/Wrappers/Stream.php',
 ];

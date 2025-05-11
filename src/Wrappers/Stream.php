@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Hub\Requests\Remote\Wrappers;
+namespace Valvoid\Fusion\Wrappers;
 
 /**
  * Stream wrapper.
@@ -33,11 +33,12 @@ class Stream
     /**
      * Construct the wrapper.
      *
-     * @param string $dir File dir.
+     * @param string $file File.
+     * @param string $mode Mode.
      */
-    public function __construct(string $dir)
+    public function __construct(string $file, string $mode)
     {
-        $this->stream = fopen("$dir/archive", "w+");
+        $this->stream = fopen($file, $mode);
     }
 
     /**

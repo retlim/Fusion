@@ -19,10 +19,12 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Local;
 
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\Cache;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Local archive synchronization request.
@@ -71,8 +73,10 @@ class Archive extends Local
         if (is_string($response))
             $this->throwError($response);
 
+        $file = Container::get(File::class);
+
         if ($response->getFile() != "$dir/archive.zip" ||
-            !file_exists("$dir/archive.zip"))
+            !$file->exists("$dir/archive.zip"))
             throw new Error(
                 "Can't write the file \"$dir/archive.zip\"."
             );

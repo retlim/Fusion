@@ -19,10 +19,12 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Local;
 
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\Cache;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
+use Valvoid\Fusion\Wrappers\File as Wrapper;
 
 /**
  * Local file synchronization request.
@@ -91,7 +93,9 @@ class File extends Local
         if (is_string($response))
             $this->throwError($response);
 
-        if (file_put_contents($this->file, $response->getContent()) === false)
+        $wrapper = Container::get(Wrapper::class);
+
+        if ($wrapper->put($this->file, $response->getContent()) === false)
             throw new Error(
                 "Can't write the file \"$this->file\"."
             );

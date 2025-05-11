@@ -20,12 +20,14 @@
 namespace Valvoid\Fusion\Hub\Requests\Cache;
 
 use Closure;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\Cache as HubCache;
 use Valvoid\Fusion\Hub\Responses\Cache\Snapshot;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
+use Valvoid\Fusion\Wrappers\File as Wrapper;
 
 /**
  * File request.
@@ -74,7 +76,8 @@ class File extends Cache
         $path = $this->source["path"];
         $reference = $this->source["prefix"] . $this->source["reference"];
         $filename = $this->path . $this->filename;
-        $content = file_get_contents($file);
+        $wrapper = Container::get(Wrapper::class);
+        $content = $wrapper->get($file);
 
         if ($content === false)
             throw new InternalError(

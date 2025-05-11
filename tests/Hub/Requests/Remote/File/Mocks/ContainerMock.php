@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks;
 use ReflectionClass;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Container\Proxy\Proxy;
-use Valvoid\Fusion\Hub\Requests\Remote\Wrappers\Curl;
+use Valvoid\Fusion\Wrappers\Curl;
 
 /**
  * @copyright Valvoid
@@ -53,7 +53,7 @@ class ContainerMock
                 if ("Valvoid\Fusion\Log\Proxy\Proxy" === $class)
                     return $this->log;
 
-                if ("Valvoid\Fusion\Hub\Requests\Remote\Wrappers\File" === $class)
+                if ("Valvoid\Fusion\Wrappers\File" === $class)
                     return $this->file;
 
                 return $this->curl;
