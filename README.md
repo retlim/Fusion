@@ -5,6 +5,12 @@ projects. It simplifies development and maintenance by automating
 repetitive tasks such as managing dependencies, migrating package states, extending 
 packages, and handling loadable code.
 
+> [!IMPORTANT]
+> This is a mirror repository and is not actively developed here. 
+> Please do not open pull requests or issues on GitHub. For active 
+> development, contributions, and discussions, visit [the official GitLab 
+> repository](https://gitlab.com/valvoid/fusion/php/code).
+
 ## Documentation
 
 The separated [documentation repository](https://gitlab.com/valvoid/fusion/php/docs)
