@@ -20,16 +20,15 @@
 namespace Valvoid\Fusion\Hub\APIs\Local\Git;
 
 use Error;
+use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;
 use Valvoid\Fusion\Hub\Responses\Local\Archive;
 use Valvoid\Fusion\Hub\Responses\Local\File;
 use Valvoid\Fusion\Hub\Responses\Local\Offset as OffsetResponse;
 use Valvoid\Fusion\Hub\Responses\Local\References;
 use Valvoid\Fusion\Log\Log;
-
-// for error message
-// otherwise PHP adds this class as parent namespace
-use function exec;
+use Valvoid\Fusion\Wrappers\Program;
+use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 
 /**
  * Git hub to get local OS packages.
@@ -44,11 +43,16 @@ class Git extends LocalOffsetApi
      *
      * @param string $path Path relative to config root.
      * @return References|string Response or error message.
+     * @throws InternalError Internal error.
      */
     public function getReferences(string $path): References|string
     {
         try {
-            exec(
+            $program = Container::get(Program::class);
+            $output = [];
+            $code = 0; // ok
+
+            $program->execute(
                 "git -C $this->root$path tag -l 2>&1",
                 $output,
                 $code
@@ -75,11 +79,16 @@ class Git extends LocalOffsetApi
      * @param string $path Path.
      * @param string $offset Reference offset (commit|branch|...).
      * @return OffsetResponse|string Response or error message.
+     * @throws InternalError Internal error.
      */
     public function getOffset(string $path, string $offset): OffsetResponse|string
     {
         try {
-            exec(
+            $program = Container::get(Program::class);
+            $output = [];
+            $code = 0;  // ok
+
+            $program->execute(
                 "git -C $this->root$path rev-parse $offset 2>&1",
                 $output,
                 $code
@@ -105,13 +114,17 @@ class Git extends LocalOffsetApi
      * @param string $path Path.
      * @param string $filename Filename.
      * @return File|string Response or error message
+     * @throws InternalError Internal error.
      */
     public function getFileContent(string $path, string $reference, string $filename): File|string
     {
         try {
             $filename = substr($filename, 1);
+            $program = Container::get(Program::class);
+            $output = [];
+            $code = 0;  // ok
 
-            exec(
+            $program->execute(
                 "git -C $this->root$path show $reference:$filename -- 2>&1",
                 $output,
                 $code
@@ -139,6 +152,7 @@ class Git extends LocalOffsetApi
      *
      * @param int $code Exit code.
      * @param string[] $output Output.
+     * @throws InternalError Internal error.
      */
     private function logExecError(int $code, array $output): void
     {
@@ -154,6 +168,7 @@ class Git extends LocalOffsetApi
      * @param string $path Path.
      * @param string $dir Directory.
      * @return Archive|string Response or error message.
+     * @throws InternalError Internal error.
      */
     public function createArchive(string $path, string $reference, string $dir): Archive|string
     {
@@ -163,7 +178,11 @@ class Git extends LocalOffsetApi
 
             // get current branch name
             // detached HEAD is empty
-            exec(
+            $program = Container::get(Program::class);
+            $output = [];
+            $code = 0;  // ok
+
+            $program->execute(
                 "git -C $this->root$path branch --show-current 2>&1",
                 $output,
                 $code
@@ -182,7 +201,7 @@ class Git extends LocalOffsetApi
                 $output =
                 $filter = [];
 
-                exec(
+                $program->execute(
 
                     // collect added files
                     "git -C $this->root$path diff --name-only --diff-filter=A HEAD 2>&1",
@@ -205,7 +224,7 @@ class Git extends LocalOffsetApi
                     // clear output
                     $output = [];
 
-                    exec(
+                    $program->execute(
                         "git -C $this->root$path check-ignore --no-index -- " .
                         implode(" ", $files) . " 2>&1",
                         $output,
@@ -226,7 +245,7 @@ class Git extends LocalOffsetApi
                 // clear output
                 $output = [];
 
-                exec(
+                $program->execute(
                     "git -C $this->root$path ls-files -o --exclude-standard 2>&1",
                     $output,
                     $code
@@ -264,7 +283,7 @@ class Git extends LocalOffsetApi
                     // clear output
                     $output = [];
 
-                    exec(
+                    $program->execute(
                         "git -C $this->root$path check-attr export-ignore -- " .
                         implode(" ", $files) . " 2>&1",
                         $output,
@@ -302,7 +321,7 @@ class Git extends LocalOffsetApi
                 }
             }
 
-            exec(
+            $program->execute(
                 "git -C $this->root$path archive $reference --format=zip " .
                 "--output=$archive $extension --prefix=$reference/ 2>&1",
                 $output,

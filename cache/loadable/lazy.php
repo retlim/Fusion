@@ -205,5 +205,6 @@ return [
 	'Valvoid\Fusion\Util\Version\Parser' => '/src/Util/Version/Parser.php',
 	'Valvoid\Fusion\Wrappers\Curl' => '/src/Wrappers/Curl.php',
 	'Valvoid\Fusion\Wrappers\File' => '/src/Wrappers/File.php',
+	'Valvoid\Fusion\Wrappers\Program' => '/src/Wrappers/Program.php',
 	'Valvoid\Fusion\Wrappers\Stream' => '/src/Wrappers/Stream.php',
 ];
