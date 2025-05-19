@@ -72,6 +72,7 @@ class ContainerMock implements Proxy
             "Valvoid\Fusion\Config\Proxy\Proxy" => $this->config ??= new ($this->classes[$class]),
             "Valvoid\Fusion\Hub\Proxy\Proxy" => $this->hub ??= new ($this->classes[$class]),
             "Valvoid\Fusion\Hub\Cache" => $this->cache ??= new ($this->classes[$class]),
+            default => new $class
         };
     }
 

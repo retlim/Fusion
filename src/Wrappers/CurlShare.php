@@ -19,33 +19,33 @@
 
 namespace Valvoid\Fusion\Wrappers;
 
-use CurlHandle;
+use CurlShareHandle;
 
 /**
- * Curl wrapper.
+ * Curl share wrapper.
  *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class Curl
+class CurlShare
 {
-    /** @var CurlHandle Curl handle. */
-    protected CurlHandle $handle;
+    /** @var CurlShareHandle Curl share handle. */
+    protected CurlShareHandle $handle;
 
     /** Constructs the wrapper. */
     public function __construct()
     {
-        $this->handle = curl_init();
+        $this->handle = curl_share_init();
     }
 
     /** Destructs the wrapper. */
     public function __destruct()
     {
-        curl_close($this->handle);
+        curl_share_close($this->handle);
     }
 
     /**
-     * Sets an option for a cURL transfer.
+     * Sets an option for a cURL share handle.
      *
      * @param int $option Option ID.
      * @param mixed $value Value for the option.
@@ -53,70 +53,27 @@ class Curl
      */
     public function setOption(int $option, mixed $value): bool
     {
-        return curl_setopt($this->handle, $option, $value);
+        return curl_share_setopt($this->handle, $option, $value);
     }
 
     /**
-     * Sets an option for a cURL transfer.
+     * Returns curl share handle.
      *
-     * @return bool True on success or false on failure.
+     * @return CurlShareHandle Handle.
      */
-    public function setShareOption(CurlShare $curlShare): bool
-    {
-        return curl_setopt($this->handle, CURLOPT_SHARE,
-
-            // wrapper abstraction
-            $curlShare->getHandle());
-    }
-
-    /**
-     * Sets multiple options for a cURL transfer.
-     *
-     * @param array $options Option ID.
-     * @return bool True on success or false on failure.
-     */
-    public function setOptions(array $options): bool
-    {
-        return curl_setopt_array($this->handle, $options);
-    }
-
-    /**
-     * Returns info regarding a specific transfer.
-     *
-     * @param int|null $option
-     * @return mixed
-     */
-    public function getInfo(?int $option): mixed
-    {
-        return curl_getinfo($this->handle, $option);
-    }
-
-    /**
-     * Resets options.
-     */
-    public function reset(): void
-    {
-        curl_reset($this->handle);
-    }
-
-    /**
-     * Returns curl handle.
-     *
-     * @return CurlHandle Handle.
-     */
-    public function getHandle(): CurlHandle
+    public function getHandle(): CurlShareHandle
     {
         return $this->handle;
     }
 
     /**
-     * Returns last error number.
+     * Returns last share curl error number.
      *
      * @return int Error number or 0 (zero) if no error occurred.
      */
     public function getErrorCode(): int
     {
-        return curl_errno($this->handle);
+        return curl_share_errno($this->handle);
     }
 
     /**
@@ -127,7 +84,7 @@ class Curl
      */
     public function getErrorMessage(int $code): string
     {
-        return curl_strerror($code) ??
+        return curl_share_strerror($code) ??
             "Unknown error";
     }
 }

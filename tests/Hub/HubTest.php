@@ -35,6 +35,7 @@ use Valvoid\Fusion\Hub\Responses\Remote\References as RemoteReferences;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Wrappers\CurlShare;
 
 /**
  * Hub test.
@@ -58,6 +59,7 @@ class HubTest extends Test
         Snapshot::class,
         Metadata::class,
         CacheArchive::class,
+        CurlShare::class
     ];
 
     private ContainerMock $container;
