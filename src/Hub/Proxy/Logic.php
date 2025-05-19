@@ -49,6 +49,7 @@ use Valvoid\Fusion\Hub\Requests\Remote\Remote as RemoteRequest;
 use Valvoid\Fusion\Log\Events\Errors\Error as HubError;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Wrappers\CurlShare;
 
 /**
  * Default hub implementation.
@@ -61,8 +62,8 @@ class Logic implements Proxy
     /** @var CurlMultiHandle Curl handles wrapper. */
     protected CurlMultiHandle $handle;
 
-    /** @var CurlShareHandle Share handle. */
-    protected CurlShareHandle $shareHandle;
+    /** @var CurlShare Curl share. */
+    protected CurlShare $curlShare;
 
     /** @var array<string, RemoteApi|LocalApi> APIs. */
     protected array $apis;
@@ -92,7 +93,7 @@ class Logic implements Proxy
     public function __construct()
     {
         $config = Config::get("hub");
-        $this->shareHandle = curl_share_init();
+        $this->curlShare = Container::get(CurlShare::class);
         $this->handle = curl_multi_init();
 
         // local API root
@@ -108,12 +109,16 @@ class Logic implements Proxy
                 new $api["api"]($api);
 
         // recycle data
-        curl_share_setopt($this->shareHandle, CURLSHOPT_SHARE,
-            CURL_LOCK_DATA_SSL_SESSION);
-        curl_share_setopt($this->shareHandle, CURLSHOPT_SHARE,
-            CURL_LOCK_DATA_DNS);
-        curl_share_setopt($this->shareHandle, CURLSHOPT_SHARE,
-            CURL_LOCK_DATA_COOKIE);
+        foreach ([CURL_LOCK_DATA_SSL_SESSION,
+                CURL_LOCK_DATA_DNS,
+                CURL_LOCK_DATA_COOKIE] as $option)
+            if ($this->curlShare->setOption(CURLSHOPT_SHARE, $option) === false)
+                throw new HubError(
+                    $this->curlShare->getErrorMessage(
+                        $this->curlShare->getErrorCode()
+                    )
+                );
+
         curl_multi_setopt($this->handle, CURLMOPT_PIPELINING,
 
             // recycle connections
@@ -123,7 +128,6 @@ class Logic implements Proxy
     /** Destructs the logic. */
     public function __destruct()
     {
-        curl_share_close($this->shareHandle);
         curl_multi_close($this->handle);
     }
 
@@ -420,10 +424,15 @@ class Logic implements Proxy
     protected function addRemoteRequest(RemoteApi $api, RemoteRequest $request): void
     {
         $this->queues["remote"][$this->id] = $request;
+        $curl = $request->getCurl();
         $handle = $request->getHandle();
 
-        if (!curl_setopt($handle, CURLOPT_SHARE, $this->shareHandle))
-            $this->dropCurlError();
+        if ($curl->setShareOption($this->curlShare) === false)
+            throw new HubError(
+                $curl->getErrorMessage(
+                    $curl->getErrorCode()
+                )
+            );
 
         // prevent polling and
         // respect rate limit

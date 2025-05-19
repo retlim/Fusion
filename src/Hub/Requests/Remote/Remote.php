@@ -243,6 +243,16 @@ abstract class Remote extends Request
     }
 
     /**
+     * Returns cURL wrapper.
+     *
+     * @return Curl Wrapper.
+     */
+    public function getCurl(): Curl
+    {
+        return $this->curl;
+    }
+
+    /**
      * Throws request error.
      *
      * @param string $message Error message.
