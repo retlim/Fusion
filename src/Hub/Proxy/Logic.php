@@ -20,8 +20,6 @@
 namespace Valvoid\Fusion\Hub\Proxy;
 
 use Closure;
-use CurlMultiHandle;
-use CurlShareHandle;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
@@ -49,6 +47,7 @@ use Valvoid\Fusion\Hub\Requests\Remote\Remote as RemoteRequest;
 use Valvoid\Fusion\Log\Events\Errors\Error as HubError;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Wrappers\CurlMulti;
 use Valvoid\Fusion\Wrappers\CurlShare;
 
 /**
@@ -59,10 +58,10 @@ use Valvoid\Fusion\Wrappers\CurlShare;
  */
 class Logic implements Proxy
 {
-    /** @var CurlMultiHandle Curl handles wrapper. */
-    protected CurlMultiHandle $handle;
+    /** @var CurlMulti Curl multi wrapper. */
+    protected CurlMulti $curlMulti;
 
-    /** @var CurlShare Curl share. */
+    /** @var CurlShare Curl share wrapper. */
     protected CurlShare $curlShare;
 
     /** @var array<string, RemoteApi|LocalApi> APIs. */
@@ -94,7 +93,7 @@ class Logic implements Proxy
     {
         $config = Config::get("hub");
         $this->curlShare = Container::get(CurlShare::class);
-        $this->handle = curl_multi_init();
+        $this->curlMulti = Container::get(CurlMulti::class);
 
         // local API root
         $root = Config::get("dir", "path");
@@ -119,16 +118,11 @@ class Logic implements Proxy
                     )
                 );
 
-        curl_multi_setopt($this->handle, CURLMOPT_PIPELINING,
+        if ($this->curlMulti->setOption(CURLMOPT_PIPELINING,
 
             // recycle connections
-            CURLPIPE_MULTIPLEX);
-    }
-
-    /** Destructs the logic. */
-    public function __destruct()
-    {
-        curl_multi_close($this->handle);
+            CURLPIPE_MULTIPLEX) === false)
+            $this->dropCurlMultiError();
     }
 
     /**
@@ -425,7 +419,6 @@ class Logic implements Proxy
     {
         $this->queues["remote"][$this->id] = $request;
         $curl = $request->getCurl();
-        $handle = $request->getHandle();
 
         if ($curl->setShareOption($this->curlShare) === false)
             throw new HubError(
@@ -439,8 +432,8 @@ class Logic implements Proxy
         if ($api->hasDelay())
             $api->addDelayRequest($this->id);
 
-        elseif (curl_multi_add_handle($this->handle, $handle))
-            $this->dropCurlError();
+        elseif ($this->curlMulti->addCurl($curl) !== 0)
+            $this->dropCurlMultiError();
     }
 
     /**
@@ -472,27 +465,30 @@ class Logic implements Proxy
                 unset($this->queues["local"][$syncId]);
             }
 
+            // active operations
+            $operations = 0;
+
             // execution state as group
             // individuals may still have errors
             // wait until any pulse or
             // timeout block
-            if (curl_multi_exec($this->handle, $tail) ||
-                curl_multi_select($this->handle) == -1)
-                $this->dropCurlError();
+            if ($this->curlMulti->exec($operations) ||
+                $this->curlMulti->select() == -1)
+                $this->dropCurlMultiError();
 
             // evaluate responses
-            while ($info = curl_multi_info_read($this->handle)) {
-                $id = curl_getinfo($info["handle"], CURLINFO_PRIVATE);
+            while ($info = $this->curlMulti->getAllInfo()) {
+                $id = $this->curlMulti->getId($info["handle"]);
                 $request = $this->queues["remote"][$id];
                 $lifecycle = $request->getLifecycle($info["result"],
 
                     // archive has no content
                     // normalize
-                    curl_multi_getcontent($info["handle"]) ??
+                    $this->curlMulti->getContent($request->getCurl()) ??
                     "no content");
 
-                if (curl_multi_remove_handle($this->handle, $info["handle"]))
-                    $this->dropCurlError();
+                if ($this->curlMulti->removeCurl($request->getCurl()) !== 0)
+                    $this->dropCurlMultiError();
 
                 // check lifecycle
                 // some request are not primitive
@@ -502,12 +498,12 @@ class Logic implements Proxy
 
                     unset($this->queues["remote"][$id]);
 
-                    // pagination, token, ...
+                // pagination, token, ...
                 } elseif ($lifecycle == Lifecycle::RELOAD) {
-                    if (curl_multi_add_handle($this->handle, $info["handle"]))
-                        $this->dropCurlError();
+                    if ($this->curlMulti->addCurl($request->getCurl()))
+                        $this->dropCurlMultiError();
 
-                    $tail++;
+                    $operations++;
                 }
             }
 
@@ -518,13 +514,13 @@ class Logic implements Proxy
 
                     if ($delay["timestamp"] <= time()) {
                         foreach ($delay["requests"] as $id) {
-                            if (curl_multi_add_handle($this->handle,
+                            if ($this->curlMulti->addCurl(
 
                                 // reload again
-                                $this->queues["remote"][$id]->getHandle()))
-                                $this->dropCurlError();
+                                $this->queues["remote"][$id]->getCurl()))
+                                $this->dropCurlMultiError();
 
-                            $tail++;
+                            $operations++;
                         }
 
                         $api->resetDelay();
@@ -533,7 +529,7 @@ class Logic implements Proxy
 
             // only idle remote queue left
             // trigger delay
-            if ($tail == 0 && $this->queues["remote"] && !$this->queues["local"]) {
+            if ($operations == 0 && $this->queues["remote"] && !$this->queues["local"]) {
 
                 // + 1 hour should be enough max
                 $timestamp = time() + 3600;
@@ -576,11 +572,11 @@ class Logic implements Proxy
      *
      * @throws HubError Hub exception.
      */
-    protected function dropCurlError(): void
+    protected function dropCurlMultiError(): void
     {
         throw new HubError(
-            curl_multi_strerror(
-                curl_multi_errno($this->handle)
+            $this->curlMulti->getErrorMessage(
+                $this->curlMulti->getErrorCode()
             )
         );
     }
