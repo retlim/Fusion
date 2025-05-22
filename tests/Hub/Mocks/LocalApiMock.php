@@ -19,39 +19,36 @@
 
 namespace Valvoid\Fusion\Tests\Hub\Mocks;
 
-use Valvoid\Fusion\Config\Proxy\Proxy;
+use Valvoid\Fusion\Hub\APIs\Local\Local;
+use Valvoid\Fusion\Hub\Responses\Local\Archive;
+use Valvoid\Fusion\Hub\Responses\Local\File;
+use Valvoid\Fusion\Hub\Responses\Local\References;
 
 /**
- * Mocked config proxy.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ConfigMock implements Proxy
+class LocalApiMock extends Local
 {
-    public function get(string ...$breadcrumb): mixed
-    {
-        // normalized
-        if ($breadcrumb[0] == "hub")
-            return [
-                "apis" => [
-                    "test" => [
-                        "api" => LocalApiMock::class
-                    ]
-                ]
-            ];
+    public function __construct(public string $root, public array $config) {}
 
-        // dir
-        return "path";
+    public function getReferences(string $path): References|string
+    {
+        return "";
     }
 
-    public function getLazy(): array
+    public function getFileContent(string $path, string $reference, string $filename): File|string
     {
-        return [];
+        return "";
     }
 
-    public function hasLazy(string $class): bool
+    public function createArchive(string $path, string $reference, string $dir): Archive|string
     {
-        return false;
+        return "";
+    }
+
+    public function getFileLocation(string $path, string $reference, string $filename): string
+    {
+        return "/###";
     }
 }

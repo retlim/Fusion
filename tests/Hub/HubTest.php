@@ -22,6 +22,7 @@ namespace Valvoid\Fusion\Tests\Hub;
 use Exception;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Proxy\Logic;
+use Valvoid\Fusion\Hub\Responses\Cache\Archive;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive as CacheArchive;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
 use Valvoid\Fusion\Hub\Responses\Cache\Snapshot;
@@ -35,6 +36,7 @@ use Valvoid\Fusion\Hub\Responses\Remote\References as RemoteReferences;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Wrappers\CurlMulti;
 use Valvoid\Fusion\Wrappers\CurlShare;
 
 /**
@@ -59,7 +61,8 @@ class HubTest extends Test
         Snapshot::class,
         Metadata::class,
         CacheArchive::class,
-        CurlShare::class
+        CurlShare::class,
+        CurlMulti::class
     ];
 
     private ContainerMock $container;
@@ -76,84 +79,187 @@ class HubTest extends Test
         $this->container->setUpLogicTests();
         $this->testErrorRequest();
 
+        // all request are cache first and
+        // synchronizable
+        $this->testVersionsCacheRequest();
+        $this->testFileCacheRequest();
+        $this->testArchiveCacheRequest();
+
         $this->container->destroy();
+    }
+
+    public function testArchiveCacheRequest(): void
+    {
+        $hub = new Logic;
+        $source = [
+            "api" => "test",
+            "path" => "/-",
+            "reference" => "1.2.3",
+            "prefix" => ""
+        ];
+
+        try {
+            $id = $hub->addArchiveRequest($source);
+            $hub->executeRequests(function (Archive $archive) use (&$id) {
+                if ($archive->getId() !== $id ||
+                    $archive->getFile() !== "/archive.zip")
+                    $this->handleFailedTest();
+
+                // hook triggered
+                $id = true;
+            });
+
+            if ($id !== true)
+                $this->handleFailedTest();
+
+        // mock API has no logic and
+        // drops error when sync request
+        } catch (Exception) {
+            $this->handleFailedTest();
+        }
+    }
+
+    public function testFileCacheRequest(): void
+    {
+        $hub = new Logic;
+        $source = [
+            "api" => "test",
+            "path" => "/-",
+            "reference" => "1.2.3",
+            "prefix" => ""
+        ];
+
+        try {
+            $id = $hub->addMetadataRequest($source);
+            $hub->executeRequests(function (Metadata $metadata) use (&$id) {
+                if ($metadata->getId() !== $id ||
+                    $metadata->getFile() !== "/###" ||
+                    $metadata->getContent() !== "###")
+                    $this->handleFailedTest();
+
+                // hook triggered
+                $id = true;
+            });
+
+            if ($id !== true)
+                $this->handleFailedTest();
+
+            $id = $hub->addSnapshotRequest($source, "/-");
+            $hub->executeRequests(function (Snapshot $snapshot) use (&$id) {
+                if ($snapshot->getId() !== $id ||
+                    $snapshot->getFile() !== "/###" ||
+                    $snapshot->getContent() !== "###")
+                    $this->handleFailedTest();
+
+                // hook triggered
+                $id = true;
+            });
+
+            if ($id !== true)
+                $this->handleFailedTest();
+
+        // mock API has no logic and
+        // drops error when sync request
+        } catch (Exception) {
+            $this->handleFailedTest();
+        }
+    }
+
+    public function testVersionsCacheRequest(): void
+    {
+        $hub = new Logic;
+        $source = [
+            "api" => "test",
+            "path" => "/-",
+            "reference" => [[
+                "major" => 1,
+                "minor" => 2,
+                "patch" => 3,
+                "release" => "",
+                "build" => ""
+            ]]
+        ];
+
+        try {
+            $id = $hub->addVersionsRequest($source);
+            $hub->executeRequests(function (Versions $versions) use (&$id) {
+                if ($versions->getId() !== $id ||
+                    $versions->getEntries() !== [
+                        "1.3.4",
+                        "1.2.3"
+                    ])
+                    $this->handleFailedTest();
+
+                // hook triggered
+                $id = true;
+            });
+
+            if ($id !== true)
+                $this->handleFailedTest();
+
+        // mock API has no logic and
+        // drops error when sync request
+        } catch (Exception) {
+            $this->handleFailedTest();
+        }
     }
 
     public function testErrorRequest(): void
     {
         // unknown api
+        $source = ["api" => "whatever"];
         $hub = new Logic;
 
         try {
-            $hub->addVersionsRequest(["api" => "whatever"]);
+            $hub->addVersionsRequest($source);
             $hub->executeRequests(function (){});
 
             // assert exception
             // unknown api
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
+            $this->handleFailedTest();
 
         } catch (Exception $exception) {
-            if (!($exception instanceof Request)) {
-                echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-                $this->result = false;
-            }
+            if (!($exception instanceof Request))
+                $this->handleFailedTest();
         }
 
         try {
-            $hub->addSnapshotRequest(["api" => "whatever"], "");
+            $hub->addSnapshotRequest($source, "");
             $hub->executeRequests(function (){});
 
             // assert exception
             // unknown api
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
+            $this->handleFailedTest();
 
         } catch (Exception $exception) {
-            if (!($exception instanceof Request)) {
-                echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-                $this->result = false;
-            }
+            if (!($exception instanceof Request))
+                $this->handleFailedTest();
         }
 
         try {
-            $hub->addMetadataRequest(["api" => "whatever"]);
+            $hub->addMetadataRequest($source);
             $hub->executeRequests(function (){});
 
             // assert exception
             // unknown api
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
+            $this->handleFailedTest();
 
         } catch (Exception $exception) {
-            if (!($exception instanceof Request)) {
-                echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-                $this->result = false;
-            }
+            if (!($exception instanceof Request))
+                $this->handleFailedTest();
         }
 
         try {
-            $hub->addArchiveRequest(["api" => "whatever"]);
+            $hub->addArchiveRequest($source);
             $hub->executeRequests(function (){});
 
             // assert exception
             // unknown api
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
+            $this->handleFailedTest();
 
         } catch (Exception $exception) {
-            if (!($exception instanceof Request)) {
-                echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-                $this->result = false;
-            }
+            if (!($exception instanceof Request))
+                $this->handleFailedTest();
         }
     }
 
@@ -171,11 +277,7 @@ class HubTest extends Test
                 "addMetadataRequest",
                 "addSnapshotRequest",
                 "addArchiveRequest",
-                "executeRequests",]) {
-
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+                "executeRequests",])
+            $this->handleFailedTest();
     }
 }
