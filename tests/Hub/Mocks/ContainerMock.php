@@ -41,6 +41,7 @@ class ContainerMock implements Proxy
     public array $classes = [
         "Valvoid\Fusion\Hub\Cache" => CacheMock::class,
         "Valvoid\Fusion\Config\Proxy\Proxy" => ConfigMock::class,
+        "Valvoid\Fusion\Wrappers\File" => FileMock::class
     ];
 
     public function __construct()
@@ -72,6 +73,7 @@ class ContainerMock implements Proxy
             "Valvoid\Fusion\Config\Proxy\Proxy" => $this->config ??= new ($this->classes[$class]),
             "Valvoid\Fusion\Hub\Proxy\Proxy" => $this->hub ??= new ($this->classes[$class]),
             "Valvoid\Fusion\Hub\Cache" => $this->cache ??= new ($this->classes[$class]),
+            "Valvoid\Fusion\Wrappers\File" => new ($this->classes[$class]),
             default => new $class
         };
     }

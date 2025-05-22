@@ -75,6 +75,8 @@ return [
 	'Valvoid\Fusion\Tests\Hub\Mocks\CacheMock' => '/tests/Hub/Mocks/CacheMock.php',
 	'Valvoid\Fusion\Tests\Hub\Mocks\ConfigMock' => '/tests/Hub/Mocks/ConfigMock.php',
 	'Valvoid\Fusion\Tests\Hub\Mocks\ContainerMock' => '/tests/Hub/Mocks/ContainerMock.php',
+	'Valvoid\Fusion\Tests\Hub\Mocks\FileMock' => '/tests/Hub/Mocks/FileMock.php',
+	'Valvoid\Fusion\Tests\Hub\Mocks\LocalApiMock' => '/tests/Hub/Mocks/LocalApiMock.php',
 	'Valvoid\Fusion\Tests\Hub\Mocks\ProxyMock' => '/tests/Hub/Mocks/ProxyMock.php',
 	'Valvoid\Fusion\Tests\Hub\ParserTest' => '/tests/Hub/ParserTest.php',
 	'Valvoid\Fusion\Tests\Hub\Requests\Cache\Archive\ArchiveTest' => '/tests/Hub/Requests/Cache/Archive/ArchiveTest.php',
