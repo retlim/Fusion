@@ -130,10 +130,17 @@ class Logic implements Proxy
      *
      * @param array $source Source.
      * @return int Request ID.
+     * @throws HubError Hub exception.
      */
     protected function addErrorRequest(array $source): int
     {
-        $request = new CacheErrorRequest($this->id, $this->cache, $source, null);
+        $request = Container::get(CacheErrorRequest::class,
+            id: $this->id,
+            cache: $this->cache,
+            source: $source,
+            api: null
+        );
+
         $this->queues["cache"][$this->id] = $request;
 
         return $this->id++;
@@ -145,7 +152,6 @@ class Logic implements Proxy
      * @param array $source Source.
      * @return int Unique request ID.
      * @throws HubError Hub exception.
-     * @throws RequestError Request exception.
      */
     public function addVersionsRequest(array $source): int
     {
@@ -161,7 +167,14 @@ class Logic implements Proxy
         // hub caches everything
         $id = $this->id++;
         $offsets = Parser::getOffsets($source["reference"]);
-        $request = new CacheVersionsRequest($id, $this->cache, $source, $api, $offsets);
+        $request = Container::get(CacheVersionsRequest::class,
+            id: $id,
+            cache: $this->cache,
+            source: $source,
+            api: $api,
+            offsets: $offsets
+        );
+
         $this->queues["cache"][$id] = $request;
 
         // sync/instant local
@@ -174,15 +187,22 @@ class Logic implements Proxy
                     // no synchronization yet
                     // create sub sync request
                     if ($state === false) {
-                        $sync = new LocalOffsetRequest($this->id, $this->cache,
-                            $source, $api, $offset["version"], $offset["entry"]);
+                        $sync = Container::get(LocalOffsetRequest::class,
+                            id: $this->id,
+                            cache: $this->cache,
+                            source: $source,
+                            api: $api,
+                            inline: $offset["version"],
+                            inflated: $offset["entry"]
+                        );
+
                         $this->queues["local"][$this->id] = $sync;
 
                         $sync->addCacheId($id);
                         $request->addSyncId($this->id++);
 
-                        // redundant
-                        // recycle active sync request ID
+                    // redundant
+                    // recycle active sync request ID
                     } elseif (is_int($state)) {
                         $this->queues["local"][$state]->addCacheId($id);
                         $request->addSyncId($state);
@@ -194,7 +214,13 @@ class Logic implements Proxy
             // no synchronization yet
             // create sub sync request
             if ($state === false) {
-                $sync = new LocalReferencesRequest($this->id, $this->cache, $source, $api);
+                $sync = Container::get(LocalReferencesRequest::class,
+                    id: $this->id,
+                    cache: $this->cache,
+                    source: $source,
+                    api: $api
+                );
+
                 $this->queues["local"][$this->id] = $sync;
 
                 $sync->addCacheId($id);
@@ -207,7 +233,7 @@ class Logic implements Proxy
                 $request->addSyncId($state);
             }
 
-            // async/lazy remote
+        // async/lazy remote
         } else {
             if ($api instanceof RemoteOffsetApi)
                 foreach ($offsets as $offset) {
@@ -217,15 +243,21 @@ class Logic implements Proxy
                     // no synchronization yet
                     // create sub sync request
                     if ($state === false) {
-                        $sync = new RemoteOffsetRequest($this->id, $this->cache,
-                            $source, $api, $offset["version"], $offset["entry"]);
+                        $sync = Container::get(RemoteOffsetRequest::class,
+                            id: $this->id,
+                            cache: $this->cache,
+                            source: $source,
+                            api: $api,
+                            inline: $offset["version"],
+                            inflated: $offset["entry"]
+                        );
 
                         $this->addRemoteRequest($api, $sync);
                         $sync->addCacheId($id);
                         $request->addSyncId($this->id++);
 
-                        // redundant
-                        // recycle active sync request ID
+                    // redundant
+                    // recycle active sync request ID
                     } elseif (is_int($state)) {
                         $this->queues["remote"][$state]->addCacheId($id);
                         $request->addSyncId($state);
@@ -237,7 +269,12 @@ class Logic implements Proxy
             // no synchronization yet
             // create sub sync request
             if ($state === false) {
-                $sync = new RemoteReferencesRequest($this->id, $this->cache, $source, $api);
+                $sync = Container::get(RemoteReferencesRequest::class,
+                    id: $this->id,
+                    cache: $this->cache,
+                    source: $source,
+                    api: $api
+                );
 
                 $this->addRemoteRequest($api, $sync);
                 $sync->addCacheId($id);
@@ -274,7 +311,7 @@ class Logic implements Proxy
     }
 
     /**
-     * Enqueues snap file (snapshot.json) request.
+     * Enqueues snapshot file (snapshot.json) request.
      *
      * @param array $source Source + pointer.
      * @param string $path Relative to the package root cache path.
@@ -311,7 +348,15 @@ class Logic implements Proxy
 
         // visible external request
         $id = $this->id++;
-        $request = new CacheFileRequest($id, $this->cache, $source, $path, $file, $api);
+        $request = Container::get(CacheFileRequest::class,
+            id: $id,
+            cache: $this->cache,
+            source: $source,
+            path: $path,
+            filename: $file,
+            api: $api
+        );
+
         $this->queues["cache"][$id] = $request;
 
         $state = $this->cache->getFileState($source, $file, $api);
@@ -320,14 +365,26 @@ class Logic implements Proxy
         // create sub sync request
         if ($state === false) {
             if ($api instanceof LocalApi) {
-                $sync = new LocalFileRequest($this->id, $this->cache, $source,
-                    $path, $file, $api);
+                $sync = Container::get(LocalFileRequest::class,
+                    id: $this->id,
+                    cache: $this->cache,
+                    source: $source,
+                    path: $path,
+                    filename: $file,
+                    api: $api
+                );
 
                 $this->queues["local"][$this->id] = $sync;
 
             } else {
-                $sync = new RemoteFileRequest($this->id, $this->cache, $source,
-                    $path, $file, $api);
+                $sync = Container::get(RemoteFileRequest::class,
+                    id: $this->id,
+                    cache: $this->cache,
+                    source: $source,
+                    path: $path,
+                    filename: $file,
+                    api: $api
+                );
 
                 $this->addRemoteRequest($api, $sync);
             }
@@ -335,8 +392,8 @@ class Logic implements Proxy
             $sync->addCacheId($id);
             $request->addSyncId($this->id++);
 
-            // redundant
-            // recycle active sync request ID
+        // redundant
+        // recycle active sync request ID
         } elseif (is_int($state)) {
             $sync = $this->queues["remote"][$state] ??
                 $this->queues["local"][$state];
@@ -351,7 +408,7 @@ class Logic implements Proxy
     }
 
     /**
-     * Enqueues pointer request.
+     * Enqueues archive request.
      *
      * @param array $source Source + pointer.
      * @return int Unique request ID.
@@ -369,7 +426,13 @@ class Logic implements Proxy
 
         // visible external request
         $id = $this->id++;
-        $request = new CacheArchiveRequest($id, $this->cache, $source, $api);
+        $request = Container::get(CacheArchiveRequest::class,
+            id: $id,
+            cache: $this->cache,
+            source: $source,
+            api: $api
+        );
+
         $this->queues["cache"][$id] = $request;
 
         $state = $this->cache->getFileState($source, "/archive.zip", $api);
@@ -378,14 +441,22 @@ class Logic implements Proxy
         // create sub sync request
         if ($state === false) {
             if ($api instanceof LocalApi) {
-                $sync = new LocalArchiveRequest($this->id, $this->cache,
-                    $source, $api);
+                $sync = Container::get(LocalArchiveRequest::class,
+                    id: $this->id,
+                    cache: $this->cache,
+                    source: $source,
+                    api: $api
+                );
 
                 $this->queues["local"][$this->id] = $sync;
 
             } else {
-                $sync = new RemoteArchiveRequest($this->id, $this->cache,
-                    $source, $api);
+                $sync = Container::get(RemoteArchiveRequest::class,
+                    id: $this->id,
+                    cache: $this->cache,
+                    source: $source,
+                    api: $api
+                );
 
                 $this->addRemoteRequest($api, $sync);
             }
@@ -393,8 +464,8 @@ class Logic implements Proxy
             $sync->addCacheId($id);
             $request->addSyncId($this->id++);
 
-            // redundant
-            // recycle active sync request ID
+        // redundant
+        // recycle active sync request ID
         } elseif (is_int($state)) {
             $sync = $this->queues["remote"][$state] ??
                 $this->queues["local"][$state];
