@@ -51,7 +51,7 @@ interface Proxy
     public function addMetadataRequest(array $source): int;
 
     /**
-     * Enqueues snap file (snapshot.json) request.
+     * Enqueues snapshot file (snapshot.json) request.
      *
      * @param array $source Source + pointer.
      * @param string $path Relative to the package root cache path.
@@ -61,7 +61,7 @@ interface Proxy
     public function addSnapshotRequest(array $source, string $path): int;
 
     /**
-     * Enqueues pointer request.
+     * Enqueues archive request.
      *
      * @param array $source Source + pointer.
      * @return int Unique request ID.
