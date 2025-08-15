@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.7](/../../compare/1.0.6...1.0.7) - August 15, 2025
+
+- Fixes CLI script exit code on failed task ([#22](https://gitlab.com/valvoid/fusion/php/code/-/issues/22))
+
 ## [1.0.6](/../../compare/1.0.5...1.0.6) - May 10, 2025
 
 - Fixes optional serialization keys ([#20](https://gitlab.com/valvoid/fusion/php/code/-/issues/20))
