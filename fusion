@@ -79,7 +79,11 @@ try {
     require_once __DIR__ . "/src/Fusion.php";
 
     Fusion::init($config);
-    Fusion::manage($taskId);
+
+    if (Fusion::manage($taskId) === false) {
+        echo "\n\n";
+        exit(1);
+    }
 
 // own CLI and fusion constructor loggable
 } catch (Event $event) {
