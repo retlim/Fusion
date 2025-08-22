@@ -22,8 +22,9 @@ namespace Valvoid\Fusion\Tests\Hub\Requests\Cache\File;
 use Throwable;
 use Valvoid\Fusion\Hub\Requests\Cache\File;
 use Valvoid\Fusion\Tests\Hub\Requests\Cache\File\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Cache\File\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Cache\File\Mocks\CacheMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Cache\File\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Cache\File\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
 use Valvoid\Fusion\Hub\Responses\Cache\Snapshot;
@@ -47,7 +48,8 @@ class FileTest extends Test
 
     public function __construct()
     {
-        $containerMock = new ContainerMock;
+        $container = new BoxMock;
+        $container->file = new FileMock;
         $this->cacheMock = new CacheMock;
         $this->apiMock = new APIMock;
         $this->file = new File(1, $this->cacheMock, $this->source,
@@ -57,7 +59,7 @@ class FileTest extends Test
         $this->testMetadataResponse();
         $this->testSnapshotResponse();
 
-        $containerMock->destroy();
+        $container::unsetInstance();
     }
 
     public function testInit(): void

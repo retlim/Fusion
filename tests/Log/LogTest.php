@@ -31,7 +31,7 @@ use Valvoid\Fusion\Log\Events\Infos\Error as InfoError;
 use Valvoid\Fusion\Log\Events\Infos\Id;
 use Valvoid\Fusion\Log\Events\Infos\Name;
 use Valvoid\Fusion\Log\Log;
-use Valvoid\Fusion\Tests\Log\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Log\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Log\Mocks\InterceptorMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -60,17 +60,17 @@ class LogTest extends Test
         Request::class
     ];
 
-    private ContainerMock $container;
+    private BoxMock $container;
     private InterceptorMock $interceptor;
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->container = new BoxMock;
         $this->interceptor = new InterceptorMock;
 
         // static
         $this->testStaticInterface();
-        $this->container->destroy();
+        $this->container::unsetInstance();
     }
 
     public function testStaticInterface(): void
@@ -85,7 +85,7 @@ class LogTest extends Test
         Log::debug("");
 
         // static functions connected to same non-static functions
-        if ($this->container->logic->log->calls !== [
+        if ($this->container->log->calls !== [
                 "removeInterceptor",
                 "addInterceptor",
                 "debug",
@@ -93,11 +93,6 @@ class LogTest extends Test
                 "warning",
                 "notice",
                 "info",
-                "debug"]) {
-
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+                "debug"]) $this->handleFailedTest();
     }
 }

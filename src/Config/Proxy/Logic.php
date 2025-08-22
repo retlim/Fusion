@@ -19,9 +19,9 @@
 
 namespace Valvoid\Fusion\Config\Proxy;
 
-use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Bus\Events\Boot;
+use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
 use Valvoid\Fusion\Config\Interpreter\Dir as DirectoryInterpreter;
 use Valvoid\Fusion\Config\Interpreter\Interpreter;
 use Valvoid\Fusion\Config\Normalizer\Dir as DirectoryNormalizer;
@@ -61,12 +61,13 @@ class Logic implements Proxy
     /**
      * Constructs the config.
      *
+     * @param BusProxy $bus
      * @param string $root
      * @param array $lazy
      * @param array $config Runtime config layer.
-     * @throws Error Internal error.
      */
-    public function __construct(string $root, array $lazy, array $config)
+    public function __construct(BusProxy $bus, string $root, array $lazy,
+                                array $config)
     {
         $this->root = $root;
         $this->lazy = $lazy;
@@ -76,8 +77,8 @@ class Logic implements Proxy
             "default" => []
         ];
 
-        Bus::addReceiver(self::class, function () {
-            Bus::addReceiver(self::class, $this->handleBusEvent(...),
+        $bus->addReceiver(self::class, function () use ($bus) {
+            $bus->addReceiver(self::class, $this->handleBusEvent(...),
 
                 // parser, interpreter, normalizer
                 ConfigEvent::class);

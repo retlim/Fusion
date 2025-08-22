@@ -21,8 +21,13 @@ namespace Valvoid\Fusion\Tests\Tasks\Extend;
 
 use Exception;
 use Valvoid\Fusion\Tasks\Extend\Extend;
-use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\ContainerMock;
-use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\MetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\ExternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\InternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\LogMock;
+use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -52,7 +57,15 @@ class ExtendTest extends Test
 
     public function __construct()
     {
+        $box = new BoxMock;
+        $box->bus = new BusMock;
+        $box->log = new LogMock;
+        $group = new GroupMock;
+        $box->group = $group;
+        $group->hasDownloadable = false;
         try {
+
+
             foreach ($this->structure as $directory)
                 if (!is_dir($directory))
                     if (!mkdir($directory, 0777, true))
@@ -61,14 +74,47 @@ class ExtendTest extends Test
                         );
 
             $this->time = time();
-            $containerMock = new ContainerMock;
             $ballast = "$this->dir/metadata3";
             $task = new Extend([]);
 
             // refresh state
             // implication contains only existing versions
             // refresh cache and extensions dirs
-            MetadataMock::addRefreshMetadata();
+            $group->implication = ["metadata2" => [ // no external root
+                "implication" => []
+            ]];
+            $group->internalMetas["metadata1"] = new InternalMetadataMock([
+                "id" => "metadata1",
+                "name" => "metadata1",
+                "description" => "metadata1",
+                "source" => __DIR__ . "/Mocks/package",
+                "dir" => "", // relative to root dir
+                "version" => "1.0.0",
+                "structure" => [
+                    "cache" => "/cache",
+                    "extensions" => [],
+                    "sources" => [
+                        "/dependencies" => []
+                    ]
+                ]
+            ]);
+
+            $group->internalRoot = $group->internalMetas["metadata1"];
+            $group->internalMetas["metadata2"] = new InternalMetadataMock([
+                "id" => "metadata2",
+                "name" => "metadata2",
+                "description" => "metadata2",
+                "source" => __DIR__ . "/Mocks/package/dependencies/metadata2",
+                "dir" => "/dependencies/metadata2", // relative to root dir
+                "version" => "1.0.0",
+                "structure" => [
+                    "cache" => "/cache",
+                    "extensions" => [
+                        "/extensions"
+                    ],
+                    "sources" => []
+                ]
+            ]);
 
             if (!file_exists($ballast) && !mkdir($ballast, 0777, true))
                 throw new Exception(
@@ -81,7 +127,9 @@ class ExtendTest extends Test
             $this->testRefreshBallast();
 
             // clear previous metadata
-            unset($containerMock->logic->group);
+            $group = new GroupMock;
+            $box->group = $group;
+            $group->hasDownloadable = true;
 
             $from = "$this->cache/metadata3/dependencies/metadata2/extensions/metadata3";
             $to = "$this->cache/metadata2/extensions/metadata3";
@@ -91,7 +139,95 @@ class ExtendTest extends Test
             // new state
             // implication contains at least one downloadable (metadata3) package
             // loop packages inside cached state
-            MetadataMock::addNewStateMetadata();
+            $group->internalMetas = [
+                "metadata1" => new InternalMetadataMock([
+                    "id" => "metadata1",
+                    "name" => "metadata1",
+                    "description" => "metadata1",
+                    "source" => __DIR__ . "/Mocks/package",
+                    "dir" => "", // relative to root dir
+                    "version" => "1.0.0",
+                    "structure" => [
+                        "cache" => "/cache",
+                        "extensions" => [],
+                        "sources" => [
+                            "/dependencies" => []
+                        ]
+                    ]
+                ])
+            ];
+
+            $group->internalRoot = $group->internalMetas["metadata1"];
+            $group->implication = [
+                "metadata1" => [
+                    "implication" => [
+                        "metadata2" => [
+                            "implication" => []
+                        ],
+                        "metadata3" => [
+                            "implication" => [
+                                "metadata2" => [
+                                    "implication" => []
+                                ]
+                            ]
+                        ],
+                    ]
+                ]
+            ];
+
+            $group->externalMetas["metadata1"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE, [
+                    "id" => "metadata1",
+                    "name" => "metadata1",
+                    "description" => "metadata1",
+                    "source" => "/package",
+                    "dir" => "", // relative to root dir
+                    "version" => "1.0.0",
+                    "structure" => [
+                        "cache" => "/cache",
+                        "extensions" => [],
+                        "sources" => [
+                            "/dependencies" => [
+                                "metadata2",
+                                "metadata3"
+                            ]
+                        ]
+                    ]
+                ]);
+
+            $group->externalMetas["metadata2"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT, [
+                "id" => "metadata2",
+                "name" => "metadata2",
+                "description" => "metadata2",
+                "source" => "/package/dependencies/metadata2",
+                "dir" => "/dependencies/metadata2",
+                "version" => "1.0.0",
+                "structure" => [
+                    "cache" => "/cache",
+                    "extensions" => [
+                        "/extensions"
+                    ],
+                    "sources" => []
+                ]
+            ]);
+
+            $group->externalMetas["metadata3"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE, [
+                "id" => "metadata3",
+                "name" => "metadata3",
+                "description" => "metadata3",
+                "source" => "whatever/metadata3",
+                "dir" => "/dependencies/metadata3",
+                "version" => "1.0.0",
+                "structure" => [
+                    "cache" => "/cache",
+                    "extensions" => [],
+                    "sources" => [
+                        "/dependencies" => ["metadata2"]
+                    ]
+                ]
+            ]);
 
             if (!file_exists($from) && !mkdir($from, 0777, true))
                 throw new Exception(
@@ -113,17 +249,16 @@ class ExtendTest extends Test
             $this->testNewStateExtensionsOrder();
             $this->testNewStateBallast();
             $this->testNewStateExtension();
-            $containerMock->destroy();
+            $box::unsetInstance();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
 
-            if (isset($containerMock))
-                $containerMock->destroy();
-
             $this->result = false;
         }
+
+        $box::unsetInstance();
     }
 
     public function testRefreshExtensionsFiles(): void
@@ -135,9 +270,7 @@ class ExtendTest extends Test
             file_exists($file2) && filemtime($file2) >= $this->time)
             return;
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testRefreshExtensionsOrder(): void
@@ -154,9 +287,7 @@ class ExtendTest extends Test
             ])
             return;
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testRefreshBallast(): void
@@ -170,9 +301,7 @@ class ExtendTest extends Test
         if ($filenames == $assertion)
             return;
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testNewStateExtensionsFiles(): void
@@ -186,9 +315,7 @@ class ExtendTest extends Test
             file_exists($file3) && filemtime($file3) >= $this->time)
             return;
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testNewStateExtensionsOrder(): void
@@ -208,13 +335,12 @@ class ExtendTest extends Test
                 0 => "metadata2", // dep of meta1
                 1 => "metadata2", // dep of meta3
                 2 => "metadata3",
-                3 => "metadata1"
+                3 => "metadata1",
+                4 => "metadata1"
             ])
             return;
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testNewStateBallast(): void
@@ -222,9 +348,7 @@ class ExtendTest extends Test
         if (!file_exists("$this->cache/metadata2/extensions/metadata6"))
             return;
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testNewStateExtension(): void

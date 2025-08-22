@@ -20,9 +20,10 @@
 namespace Valvoid\Fusion\Bus;
 
 use Closure;
+use Exception;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Event;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 
 /**
@@ -39,11 +40,11 @@ class Bus
      * @param string $id Receiver ID.
      * @param Closure $callback Receiver callback.
      * @param string ...$events Event class name IDs.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function addReceiver(string $id, Closure $callback, string ...$events): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->addReceiver($id, $callback, ...$events);
     }
 
@@ -51,11 +52,11 @@ class Bus
      * Sends the event to all receivers.
      *
      * @param Event $event Event.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function broadcast(Event $event): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->broadcast($event);
     }
 
@@ -64,11 +65,11 @@ class Bus
      *
      * @param string $id Receiver ID.
      * @param string ...$events Event class name IDs.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function removeReceiver(string $id, string ...$events): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->removeReceiver($id, ...$events);
     }
 }

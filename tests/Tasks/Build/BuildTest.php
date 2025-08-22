@@ -22,7 +22,13 @@ namespace Valvoid\Fusion\Tests\Tasks\Build;
 use Exception;
 use Valvoid\Fusion\Tasks\Build\Build;
 use Valvoid\Fusion\Tasks\Group;
+use Valvoid\Fusion\Tests\Tasks\Build\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Tasks\Build\Mocks\BuilderMock;
 use Valvoid\Fusion\Tests\Tasks\Build\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Tasks\Build\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Build\Mocks\HubMock;
+use Valvoid\Fusion\Tests\Tasks\Build\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Build\Mocks\SolverMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -35,35 +41,38 @@ class BuildTest extends Test
 {
     protected string|array $coverage = Build::class;
 
-    private ContainerMock $containerMock;
-
+    private BoxMock $box;
 
     public function __construct()
     {
-        try {
-            $this->containerMock = new ContainerMock;
+        $this->box = new BoxMock;
 
+        try {
             $this->testExternalRootSourceImplication();
             $this->testRecursiveMetadataImplication();
             $this->testNestedMetadataImplication();
-
-            $this->containerMock->destroy();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
 
-            if (isset($this->containerMock))
-                $this->containerMock->destroy();
+            if (isset($this->box))
+                $this->box::unsetInstance();
 
             if (isset($this->groupMock))
                 $this->groupMock->destroy();
         }
+
+        $this->box::unsetInstance();
     }
 
     public function testNestedMetadataImplication(): void
     {
-        $this->containerMock->setUpNestedMetadataImplication();
+        $this->box->case = 2;
+        $this->box->metas = [];
+        $this->box->implication = [];
+        unset($this->box->hub);
+        unset($this->box->group);
 
         // get nested deps from root metadata
         $task = new Build([
@@ -83,7 +92,7 @@ class BuildTest extends Test
         $task->execute();
 
         // invalid raw version implication passed to solver
-        if ($this->containerMock->logic->implication != [
+        if ($this->box->implication != [
                 "metadata2" => [
                     "source" => "metadata2",
                     "implication" => [
@@ -182,11 +191,8 @@ class BuildTest extends Test
                         ]
                     ]
                 ]
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
-
-            $this->result = false;
-        }
+            ])
+            $this->handleFailedTest();
 
         // invalid implication
         // without internal root
@@ -221,11 +227,8 @@ class BuildTest extends Test
                         ]
                     ]
                 ]
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
-
-            $this->result = false;
-        }
+            ])
+            $this->handleFailedTest();
 
         $metas = Group::getExternalMetas();
         $line = "";
@@ -238,11 +241,8 @@ class BuildTest extends Test
             "metadata5",
             "metadata6",
             "metadata7"
-        ], array_keys($metas))) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
-
-            $this->result = false;
-        }
+        ], array_keys($metas)))
+            $this->handleFailedTest();
 
         // ids equal solver path
         // stacked dirs
@@ -315,8 +315,11 @@ class BuildTest extends Test
 
     public function testRecursiveMetadataImplication(): void
     {
-        $this->containerMock->setUpRecursiveMetadataImplication();
-
+        $this->box->case = 1;
+        $this->box->metas = [];
+        $this->box->implication = [];
+        unset($this->box->hub);
+        unset($this->box->group);
         // get source from root metadata
         $task = new Build([
             "source" => false,
@@ -335,7 +338,7 @@ class BuildTest extends Test
         $task->execute();
 
         // invalid raw version implication passed to solver
-        if ($this->containerMock->logic->implication != [
+        if ($this->box->implication != [
                 "metadata2" => [
                     "source" => "metadata2",
                     "implication" => [
@@ -434,11 +437,8 @@ class BuildTest extends Test
                         ]
                     ]
                 ]
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
-
-            $this->result = false;
-        }
+            ])
+            $this->handleFailedTest();
 
         // invalid implication
         if (Group::getImplication() != [
@@ -477,11 +477,8 @@ class BuildTest extends Test
                         ]
                     ]
                 ]
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
-
-            $this->result = false;
-        }
+            ])
+            $this->handleFailedTest();
 
         $metas = Group::getExternalMetas();
         $line = "";
@@ -495,11 +492,8 @@ class BuildTest extends Test
             "metadata5",
             "metadata6",
             "metadata7"
-        ], array_keys($metas))) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
-
-            $this->result = false;
-        }
+        ], array_keys($metas)))
+            $this->handleFailedTest();
 
         // ids equal solver path
         // stacked dirs
@@ -581,8 +575,11 @@ class BuildTest extends Test
 
     public function testExternalRootSourceImplication(): void
     {
-        // recursive runtime layer source arg
-        $this->containerMock->setUpExternalRootSourceImplication();
+        $this->box->case = 0;
+        $this->box->metas = [];
+        $this->box->implication = [];
+        unset($this->box->hub);
+        unset($this->box->group);
 
         $task = new Build([
             "source" => "metadata1", // runtime layer
@@ -601,7 +598,7 @@ class BuildTest extends Test
         $task->execute();
 
         // invalid raw version implication passed to solver
-        if ($this->containerMock->logic->implication != [
+        if ($this->box->implication != [
                 "metadata2" => [
                     "source" => "metadata2",
                     "implication" => [
@@ -700,11 +697,8 @@ class BuildTest extends Test
                         ]
                     ]
                 ]
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
-
-            $this->result = false;
-        }
+            ])
+            $this->handleFailedTest();
 
         // invalid implication
         if (Group::getImplication() != [
@@ -743,11 +737,7 @@ class BuildTest extends Test
                         ]
                     ]
                 ]
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
-
-            $this->result = false;
-        }
+            ]) $this->handleFailedTest();
 
         $metas = Group::getExternalMetas();
         $line = "";
@@ -761,11 +751,8 @@ class BuildTest extends Test
             "metadata5",
             "metadata6",
             "metadata7"
-        ], array_keys($metas))) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
-
-            $this->result = false;
-        }
+        ], array_keys($metas)))
+            $this->handleFailedTest();
 
         // ids equal solver path
         // stacked dirs

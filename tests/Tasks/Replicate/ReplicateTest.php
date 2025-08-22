@@ -20,9 +20,12 @@
 namespace Valvoid\Fusion\Tests\Tasks\Replicate;
 
 use Exception;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Replicate\Replicate;
-use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\InternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Tasks\Replicate\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -37,6 +40,7 @@ class ReplicateTest extends Test
     protected string|array $coverage = Replicate::class;
 
     private int $time;
+    protected GroupMock $group;
 
     private array $environment = [
         "php" => [
@@ -54,26 +58,50 @@ class ReplicateTest extends Test
 
     public function __construct()
     {
+        $box = new BoxMock;
+        $this->group = new GroupMock;
+        $box->group = $this->group;
+        $box->bus = new BusMock;
+        $box->log = new LogMock;
+
         try {
             $this->time = time();
-            $containerMock = new ContainerMock;
             $task = new Replicate([
                 "source" => false,
                 "environment" => $this->environment
             ]);
 
-            MetadataMock::addRootMetadata();
+            $this->group->internalMetas["metadata1"] = new InternalMetadataMock([
+                "id" => "metadata1",
+                "name" => "metadata1",
+                "description" => "metadata1",
+                "source" => __DIR__ . "/Mocks/package",
+                "dir" => "", // relative to root dir
+                "version" => "1.0.0",
+                "structure" => [
+                    "cache" => "/cache",
+                    "namespaces" => [],
+                    "sources" => [
+                        "/deps" => [
+                            "a/test/production/1.0.0",
+                            "a/test/local/1.0.0",
+                            "a/test/development/1.0.0"
+                        ]
+                    ]
+                ]
+            ]);
+
+            $this->group->internalRoot = $this->group->internalMetas["metadata1"];
 
             $task->execute();
             $this->testCachedSnapshotFiles();
-            $containerMock->destroy();
+            $box::unsetInstance();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
 
-
-                $containerMock->destroy();
+            $box::unsetInstance();
 
             $this->result = false;
         }
@@ -81,15 +109,13 @@ class ReplicateTest extends Test
 
     public function testCachedSnapshotFiles(): void
     {
-        $metas = Group::getExternalMetas();
+        $metas = $this->group->getExternalMetas();
 
         if (isset($metas["test/local"]) &&
             isset($metas["test/development"]) &&
             isset($metas["test/production"]))
             return;
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 }

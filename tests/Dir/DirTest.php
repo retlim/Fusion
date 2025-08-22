@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Tests\Dir;
 
 use Valvoid\Fusion\Dir\Dir;
-use Valvoid\Fusion\Tests\Dir\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Dir\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -33,15 +33,15 @@ class DirTest extends Test
 {
     protected string|array $coverage = Dir::class;
 
-    private ContainerMock $container;
+    private BoxMock $box;
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->box = new BoxMock;
 
         // static
         $this->testStaticInterface();
-        $this->container->destroy();
+        $this->box::unsetInstance();
 
     }
 
@@ -60,7 +60,7 @@ class DirTest extends Test
         Dir::clear("", "");
 
         // static functions connected to same non-static functions
-        if ($this->container->logic->dir->calls !== [
+        if ($this->box->dir->calls !== [
                 "getTaskDir",
                 "getStateDir",
                 "getCacheDir",

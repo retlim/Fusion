@@ -25,9 +25,13 @@ use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\CacheMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\CurlMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\DirMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\StreamMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\Stream;
 
@@ -58,7 +62,12 @@ class ArchiveTest extends Test
     public function __construct()
     {
         $this->curlMock = new CurlMock;
-        $container = new ContainerMock($this->curlMock);
+        $container = new BoxMock;
+        $container->curl = $this->curlMock;
+        $container->log = new LogMock;
+        $container->stream = new StreamMock;
+        $container->dir = new DirMock;
+
         $this->apiMock = new APIMock;
         $this->cacheMock = new CacheMock;
 
@@ -86,12 +95,11 @@ class ArchiveTest extends Test
             $this->testForbiddenStatus();
             $this->testErrorStatus();
 
-        } catch (Throwable $e) {
-            var_dump($e->getMessage());
+        } catch (Throwable) {
             $this->handleFailedTest();
         }
 
-        $container->destroy();
+        $container::unsetInstance();
     }
 
 

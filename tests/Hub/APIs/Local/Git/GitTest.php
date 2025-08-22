@@ -22,7 +22,8 @@ namespace Valvoid\Fusion\Tests\Hub\APIs\Local\Git;
 use Valvoid\Fusion\Hub\APIs\Local\Git\Git;
 use Valvoid\Fusion\Hub\Responses\Local\Offset;
 use Valvoid\Fusion\Log\Events\Errors\Error;
-use Valvoid\Fusion\Tests\Hub\APIs\Local\Git\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\APIs\Local\Git\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Hub\APIs\Local\Git\Mocks\GitMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Hub\Responses\Local\File as FileResponse;
 use Valvoid\Fusion\Hub\Responses\Local\References as ReferencesResponse;
@@ -36,7 +37,7 @@ use Valvoid\Fusion\Wrappers\Program;
 class GitTest extends Test
 {
     protected Git $api;
-    protected ContainerMock $container;
+    protected BoxMock $container;
     protected string|array $coverage = [
         Git::class,
 
@@ -46,7 +47,8 @@ class GitTest extends Test
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->container = new BoxMock;
+        $this->container->program = new GitMock;
         $this->api = new Git("/root", []);
 
         $this->testRoot();
@@ -56,7 +58,7 @@ class GitTest extends Test
         $this->testReferences();
         $this->testArchive();
 
-        $this->container->destroy();
+        $this->container::unsetInstance();
     }
 
     public function testRoot(): void

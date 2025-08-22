@@ -51,11 +51,7 @@ class NormalizerTest extends Test
                 "domain" => "bitbucket.org",
                 "url" => "https://api.bitbucket.org/2.0/repositories",
                 "version" => 2.0
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]) $this->handleFailedTest();
     }
 
     public function testCustom(): void
@@ -73,10 +69,6 @@ class NormalizerTest extends Test
                 "domain" => "c3",
                 "url" => "c2://c3/rest/api/latest/projects",
                 "version" => 1.0
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]) $this->handleFailedTest();
     }
 }

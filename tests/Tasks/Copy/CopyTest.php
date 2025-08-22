@@ -19,13 +19,16 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Copy;
 
-use Exception;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Copy\Copy;
-use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\ContainerMock;
-use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\DirMock;
-use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\MetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\ExternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\InternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Copy\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
+use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
 
 /**
  * Integration test case for the copy task.
@@ -41,27 +44,85 @@ class CopyTest extends Test
 
     public function __construct()
     {
-        try {
-            $container = new ContainerMock;
+        $box = new BoxMock;
+        $box->log = new LogMock;
+        $group = new GroupMock;
+        $box->group = $group;
+        $group->hasDownloadable = true;
 
-            MetadataMock::addMockedMetadata();
+        $group->internalMetas["metadata1"] = new InternalMetadataMock(
+            InternalCategory::RECYCLABLE, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "source" => __DIR__ . "/Mocks/package",
+            "dir" => __DIR__ . "/Mocks/package", // project root
+            "version" => "1.0.0",
+            "structure" => [
+                "cache" => "/cache",
+                "extensions" => [],
+                "sources" => [
 
-            $this->testTargetCacheDirectory();
+                    // lock - do not copy
+                    // its other package content
+                    "/dependencies" => [
+                        "metadata2",
+                        "metadata3"
+                    ]
+                ]
+            ]
+        ]);
 
-            $container->destroy();
+        $group->internalMetas["metadata2"] = new InternalMetadataMock(
+            InternalCategory::MOVABLE, [
+            "id" => "metadata2",
+            "name" => "metadata2",
+            "description" => "metadata2",
+            "source" => __DIR__ . "/Mocks/package/dependencies/metadata2",
+            "dir" => __DIR__ . "/Mocks/package/dependencies/metadata2",
+            "version" => "1.0.0",
+            "structure" => [
+                "cache" => "/cache",
+                "extensions" => [],
+                "sources" => []
+            ]
+        ]);
 
-        } catch (Exception $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
+        $group->internalMetas["metadata3"] = new InternalMetadataMock(
+            InternalCategory::OBSOLETE, [
+            "id" => "metadata3",
+            "name" => "metadata3",
+            "description" => "metadata3",
+            "source" => __DIR__ . "/Mocks/package/dependencies/metadata3",
+            "dir" => __DIR__ . "/Mocks/package/dependencies/metadata3",
+            "version" => "1.0.0",
+            "structure" => [
+                "cache" => "/cache",
+                "extensions" => [],
+                "sources" => []
+            ]
+        ]);
 
-            $container->destroy();
+        $group->externalMetas["metadata3"] = new ExternalMetadataMock(
+            ExternalCategory::DOWNLOADABLE, [
+            "id" => "metadata3",
+            "name" => "metadata3",
+            "description" => "metadata3",
+            "source" => "metadata3",
+            "dir" => __DIR__ . "/Mocks/package/dep/metadata3",
+            "version" => "1.0.1",
+            "structure" => [
+                "cache" => "/cache",
+                "extensions" => [],
+                "sources" => []
+            ]
+        ]);
 
-            $this->result = false;
-        }
+        $this->testTargetCacheDirectory();
+
+        $box::unsetInstance();
     }
 
-    /**
-     * @throws Error
-     */
     public function testTargetCacheDirectory(): void
     {
         $copy = new Copy([]);
@@ -81,9 +142,7 @@ class CopyTest extends Test
                 return;
         }
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     private function getFilenames(string $dir): array

@@ -20,8 +20,13 @@
 namespace Valvoid\Fusion\Tests\Tasks\Stack;
 
 use Exception;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Tasks\Stack\Stack;
-use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\DirMock;
+use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -32,39 +37,43 @@ use Valvoid\Fusion\Tests\Test;
  */
 class StackTest extends Test
 {
-    protected string|array $coverage = Stack::class;
+    protected string|array $coverage = [
+        Stack::class,
 
-    public ContainerMock $containerMock;
+        // ballast
+        Box::class
+    ];
+
+    public BoxMock $box;
 
     public function __construct()
     {
+        $this->box = new BoxMock;
+        $this->box->group = new GroupMock;
+        $this->box->bus = new BusMock;
+        $this->box->log = new LogMock;
+        $this->box->dir = new DirMock;
+
         try {
 
             // set up
-            $this->containerMock = new ContainerMock;
             (new Stack([]))->execute();
 
             // test
             $this->testStateStructure();
             $this->testLifecycle();
 
-            // clear
-            $this->containerMock->destroy();
 
-        } catch (Exception $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ .
-                "\n " . $exception->getMessage();
-
-            if (isset($this->containerMock))
-                $this->containerMock->destroy();
-
-            $this->result = false;
+        } catch (Exception) {
+            $this->handleFailedTest();
         }
+
+        $this->box::unsetInstance();
     }
 
     public function testStateStructure(): void
     {
-        if ($this->containerMock->dir->structure === [
+        if ($this->box->dir->structure === [
 
             // internal root
             "state" => [
@@ -96,30 +105,24 @@ class StackTest extends Test
         ])
             return;
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testLifecycle(): void
     {
         // internal root copy inside state
-        foreach ($this->containerMock->group->internalMetas as $id => $internalMeta)
+        foreach ($this->box->group->internalMetas as $id => $internalMeta)
             if (($id == "metadata1" && $internalMeta->onCopy === false) ||
                 ($id != "metadata1" && $internalMeta->onCopy === true)) {
-                echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
-
-                $this->result = false;
+                $this->handleFailedTest();
                 break;
             }
 
         // external deps
-        foreach ($this->containerMock->group->externalMetas as $id => $externalMeta)
+        foreach ($this->box->group->externalMetas as $id => $externalMeta)
             if (($id == "metadata6" && $externalMeta->onDownload === false) ||
                 ($id != "metadata6" && $externalMeta->onCopy === false)) {
-                echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " . __LINE__;
-
-                $this->result = false;
+                $this->handleFailedTest();
                 break;
             }
     }

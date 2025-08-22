@@ -21,7 +21,8 @@ namespace Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Config;
 
 use Valvoid\Fusion\Hub\APIs\Local\Dir\Config\Interpreter;
 use Valvoid\Fusion\Hub\APIs\Local\Dir\Dir;
-use Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Config\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Config\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Config\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -31,48 +32,49 @@ use Valvoid\Fusion\Tests\Test;
 class InterpreterTest extends Test
 {
     protected string|array $coverage = Interpreter::class;
-    protected ContainerMock $container;
+    protected BoxMock $boxMock;
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->boxMock = new BoxMock;
+        $this->boxMock->bus = new BusMock;
 
         $this->testDefault();
         $this->testCustom();
         $this->testError();
 
-        $this->container->destroy();
+        $this->boxMock::unsetInstance();
     }
 
     public function testDefault(): void
     {
-        $this->container->logic->bus->event = false;
+        $this->boxMock->bus->event = false;
 
         Interpreter::interpret([], Dir::class);
 
-        if ($this->container->logic->bus->event !== false)
+        if ($this->boxMock->bus->event !== false)
             $this->handleFailedTest();
     }
 
     public function testCustom(): void
     {
-        $this->container->logic->bus->event = false;
+        $this->boxMock->bus->event = false;
 
         Interpreter::interpret([], [
             "api" => Dir::class
         ]);
 
-        if ($this->container->logic->bus->event !== false)
+        if ($this->boxMock->bus->event !== false)
             $this->handleFailedTest();
     }
 
     public function testError(): void
     {
-        $this->container->logic->bus->event = false;
+        $this->boxMock->bus->event = false;
 
         Interpreter::interpret([], 34);
 
-        if ($this->container->logic->bus->event === false)
+        if ($this->boxMock->bus->event === false)
             $this->handleFailedTest();
     }
 }

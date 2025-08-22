@@ -32,39 +32,6 @@ use Valvoid\Fusion\Tasks\Group;
  */
 class MetadataMock
 {
-    /**
-     * @throws ReflectionException
-     */
-    public static function addRootMetadata(): void
-    {
-        $reflection = new ReflectionClass(Internal::class);
-        $metadata = $reflection->newInstanceWithoutConstructor();
-        $content = $reflection->getProperty("content");
-        $content->setValue($metadata, [
-            "id" => "metadata1",
-            "name" => "metadata1",
-            "description" => "metadata1",
-            "source" => __DIR__ . "/package",
-            "dir" => "", // relative to root dir
-            "version" => "1.0.0",
-            "structure" => [
-                "cache" => "/cache",
-                "namespaces" => [],
-                "sources" => [
-                    "/dependencies" => [
-
-                        // api/path/ref
-                        "valvoid.com/test/local/1.0.0",
-                        "valvoid.com/test/development/1.0.0",
-                        "valvoid.com/test/production/1.0.0"
-                    ]
-                ],
-            ]
-        ]);
-
-        Group::setInternalMetas(["metadata1" => $metadata]);
-    }
-
     public static function get(string $id): string
     {
         return json_encode([

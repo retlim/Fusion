@@ -21,8 +21,15 @@ namespace Valvoid\Fusion\Tests\Tasks\Shift;
 
 use Exception;
 use ReflectionClass;
+use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
+use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Tasks\Shift\Shift;
-use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\ExternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\InternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -37,120 +44,309 @@ class ShiftTest extends Test
     protected string|array $coverage = Shift::class;
 
     private string $cache = __DIR__ . '/cache';
-
+    private GroupMock $group;
     public function __construct()
     {
+        $box = new BoxMock;
+        $this->group = new GroupMock;
+        $box->group = $this->group;
+        $box->bus = new BusMock;
+        $box->log = new LogMock;
+
         try {
-            $containerMock = new ContainerMock;
 
             // new root version
             $this->testShiftRecursive();
-            unset($containerMock->logic->group);
-            unset($containerMock->logic->dir);// clear
+            $box = new BoxMock;
+            $this->group = new GroupMock;
+            $box->group = $this->group;
+            $box->bus = new BusMock;
+            $box->log = new LogMock;
 
             // new root with new cache dir
             $this->testShiftRecursiveCache();
-            unset($containerMock->logic->group);// clear
-            unset($containerMock->logic->dir);// clear
+            $this->group = new GroupMock;
+            $box->group = $this->group;
+            unset($box->dir);// clear
 
             // new root with new cache dir intersection
             $this->testShiftRecursiveCacheIntersection();
-            unset($containerMock->logic->group);// clear
-            unset($containerMock->logic->dir);// clear
+            $this->group = new GroupMock;
+            $box->group = $this->group;
+            unset($box->dir);// clear
 
             $this->testShiftNested();
-            unset($containerMock->logic->group);// clear
-            unset($containerMock->logic->dir);// clear
+            $this->group = new GroupMock;
+            $box->group = $this->group;
+            unset($box->dir);// clear
 
             // check if persisted inside "other" dir
             $this->testShiftRecursiveWithExecutedFiles();
-            unset($containerMock->logic->group);// clear
-            unset($containerMock->logic->dir);// clear
+            $this->group = new GroupMock;
+            $box->group = $this->group;
+            unset($box->dir);// clear
 
             $this->testShiftNestedWithExecutedFiles();
-            $containerMock->destroy();
 
 
-        } catch (Exception $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-
-            if (isset($containerMock))
-                $containerMock->destroy();
-
-
-            $this->result = false;
+        } catch (Exception) {
+            $this->handleFailedTest();
         }
+
+        $box::unsetInstance();
     }
 
     public function testShiftRecursive(): void
     {
         $this->setUp(__DIR__ . '/Mocks/package/recursive');
-        MetadataMock::addRecursive();
+
+        $this->group->hasDownloadable = true;
+        $this->group->internalMetas["metadata1"] = new InternalMetadataMock(
+            InternalCategory::OBSOLETE, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "dir" => "",
+            "source" => "",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
+
+        $this->group->internalRoot = $this->group->internalMetas["metadata1"];
+        $this->group->externalMetas["metadata1"] = new ExternalMetadataMock(
+            ExternalCategory::DOWNLOADABLE, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "source" => [
+                "api" => "",
+                "path" => "",
+                "prefix" => "",
+                "reference" => ""
+            ],
+            "dir" => "",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
+
+        $this->group->externalRoot = $this->group->externalMetas["metadata1"];
+
         (new Shift([]))->execute();
 
         if (!file_exists("$this->cache/new") ||
             !file_exists("$this->cache/cache/new") ||
-            !file_exists("$this->cache/cache/log/keep")) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            !file_exists("$this->cache/cache/log/keep"))
+            $this->handleFailedTest();
     }
 
     public function testShiftRecursiveCache(): void
     {
         $this->setUp(__DIR__ . '/Mocks/package/cache');
-        MetadataMock::addRecursiveCache();
+        $this->group->hasDownloadable = true;
+        $this->group->internalMetas["metadata1"] = new InternalMetadataMock(
+            InternalCategory::OBSOLETE, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "dir" => "",
+            "source" => "",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
+
+        $this->group->internalRoot = $this->group->internalMetas["metadata1"];
+        $this->group->externalMetas["metadata1"] = new ExternalMetadataMock(
+            ExternalCategory::DOWNLOADABLE, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "source" => [
+                "api" => "",
+                "path" => "",
+                "prefix" => "",
+                "reference" => ""
+            ],
+            "dir" => "",
+            "structure" => [
+                "cache" => "/che"
+            ]
+        ]);
+
+        $this->group->externalRoot = $this->group->externalMetas["metadata1"];
         (new Shift([]))->execute();
 
         if (file_exists("$this->cache/cache") || // old cache dir
             !file_exists("$this->cache/new") ||
             !file_exists("$this->cache/che/new") ||
-            !file_exists("$this->cache/che/log/keep")) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            !file_exists("$this->cache/che/log/keep"))
+            $this->handleFailedTest();
     }
 
     public function testShiftRecursiveCacheIntersection(): void
     {
         $this->setUp(__DIR__ . '/Mocks/package/cache_intersecion');
-        MetadataMock::addRecursiveCacheIntersection();
+        $this->group->hasDownloadable = true;
+        $this->group->internalMetas["metadata1"] = new InternalMetadataMock(
+            InternalCategory::OBSOLETE, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "dir" => "",
+            "source" => "",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
+
+        $this->group->internalRoot = $this->group->internalMetas["metadata1"];
+        $this->group->externalMetas["metadata1"] = new ExternalMetadataMock(
+            ExternalCategory::DOWNLOADABLE, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "source" => [
+                "api" => "",
+                "path" => "",
+                "prefix" => "",
+                "reference" => ""
+            ],
+            "dir" => "",
+            "structure" => [
+                "cache" => "/cache/new"
+            ]
+        ]);
+
+        $this->group->externalRoot = $this->group->externalMetas["metadata1"];
        (new Shift([]))->execute();
 
         if (!file_exists("$this->cache/cache/new") ||
             !file_exists("$this->cache/cache/new/new") ||
-            !file_exists("$this->cache/cache/new/log/keep")) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            !file_exists("$this->cache/cache/new/log/keep"))
+            $this->handleFailedTest();
     }
 
     public function testShiftNested(): void
     {
         $this->setUp(__DIR__ . '/Mocks/package/nested');
-        MetadataMock::addNested();
+        $this->group->hasDownloadable = true;
+        $this->group->internalMetas["metadata1"] = new InternalMetadataMock(
+            InternalCategory::RECYCLABLE, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "dir" => "",
+            "source" => __DIR__ . "/cache",
+            "structure" => [
+                "cache" => "/cache",
+                "extensions" => [],
+                "states" => []
+            ]
+        ]);
+        $this->group->internalRoot = $this->group->internalMetas["metadata1"];
+        $this->group->internalMetas["metadata3"] = new InternalMetadataMock(
+            InternalCategory::OBSOLETE, [
+            "id" => "metadata3",
+            "name" => "metadata3",
+            "description" => "metadata3",
+            "version" => "1.0.0",
+            "source" => __DIR__ . "/cache/dependencies/metadata3",
+            "dir" => "/dependencies/metadata3",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
+        $this->group->externalMetas["metadata1"] = new ExternalMetadataMock(
+            ExternalCategory::REDUNDANT, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "source" => [
+                "api" => "",
+                "path" => "",
+                "prefix" => "",
+                "reference" => ""
+            ],
+            "dir" => "",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
+
+        $this->group->externalRoot = $this->group->externalMetas["metadata1"];
+        $this->group->externalMetas["metadata1"] = new ExternalMetadataMock(
+            ExternalCategory::DOWNLOADABLE, [
+            "id" => "metadata3",
+            "name" => "metadata3",
+            "description" => "metadata3",
+            "version" => "1.0.0",
+            "source" => [
+                "api" => "",
+                "path" => "",
+                "prefix" => "",
+                "reference" => ""
+            ],
+            "dir" => "/dependencies/metadata3",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
         (new Shift([]))->execute();
 
         if (!file_exists("$this->cache/old") ||
             !file_exists("$this->cache/dependencies/metadata3/new") ||
             !file_exists("$this->cache/cache/new") ||
-            !file_exists("$this->cache/cache/log/keep")) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-
+            !file_exists("$this->cache/cache/log/keep"))
+            $this->handleFailedTest();
     }
 
     public function testShiftRecursiveWithExecutedFiles(): void
     {
         $this->setUp(__DIR__ . '/Mocks/package/recursive_executed');
-        MetadataMock::addRecursiveExecuted();
+        $this->group->hasDownloadable = true;
+        $this->group->internalMetas["valvoid/fusion"] = new InternalMetadataMock(
+            InternalCategory::OBSOLETE, [
+            "id" => "valvoid/fusion",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "dir" => "",
+            "source" => __DIR__ . "/cache", // outside mocks
+            "structure" => [
+                "cache" => "/cache",
+                "sources" => []
+            ]
+        ]);
+        $this->group->internalRoot = $this->group->internalMetas["valvoid/fusion"];
+        $this->group->externalMetas["valvoid/fusion"] = new ExternalMetadataMock(
+            ExternalCategory::DOWNLOADABLE, [
+            "id" => "valvoid/fusion",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "source" => [
+                "api" => "",
+                "path" => "",
+                "prefix" => "",
+                "reference" => ""
+            ],
+            "dir" => "",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
 
+        $this->group->externalRoot = $this->group->externalMetas["valvoid/fusion"];
         $reflection = new ReflectionClass(Shift::class);
         $task = $reflection->newInstance([]);
         $reflection->getProperty("dir")->setValue($task, __DIR__ . '/cache');
@@ -180,15 +376,76 @@ class ShiftTest extends Test
             }
         }
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testShiftNestedWithExecutedFiles(): void
     {
         $this->setUp(__DIR__ . '/Mocks/package/nested_executed');
-        MetadataMock::addNestedExecuted();
+        $this->group->hasDownloadable = true;
+        $this->group->internalMetas["metadata1"] = new InternalMetadataMock(
+            InternalCategory::RECYCLABLE, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "dir" => "",
+            "source" => __DIR__ . "/cache", // outside mocks
+            "structure" => [
+                "cache" => "/cache",
+                "extensions" => [],
+                "states" => []
+            ]
+        ]);
+        $this->group->internalRoot = $this->group->internalMetas["metadata1"];
+        $this->group->internalMetas["valvoid/fusion"] = new InternalMetadataMock(
+            InternalCategory::OBSOLETE, [
+            "id" => "valvoid/fusion",
+            "name" => "metadata3",
+            "description" => "metadata3",
+            "version" => "1.0.0",
+            "source" => __DIR__ . "/cache/dependencies/valvoid/fusion", // outside mocks
+            "dir" => "/dependencies/valvoid/fusion",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
+        $this->group->externalMetas["metadata1"] = new ExternalMetadataMock(
+            ExternalCategory::REDUNDANT, [
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "version" => "1.0.0",
+            "source" => [
+                "api" => "",
+                "path" => "",
+                "prefix" => "",
+                "reference" => ""
+            ],
+            "dir" => "",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
+
+        $this->group->externalRoot = $this->group->externalMetas["metadata1"];
+        $this->group->externalMetas["valvoid/fusion"] = new ExternalMetadataMock(
+            ExternalCategory::DOWNLOADABLE,  [
+            "id" => "valvoid/fusion",
+            "name" => "metadata3",
+            "description" => "metadata3",
+            "version" => "1.0.0",
+            "source" => [
+                "api" => "",
+                "path" => "",
+                "prefix" => "",
+                "reference" => ""
+            ],
+            "dir" => "/dependencies/valvoid/fusion",
+            "structure" => [
+                "cache" => "/cache"
+            ]
+        ]);
 
         $reflection = new ReflectionClass(Shift::class);
         $task = $reflection->newInstance([]);
@@ -218,9 +475,7 @@ class ShiftTest extends Test
             }
         }
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     private function setUp(string $dir): void

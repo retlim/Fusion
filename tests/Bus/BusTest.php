@@ -26,7 +26,7 @@ use Valvoid\Fusion\Bus\Events\Config;
 use Valvoid\Fusion\Bus\Events\Metadata;
 use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Bus\Proxy\Logic;
-use Valvoid\Fusion\Tests\Bus\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Bus\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Bus\Mocks\EventMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -50,23 +50,24 @@ class BusTest extends Test
         Boot::class
     ];
 
-    private ContainerMock $container;
+    private BoxMock $box;
     private Logic $logic;
     private EventMock $eventMock;
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->box = new BoxMock;
         $this->logic = new Logic;
         $this->eventMock = new EventMock;
 
         // static
         $this->testStaticInterface();
-        $this->container->destroy();
 
         // logic
         $this->testReceivers();
         $this->testEvents();
+
+        $this->box::unsetInstance();
     }
 
     public function testReceivers(): void
@@ -124,7 +125,7 @@ class BusTest extends Test
         Bus::broadcast($this->eventMock);
 
         // static functions connected to same non-static functions
-        if ($this->container->logic->bus->calls !== [
+        if ($this->box->bus->calls !== [
             "addReceiver",
             "removeReceiver",
             "broadcast"]) {

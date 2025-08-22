@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Tasks\Build;
 
-use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Fusion;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata as MetadataResponse;
@@ -127,7 +127,7 @@ class Build extends Task implements Interceptor
 
         // parse inline source
         $versions = [];
-        $builder = Container::get(ExternalMetadataBuilder::class,
+        $builder = Box::getInstance()->get(ExternalMetadataBuilder::class,
             source: $source,
             dir: ""
         );
@@ -183,7 +183,7 @@ class Build extends Task implements Interceptor
             $id = $metadata->getId();
             $version = $metadata->getVersion();
 
-            $solver = Container::get(Solver::class,
+            $solver = Box::getInstance()->get(Solver::class,
                 implication: $this->implication[$id]["implication"][$version],
                 version: $version,
                 id: $id,
@@ -249,7 +249,7 @@ class Build extends Task implements Interceptor
                         "metas" => []
                     ];
 
-                    $builder = Container::get(ExternalMetadataBuilder::class,
+                    $builder = Box::getInstance()->get(ExternalMetadataBuilder::class,
 
                         // inherit or
                         // direct directory
@@ -295,7 +295,7 @@ class Build extends Task implements Interceptor
         $this->buildRequests();
         $this->buildImplication();
 
-        $solver = Container::get(Solver::class,
+        $solver = Box::getInstance()->get(Solver::class,
             implication: $this->implication,
             version: $version,
             id: $id,

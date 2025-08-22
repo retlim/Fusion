@@ -21,7 +21,10 @@ namespace Valvoid\Fusion\Tests\Metadata\Internal;
 
 use Valvoid\Fusion\Metadata\Internal\Category;
 use Valvoid\Fusion\Metadata\Internal\Internal;
-use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\DirMock;
+use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -33,19 +36,11 @@ class InternalTest extends Test
 {
     /** @var string|array  */
     protected string|array $coverage = Internal::class;
-
-    /** @var ContainerMock  */
-    protected ContainerMock $container;
-
-    /** @var Internal  */
+    protected BoxMock $container;
     protected Internal $metadata;
-
-    /** @var array  */
     protected array $layers = [
         "layers"
     ];
-
-    /** @var array  */
     protected array $content = [
         "id" => "identifier",
         "source" => __DIR__ ."/Mocks",
@@ -75,7 +70,10 @@ class InternalTest extends Test
     public function __construct()
     {
         $this->metadata = new Internal($this->layers, $this->content);
-        $this->container = new ContainerMock;
+        $this->container = new BoxMock;
+        $this->container->group = new GroupMock;
+        $this->container->log = new LogMock;
+        $this->container->dir = new DirMock;
 
         $this->testVersion();
         $this->testDir();
@@ -101,13 +99,13 @@ class InternalTest extends Test
         $this->testLifecycleDelete();
         $this->testLifecycleMigrate();
 
-        $this->container->destroy();
+        $this->container::unsetInstance();
     }
 
     public function testLifecycleCopy(): void
     {
         if ($this->metadata->onCopy() !== true ||
-            $this->container->proxy->log->event !== "copy")
+            $this->container->log->event !== "copy")
             $this->handleFailedTest();
     }
 
@@ -115,21 +113,21 @@ class InternalTest extends Test
     {
         // dir + version of external package
         if ($this->metadata->onMigrate() !== true ||
-            $this->container->proxy->log->event !== "migrate:/identifier:version")
+            $this->container->log->event !== "migrate:/identifier:version")
             $this->handleFailedTest();
     }
 
     public function testLifecycleUpdate(): void
     {
         if ($this->metadata->onUpdate() !== true ||
-            $this->container->proxy->log->event !== "update")
+            $this->container->log->event !== "update")
             $this->handleFailedTest();
     }
 
     public function testLifecycleDelete(): void
     {
         if ($this->metadata->onDelete() !== true ||
-            $this->container->proxy->log->event !== "delete")
+            $this->container->log->event !== "delete")
             $this->handleFailedTest();
     }
 

@@ -50,10 +50,7 @@ class ParserTest extends Test
 
         Parser::parse([], $config);
 
-        if ($config !== $assertion) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($config !== $assertion)
+            $this->handleFailedTest();
     }
 }

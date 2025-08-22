@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Log;
 
-use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
@@ -41,7 +41,7 @@ class Log
      */
     public static function addInterceptor(Interceptor $interceptor): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->addInterceptor($interceptor);
     }
 
@@ -52,7 +52,7 @@ class Log
      */
     public static function removeInterceptor(): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->removeInterceptor();
     }
 
@@ -64,7 +64,7 @@ class Log
      */
     public static function error(Event|string $event): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->error($event);
     }
 
@@ -76,7 +76,7 @@ class Log
      */
     public static function warning(Event|string $event): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->warning($event);
     }
 
@@ -88,7 +88,7 @@ class Log
      */
     public static function notice(Event|string $event): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->notice($event);
     }
 
@@ -100,7 +100,7 @@ class Log
      */
     public static function info(Event|string $event): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->info($event);
     }
 
@@ -112,7 +112,7 @@ class Log
      */
     public static function verbose(Event|string $event): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->verbose($event);
     }
 
@@ -124,7 +124,7 @@ class Log
      */
     public static function debug(Event|string $event): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->debug($event);
     }
 }

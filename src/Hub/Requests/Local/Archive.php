@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Local;
 
-use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\Cache;
 use Valvoid\Fusion\Log\Events\Errors\Error;
@@ -73,7 +73,7 @@ class Archive extends Local
         if (is_string($response))
             $this->throwError($response);
 
-        $file = Container::get(File::class);
+        $file = Box::getInstance()->get(File::class);
 
         if ($response->getFile() != "$dir/archive.zip" ||
             !$file->exists("$dir/archive.zip"))

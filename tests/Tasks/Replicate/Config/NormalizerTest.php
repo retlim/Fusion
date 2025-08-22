@@ -59,11 +59,8 @@ class NormalizerTest extends Test
 
         Normalizer::normalize([], $config);
 
-        if ($config !== $assertion) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($config !== $assertion)
+            $this->handleFailedTest();
     }
 
     public function testDefaultSource(): void
@@ -86,11 +83,8 @@ class NormalizerTest extends Test
 
         Normalizer::normalize([], $config);
 
-        if ($config != $assertion) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($config != $assertion)
+            $this->handleFailedTest();
     }
 
     public function testDefaultPhpVersion(): void
@@ -115,10 +109,7 @@ class NormalizerTest extends Test
 
         Normalizer::normalize([], $config);
 
-        if ($config != $assertion) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($config != $assertion)
+            $this->handleFailedTest();
     }
 }
