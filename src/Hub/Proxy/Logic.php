@@ -20,8 +20,8 @@
 namespace Valvoid\Fusion\Hub\Proxy;
 
 use Closure;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Config\Config;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Offset as RemoteOffsetApi;
@@ -92,13 +92,13 @@ class Logic implements Proxy
     public function __construct()
     {
         $config = Config::get("hub");
-        $this->curlShare = Container::get(CurlShare::class);
-        $this->curlMulti = Container::get(CurlMulti::class);
+        $this->curlShare = Box::getInstance()->get(CurlShare::class);
+        $this->curlMulti = Box::getInstance()->get(CurlMulti::class);
 
         // local API root
         $root = Config::get("dir", "path");
         $root = dirname($root);
-        $this->cache = Container::get(Cache::class,
+        $this->cache = Box::getInstance()->get(Cache::class,
             root: $root
         );
 
@@ -134,7 +134,7 @@ class Logic implements Proxy
      */
     protected function addErrorRequest(array $source): int
     {
-        $request = Container::get(CacheErrorRequest::class,
+        $request = Box::getInstance()->get(CacheErrorRequest::class,
             id: $this->id,
             cache: $this->cache,
             source: $source,
@@ -167,7 +167,7 @@ class Logic implements Proxy
         // hub caches everything
         $id = $this->id++;
         $offsets = Parser::getOffsets($source["reference"]);
-        $request = Container::get(CacheVersionsRequest::class,
+        $request = Box::getInstance()->get(CacheVersionsRequest::class,
             id: $id,
             cache: $this->cache,
             source: $source,
@@ -187,7 +187,7 @@ class Logic implements Proxy
                     // no synchronization yet
                     // create sub sync request
                     if ($state === false) {
-                        $sync = Container::get(LocalOffsetRequest::class,
+                        $sync = Box::getInstance()->get(LocalOffsetRequest::class,
                             id: $this->id,
                             cache: $this->cache,
                             source: $source,
@@ -214,7 +214,7 @@ class Logic implements Proxy
             // no synchronization yet
             // create sub sync request
             if ($state === false) {
-                $sync = Container::get(LocalReferencesRequest::class,
+                $sync = Box::getInstance()->get(LocalReferencesRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,
@@ -243,7 +243,7 @@ class Logic implements Proxy
                     // no synchronization yet
                     // create sub sync request
                     if ($state === false) {
-                        $sync = Container::get(RemoteOffsetRequest::class,
+                        $sync = Box::getInstance()->get(RemoteOffsetRequest::class,
                             id: $this->id,
                             cache: $this->cache,
                             source: $source,
@@ -269,7 +269,7 @@ class Logic implements Proxy
             // no synchronization yet
             // create sub sync request
             if ($state === false) {
-                $sync = Container::get(RemoteReferencesRequest::class,
+                $sync = Box::getInstance()->get(RemoteReferencesRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,
@@ -348,7 +348,7 @@ class Logic implements Proxy
 
         // visible external request
         $id = $this->id++;
-        $request = Container::get(CacheFileRequest::class,
+        $request = Box::getInstance()->get(CacheFileRequest::class,
             id: $id,
             cache: $this->cache,
             source: $source,
@@ -365,7 +365,7 @@ class Logic implements Proxy
         // create sub sync request
         if ($state === false) {
             if ($api instanceof LocalApi) {
-                $sync = Container::get(LocalFileRequest::class,
+                $sync = Box::getInstance()->get(LocalFileRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,
@@ -377,7 +377,7 @@ class Logic implements Proxy
                 $this->queues["local"][$this->id] = $sync;
 
             } else {
-                $sync = Container::get(RemoteFileRequest::class,
+                $sync = Box::getInstance()->get(RemoteFileRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,
@@ -426,7 +426,7 @@ class Logic implements Proxy
 
         // visible external request
         $id = $this->id++;
-        $request = Container::get(CacheArchiveRequest::class,
+        $request = Box::getInstance()->get(CacheArchiveRequest::class,
             id: $id,
             cache: $this->cache,
             source: $source,
@@ -441,7 +441,7 @@ class Logic implements Proxy
         // create sub sync request
         if ($state === false) {
             if ($api instanceof LocalApi) {
-                $sync = Container::get(LocalArchiveRequest::class,
+                $sync = Box::getInstance()->get(LocalArchiveRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,
@@ -451,7 +451,7 @@ class Logic implements Proxy
                 $this->queues["local"][$this->id] = $sync;
 
             } else {
-                $sync = Container::get(RemoteArchiveRequest::class,
+                $sync = Box::getInstance()->get(RemoteArchiveRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,

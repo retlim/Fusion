@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Tests\Group;
 
 use Valvoid\Fusion\Tasks\Group;
-use Valvoid\Fusion\Tests\Group\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Group\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -32,15 +32,15 @@ use Valvoid\Fusion\Tests\Test;
 class GroupTest extends Test
 {
     protected string|array $coverage = Group::class;
-    private ContainerMock $container;
+    private BoxMock $box;
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->box = new BoxMock;
 
         // static
         $this->testStaticInterface();
-        $this->container->destroy();
+        $this->box::unsetInstance();
     }
 
     public function testStaticInterface(): void
@@ -60,7 +60,7 @@ class GroupTest extends Test
         Group::getSourcePath([],"");
 
         // static functions connected to same non-static functions
-        if ($this->container->logic->group->calls !== [
+        if ($this->box->group->calls !== [
                 "setInternalMetas",
                 "setImplication",
                 "setExternalMetas",

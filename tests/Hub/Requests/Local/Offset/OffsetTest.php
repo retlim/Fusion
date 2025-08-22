@@ -23,8 +23,10 @@ use Throwable;
 use Valvoid\Fusion\Hub\Requests\Local\Offset;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Requests\Local\Offset\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Local\Offset\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Local\Offset\Mocks\CacheMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Local\Offset\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Local\Offset\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -60,7 +62,8 @@ class OffsetTest extends Test
     {
         $this->apiMock = new APIMock;
         $this->cacheMock = new CacheMock;
-        $container = new ContainerMock;
+        $container = new BoxMock;
+        $container->dir = new DirMock;
 
         try {
             $this->offset = new Offset(2, $this->cacheMock, $this->source,
@@ -77,7 +80,7 @@ class OffsetTest extends Test
             $this->handleFailedTest();
         }
 
-        $container->destroy();
+        $container::unsetInstance();
     }
 
 

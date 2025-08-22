@@ -20,11 +20,11 @@
 namespace Valvoid\Fusion\Hub\APIs\Local\Dir;
 
 use PharData;
-use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
+use Valvoid\Fusion\Hub\Responses\Local\Archive;
 use Valvoid\Fusion\Hub\Responses\Local\File;
 use Valvoid\Fusion\Hub\Responses\Local\References;
-use Valvoid\Fusion\Hub\Responses\Local\Archive;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Wrappers\File as FileWrapper;
 
@@ -42,13 +42,14 @@ class Dir extends LocalApi
      * @param string $path Path relative to config root.
      * @return References|string Response or error message.
      * @throws Error Internal error.
+     * @throws \Exception
      */
     public function getReferences(string $path): References|string
     {
         // directory has only one pointer
         // version inside metadata
         $file = "$this->root$path/fusion.json";
-        $wrapper = Container::get(FileWrapper::class);
+        $wrapper = Box::getInstance()->get(FileWrapper::class);
 
         if (!$wrapper->exists($file))
             return "Invalid directory (package) content. The required " .
@@ -92,6 +93,7 @@ class Dir extends LocalApi
      * @param string $filename Filename.
      * @return File|string Response or error message.
      * @throws Error Internal error.
+     * @throws \Exception
      */
     public function getFileContent(string $path, string $reference, string $filename): File|string
     {
@@ -101,7 +103,7 @@ class Dir extends LocalApi
             return "Can't get content from the file \"$file\"" .
                 " at reference \"$reference\". Reference does not exist.";
 
-        $wrapper = Container::get(FileWrapper::class);
+        $wrapper = Box::getInstance()->get(FileWrapper::class);
 
         if (!$wrapper->exists($file))
             return "The file \"$file\" does not exist.";
@@ -122,6 +124,7 @@ class Dir extends LocalApi
      * @param string $dir Directory.
      * @return Archive|string Response or error message.
      * @throws Error Internal error.
+     * @throws \Exception
      */
     public function createArchive(string $path, string $reference, string $dir): Archive|string
     {
@@ -130,7 +133,7 @@ class Dir extends LocalApi
                 " of reference \"$reference\". Reference does not exist.";
 
         $file = "$dir/archive.zip";
-        $archive = Container::get(PharData::class, filename: $file);
+        $archive = Box::getInstance()->get(PharData::class, filename: $file);
 
         $archive->buildFromDirectory($this->root . $path);
 

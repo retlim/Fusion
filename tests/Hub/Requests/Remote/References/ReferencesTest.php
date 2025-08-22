@@ -25,9 +25,11 @@ use Valvoid\Fusion\Hub\Requests\Remote\References;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\CacheMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\CurlMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\Curl;
 
@@ -58,7 +60,9 @@ class ReferencesTest extends Test
     public function __construct()
     {
         $this->curlMock = new CurlMock;
-        $container = new ContainerMock($this->curlMock);
+        $container = new BoxMock;
+        $container->curl = $this->curlMock;
+        $container->log = new LogMock;
         $this->apiMock = new APIMock;
         $this->cacheMock = new CacheMock;
 
@@ -91,7 +95,7 @@ class ReferencesTest extends Test
             $this->handleFailedTest();
         }
 
-        $container->destroy();
+        $container::unsetInstance();
     }
 
     public function testInit(): void

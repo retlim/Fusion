@@ -19,8 +19,9 @@
 
 namespace Valvoid\Fusion\Config;
 
+use Exception;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Config\Proxy\Proxy;
-use Valvoid\Fusion\Container\Container;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 
 /**
@@ -36,11 +37,11 @@ class Config
      *
      * @param string ...$breadcrumb Index path inside config.
      * @return mixed Config.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function get(string ...$breadcrumb): mixed
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->get(...$breadcrumb);
     }
 
@@ -48,11 +49,11 @@ class Config
      * Returns lazy code registry.
      *
      * @return array Lazy.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function getLazy(): array
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getLazy();
     }
 
@@ -61,11 +62,11 @@ class Config
      *
      * @param string $class Class.
      * @return bool Indicator.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function hasLazy(string $class): bool
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->hasLazy($class);
     }
 }

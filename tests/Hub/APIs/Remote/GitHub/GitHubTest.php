@@ -77,14 +77,8 @@ class GitHubTest  extends Test
         $this->api->setDelay($time, 1);
 
         // rate limit
-        if ($this->api->hasDelay() !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+        if ($this->api->hasDelay() !== true)
+            $this->handleFailedTest();
 
         // add other requests
         $this->api->addDelayRequest(2);
@@ -93,84 +87,35 @@ class GitHubTest  extends Test
         if($this->api->getDelay() !== [
                 "timestamp" => $time,
                 "requests" => [1, 2]
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+            ]) $this->handleFailedTest();
 
         // clear
         $this->api->resetDelay();
 
         // rate limit
-        if ($this->api->hasDelay() !== false) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+        if ($this->api->hasDelay() !== false)
+            $this->handleFailedTest();
     }
 
     public function testStatus(): void
     {
-        if ($this->api->getStatus(200, []) !== Status::OK) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
+        if ($this->api->getStatus(200, []) !== Status::OK)
+            $this->handleFailedTest();
 
-                // multi test pointer
-                __LINE__;
+        if ($this->api->getStatus(401, []) !== Status::UNAUTHORIZED)
+            $this->handleFailedTest();
 
-            $this->result = false;
-        }
+        if ($this->api->getStatus(403, []) !== Status::FORBIDDEN)
+            $this->handleFailedTest();
 
-        if ($this->api->getStatus(401, []) !== Status::UNAUTHORIZED) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
+        if ($this->api->getStatus(404, []) !== Status::NOT_FOUND)
+            $this->handleFailedTest();
 
-                // multi test pointer
-                __LINE__;
+        if ($this->api->getStatus(429, []) !== Status::TO_MANY_REQUESTS)
+            $this->handleFailedTest();
 
-            $this->result = false;
-        }
-
-        if ($this->api->getStatus(403, []) !== Status::FORBIDDEN) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
-
-        if ($this->api->getStatus(404, []) !== Status::NOT_FOUND) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
-
-        if ($this->api->getStatus(429, []) !== Status::TO_MANY_REQUESTS) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
-
-        if ($this->api->getStatus(500, []) !== Status::ERROR) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+        if ($this->api->getStatus(500, []) !== Status::ERROR)
+            $this->handleFailedTest();
     }
 
     public function testRate(): void
@@ -180,30 +125,21 @@ class GitHubTest  extends Test
         if ($this->api->getRateLimitReset(["x-ratelimit-reset: $time"],
 
                 // ballast
-                "") !== $time) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+                "") !== $time)
+            $this->handleFailedTest();
 
         if ($this->api->getRateLimitReset(["retry-after: $time"],
 
                 // ballast
-                "") <= $time) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+                "") <= $time)
+            $this->handleFailedTest();
 
         // fallback
         if ($this->api->getRateLimitReset([],
 
                 // ballast
-                "") !== $time + 60) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+                "") !== $time + 60)
+            $this->handleFailedTest();
     }
 
     public function testArchiveUrl(): void
@@ -214,11 +150,8 @@ class GitHubTest  extends Test
             $this->config["url"] .
 
             // encoded semver
-            "/valvoid/fusion/zipball/1.2.3%2B346") {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            "/valvoid/fusion/zipball/1.2.3%2B346")
+            $this->handleFailedTest();
     }
 
     public function testFileUrl(): void
@@ -230,11 +163,8 @@ class GitHubTest  extends Test
 
             // encoded semver and
             // path as repo identifier
-            "/valvoid/fusion/contents/fusion.json?ref=1.2.3-beta%2B346") {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            "/valvoid/fusion/contents/fusion.json?ref=1.2.3-beta%2B346")
+            $this->handleFailedTest();
     }
 
     public function testTokens(): void
@@ -244,36 +174,21 @@ class GitHubTest  extends Test
             // path first order
             // matched tokens (token3) are higher and
             // first to consume
-            ["token3", "token1", "token4"]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+            ["token3", "token1", "token4"])
+            $this->handleFailedTest();
 
         // do not reuse invalid tokens
         $this->api->addInvalidToken("token3");
         $this->api->addInvalidToken("token4");
 
-        if ($this->api->getTokens("/valvoid") !== ["token1"]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+        if ($this->api->getTokens("/valvoid") !== ["token1"])
+            $this->handleFailedTest();
     }
 
     public function testAuthHeaderPrefix(): void
     {
-        if ($this->api->getAuthHeaderPrefix() !== "Authorization: Bearer ") {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($this->api->getAuthHeaderPrefix() !== "Authorization: Bearer ")
+            $this->handleFailedTest();
     }
 
     public function testOptions(): void
@@ -284,35 +199,16 @@ class GitHubTest  extends Test
             "accept: application/vnd.github+json"
         ]];
 
-        if ($this->api->getReferencesOptions() !== $options) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
+        if ($this->api->getReferencesOptions() !== $options)
+            $this->handleFailedTest();
 
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
-
-        if ($this->api->getArchiveOptions() !== $options) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+        if ($this->api->getArchiveOptions() !== $options)
+            $this->handleFailedTest();
 
         if ($this->api->getFileOptions() !== [CURLOPT_HTTPHEADER => [
                 "user-agent: Fusion",
                 "accept: application/vnd.github.raw+json"
-            ]]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+            ]])  $this->handleFailedTest();
 
         // dev/local/whatever http
         $this->config["protocol"] = "http";
@@ -325,23 +221,11 @@ class GitHubTest  extends Test
                 "accept: application/vnd.github+json"
             ]];
 
-        if ($this->api->getReferencesOptions() != $options) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
+        if ($this->api->getReferencesOptions() != $options)
+            $this->handleFailedTest();
 
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
-
-        if ($this->api->getArchiveOptions() != $options) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+        if ($this->api->getArchiveOptions() != $options)
+            $this->handleFailedTest();
 
         if ($this->api->getFileOptions() != [
                 CURLOPT_SSL_VERIFYHOST => 0,
@@ -349,14 +233,7 @@ class GitHubTest  extends Test
                 CURLOPT_HTTPHEADER => [
                     "user-agent: Fusion",
                     "accept: application/vnd.github.raw+json"
-                ]]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+                ]]) $this->handleFailedTest();
     }
 
     public function testError(): void
@@ -364,22 +241,16 @@ class GitHubTest  extends Test
         if ($this->api->getErrorMessage(404, [],
 
                 // API json response
-                json_encode(["message" => "test"])) !== "404 | test") {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+                json_encode(["message" => "test"])) !== "404 | test")
+            $this->handleFailedTest();
 
         if (str_starts_with($this->api->getErrorMessage(500, [],
 
                 // can not parse
                 // server whatever response
                 // try debug log
-                ""), "500 |") === false) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+                ""), "500 |") === false)
+            $this->handleFailedTest();
     }
 
     public function testReferencesUrl(): void
@@ -389,11 +260,8 @@ class GitHubTest  extends Test
             $this->config["url"] .
 
             // as it is
-            "/valvoid/fusion/tags?per_page=100") {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            "/valvoid/fusion/tags?per_page=100")
+            $this->handleFailedTest();
     }
 
     public function testReferences(): void
@@ -409,14 +277,8 @@ class GitHubTest  extends Test
         // pagination
         // asset next api link to get more references
         if ($references->getUrl() !== "https://github.com" ||
-            $references->getEntries() !== $content) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+            $references->getEntries() !== $content)
+            $this->handleFailedTest();
 
         // last page or
         // next link is optional
@@ -428,13 +290,7 @@ class GitHubTest  extends Test
             [["name" => "ref"]]);
 
         if ($references->getUrl() !== null ||
-            $references->getEntries() !== $content) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | " .
-
-                // multi test pointer
-                __LINE__;
-
-            $this->result = false;
-        }
+            $references->getEntries() !== $content)
+            $this->handleFailedTest();
     }
 }

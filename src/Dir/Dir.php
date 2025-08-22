@@ -19,7 +19,8 @@
 
 namespace Valvoid\Fusion\Dir;
 
-use Valvoid\Fusion\Container\Container;
+use Exception;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 
@@ -35,11 +36,11 @@ class Dir
      * Returns current (locked) task cache directory.
      *
      * @return string Directory.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function getTaskDir(): string
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getTaskDir();
     }
 
@@ -47,11 +48,11 @@ class Dir
      * Returns current (locked) task cache directory.
      *
      * @return string Directory.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function getStateDir(): string
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getStateDir();
     }
 
@@ -59,11 +60,11 @@ class Dir
      * Returns absolute cache directory.
      *
      * @return string Directory.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function getCacheDir(): string
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getCacheDir();
     }
 
@@ -71,11 +72,11 @@ class Dir
      * Returns other directory.
      *
      * @return string Directory.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function getOtherDir(): string
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getOtherDir();
     }
 
@@ -83,11 +84,11 @@ class Dir
      * Returns packages directory.
      *
      * @return string Directory.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function getPackagesDir(): string
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getPackagesDir();
     }
 
@@ -95,11 +96,11 @@ class Dir
      * Returns root directory.
      *
      * @return string Root dir.
-     * @throws Error Internal error.
+     * @throws Error|Exception Internal error.
      */
     public static function getRootDir(): string
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getRootDir();
     }
 
@@ -109,10 +110,11 @@ class Dir
      * @param string $dir Dir.
      * @param int $permissions Permissions.
      * @throws Error Internal error.
+     * @throws Exception
      */
     public static function createDir(string $dir, int $permissions = 0755): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->createDir($dir, $permissions);
     }
 
@@ -122,10 +124,11 @@ class Dir
      * @param string $from Current file or directory.
      * @param string $to To file or directory.
      * @throws Error Internal error.
+     * @throws Exception
      */
     public static function rename(string $from, string $to): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->rename($from, $to);
     }
 
@@ -135,10 +138,11 @@ class Dir
      * @param string $from Current file.
      * @param string $to To file.
      * @throws Error Internal error.
+     * @throws Exception
      */
     public static function copy(string $from, string $to): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->copy($from, $to);
     }
 
@@ -147,10 +151,11 @@ class Dir
      *
      * @param string $file Dir or file.
      * @throws Error Internal error.
+     * @throws Exception
      */
     public static function delete(string $file): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->delete($file);
     }
 
@@ -160,10 +165,11 @@ class Dir
      * @param string $dir Directory.
      * @param string $path Path.
      * @throws Error Internal error.
+     * @throws Exception
      */
     public static function clear(string $dir, string $path): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->clear($dir, $path);
     }
 }

@@ -20,13 +20,20 @@
 namespace Valvoid\Fusion;
 
 use Exception;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Bus\Events\Boot;
-use Valvoid\Fusion\Container\Container;
-use Valvoid\Fusion\Container\Proxy\Logic;
-use Valvoid\Fusion\Dir\Dir;
-use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Bus\Events\Root;
+use Valvoid\Fusion\Bus\Proxy\Logic as BusLogic;
+use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
+use Valvoid\Fusion\Config\Proxy\Logic as ConfigLogic;
+use Valvoid\Fusion\Config\Proxy\Proxy as ConfigProxy;
+use Valvoid\Fusion\Dir\Proxy\Logic as DirLogic;
+use Valvoid\Fusion\Dir\Proxy\Proxy as DirProxy;
+use Valvoid\Fusion\Group\Proxy\Logic as GroupLogic;
+use Valvoid\Fusion\Group\Proxy\Proxy as GroupProxy;
+use Valvoid\Fusion\Hub\Proxy\Logic as HubLogic;
+use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Errors\Metadata as MetadataError;
@@ -34,20 +41,9 @@ use Valvoid\Fusion\Log\Events\Event as LogEvent;
 use Valvoid\Fusion\Log\Events\Infos\Id;
 use Valvoid\Fusion\Log\Events\Infos\Name;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Log;
-use Valvoid\Fusion\Log\Proxy\Proxy as LogProxy;
 use Valvoid\Fusion\Log\Proxy\Logic as LogLogic;
+use Valvoid\Fusion\Log\Proxy\Proxy as LogProxy;
 use Valvoid\Fusion\Tasks\Task;
-use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
-use Valvoid\Fusion\Hub\Proxy\Logic as HubLogic;
-use Valvoid\Fusion\Group\Proxy\Proxy as GroupProxy;
-use Valvoid\Fusion\Group\Proxy\Logic as GroupLogic;
-use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
-use Valvoid\Fusion\Bus\Proxy\Logic as BusLogic;
-use Valvoid\Fusion\Dir\Proxy\Proxy as DirProxy;
-use Valvoid\Fusion\Dir\Proxy\Logic as DirLogic;
-use Valvoid\Fusion\Config\Proxy\Proxy as ConfigProxy;
-use Valvoid\Fusion\Config\Proxy\Logic as ConfigLogic;
 
 /**
  * Package manager for PHP-based projects.
@@ -57,6 +53,9 @@ use Valvoid\Fusion\Config\Proxy\Logic as ConfigLogic;
  */
 class Fusion
 {
+    /** @var Box Dependency container. */
+    private Box $box;
+
     /** @var ?Fusion Runtime instance. */
     private static ?Fusion $instance = null;
 
@@ -72,37 +71,48 @@ class Fusion
     /**
      * Constructs the package manager.
      *
+     * @param Box $box Dependency container.
      * @param array $config Runtime config layer.
      * @throws ConfigError Invalid config exception.
      * @throws MetadataError Invalid metadata exception.
      * @throws InternalError Internal error.
+     * @throws Exception Internal error.
      */
-    private function __construct(array $config)
+    private function __construct(Box $box, array $config = [])
     {
         $this->root = dirname(__DIR__);
         $this->lazy = require "$this->root/cache/loadable/lazy.php";
+        $this->box = $box;
 
         spl_autoload_register($this->loadLazyLoadable(...));
 
         // set up proxies
-        (new Logic)->get(Container::class);
-        Container::refer(BusProxy::class, BusLogic::class);
-        Container::refer(LogProxy::class, LogLogic::class);
-        Container::refer(ConfigProxy::class, ConfigLogic::class);
-        Container::refer(GroupProxy::class, GroupLogic::class);
-        Container::refer(DirProxy::class, DirLogic::class);
-        Container::refer(HubProxy::class, HubLogic::class);
+        $box->map(BusLogic::class, BusProxy::class);
+        $box->map(LogLogic::class, LogProxy::class);
+        $box->map(ConfigLogic::class, ConfigProxy::class);
+        $box->map(GroupLogic::class, GroupProxy::class);
+        $box->map(DirLogic::class, DirProxy::class);
+        $box->map(HubLogic::class, HubProxy::class);
+
+        // shareable objects
+        $box->recycle(BusLogic::class,
+            LogLogic::class,
+            ConfigLogic::class,
+            GroupLogic::class,
+            DirLogic::class,
+            HubLogic::class);
 
         // init sharable config instance
-        Container::get(ConfigProxy::class,
+        $box->get(ConfigLogic::class,
             root: $this->root,
             lazy: $this->lazy,
-            config: $config
-        );
+            config: $config);
+
+        $bus = $box->get(BusLogic::class);
 
         // trigger lazy config build due to self reference
-        Bus::broadcast(new Boot);
-        Bus::addReceiver(self::class, $this->handleBusEvent(...),
+        $bus->broadcast(new Boot);
+        $bus->addReceiver(self::class, $this->handleBusEvent(...),
 
             // keep session active if
             // recursive or nested update/upgrade
@@ -123,7 +133,9 @@ class Fusion
         if (self::$instance !== null)
             return false;
 
-        self::$instance = new self($config);
+        require_once __DIR__ . "/Box/Box.php";
+
+        self::$instance = new self(new Box, $config);
 
         return true;
     }
@@ -159,7 +171,7 @@ class Fusion
             return false;
 
         Bus::removeReceiver(self::class);
-        Container::unset(Container::class);
+        Box::unsetInstance();
 
         $fusion = null;
 
@@ -182,14 +194,15 @@ class Fusion
             return false;
 
         $fusion->busy = true;
+        $log = $fusion->box->get(LogLogic::class);
 
         try {
-            $entry = Config::get("tasks", $id) ??
+            $entry = $fusion->box->get(ConfigLogic::class)->get("tasks", $id) ??
                 throw new InternalError(
                     "Task id \"$id\" does not exist."
                 );
 
-            Log::info(new Id($id));
+            $log->info(new Id($id));
             $fusion->normalize();
 
             /** @var Task $task */
@@ -197,23 +210,23 @@ class Fusion
                 $task = new $entry["task"]($entry);
 
                 if (is_subclass_of($task, Interceptor::class)) {
-                    Log::addInterceptor($task);
+                    $log->addInterceptor($task);
                     $task->execute();
-                    Log::removeInterceptor();
+                    $log->removeInterceptor();
 
                 } else
                     $task->execute();
 
             } else {
                 foreach ($entry as $taskId => $task) {
-                    Log::info(new Name($taskId));
+                    $log->info(new Name($taskId));
 
                     $task = new $task["task"]($task);
 
                     if (is_subclass_of($task, Interceptor::class)) {
-                        Log::addInterceptor($task);
+                        $log->addInterceptor($task);
                         $task->execute();
-                        Log::removeInterceptor();
+                        $log->removeInterceptor();
 
                     } else
                         $task->execute();
@@ -221,7 +234,7 @@ class Fusion
             }
 
         } catch (LogEvent $error) {
-            Log::error($error);
+            $log->error($error);
         }
 
         $fusion->normalize();
@@ -234,13 +247,16 @@ class Fusion
      * Normalizes working directory.
      *
      * @throws InternalError Internal error.
+     * @throws Exception
      */
     protected function normalize(): void
     {
-        Dir::delete(Dir::getStateDir());
-        Dir::delete(Dir::getTaskDir());
-        Dir::delete(Dir::getPackagesDir());
-        Dir::delete(Dir::getOtherDir());
+        $dir = $this->box->get(DirLogic::class);
+
+        $dir->delete($dir->getStateDir());
+        $dir->delete($dir->getTaskDir());
+        $dir->delete($dir->getPackagesDir());
+        $dir->delete($dir->getOtherDir());
     }
 
     /**

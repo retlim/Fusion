@@ -24,8 +24,10 @@ use Valvoid\Fusion\Hub\Requests\Local\File;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Requests\Local\File\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Local\File\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Local\File\Mocks\CacheMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Local\File\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Local\File\Mocks\DirMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Local\File\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\File as Wrapper;
 
@@ -44,7 +46,7 @@ class FileTest extends Test
 
     protected File $file;
     protected CacheMock $cacheMock;
-    protected ContainerMock $containerMock;
+    protected BoxMock $containerMock;
     protected APIMock $apiMock;
     protected array $source = [
         "api" => "test",
@@ -57,7 +59,9 @@ class FileTest extends Test
     {
         $this->cacheMock = new CacheMock;
         $this->apiMock = new APIMock;
-        $this->containerMock = new ContainerMock;
+        $this->containerMock = new BoxMock;
+        $this->containerMock->dir = new DirMock;
+        $this->containerMock->file = new FileMock;
 
         try {
             $this->file = new File(2, $this->cacheMock,
@@ -73,7 +77,7 @@ class FileTest extends Test
             $this->handleFailedTest();
         }
 
-        $this->containerMock->destroy();
+        $this->containerMock::unsetInstance();
     }
 
     public function testInit(): void
@@ -100,7 +104,7 @@ class FileTest extends Test
         if ($this->cacheMock->lock !== -1)
             $this->handleFailedTest();
 
-        if ($this->containerMock->logic->file->content !== "/filenamewhatever")
+        if ($this->containerMock->file->content !== "/filenamewhatever")
             $this->handleFailedTest();
     }
 

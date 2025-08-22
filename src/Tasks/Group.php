@@ -19,11 +19,11 @@
 
 namespace Valvoid\Fusion\Tasks;
 
-use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Group\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
-use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
+use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 
 /**
  * Static task group proxy.
@@ -41,7 +41,7 @@ class Group
      */
     public static function setInternalMetas(array $metas): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->setInternalMetas($metas);
     }
 
@@ -53,7 +53,7 @@ class Group
      */
     public static function setImplication(array $implication): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->setImplication($implication);
     }
 
@@ -65,7 +65,7 @@ class Group
      */
     public static function setExternalMetas(array $metas): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->setExternalMetas($metas);
     }
 
@@ -77,7 +77,7 @@ class Group
      */
     public static function getExternalRootMetadata(): ?ExternalMeta
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getExternalRootMetadata();
     }
 
@@ -89,7 +89,7 @@ class Group
      */
     public static function getInternalRootMetadata(): InternalMeta
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getInternalRootMetadata();
     }
 
@@ -101,7 +101,7 @@ class Group
      */
     public static function getRootMetadata(): ExternalMeta|InternalMeta
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getRootMetadata();
     }
 
@@ -113,7 +113,7 @@ class Group
      */
     public static function hasDownloadable(): bool
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->hasDownloadable();
     }
 
@@ -125,7 +125,7 @@ class Group
      */
     public static function getExternalMetas(): array
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getExternalMetas();
     }
 
@@ -137,7 +137,7 @@ class Group
      */
     public static function getInternalMetas(): array
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getInternalMetas();
     }
 
@@ -150,7 +150,7 @@ class Group
      */
     public static function setImplicationBreadcrumb(array $breadcrumb): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->setImplicationBreadcrumb($breadcrumb);
     }
 
@@ -162,7 +162,7 @@ class Group
      */
     public static function getImplication(): array
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getImplication();
     }
 
@@ -175,7 +175,7 @@ class Group
      */
     public static function getPath(string $source): array
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getPath($source);
     }
 
@@ -189,7 +189,7 @@ class Group
      */
     public static function getSourcePath(array $implication, string $source): array
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->getSourcePath($implication, $source);
     }
 }

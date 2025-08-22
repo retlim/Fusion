@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Hub;
 
 use Closure;
-use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\Proxy\Proxy;
 use Valvoid\Fusion\Log\Events\Errors\Error as HubError;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
@@ -43,7 +43,7 @@ class Hub
      */
     public static function addVersionsRequest(array $source): int
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->addVersionsRequest($source);
     }
 
@@ -56,7 +56,7 @@ class Hub
      */
     public static function addMetadataRequest(array $source): int
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->addMetadataRequest($source);
     }
 
@@ -70,7 +70,7 @@ class Hub
      */
     public static function addSnapshotRequest(array $source, string $path): int
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->addSnapshotRequest($source, $path);
     }
 
@@ -83,7 +83,7 @@ class Hub
      */
     public static function addArchiveRequest(array $source): int
     {
-        return Container::get(Proxy::class)
+        return Box::getInstance()->get(Proxy::class)
             ->addArchiveRequest($source);
     }
 
@@ -96,7 +96,7 @@ class Hub
      */
     public static function executeRequests(Closure $callback): void
     {
-        Container::get(Proxy::class)
+        Box::getInstance()->get(Proxy::class)
             ->executeRequests($callback);
     }
 }

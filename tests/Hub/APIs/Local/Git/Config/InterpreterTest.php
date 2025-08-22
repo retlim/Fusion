@@ -21,7 +21,8 @@ namespace Valvoid\Fusion\Tests\Hub\APIs\Local\Git\Config;
 
 use Valvoid\Fusion\Hub\APIs\Local\Git\Config\Interpreter;
 use Valvoid\Fusion\Hub\APIs\Local\Git\Git;
-use Valvoid\Fusion\Tests\Hub\APIs\Local\Git\Config\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\APIs\Local\Git\Config\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Hub\APIs\Local\Git\Config\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -31,49 +32,49 @@ use Valvoid\Fusion\Tests\Test;
 class InterpreterTest extends Test
 {
     protected string|array $coverage = Interpreter::class;
-
-    protected ContainerMock $container;
+    protected BoxMock $container;
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->container = new BoxMock;
+        $this->container->bus = new BusMock;
 
         $this->testDefault();
         $this->testCustom();
         $this->testError();
 
-        $this->container->destroy();
+        $this->container::unsetInstance();
     }
 
     public function testDefault(): void
     {
-        $this->container->logic->bus->event = false;
+        $this->container->bus->event = false;
 
         Interpreter::interpret([], Git::class);
 
-        if ($this->container->logic->bus->event !== false)
+        if ($this->container->bus->event !== false)
             $this->handleFailedTest();
     }
 
     public function testCustom(): void
     {
-        $this->container->logic->bus->event = false;
+        $this->container->bus->event = false;
 
         Interpreter::interpret([], [
             "api" => Git::class
         ]);
 
-        if ($this->container->logic->bus->event !== false)
+        if ($this->container->bus->event !== false)
             $this->handleFailedTest();
     }
 
     public function testError(): void
     {
-        $this->container->logic->bus->event = false;
+        $this->container->bus->event = false;
 
         Interpreter::interpret([], 34);
 
-        if ($this->container->logic->bus->event === false)
+        if ($this->container->bus->event === false)
             $this->handleFailedTest();
     }
 }

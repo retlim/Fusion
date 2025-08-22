@@ -24,8 +24,10 @@ use Valvoid\Fusion\Hub\Requests\Local\Archive;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Requests\Local\Archive\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Local\Archive\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Local\Archive\Mocks\CacheMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Local\Archive\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Local\Archive\Mocks\DirMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Local\Archive\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\File;
 
@@ -44,7 +46,7 @@ class ArchiveTest extends Test
 
     protected Archive $archive;
     protected CacheMock $cacheMock;
-    protected ContainerMock $containerMock;
+    protected BoxMock $boxMock;
     protected APIMock $apiMock;
     protected array $source = [
         "api" => "test",
@@ -57,7 +59,9 @@ class ArchiveTest extends Test
     {
         $this->cacheMock = new CacheMock;
         $this->apiMock = new APIMock;
-        $this->containerMock = new ContainerMock;
+        $this->boxMock = new BoxMock;
+        $this->boxMock->dir = new DirMock;
+        $this->boxMock->file = new FileMock;
 
         try {
             $this->archive = new Archive(2, $this->cacheMock,
@@ -73,7 +77,7 @@ class ArchiveTest extends Test
             $this->handleFailedTest();
         }
 
-        $this->containerMock->destroy();
+        $this->boxMock::unsetInstance();
     }
 
     public function testInit(): void

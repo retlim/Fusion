@@ -19,12 +19,11 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Build\Config;
 
-use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Tasks\Build\Build;
 use Valvoid\Fusion\Tasks\Build\Config\Interpreter;
-use Valvoid\Fusion\Tests\Tasks\Build\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Tasks\Build\Config\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Tasks\Build\Config\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -36,101 +35,67 @@ use Valvoid\Fusion\Tests\Test;
 class InterpreterTest extends Test
 {
     protected string|array $coverage = Interpreter::class;
-
-    /** @var ?ConfigEvent last event */
-    private ?ConfigEvent $event = null;
+    protected BusMock $bus;
 
     public function __construct()
     {
-        $containerMock = new ContainerMock;
-
-        $containerMock->setUpInterpreter();
+        $this->bus = new BusMock;
+        $box = new BoxMock;
+        $box->bus = $this->bus;
 
         $this->testReset();
         $this->testInvalidType();
         $this->testDefault();
         $this->testInflated();
 
-        $containerMock->destroy();
+        $box::unsetInstance();
     }
 
     public function testReset(): void
     {
-        $this->event = null;
+        $this->bus->event = null;
 
-        Bus::addReceiver(self::class, $this->handleBusEvent(...), ConfigEvent::class);
         Interpreter::interpret([], null);
 
         // assert nothing
-        if ($this->event !== null) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-
-        Bus::removeReceiver(self::class);
+        if ($this->bus->event !== null)
+            $this->handleFailedTest();
     }
 
     public function testInvalidType(): void
     {
-        $this->event = null;
+        $this->bus->event = null;
 
-        Bus::addReceiver(self::class, $this->handleBusEvent(...), ConfigEvent::class);
-        Interpreter::interpret([], 3455); // must be string or array
+        // must be string or array
+        Interpreter::interpret([], 3455);
 
-        if ($this->event === null || $this->event->getLevel() !== Level::ERROR) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-
-        Bus::removeReceiver(self::class);
+        if ($this->bus->event === null ||
+            $this->bus->event->getLevel() !== Level::ERROR)
+            $this->handleFailedTest();
     }
 
     public function testDefault(): void
     {
-        $this->event = null;
+        $this->bus->event = null;
 
-        Bus::addReceiver(self::class, $this->handleBusEvent(...), ConfigEvent::class);
-        Interpreter::interpret([], Build::class); // default string task config
+        // default string task config
+        Interpreter::interpret([], Build::class);
 
         // assert nothing
-        if ($this->event !== null) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-
-        Bus::removeReceiver(self::class);
+        if ($this->bus->event !== null)
+            $this->handleFailedTest();
     }
 
     public function testInflated(): void
     {
-        $this->event = null;
+        $this->bus->event = null;
 
-        Bus::addReceiver(self::class, $this->handleBusEvent(...), ConfigEvent::class);
         Interpreter::interpret([], [
             "task" => Build::class
-
         ]);
 
         // assert nothing
-        if ($this->event !== null) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-
-        Bus::removeReceiver(self::class);
-    }
-
-    /**
-     * Handles bus event.
-     *
-     * @param ConfigEvent $event Root event.
-     */
-    private function handleBusEvent(ConfigEvent $event): void
-    {
-        $this->event = $event;
+        if ($this->bus->event !== null)
+            $this->handleFailedTest();
     }
 }

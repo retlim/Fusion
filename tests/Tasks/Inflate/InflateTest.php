@@ -21,8 +21,13 @@ namespace Valvoid\Fusion\Tests\Tasks\Inflate;
 
 use Exception;
 use Valvoid\Fusion\Tasks\Inflate\Inflate;
-use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\ContainerMock;
-use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\MetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\ExternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\InternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\LogMock;
+use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -34,46 +39,179 @@ use Valvoid\Fusion\Tests\Test;
 class InflateTest extends Test
 {
     protected string|array $coverage = Inflate::class;
-
     private string $cache = __DIR__ . "/Mocks/package/cache/packages";
-
     private string $dependencies = __DIR__ . "/Mocks/package/dependencies";
-
     private int $time;
 
     public function __construct()
     {
+        $box = new BoxMock;
+        $group = new GroupMock;
+        $box->group = $group;
+        $group->hasDownloadable = false;
+        $box->bus = new BusMock;
+        $box->log = new LogMock;
+
         try {
             $this->time = time();
-            $containerMock = new ContainerMock;
             $task = new Inflate([]);
+            $group->implication = [
+                "metadata2" => [ // no external root
+                    "implication" => []
+                ], "metadata3" => [
+                    "implication" => []
+                ]];
 
-            MetadataMock::addRefreshMetadata();
+            $group->internalMetas["metadata1"] = new InternalMetadataMock([
+                "id" => "metadata1",
+                "name" => "metadata1",
+                "description" => "metadata1",
+                "source" => __DIR__ . "/Mocks/package",
+                "dir" => "", // relative to root dir
+                "version" => "1.0.0",
+                "structure" => [
+                    "cache" => "/cache",
+                    "namespaces" => [],
+                ]
+            ]);
+
+            $group->internalMetas["metadata2"] = new InternalMetadataMock([
+                "id" => "metadata2",
+                "name" => "metadata2",
+                "description" => "metadata2",
+                "source" => __DIR__ . "/Mocks/package/dependencies/metadata2",
+                "dir" => "/dependencies/metadata2", // relative to root dir
+                "version" => "1.0.0",
+                "structure" => [
+                    "cache" => "/cache",
+                    "namespaces" => []
+                ]
+            ]);
+
+            $group->internalMetas["metadata3"] = new InternalMetadataMock([
+                "id" => "metadata3",
+                "name" => "metadata3",
+                "description" => "metadata3",
+                "source" => __DIR__ . "/Mocks/package/dependencies/metadata3",
+                "dir" => "/dependencies/metadata3", // relative to root dir
+                "version" => "1.0.0",
+                "structure" => [
+                    "cache" => "/cache",
+                    "namespaces" => []
+                ]
+            ]);
 
             $task->execute();
             $this->testRefreshClassAndFunction();
             $this->testRefreshInterface();
             $this->testRefreshTrait();
 
-            unset($containerMock->logic->group);
+            $group = new GroupMock;
+            $box->group = $group;
+            $group->hasDownloadable = true;
+            $group->internalMetas = ["metadata1" => new InternalMetadataMock([
+                "id" => "metadata1",
+                "name" => "metadata1",
+                "description" => "metadata1",
+                "source" => __DIR__ . "/Mocks/package",
+                "dir" => "", // relative to root dir
+                "version" => "1.0.0",
+                "structure" => [
+                    "namespaces" => [],
+                    "cache" => "/cache",
+                    "extensions" => [],
+                    "sources" => [
+                        "/dependencies" => []
+                    ]
+                ]
+            ])];
 
-            MetadataMock::addNewStateMetadata();
+            $group->externalMetas["metadata1"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE,[
+                "id" => "metadata1",
+                "name" => "metadata1",
+                "description" => "metadata1",
+                "source" => "/package",
+                "dir" => "", // relative to root dir
+                "version" => "1.0.0",
+                "structure" => [
+                    "cache" => "/cache",
+                    "namespaces" => [],
+                    "extensions" => [],
+                    "sources" => [
+                        "/dependencies" => [
+                            "metadata2",
+                            "metadata3"
+                        ]
+                    ]
+                ]
+            ]);
+
+            $group->externalMetas["metadata2"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE,[
+                "id" => "metadata2",
+                "name" => "metadata2",
+                "description" => "metadata2",
+                "source" => "/package/dependencies/metadata2",
+                "dir" => "/dependencies/metadata2",
+                "version" => "1.0.0",
+                "structure" => [
+                    "namespaces" => [],
+                    "cache" => "/cache",
+                    "extensions" => [
+                        "/extensions"
+                    ],
+                    "sources" => []
+                ]
+            ]);
+
+            $group->externalMetas["metadata3"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE,[
+                "id" => "metadata3",
+                "name" => "metadata3",
+                "description" => "metadata3",
+                "source" => "whatever/metadata3",
+                "dir" => "/dependencies/metadata3",
+                "version" => "1.0.0",
+                "structure" => [
+                    "cache" => "/cache",
+                    "extensions" => [],
+                    "namespaces" => [],
+                    "sources" => [
+                        "/dependencies" => ["metadata2"]
+                    ]
+                ]
+            ]);
+
             $task = new Inflate([]);
+            $group->implication = [
+                "metadata1" => [
+                    "implication" => [
+                        "metadata2" => [
+                            "implication" => []
+                        ],
+                        "metadata3" => [
+                            "implication" => [
+                                "metadata2" => [
+                                    "implication" => []
+                                ]
+                            ]
+                        ],
+                    ]
+                ]
+            ];
 
             $task->execute();
             $this->testNewStateFinalClass();
             $this->testNewStateAbstractClass();
             $this->testNewStateEnum();
-            $containerMock->destroy();
+            $box::unsetInstance();
 
-        } catch (Exception $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-
-                $containerMock->destroy();
-
-            $this->result = false;
+        } catch (Exception) {
+            $this->handleFailedTest();
         }
+
+        $box::unsetInstance();
     }
 
     public function testRefreshClassAndFunction(): void
@@ -92,9 +230,7 @@ class InflateTest extends Test
                 return;
         }
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testRefreshInterface(): void
@@ -109,9 +245,7 @@ class InflateTest extends Test
                 return;
         }
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testRefreshTrait(): void
@@ -126,9 +260,7 @@ class InflateTest extends Test
                 return;
         }
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testNewStateFinalClass(): void
@@ -143,9 +275,7 @@ class InflateTest extends Test
                 return;
         }
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testNewStateAbstractClass(): void
@@ -160,9 +290,7 @@ class InflateTest extends Test
                 return;
         }
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     public function testNewStateEnum(): void
@@ -177,8 +305,6 @@ class InflateTest extends Test
                 return;
         }
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 }

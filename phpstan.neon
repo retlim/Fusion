@@ -10,3 +10,5 @@ parameters:
       - throwNormalizedError
     Valvoid\Fusion\Config\Proxy\Logic:
       - throwMetaError
+    Valvoid\Fusion\Box\Box:
+      - throwNormalizedError

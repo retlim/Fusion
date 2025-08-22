@@ -21,8 +21,13 @@ namespace Valvoid\Fusion\Tests\Tasks\Download;
 
 use Exception;
 use Valvoid\Fusion\Log\Events\Errors\Error;
+use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Tasks\Download\Download;
+use Valvoid\Fusion\Tests\Tasks\Download\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Tasks\Download\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Tasks\Download\Mocks\ExternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Download\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Download\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Tasks\Download\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -35,30 +40,44 @@ use Valvoid\Fusion\Tests\Test;
 class DownloadTest extends Test
 {
     protected string|array $coverage = Download::class;
-
     private string $cache = __DIR__ . "/Mocks/package/cache/packages";
 
     public function __construct()
     {
-        try {
-            $this->delete($this->cache);
+        $this->delete($this->cache);
+        $box = new BoxMock;
+        $box->log = new LogMock;
+        $group = new GroupMock;
+        $box->group = $group;
+        $group->hasDownloadable = true;
+        $group->externalMetas["metadata1"] = new ExternalMetadataMock(
+            ExternalCategory::DOWNLOADABLE,[
+                "id" => "metadata1",
+                "name" => "metadata1",
+                "description" => "metadata1",
+                "source" => [
+                    "api" => "",
+                    "path" => "",
+                    "prefix" => "",
+                    "reference" => ""
+                ],
+                "dir" => __DIR__ . "/Mocks/package/dep/metadata1",
+                "version" => "1.0.1",
+                "structure" => [
+                    "cache" => "/cache",
+                    "extensions" => [],
+                    "sources" => []
+                ]
+            ],[
+                "object" => [
+                    "version" => "3.4.5"
+                ]
+            ]
+        );
 
-            $containerMock = new ContainerMock;
-            MetadataMock::addMockedMetadata();
+        $this->testTargetCacheDirectory();
 
-            $this->testTargetCacheDirectory();
-
-            $containerMock->destroy();
-
-        } catch (Exception $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-
-                $containerMock->destroy();
-
-
-            $this->result = false;
-        }
+        $box::unsetInstance();
     }
 
     /**
@@ -82,9 +101,7 @@ class DownloadTest extends Test
                 return;
         }
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     private function getFilenames(string $dir): array

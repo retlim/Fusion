@@ -50,11 +50,7 @@ class NormalizerTest extends Test
                 "protocol" => "https",
                 "domain" => "valvoid.com",
                 "url" => "https://api.valvoid.com/v1/registry"
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]) $this->handleFailedTest();
     }
 
     public function testCustom(): void
@@ -71,10 +67,6 @@ class NormalizerTest extends Test
                 "protocol" => "c2",
                 "domain" => "c3",
                 "url" => "c2://api.c3/v1/registry"
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]) $this->handleFailedTest();
     }
 }

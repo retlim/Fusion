@@ -21,7 +21,8 @@ namespace Valvoid\Fusion\Tests\Metadata\External\Builder;
 
 use Throwable;
 use Valvoid\Fusion\Metadata\External\Builder;
-use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -33,15 +34,13 @@ class BuilderTest extends Test
 {
     /** @var string|array  */
     protected string|array $coverage = Builder::class;
-
-    /** @var ContainerMock  */
-    protected ContainerMock $container;
-
+    protected BoxMock $container;
     protected Builder $builder;
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->container = new BoxMock;
+        $this->container->bus = new BusMock;
         $this->builder = new Builder("/dir", "api/path/1.0.0");
 
         $this->testId();
@@ -55,7 +54,7 @@ class BuilderTest extends Test
         $this->testProductionLayer();
         $this->testMetadata();
 
-        $this->container->destroy();
+        $this->container::unsetInstance();
     }
 
     public function testProductionLayer(): void

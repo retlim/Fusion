@@ -21,8 +21,9 @@ namespace Valvoid\Fusion\Tests\Config\Parser\Hub;
 
 use Valvoid\Fusion\Config\Parser\Hub;
 use Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks\ApiMock;
+use Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks\Config\Parser;
-use Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks\ConfigMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -37,14 +38,23 @@ class HubTest extends Test
 
     public function __construct()
     {
-        $containerMock = new ContainerMock;
+        $config = new ConfigMock;
+        $box = new BoxMock;
+
+        $config->get = 0;
+        $config->lazy = [];
+        $config->has = false;
+        $box->get = $config;
 
         // test parseable api
         $this->testDefaultApiConfig();
         $this->testConfiguredApiConfig();
-        $containerMock->addParser();
+
+        $config->has = true;
+
         $this->testConfiguredParsableApiConfig();
-        $containerMock->destroy();
+
+        $box::unsetInstance();
     }
 
     public function testDefaultApiConfig(): void

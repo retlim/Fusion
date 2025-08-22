@@ -70,10 +70,6 @@ class ParserTest extends Test
                         ]
                     ]
                 ]
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ])$this->handleFailedTest();
     }
 }

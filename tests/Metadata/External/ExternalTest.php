@@ -21,7 +21,10 @@ namespace Valvoid\Fusion\Tests\Metadata\External;
 
 use Valvoid\Fusion\Metadata\External\Category;
 use Valvoid\Fusion\Metadata\External\External;
-use Valvoid\Fusion\Tests\Metadata\External\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Metadata\External\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Metadata\External\Mocks\DirMock;
+use Valvoid\Fusion\Tests\Metadata\External\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Metadata\External\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -33,14 +36,8 @@ class ExternalTest extends Test
 {
     /** @var string|array  */
     protected string|array $coverage = External::class;
-
-    /** @var ContainerMock  */
-    protected ContainerMock $container;
-
-    /** @var External  */
+    protected BoxMock $container;
     protected External $metadata;
-
-    /** @var array  */
     protected array $layers = [
 
         // runtime helper layer
@@ -49,7 +46,6 @@ class ExternalTest extends Test
         ]
     ];
 
-    /** @var array  */
     protected array $content = [
         "id" => "identifier",
         "source" => ["src"],
@@ -78,7 +74,10 @@ class ExternalTest extends Test
     public function __construct()
     {
         $this->metadata = new External($this->layers, $this->content);
-        $this->container = new ContainerMock;
+        $this->container = new BoxMock;
+        $this->container->log = new LogMock;
+        $this->container->dir = new DirMock;
+        $this->container->group = new GroupMock;
 
         $this->testVersion();
         $this->testDir();
@@ -98,13 +97,13 @@ class ExternalTest extends Test
         $this->testLifecycleCopy();
         $this->testLifecycleMigrate();
 
-        $this->container->destroy();
+        $this->container::unsetInstance();
     }
 
     public function testLifecycleCopy(): void
     {
         if ($this->metadata->onCopy() !== true ||
-            $this->container->proxy->log->event !== "copy")
+            $this->container->log->event !== "copy")
             $this->handleFailedTest();
     }
 
@@ -112,7 +111,7 @@ class ExternalTest extends Test
     {
         // dir + version of internal package
         if ($this->metadata->onMigrate() !== true ||
-            $this->container->proxy->log->event !== "migrate:" .
+            $this->container->log->event !== "migrate:" .
             __DIR__ . "/Mocks:version")
             $this->handleFailedTest();
     }

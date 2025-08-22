@@ -22,10 +22,9 @@ namespace Valvoid\Fusion\Tests\Metadata\Interpreter;
 use Exception;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
-use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Metadata\Interpreter\Interpreter;
-use Valvoid\Fusion\Tests\Metadata\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -46,13 +45,13 @@ class InterpreterTest extends Test
 
     public function __construct()
     {
-        $containerMock = new ContainerMock;
+        $containerMock = new BoxMock;
 
         $this->testReset();
         $this->testInvalidType();
         $this->testInvalidKey();
 
-        $containerMock->destroy();
+        $containerMock::unsetInstance();
     }
 
     public function testReset(): void
@@ -67,11 +66,8 @@ class InterpreterTest extends Test
         ]);
 
         // assert nothing
-        if ($this->event !== null) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($this->event !== null)
+            $this->handleFailedTest();
 
         Bus::removeReceiver(self::class);
     }
@@ -89,11 +85,8 @@ class InterpreterTest extends Test
             $this->result = false;
 
         } catch (Exception) {
-            if ($this->event === null || $this->event->getLevel() !== Level::ERROR) {
-                echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-                $this->result = false;
-            }
+            if ($this->event === null || $this->event->getLevel() !== Level::ERROR)
+                $this->handleFailedTest();
         }
 
         $this->throwException = false;
@@ -108,11 +101,8 @@ class InterpreterTest extends Test
         Bus::addReceiver(self::class, $this->handleBusEvent(...), MetadataEvent::class);
         Interpreter::interpret("", ["key" => true]);
 
-        if ($this->event === null || $this->event->getLevel() !== Level::NOTICE) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($this->event === null || $this->event->getLevel() !== Level::NOTICE)
+            $this->handleFailedTest();
 
         Bus::removeReceiver(self::class);
     }

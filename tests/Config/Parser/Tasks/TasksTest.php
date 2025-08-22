@@ -21,8 +21,9 @@ namespace Valvoid\Fusion\Tests\Config\Parser\Tasks;
 
 use Valvoid\Fusion\Config\Parser\Tasks;
 use Valvoid\Fusion\Tasks\Inflate\Inflate;
+use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\Config\Parser;
-use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\ConfigMock;
 use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\TaskMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -38,14 +39,22 @@ class TasksTest extends Test
 
     public function __construct()
     {
-        $containerMock = new ContainerMock;
+        $config = new ConfigMock;
+        $box = new BoxMock;
+
+        $config->get = 0;
+        $config->lazy = [];
+        $config->has = false;
+        $box->get = $config;
 
         // test parseable task
         $this->testDefaultTaskConfig();
         $this->testConfiguredTaskConfig();
-        $containerMock->addParser();
+
+        $config->has = true;
+
         $this->testConfiguredParsableTaskConfig();
-        $containerMock->destroy();
+        $box::unsetInstance();
     }
 
     public function testDefaultTaskConfig(): void

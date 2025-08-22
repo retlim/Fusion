@@ -19,14 +19,15 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Categorize;
 
-use ReflectionException;
-use Valvoid\Fusion\Container\Proxy\Logic;
 use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
 use Valvoid\Fusion\Tasks\Categorize\Categorize;
-use Valvoid\Fusion\Tasks\Group;
-use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\ContainerMock;
-use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\MetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\ExternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\InternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -38,25 +39,56 @@ use Valvoid\Fusion\Tests\Test;
 class CategorizeTest extends Test
 {
     protected string|array $coverage = Categorize::class;
+    private GroupMock $group;
 
     public function __construct()
     {
-        try {
-            $containerMock = new ContainerMock;
-            MetadataMock::addMockedMetadata();
+        $this->group = new GroupMock;
+        $box = new BoxMock;
+        $box->bus = new BusMock;
+        $box->group = $this->group;
+        $box->log = new LogMock;
 
-            $this->testEfficientCategorization();
-            $this->testRedundantCategorization();
+        $this->group->internalMetas["metadata1"] = new InternalMetadataMock([
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "source" => "metadata1",
+            "dir" => __DIR__,
+            "version" => "1.0.0"
+        ]);
 
-            $containerMock->destroy();
+        $this->group->internalMetas["metadata2"] = new InternalMetadataMock([
+            "id" => "metadata2",
+            "name" => "metadata2",
+            "description" => "metadata2",
+            "source" => "metadata2",
+            "dir" => __DIR__,
+            "version" => "1.0.0"
+        ]);
 
-        } catch (ReflectionException $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
+        $this->group->externalMetas["metadata1"] = new ExternalMetadataMock([
+            "id" => "metadata1",
+            "name" => "metadata1",
+            "description" => "metadata1",
+            "source" => "metadata1",
+            "dir" => __DIR__,
+            "version" => "1.0.1"
+        ]);
 
-            $containerMock->destroy();
+        $this->group->externalMetas["metadata2"] = new ExternalMetadataMock([
+            "id" => "metadata2",
+            "name" => "metadata2",
+            "description" => "metadata2",
+            "source" => "metadata2",
+            "dir" => __DIR__ . "/whatever",
+            "version" => "1.0.0"
+        ]);
 
-            $this->result = false;
-        }
+        $this->testEfficientCategorization();
+        $this->testRedundantCategorization();
+
+        $box::unsetInstance();
     }
 
     public function testEfficientCategorization(): void
@@ -66,7 +98,7 @@ class CategorizeTest extends Test
 
         $categorize->execute();
 
-        foreach (Group::getInternalMetas() as $metadata) {
+        foreach ($this->group->getInternalMetas() as $metadata) {
 
             // assert diff version drop
             if ($metadata->getId() == "metadata1" &&
@@ -78,14 +110,12 @@ class CategorizeTest extends Test
                 $metadata->getCategory() === InternalCategory::MOVABLE)
                 continue;
 
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
+            $this->handleFailedTest();
 
             return;
         }
 
-        foreach (Group::getExternalMetas() as $metadata) {
+        foreach ($this->group->getExternalMetas() as $metadata) {
 
             // assert diff version download
             if ($metadata->getId() == "metadata1" &&
@@ -97,9 +127,7 @@ class CategorizeTest extends Test
                 $metadata->getCategory() === ExternalCategory::REDUNDANT)
                 continue;
 
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
+            $this->handleFailedTest();
 
             return;
         }
@@ -113,21 +141,17 @@ class CategorizeTest extends Test
         $categorize->execute();
 
         // assert internal drop
-        foreach (Group::getInternalMetas() as $metadata)
+        foreach ($this->group->getInternalMetas() as $metadata)
             if ($metadata->getCategory() !== InternalCategory::OBSOLETE) {
-                echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-                $this->result = false;
+                $this->handleFailedTest();
 
                 return;
             }
 
         // assert new external state
-        foreach (Group::getExternalMetas() as $metadata)
+        foreach ($this->group->getExternalMetas() as $metadata)
             if ($metadata->getCategory() !== ExternalCategory::DOWNLOADABLE) {
-                echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-                $this->result = false;
+                $this->handleFailedTest();
 
                 return;
             }

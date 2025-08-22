@@ -25,9 +25,11 @@ use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\CacheMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\CurlMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\FileMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\File as Wrapper;
 
@@ -58,7 +60,10 @@ class FileTest extends Test
     public function __construct()
     {
         $this->curlMock = new CurlMock;
-        $container = new ContainerMock($this->curlMock);
+        $container = new BoxMock;
+        $container->curl = $this->curlMock;
+        $container->log = new LogMock;
+        $container->file = new FileMock;
         $this->apiMock = new APIMock;
         $this->cacheMock = new CacheMock;
 
@@ -90,7 +95,7 @@ class FileTest extends Test
             $this->handleFailedTest();
         }
 
-        $container->destroy();
+        $container::unsetInstance();
     }
 
     public function testInit(): void

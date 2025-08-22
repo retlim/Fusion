@@ -23,8 +23,9 @@ use Throwable;
 use Valvoid\Fusion\Hub\Requests\Local\References;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Requests\Local\References\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Local\References\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Local\References\Mocks\CacheMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Local\References\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Local\References\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -48,7 +49,8 @@ class ReferencesTest extends Test
     {
         $this->cacheMock = new CacheMock;
         $this->apiMock = new APIMock;
-        $container = new ContainerMock;
+        $container = new BoxMock;
+        $container->dir = new DirMock;
 
         try {
             $this->references = new References(2, $this->cacheMock,
@@ -65,7 +67,7 @@ class ReferencesTest extends Test
             $this->handleFailedTest();
         }
 
-        $container->destroy();
+        $container::unsetInstance();
     }
 
     public function testInit(): void

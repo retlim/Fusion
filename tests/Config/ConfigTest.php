@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Tests\Config;
 
 use Valvoid\Fusion\Config\Config;
-use Valvoid\Fusion\Tests\Config\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Config\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -32,15 +32,15 @@ use Valvoid\Fusion\Tests\Test;
 class ConfigTest extends Test
 {
     protected string|array $coverage = Config::class;
-    private ContainerMock $container;
+    private BoxMock $box;
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->box = new BoxMock;
 
         // static
         $this->testStaticInterface();
-        $this->container->destroy();
+        $this->box::unsetInstance();
     }
 
     public function testStaticInterface(): void
@@ -50,7 +50,7 @@ class ConfigTest extends Test
         Config::hasLazy("");
 
         // static functions connected to same non-static functions
-        if ($this->container->logic->config->calls !== [
+        if ($this->box->config->calls !== [
             "get",
             "getLazy",
             "hasLazy"]) {

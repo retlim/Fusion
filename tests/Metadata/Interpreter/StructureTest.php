@@ -24,7 +24,7 @@ use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Metadata\Interpreter\Structure;
-use Valvoid\Fusion\Tests\Metadata\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -45,12 +45,12 @@ class StructureTest extends Test
 
     public function __construct()
     {
-        $containerMock = new ContainerMock;
+        $containerMock = new BoxMock;
 
         $this->testReset();
         $this->testInvalidType();
 
-        $containerMock->destroy();
+        $containerMock::unsetInstance();
     }
 
     public function testReset(): void
@@ -61,11 +61,8 @@ class StructureTest extends Test
         Structure::interpret(null);
 
         // assert nothing
-        if ($this->event !== null) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($this->event !== null)
+            $this->handleFailedTest();
 
         Bus::removeReceiver(self::class);
     }
@@ -83,11 +80,8 @@ class StructureTest extends Test
             $this->result = false;
 
         } catch (Exception) {
-            if ($this->event === null || $this->event->getLevel() !== Level::ERROR) {
-                echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-                $this->result = false;
-            }
+            if ($this->event === null || $this->event->getLevel() !== Level::ERROR)
+                $this->handleFailedTest();
         }
 
         $this->throwException = false;

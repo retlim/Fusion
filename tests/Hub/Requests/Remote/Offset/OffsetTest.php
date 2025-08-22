@@ -24,9 +24,10 @@ use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
 use Valvoid\Fusion\Hub\Requests\Remote\Offset;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\CacheMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\CurlMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\Curl;
 
@@ -68,7 +69,9 @@ class OffsetTest extends Test
     public function __construct()
     {
         $this->curlMock = new CurlMock;
-        $container = new ContainerMock($this->curlMock);
+        $container = new BoxMock;
+        $container->curl = $this->curlMock;
+        $container->log = new LogMock;
         $this->apiMock = new APIMock;
         $this->cacheMock = new CacheMock;
 
@@ -94,12 +97,11 @@ class OffsetTest extends Test
             $this->testForbiddenStatus();
             $this->testErrorStatus();
 
-        } catch (Throwable $e) {
-            var_dump($e->getMessage());
+        } catch (Throwable) {
             $this->handleFailedTest();
         }
 
-        $container->destroy();
+        $container::unsetInstance();
     }
 
     public function testInit(): void

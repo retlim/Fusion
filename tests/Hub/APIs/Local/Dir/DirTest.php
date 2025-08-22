@@ -21,7 +21,8 @@ namespace Valvoid\Fusion\Tests\Hub\APIs\Local\Dir;
 
 use Valvoid\Fusion\Hub\APIs\Local\Dir\Dir;
 use Valvoid\Fusion\Log\Events\Errors\Error;
-use Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\File;
 use Valvoid\Fusion\Hub\Responses\Local\File as FileResponse;
@@ -35,7 +36,7 @@ use Valvoid\Fusion\Hub\Responses\Local\Archive as ArchiveResponse;
 class DirTest extends Test
 {
     protected Dir $api;
-    protected ContainerMock $container;
+    protected BoxMock $container;
     protected string|array $coverage = [
         Dir::class,
 
@@ -45,7 +46,8 @@ class DirTest extends Test
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->container = new BoxMock;
+        $this->container->file = new FileMock;
         $this->api = new Dir("/root", []);
 
         $this->testRoot();
@@ -54,7 +56,7 @@ class DirTest extends Test
         $this->testReferences();
         $this->testArchive();
 
-        $this->container->destroy();
+        $this->container::unsetInstance();
     }
 
     public function testRoot(): void
@@ -95,7 +97,7 @@ class DirTest extends Test
                 $references->getEntries() !== ["_"])
                 $this->handleFailedTest();
 
-            if ($this->container->logic->file->file !== "/root/-/fusion.json")
+            if ($this->container->file->file !== "/root/-/fusion.json")
                 $this->handleFailedTest();
 
         } catch (Error) {

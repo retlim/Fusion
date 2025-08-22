@@ -24,7 +24,7 @@ use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Config\Interpreter\Log as LogInterpreter;
-use Valvoid\Fusion\Tests\Config\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Config\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -45,13 +45,13 @@ class LogTest extends Test
 
     public function __construct()
     {
-        $containerMock = new ContainerMock;
+        $boxMock = new BoxMock;
 
         $this->testReset();
         $this->testInvalidType();
         $this->testInvalidKey();
 
-        $containerMock->destroy();
+        $boxMock::unsetInstance();
     }
 
     public function testReset(): void

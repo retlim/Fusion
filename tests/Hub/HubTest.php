@@ -34,7 +34,7 @@ use Valvoid\Fusion\Hub\Responses\Local\References as LocalReferences;
 use Valvoid\Fusion\Hub\Responses\Remote\Offset as RemoteOffset;
 use Valvoid\Fusion\Hub\Responses\Remote\References as RemoteReferences;
 use Valvoid\Fusion\Log\Events\Errors\Request;
-use Valvoid\Fusion\Tests\Hub\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\CurlMulti;
 use Valvoid\Fusion\Wrappers\CurlShare;
@@ -65,11 +65,11 @@ class HubTest extends Test
         CurlMulti::class
     ];
 
-    private ContainerMock $container;
+    private BoxMock $container;
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->container = new BoxMock;
 
         // static
         $this->container->setUpStaticTests();
@@ -85,7 +85,7 @@ class HubTest extends Test
         $this->testFileCacheRequest();
         $this->testArchiveCacheRequest();
 
-        $this->container->destroy();
+        $this->container::unsetInstance();
     }
 
     public function testArchiveCacheRequest(): void

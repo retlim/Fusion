@@ -20,8 +20,9 @@
 namespace Valvoid\Fusion\Tests\Config\Parser\Log;
 
 use Valvoid\Fusion\Config\Parser\Log;
+use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\Config\Parser;
-use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\ConfigMock;
 use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\SerializerMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -37,14 +38,23 @@ class LogTest extends Test
 
     public function __construct()
     {
-        $containerMock = new ContainerMock;
+        $config = new ConfigMock;
+        $box = new BoxMock;
+
+        $config->get = 0;
+        $config->lazy = [];
+        $config->has = false;
+        $box->get = $config;
 
         // test parseable serializer
         $this->testDefaultSerializerConfig();
         $this->testConfiguredSerializerConfig();
-        $containerMock->addParser();
+
+        $config->has = true;
+
         $this->testConfiguredParsableSerializerConfig();
-        $containerMock->destroy();
+
+        $box::unsetInstance();
     }
 
     public function testDefaultSerializerConfig(): void

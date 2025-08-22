@@ -20,15 +20,15 @@
 namespace Valvoid\Fusion\Hub\APIs\Local\Git;
 
 use Error;
-use Valvoid\Fusion\Container\Container;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;
 use Valvoid\Fusion\Hub\Responses\Local\Archive;
 use Valvoid\Fusion\Hub\Responses\Local\File;
 use Valvoid\Fusion\Hub\Responses\Local\Offset as OffsetResponse;
 use Valvoid\Fusion\Hub\Responses\Local\References;
+use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Wrappers\Program;
-use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 
 /**
  * Git hub to get local OS packages.
@@ -48,7 +48,7 @@ class Git extends LocalOffsetApi
     public function getReferences(string $path): References|string
     {
         try {
-            $program = Container::get(Program::class);
+            $program = Box::getInstance()->get(Program::class);
             $output = [];
             $code = 0; // ok
 
@@ -84,7 +84,7 @@ class Git extends LocalOffsetApi
     public function getOffset(string $path, string $offset): OffsetResponse|string
     {
         try {
-            $program = Container::get(Program::class);
+            $program = Box::getInstance()->get(Program::class);
             $output = [];
             $code = 0;  // ok
 
@@ -120,7 +120,7 @@ class Git extends LocalOffsetApi
     {
         try {
             $filename = substr($filename, 1);
-            $program = Container::get(Program::class);
+            $program = Box::getInstance()->get(Program::class);
             $output = [];
             $code = 0;  // ok
 
@@ -178,7 +178,7 @@ class Git extends LocalOffsetApi
 
             // get current branch name
             // detached HEAD is empty
-            $program = Container::get(Program::class);
+            $program = Box::getInstance()->get(Program::class);
             $output = [];
             $code = 0;  // ok
 

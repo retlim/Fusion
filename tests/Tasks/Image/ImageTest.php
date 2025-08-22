@@ -20,9 +20,11 @@
 namespace Valvoid\Fusion\Tests\Tasks\Image;
 
 use Exception;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Image\Image;
-use Valvoid\Fusion\Tests\Tasks\Image\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Tasks\Image\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Tasks\Image\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Image\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Image\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -34,24 +36,28 @@ use Valvoid\Fusion\Tests\Test;
 class ImageTest extends Test
 {
     protected string|array $coverage = Image::class;
-
+    protected GroupMock $group;
     public function __construct()
     {
-        try {
-            $containerMock = new ContainerMock;
+        $box = new BoxMock;
+        $this->group = new GroupMock;
+        $box->group = $this->group;
+        $box->bus = new BusMock;
+        $box->log = new LogMock;
 
+        try {
             $task = new Image(["group" => true]);
 
             $task->execute();
             $this->testMetas();
             $this->testRootMetadata();
-            $containerMock->destroy();
+            $box::unsetInstance();
 
         } catch (Exception $exception) {
             echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
             echo "\n " . $exception->getMessage();
 
-            $containerMock->destroy();
+            $box::unsetInstance();
 
             $this->result = false;
         }
@@ -59,28 +65,21 @@ class ImageTest extends Test
 
     public function testMetas(): void
     {
-        $metas = Group::getInternalMetas();
+        $metas = $this->group->getInternalMetas();
 
         if (sizeof($metas) != 3 || !isset($metas["metadata1"]) ||
-            !isset($metas["metadata2"]) || !isset($metas["metadata3"])) {
-
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            !isset($metas["metadata2"]) || !isset($metas["metadata3"]))
+            $this->handleFailedTest();
     }
 
     public function testRootMetadata(): void
     {
-        $metadata = Group::getInternalRootMetadata();
+        $metadata = $this->group->getInternalRootMetadata();
 
         // bot and env files
         if ($metadata->getId() != "metadata1" || $metadata->getVersion() != "2.0.0" ||
             $metadata->getContent()["name"] != "metadata1-dev" ||
-            $metadata->getContent()["description"] != "metadata1-local") {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            $metadata->getContent()["description"] != "metadata1-local")
+            $this->handleFailedTest();
     }
 }

@@ -22,7 +22,8 @@ namespace Valvoid\Fusion\Tests\Hub\APIs\Remote\Bitbucket\Config;
 use Valvoid\Fusion\Hub\APIs\Remote\Bitbucket\Bitbucket;
 use Valvoid\Fusion\Hub\APIs\Remote\Bitbucket\Config\Interpreter;
 use Valvoid\Fusion\Log\Events\Level;
-use Valvoid\Fusion\Tests\Hub\APIs\Remote\Bitbucket\Config\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\APIs\Remote\Bitbucket\Config\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Hub\APIs\Remote\Bitbucket\Config\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -36,23 +37,24 @@ class InterpreterTest extends Test
     /** @var string|array Code coverage. */
     protected string|array $coverage = Interpreter::class;
 
-    private ContainerMock $container;
+    private BoxMock $container;
 
     public function __construct()
     {
-        $this->container = new ContainerMock;
+        $this->container = new BoxMock;
+        $this->container->bus = new BusMock;
 
         $this->testReset();
         $this->testInvalid();
         $this->testDefault();
         $this->testCustom();
 
-        $this->container->destroy();
+        $this->container::unsetInstance();
     }
 
     public function testCustom(): void
     {
-        $this->container->logic->bus->event = null;
+        $this->container->bus->event = null;
 
         Interpreter::interpret([], [
             "api" => Bitbucket::class,
@@ -63,50 +65,38 @@ class InterpreterTest extends Test
             ]
         ]);
 
-        if ($this->container->logic->bus->event !== null) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($this->container->bus->event !== null)
+            $this->handleFailedTest();
     }
 
     public function testDefault(): void
     {
-        $this->container->logic->bus->event = null;
+        $this->container->bus->event = null;
 
         Interpreter::interpret([], Bitbucket::class);
 
-        if ($this->container->logic->bus->event !== null) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($this->container->bus->event !== null)
+            $this->handleFailedTest();
     }
 
     public function testInvalid(): void
     {
-        $this->container->logic->bus->event = null;
+        $this->container->bus->event = null;
 
         Interpreter::interpret([], 34);
 
-        if ($this->container->logic->bus->event === null ||
-            $this->container->logic->bus->event->getLevel() !== Level::ERROR) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($this->container->bus->event === null ||
+            $this->container->bus->event->getLevel() !== Level::ERROR)
+            $this->handleFailedTest();
     }
 
     public function testReset(): void
     {
-        $this->container->logic->bus->event = null;
+        $this->container->bus->event = null;
 
         Interpreter::interpret([], null);
 
-        if ($this->container->logic->bus->event !== null) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($this->container->bus->event !== null)
+            $this->handleFailedTest();
     }
 }

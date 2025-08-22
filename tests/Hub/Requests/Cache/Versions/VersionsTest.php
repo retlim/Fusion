@@ -22,8 +22,10 @@ namespace Valvoid\Fusion\Tests\Hub\Requests\Cache\Versions;
 use Throwable;
 use Valvoid\Fusion\Hub\Requests\Cache\Versions;
 use Valvoid\Fusion\Tests\Hub\Requests\Cache\Versions\Mocks\APIMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Cache\Versions\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Cache\Versions\Mocks\CacheMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Cache\Versions\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Cache\Versions\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Hub\Responses\Cache\Versions as VersionsResponse;
 use Valvoid\Fusion\Log\Events\Errors\Request;
@@ -47,7 +49,8 @@ class VersionsTest extends Test
 
     public function __construct()
     {
-        $containerMock = new ContainerMock;
+        $container = new BoxMock;
+        $container->dir = new DirMock;
         $this->cacheMock = new CacheMock;
         $this->apiMock = new APIMock;
         $this->versions = new Versions(1, $this->cacheMock, $this->source,
@@ -57,7 +60,7 @@ class VersionsTest extends Test
         $this->testResponse();
         $this->testErrorResponse();
 
-        $containerMock->destroy();
+        $container::unsetInstance();
     }
 
     public function testInit(): void

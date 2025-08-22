@@ -22,10 +22,15 @@ namespace Valvoid\Fusion\Tests\Tasks\Snap;
 use Exception;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Snap\Snap;
-use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\ContainerMock;
-use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\MetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\ExternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\InternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
-
+use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
+use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
 /**
  * Integration test case for the snap task.
  *
@@ -38,30 +43,171 @@ class SnapTest extends Test
 
     public function __construct()
     {
+        $box = new BoxMock;
+        $group = new GroupMock;
+        $box->group = $group;
+        $group->hasDownloadable = false;
+        $box->bus = new BusMock;
+        $box->log = new LogMock;
+
         try {
             $this->delete(__DIR__ . "/Mocks/package");
+            $group->implication = [
+                "metadata1" => [
+                    "implication" => [
+                        "metadata2" => [
+                            "implication" => []
+                        ],
+                        "metadata3" => [
+                            "implication" => []
+                        ]
+                    ]
+                ]
+            ];
+            $group->externalMetas["metadata1"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT,[
+                "id" => "metadata1",
+                "name" => "metadata1",
+                "description" => "metadata1",
+                "version" => "1.0.0",
+                "source" => [
+                    "api" => "",
+                    "path" => "",
+                    "prefix" => "",
+                    "reference" => ""
+                ],
+                "dir" => "", // test recursive root
+                "dependencies" => [
 
-            $containerMock = new ContainerMock;
+                    // external === production only
+                    // production metadata has deps
+                    // fusion.json
+                    "production" => [
+                        "metadata2",
+                        "metadata3"
+                    ]
+                ]
+            ]);
 
-            MetadataMock::addRedundantMockedMetadata();
+            $group->externalRoot = $group->externalMetas["metadata1"];
+            $group->externalMetas["metadata2"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT,[
+                "id" => "metadata2",
+                "name" => "metadata2",
+                "description" => "metadata2",
+                "version" => "3.2.1",
+                "source" => [
+                    "api" => "",
+                    "path" => "",
+                    "prefix" => "",
+                    "reference" => "offset" // version offset
+                ],
+                "dir" => "metadata2"
+            ],["object" => [
+                "version" => "3.2.1" // pseudo version for offset
+            ]]);
+            $group->externalMetas["metadata3"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT,[
+                "id" => "metadata3",
+                "name" => "metadata3",
+                "description" => "metadata3",
+                "version" => "1.2.3",
+                "source" => [
+                    "api" => "",
+                    "path" => "",
+                    "prefix" => "",
+                    "reference" => "1.2.3" // version
+                ],
+                "dir" => "metadata3"
+            ]);
             $this->testRedundantCacheRefresh();
 
             // clear
-            unset($containerMock->logic->group);
+            $group = new GroupMock;
+            $box->group = $group;
+            $group->hasDownloadable = true;
+            $group->implication = [
+                "metadata1" => [
+                    "implication" => [
+                        "metadata2" => [
+                            "implication" => [
+                                "metadata3" => [
+                                    "implication" => []
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ];
 
-            MetadataMock::addDownloadableMockedMetadata();
+            $group->internalMetas["metadata1"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE,[
+                "id" => "metadata1",
+                "name" => "metadata1",
+                "description" => "metadata1",
+                "source" => "", // project root
+                "dir" => "", // project root
+                "version" => "1.0.0",
+                "dependencies" => [
+
+                    // production metadata has deps
+                    // fusion.json
+                    "production" => [
+                        "metadata2"
+                    ],
+
+                    // optional empty dev metadata
+                    // fusion.dev.php
+                    "development" => [],
+
+                    // no optional local fusion metadata file
+                    // fusion.local.php
+                    "local" => null
+                ],
+                "structure" => [
+                    "cache" => "/cache"
+                ]
+            ]);
+
+            $group->internalRoot = $group->internalMetas["metadata1"];
+            $group->externalMetas["metadata2"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE,[
+                "id" => "metadata2",
+                "name" => "metadata2",
+                "description" => "metadata2",
+                "version" => "1.0.0",
+                "dir" => "metadata2",
+                "source" => [
+                    "api" => "",
+                    "path" => "",
+                    "prefix" => "",
+                    "reference" => "6.7.8" // version
+                ],
+
+            ]);
+            $group->externalMetas["metadata3"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT,[
+                "id" => "metadata3",
+                "name" => "metadata3",
+                "description" => "metadata3",
+                "version" => "1.0.0",
+                "dir" => "metadata3",
+                "source" => [
+                    "api" => "",
+                    "path" => "",
+                    "prefix" => "",
+                    "reference" => "offset" // version offset
+                ],
+            ],["object" => [
+                "version" => "5.4.3" // pseudo version for offset
+            ]]);
             $this->testDownloadableCacheUpdate();
 
-            $containerMock->destroy();
-
-        } catch (Exception $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-
-                $containerMock->destroy();
-
-            $this->result = false;
+        } catch (Exception) {
+            $this->handleFailedTest();
         }
+
+        $box::unsetInstance();
     }
 
     /**
@@ -83,9 +229,7 @@ class SnapTest extends Test
                 return;
         }
 
-        echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-        $this->result = false;
+        $this->handleFailedTest();
     }
 
     /**
@@ -116,9 +260,7 @@ class SnapTest extends Test
             }
         }
 
-       echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-       $this->result = false;
+       $this->handleFailedTest();
     }
 
     /**
