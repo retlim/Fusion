@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Proxy\Proxy;
+use Valvoid\Fusion\Dir\Proxy;
 use Valvoid\Fusion\Wrappers\Curl;
 
 /**
@@ -41,7 +41,7 @@ class BoxMock extends Box
         if ("Valvoid\Fusion\Log\Proxy\Proxy" === $class)
             return $this->log;
 
-        if ("Valvoid\Fusion\Dir\Proxy\Proxy" === $class)
+        if ("Valvoid\Fusion\Dir\Proxy" === $class)
             return $this->dir;
 
         if ("Valvoid\Fusion\Wrappers\Stream" === $class)

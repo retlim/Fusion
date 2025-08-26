@@ -23,7 +23,9 @@ use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Proxy\Logic;
+use Valvoid\Fusion\Dir\Logic;
+use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Mocked container.
@@ -49,13 +51,15 @@ class BoxMock extends Box
         if ($class === \Valvoid\Fusion\Log\Proxy\Proxy::class)
             return $this->log;
 
-        if ($class === \Valvoid\Fusion\Dir\Proxy\Proxy::class)
+        if ($class === \Valvoid\Fusion\Dir\Proxy::class)
             return $this->dir ??= new class extends Logic
             {
                 public function __construct()
                 {
                     $this->root = dirname(__DIR__) . "/cache";
                     $this->cache = dirname(__DIR__) . "/cache/cache";
+                    $this->file = new File();
+                    $this->dir = new Dir();
 
                     Bus::addReceiver("whatever", $this->handleBusEvent(...),
                         Cache::class);

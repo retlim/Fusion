@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Wrappers;
 
 /**
- * File wrapper.
+ * Abstract standard file logic.
  *
  * @copyright Valvoid
  * @license GNU GPLv3
@@ -61,5 +61,51 @@ class File
     public function get(string $file): string|false
     {
         return file_get_contents($file);
+    }
+
+    /**
+     * Returns required file content.
+     *
+     * @param string $file File.
+     * @return mixed Content.
+     */
+    public function require(string $file): mixed
+    {
+        return require $file;
+    }
+
+    /**
+     * Tells whether the filename is a regular file
+     *
+     * @param string $file Path to the file.
+     * @return bool true if the filename exists and is a regular file,
+     * false otherwise.
+     */
+    public function is(string $file): bool
+    {
+        return is_file($file);
+    }
+
+    /**
+     * Deletes a file
+     *
+     * @param string $file Path to the file.
+     * @return bool true on success or false on failure.
+     */
+    public function unlink(string $file): bool
+    {
+        return unlink($file);
+    }
+
+    /**
+     * Copies file
+     *
+     * @param string $from Path to the source file.
+     * @param string $to The destination path.
+     * @return bool true on success or false on failure.
+     */
+    public function copy(string $from, string $to): bool
+    {
+        return copy($from, $to);
     }
 }

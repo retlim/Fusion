@@ -20,10 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Stack\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Proxy\Logic;
 
 /**
  * Mocked container.
@@ -49,7 +46,7 @@ class BoxMock extends Box
         if ($class === \Valvoid\Fusion\Log\Proxy\Proxy::class)
             return $this->log;
 
-        if ($class === \Valvoid\Fusion\Dir\Proxy\Proxy::class)
+        if ($class === \Valvoid\Fusion\Dir\Proxy::class)
             return $this->dir;
 
         return parent::get($class, ...$args);

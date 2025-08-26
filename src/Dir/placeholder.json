@@ -1,0 +1,14 @@
+{
+    "name": "Placeholder",
+    "description": "A placeholder package for an empty working directory.",
+    "id": "valvoid/placeholder",
+    "version": "1.0.0",
+    "structure": {
+        "/cache": "cache"
+    },
+    "environment": {
+        "php": {
+            "version": "8.1.0"
+        }
+    }
+}

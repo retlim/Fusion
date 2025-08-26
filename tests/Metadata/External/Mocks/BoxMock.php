@@ -36,7 +36,7 @@ class BoxMock extends Box
     public function get(string $class, ...$args): object
     {
         return match($class) {
-            "Valvoid\Fusion\Dir\Proxy\Proxy" => $this->dir,
+            "Valvoid\Fusion\Dir\Proxy" => $this->dir,
             "Valvoid\Fusion\Log\Proxy\Proxy" => $this->log,
             "Valvoid\Fusion\Group\Proxy\Proxy" => $this->group
         };

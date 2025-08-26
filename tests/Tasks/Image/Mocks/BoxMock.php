@@ -21,7 +21,6 @@ namespace Valvoid\Fusion\Tests\Tasks\Image\Mocks;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Proxy\Logic;
 
 /**
  * Mocked container.

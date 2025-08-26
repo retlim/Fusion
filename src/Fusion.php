@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ use Valvoid\Fusion\Bus\Proxy\Logic as BusLogic;
 use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
 use Valvoid\Fusion\Config\Proxy\Logic as ConfigLogic;
 use Valvoid\Fusion\Config\Proxy\Proxy as ConfigProxy;
-use Valvoid\Fusion\Dir\Proxy\Logic as DirLogic;
-use Valvoid\Fusion\Dir\Proxy\Proxy as DirProxy;
+use Valvoid\Fusion\Dir\Logic as DirLogic;
+use Valvoid\Fusion\Dir\Proxy as DirProxy;
 use Valvoid\Fusion\Group\Proxy\Logic as GroupLogic;
 use Valvoid\Fusion\Group\Proxy\Proxy as GroupProxy;
 use Valvoid\Fusion\Hub\Proxy\Logic as HubLogic;
@@ -53,7 +53,7 @@ use Valvoid\Fusion\Tasks\Task;
  */
 class Fusion
 {
-    /** @var Box Dependency container. */
+    /** @var Box Dependency injection container. */
     private Box $box;
 
     /** @var ?Fusion Runtime instance. */
@@ -71,7 +71,7 @@ class Fusion
     /**
      * Constructs the package manager.
      *
-     * @param Box $box Dependency container.
+     * @param Box $box Dependency injection container.
      * @param array $config Runtime config layer.
      * @throws ConfigError Invalid config exception.
      * @throws MetadataError Invalid metadata exception.
@@ -103,7 +103,7 @@ class Fusion
             HubLogic::class);
 
         // init sharable config instance
-        $box->get(ConfigLogic::class,
+        $config = $box->get(ConfigLogic::class,
             root: $this->root,
             lazy: $this->lazy,
             config: $config);
@@ -117,6 +117,9 @@ class Fusion
             // keep session active if
             // recursive or nested update/upgrade
             Root::class);
+
+        $box->inject(DirLogic::class,
+            config: $config->get("dir"));
     }
 
     /**
