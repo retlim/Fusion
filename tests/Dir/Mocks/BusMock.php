@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,30 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Metadata\Internal\Mocks;
+namespace Valvoid\Fusion\Tests\Dir\Mocks;
 
-use Valvoid\Fusion\Box\Box;
+use Closure;
+use Valvoid\Fusion\Bus\Events\Event;
+use Valvoid\Fusion\Bus\Proxy\Proxy;
+
 /**
- * Mocked container.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BoxMock extends Box
+class BusMock implements Proxy
 {
-    public $log;
-    public $dir;
-    public $group;
+    public $id;
+    public $callback;
+    public $events;
 
-    public function get(string $class, ...$args): object
+    public function addReceiver(string $id, Closure $callback, string ...$events): void
     {
-        return match($class) {
-            "Valvoid\Fusion\Dir\Proxy" => $this->dir,
-            "Valvoid\Fusion\Log\Proxy\Proxy" => $this->log,
-            "Valvoid\Fusion\Group\Proxy\Proxy" => $this->group
-        };
+        $this->id = $id;
+        $this->callback = $callback;
+        $this->events = $events;
     }
+
+    public function broadcast(Event $event): void{}
+
+    public function removeReceiver(string $id, string ...$events): void{}
 }

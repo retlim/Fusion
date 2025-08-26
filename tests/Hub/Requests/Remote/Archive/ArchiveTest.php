@@ -27,7 +27,6 @@ use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\APIMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\CacheMock;
-use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\ContainerMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\CurlMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\LogMock;

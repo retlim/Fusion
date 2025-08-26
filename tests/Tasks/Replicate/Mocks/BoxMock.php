@@ -19,10 +19,10 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Proxy\Logic;
-use Closure;
+use Valvoid\Fusion\Dir\Logic;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
 
 /**
@@ -47,7 +47,7 @@ class BoxMock extends Box
         if ($class === \Valvoid\Fusion\Log\Proxy\Proxy::class)
             return $this->log;
 
-        if ($class === \Valvoid\Fusion\Dir\Proxy\Proxy::class)
+        if ($class === \Valvoid\Fusion\Dir\Proxy::class)
             return new class extends Logic
             {
                 public function __construct()

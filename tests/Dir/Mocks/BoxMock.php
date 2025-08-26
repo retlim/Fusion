@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,9 @@
 namespace Valvoid\Fusion\Tests\Dir\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Proxy\Proxy;
+use Valvoid\Fusion\Dir\Proxy;
 
 /**
- * Mocked container.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */

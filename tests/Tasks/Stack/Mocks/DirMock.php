@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Stack\Mocks;
 
-use Valvoid\Fusion\Dir\Proxy\Proxy;
+use Valvoid\Fusion\Dir\Proxy;
 
 /**
  * @copyright Valvoid

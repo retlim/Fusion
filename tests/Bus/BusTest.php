@@ -87,11 +87,8 @@ class BusTest extends Test
 
         $this->logic->broadcast($this->eventMock);
 
-        if (!$indicator1 || !$indicator2) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if (!$indicator1 || !$indicator2)
+            $this->handleFailedTest();
     }
 
     public function testEvents(): void
@@ -111,11 +108,8 @@ class BusTest extends Test
 
         $this->logic->broadcast($this->eventMock);
 
-        if (!$indicator1 || $indicator2) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if (!$indicator1 || $indicator2)
+            $this->handleFailedTest();
     }
 
     public function testStaticInterface(): void
@@ -128,11 +122,7 @@ class BusTest extends Test
         if ($this->box->bus->calls !== [
             "addReceiver",
             "removeReceiver",
-            "broadcast"]) {
-
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            "broadcast"])
+            $this->handleFailedTest();
     }
 }

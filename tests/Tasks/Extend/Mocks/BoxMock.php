@@ -19,11 +19,11 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Extend\Mocks;
 
-use Closure;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Proxy\Logic;
-use Valvoid\Fusion\Hub\Responses\Cache\Archive as ArchiveResponse;
+use Valvoid\Fusion\Dir\Logic;
+use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Mocked container.
@@ -47,13 +47,15 @@ class BoxMock extends Box
         if ($class === \Valvoid\Fusion\Log\Proxy\Proxy::class)
             return $this->log;
 
-        if ($class === \Valvoid\Fusion\Dir\Proxy\Proxy::class)
+        if ($class === \Valvoid\Fusion\Dir\Proxy::class)
             return new class extends Logic
             {
                 public function __construct()
                 {
                     $this->root = __DIR__ . "/package";
                     $this->cache = __DIR__ . "/package/cache";
+                    $this->file = new File();
+                    $this->dir = new Dir();
                 }
             };
 

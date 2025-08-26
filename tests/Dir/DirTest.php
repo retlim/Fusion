@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,12 @@
 
 namespace Valvoid\Fusion\Tests\Dir;
 
+use Throwable;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Tests\Dir\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Hub test.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
@@ -39,43 +38,42 @@ class DirTest extends Test
     {
         $this->box = new BoxMock;
 
-        // static
         $this->testStaticInterface();
         $this->box::unsetInstance();
-
     }
 
     public function testStaticInterface(): void
     {
-        Dir::getTaskDir();
-        Dir::getStateDir();
-        Dir::getCacheDir();
-        Dir::getOtherDir();
-        Dir::getPackagesDir();
-        Dir::getRootDir();
-        Dir::createDir("",1);
-        Dir::rename("","");
-        Dir::copy("","");
-        Dir::delete("");
-        Dir::clear("", "");
+        try {
+            Dir::getTaskDir();
+            Dir::getStateDir();
+            Dir::getCacheDir();
+            Dir::getOtherDir();
+            Dir::getPackagesDir();
+            Dir::getRootDir();
+            Dir::createDir("",1);
+            Dir::rename("","");
+            Dir::copy("","");
+            Dir::delete("");
+            Dir::clear("", "");
 
-        // static functions connected to same non-static functions
-        if ($this->box->dir->calls !== [
-                "getTaskDir",
-                "getStateDir",
-                "getCacheDir",
-                "getOtherDir",
-                "getPackagesDir",
-                "getRootDir",
-                "createDir",
-                "rename",
-                "copy",
-                "delete",
-                "clear"]) {
+            // static functions connected to same non-static functions
+            if ($this->box->dir->calls !== [
+                    "getTaskDir",
+                    "getStateDir",
+                    "getCacheDir",
+                    "getOtherDir",
+                    "getPackagesDir",
+                    "getRootDir",
+                    "createDir",
+                    "rename",
+                    "copy",
+                    "delete",
+                    "clear"])
+                $this->handleFailedTest();
 
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
+        } catch (Throwable) {
+            $this->handleFailedTest();
         }
     }
 }
