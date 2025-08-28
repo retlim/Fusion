@@ -110,6 +110,9 @@ class Inflate extends Task
         Log::info("inflate current packages");
 
         foreach (Group::getInternalMetas() as $id => $meta) {
+            if ($meta->getCategory() == InternalMetaCategory::OBSOLETE)
+                continue;
+
             Log::info(new Content($meta->getContent()));
 
             // static state root

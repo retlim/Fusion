@@ -76,16 +76,22 @@ class Shift extends Task
     {
         Log::info("shift state");
 
+        $this->root = Dir::getRootDir();
+
         // current state
         // rebuilt cache, ...
         if (!Group::hasDownloadable()) {
             foreach (Group::getInternalMetas() as $meta)
-                $meta->onUpdate();
+                if ($meta->getCategory() == InternalMetaCategory::OBSOLETE) {
+                    $meta->onDelete();
+                    Dir::delete($meta->getSource());
+                    Dir::clear($this->root, $meta->getDir());
+
+                } else $meta->onUpdate();
 
             return;
         }
 
-        $this->root = Dir::getRootDir();
         $this->internalMetas = Group::getInternalMetas();
         $this->state = Dir::getStateDir();
         $this->externalRootMeta = Group::getExternalRootMetadata();
