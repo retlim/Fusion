@@ -100,6 +100,9 @@ class Register extends Task
         $lazy = $asap = [];
 
         foreach (Group::getInternalMetas() as $meta) {
+            if ($meta->getCategory() == InternalMetaCategory::OBSOLETE)
+                continue;
+
             Log::info(new Content($meta->getContent()));
             $this->appendInflated($lazy, $asap,
 

@@ -115,6 +115,9 @@ class Extend extends Task
             Log::info("refresh cached extension files");
 
             foreach (Group::getInternalMetas() as $id => $metadata) {
+                if ($metadata->getCategory() == InternalMetaCategory::OBSOLETE)
+                    continue;
+
                 Log::info(new Content($metadata->getContent()));
 
                 $this->structures[$id] = [
