@@ -159,9 +159,11 @@ class Snap extends Task
         if (isset($layers["object"]["version"]))
             $reference = $layers["object"]["version"] . ":$reference";
 
-        $this->content[$id] = $reference;
+        if (!isset($this->content[$id])) {
+            $this->content[$id] = $reference;
 
-        Log::info(new Content($metadata->getContent()));
+            Log::info(new Content($metadata->getContent()));
+        }
     }
 
     /**
