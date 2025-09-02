@@ -7,7 +7,7 @@ packages, and handling loadable code.
 
 ## Documentation
 
-The separated [documentation repository](https://gitlab.com/valvoid/fusion/php/docs)
+The separated [documentation repository](https://gitlab.com/valvoid/fusion/docs)
 also has the [user-friendly output](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/prologue/fusion) and contains information about the 
 following key features:
 

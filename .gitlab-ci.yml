@@ -100,5 +100,5 @@ run docker pipeline:
     MINOR: $MINOR
     PATCH: $PATCH
   trigger:
-    project: valvoid/fusion/php/docker
+    project: valvoid/fusion/docker
     branch: main
