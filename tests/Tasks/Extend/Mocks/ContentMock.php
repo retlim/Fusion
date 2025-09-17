@@ -17,38 +17,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Stack\Mocks;
+namespace Valvoid\Fusion\Tests\Tasks\Extend\Mocks;
 
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Log\Events\Infos\Content;
 
 /**
- * Mocked container.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BoxMock extends Box
+class ContentMock extends Content
 {
-    public BusMock $bus;
-    public GroupMock $group;
-    public LogMock $log;
-    public DirMock $dir;
-
-    public function get(string $class, ...$args): object
-    {
-        if ($class === Proxy::class)
-            return $this->bus;
-
-        if ($class === \Valvoid\Fusion\Group\Group::class)
-            return $this->group;
-
-        if ($class === \Valvoid\Fusion\Log\Proxy::class)
-            return $this->log;
-
-        if ($class === \Valvoid\Fusion\Dir\Proxy::class)
-            return $this->dir;
-
-        return parent::get($class, ...$args);
-    }
+    public function __construct(){}
 }

@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,13 +32,13 @@ use Valvoid\Fusion\Wrappers\Curl;
 class BoxMock extends Box
 {
     public Curl $curl;
-    public \Valvoid\Fusion\Log\Proxy\Proxy $log;
+    public \Valvoid\Fusion\Log\Proxy $log;
     public StreamMock $stream;
     public Proxy $dir;
 
     public function get(string $class, ...$args): object
     {
-        if ("Valvoid\Fusion\Log\Proxy\Proxy" === $class)
+        if ("Valvoid\Fusion\Log\Proxy" === $class)
             return $this->log;
 
         if ("Valvoid\Fusion\Dir\Proxy" === $class)

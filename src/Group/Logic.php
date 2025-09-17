@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -10,14 +10,14 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Group\Proxy;
+namespace Valvoid\Fusion\Group;
 
 use Valvoid\Fusion\Fusion;
 use Valvoid\Fusion\Metadata\External\Category;
@@ -31,7 +31,7 @@ use Valvoid\Fusion\Util\Metadata\Structure;
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class Logic implements Proxy
+class Logic implements Group
 {
     /** @var array<string, InternalMeta> Internal metas by ID. */
     protected array $internalMetas = [];

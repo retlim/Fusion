@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ class BoxMock extends Box
     {
         return match($class) {
             "Valvoid\Fusion\Dir\Proxy" => $this->dir,
-            "Valvoid\Fusion\Log\Proxy\Proxy" => $this->log,
-            "Valvoid\Fusion\Group\Proxy\Proxy" => $this->group
+            "Valvoid\Fusion\Log\Proxy" => $this->log,
+            "Valvoid\Fusion\Group\Group" => $this->group
         };
     }
 }
