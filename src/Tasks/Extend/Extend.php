@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,19 @@
 
 namespace Valvoid\Fusion\Tasks\Extend;
 
-use Valvoid\Fusion\Dir\Dir;
+use Exception;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Infos\Content;
-use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalMetaCategory;
 use Valvoid\Fusion\Metadata\Metadata;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
+use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Extend task to handle stackable package customizations.
@@ -53,22 +57,46 @@ class Extend extends Task
     private array $filters = [];
 
     /**
+     * Constructs the task.
+     *
+     * @param Box $box Dependency injection container.
+     * @param GroupProxy $group Tasks group.
+     * @param LogProxy $log Event log.
+     * @param DirProxy $directory Current working directory.
+     * @param File $file Standard file logic wrapper.
+     * @param Dir $dir Standard dir logic wrapper.
+     * @param array $config Task config.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly GroupProxy $group,
+        private readonly LogProxy $log,
+        private readonly DirProxy $directory,
+        private readonly File $file,
+        private readonly Dir $dir,
+        array $config)
+    {
+        parent::__construct($config);
+    }
+
+    /**
      * Executes the task.
      *
      * @throws Error Internal error.
+     * @throws Exception
      */
     public function execute(): void
     {
-        if (Group::getExternalRootMetadata())
-            $implication = Group::getImplication();
+        if ($this->group->getExternalRootMetadata())
+            $implication = $this->group->getImplication();
 
         else {
-            $internalRootMeta = Group::getInternalRootMetadata();
+            $internalRootMeta = $this->group->getInternalRootMetadata();
             $implication[$internalRootMeta->getId()] = [
 
                 // no need "source" entry here
                 // just extend tree for extension order
-                "implication" => Group::getImplication()
+                "implication" => $this->group->getImplication()
             ];
         }
 
@@ -77,12 +105,12 @@ class Extend extends Task
         $this->initFilters($implication, []);
 
         // extend new state
-        if (Group::hasDownloadable()) {
-            Log::info("extend packages");
+        if ($this->group->hasDownloadable()) {
+            $this->log->info("extend packages");
 
-            $this->externalMetas = Group::getExternalMetas();
-            $this->packagesDir = Dir::getPackagesDir();
-            $metadata = Group::getInternalRootMetadata();
+            $this->externalMetas = $this->group->getExternalMetas();
+            $this->packagesDir = $this->directory->getPackagesDir();
+            $metadata = $this->group->getInternalRootMetadata();
 
             // implication recursive root else
             // recycle current
@@ -98,13 +126,14 @@ class Extend extends Task
             }
 
             foreach ($this->externalMetas as $id => $metadata) {
-                Log::info(new Content($metadata->getContent()));
+                $this->log->info(
+                    $this->box->get(Content::class,
+                        content: $metadata->getContent()));
 
-                $extension = $metadata->getStructureExtensions();
                 $this->structures[$id] = [
                     "dir" => "$this->packagesDir/$id",
                     "cache" => $metadata->getStructureCache(),
-                    "extensions" => $extension
+                    "extensions" => $metadata->getStructureExtensions()
                 ];
 
                 $this->spread($metadata, $id);
@@ -112,20 +141,20 @@ class Extend extends Task
 
         // refresh
         } else {
-            Log::info("refresh cached extension files");
+            $this->log->info("refresh cached extension files");
 
-            foreach (Group::getInternalMetas() as $id => $metadata) {
-                if ($metadata->getCategory() == InternalMetaCategory::OBSOLETE)
-                    continue;
+            foreach ($this->group->getInternalMetas() as $id => $metadata)
+                if ($metadata->getCategory() != InternalMetaCategory::OBSOLETE) {
+                    $this->log->info(
+                        $this->box->get(Content::class,
+                            content: $metadata->getContent()));
 
-                Log::info(new Content($metadata->getContent()));
-
-                $this->structures[$id] = [
-                    "dir" => $metadata->getSource(),
-                    "extensions" => $metadata->getStructureExtensions(),
-                    "cache" => $metadata->getStructureCache()
-                ];
-            }
+                    $this->structures[$id] = [
+                        "dir" => $metadata->getSource(),
+                        "extensions" => $metadata->getStructureExtensions(),
+                        "cache" => $metadata->getStructureCache()
+                    ];
+                }
         }
 
         // filter dirs and
@@ -140,12 +169,12 @@ class Extend extends Task
 
                 // only existing content
                 // prevent redundant checks after
-                if (is_dir("$dir$extension")) {
+                if ($this->dir->is("$dir$extension")) {
                     $this->filterExtension("$dir$extension", $filter);
 
                     // shift ordered identifiers
                     foreach ($this->ids as $index => $id)
-                        if (is_dir("$dir$extension/$id"))
+                        if ($this->dir->is("$dir$extension/$id"))
                             $content .= "\n\t\t$index => \"$id\",";
 
                     $content .= "\n\t";
@@ -156,14 +185,14 @@ class Extend extends Task
 
             $cache = $dir . $structure["cache"];
 
-            Dir::createDir($cache);
+            $this->directory->createDir($cache);
 
-            if (!file_put_contents(
+            if (false === $this->file->put(
                 "$cache/extensions.php",
                 "<?php\n" .
-                "// Auto-generated by Fusion package manager. \n// Do not modify.\n" .
-                "return [$content\n];",true
-            ))
+                "// Auto-generated by Fusion package manager. \n" .
+                "// Do not modify.\n" .
+                "return [$content\n];"))
                 throw new Error(
                     "Can't write to the file \"$cache/extensions.php\"."
                 );
@@ -184,21 +213,26 @@ class Extend extends Task
         if (!$filter)
             return;
 
-        foreach (scandir($dir, SCANDIR_SORT_NONE) as $filename) {
+        $filenames = $this->dir->getFilenames($dir, SCANDIR_SORT_NONE);
+
+        if ($filenames === false)
+            throw new Error(
+                "Can't read directory '$dir'."
+            );
+
+        foreach ($filenames as $filename) {
             if ($filename == "." || $filename == "..")
                 continue;
 
             $file = "$dir/$filename";
 
-            if (is_dir($file)) {
+            if ($this->dir->is($file)) {
                 if (isset($filter[$filename]))
                     $this->filterExtension("$dir/$filename", $filter[$filename]);
 
-                else
-                    Dir::delete($file);
+                else $this->directory->delete($file);
 
-            } else
-                Dir::delete($file);
+            } else $this->directory->delete($file);
         }
     }
 
@@ -244,20 +278,20 @@ class Extend extends Task
                                 // own ID group
                                 "$extension/$id";
 
-                            if (is_dir($from)) {
+                            if ($this->dir->is($from)) {
                                 $to = "$this->packagesDir/$externalId" .
 
                                     // own ID group
                                     "$extension/$id";
 
                                 // maybe obsolete collision
-                                Dir::delete($to);
-                                Dir::createDir($to);
-                                Dir::rename($from, $to);
+                                $this->directory->delete($to);
+                                $this->directory->createDir($to);
+                                $this->directory->rename($from, $to);
 
                                 // storage wrapper
                                 // clear empty dir prefixes
-                                Dir::clear(
+                                $this->directory->clear(
                                     "$this->packagesDir/$id$path",
                                     "/$externalId$extension/$id"
                                 );

@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,13 @@
 namespace Valvoid\Fusion\Tests\Tasks\Extend;
 
 use Exception;
+use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
 use Valvoid\Fusion\Tasks\Extend\Extend;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\BoxMock;
-use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\DirectoryMock;
+use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\ExternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\GroupMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\InternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\LogMock;
@@ -31,142 +34,206 @@ use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Integration test case for the extend task.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
 class ExtendTest extends Test
 {
     protected string|array $coverage = Extend::class;
-
-    private string $cache = __DIR__ . "/Mocks/package/cache/packages";
-
-    private string $dir = __DIR__ . "/Mocks/package/dependencies/metadata2/extensions";
-
-    private array $structure = [
-        __DIR__ . "/Mocks/package/cache/packages/metadata1",
-        __DIR__ . "/Mocks/package/cache/packages/metadata2/extensions/metadata1",
-        __DIR__ . "/Mocks/package/cache/packages/metadata2/extensions/metadata2",
-        __DIR__ . "/Mocks/package/cache/packages/metadata3",
-        __DIR__ . "/Mocks/package/dependencies/metadata2/extensions/metadata1",
-        __DIR__ . "/Mocks/package/dependencies/metadata2/extensions/metadata2",
-    ];
-
-    private int $time;
+    private BoxMock $box;
+    private LogMock $log;
 
     public function __construct()
     {
-        $box = new BoxMock;
-        $box->bus = new BusMock;
-        $box->log = new LogMock;
-        $group = new GroupMock;
-        $box->group = $group;
-        $group->hasDownloadable = false;
+        $this->box = new BoxMock;
+        $this->log = new LogMock;
+
+        $this->testCurrentStateRefresh();
+        $this->testNewState();
+
+        $this->box::unsetInstance();
+    }
+
+    public function testCurrentStateRefresh(): void
+    {
         try {
+            $group = new GroupMock;
+            $directory = new DirectoryMock;
+            $dirWrapper = new DirMock;
+            $fileWrapper = new FileMock;
+            $task = new Extend(
+                $this->box,
+                $group,
+                $this->log,
+                $directory,
+                $fileWrapper,
+                $dirWrapper,
+                []);
 
-
-            foreach ($this->structure as $directory)
-                if (!is_dir($directory))
-                    if (!mkdir($directory, 0777, true))
-                        throw new Exception(
-                            "Failed to create structure directory $directory"
-                        );
-
-            $this->time = time();
-            $ballast = "$this->dir/metadata3";
-            $task = new Extend([]);
-
-            // refresh state
-            // implication contains only existing versions
-            // refresh cache and extensions dirs
-            $group->implication = ["metadata2" => [ // no external root
+            $group->implication = ["i1/i1" => [
                 "implication" => []
             ]];
-            $group->internalMetas["metadata1"] = new InternalMetadataMock([
-                "id" => "metadata1",
-                "name" => "metadata1",
-                "description" => "metadata1",
-                "source" => __DIR__ . "/Mocks/package",
-                "dir" => "", // relative to root dir
-                "version" => "1.0.0",
+
+            $group->internalMetas["i0"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE, [
+                "id" => "i0",
+                "source" => "/s0",
                 "structure" => [
                     "cache" => "/cache",
                     "extensions" => [],
                     "sources" => [
-                        "/dependencies" => []
+                        "/deps" => []
                     ]
                 ]
             ]);
 
-            $group->internalRoot = $group->internalMetas["metadata1"];
-            $group->internalMetas["metadata2"] = new InternalMetadataMock([
-                "id" => "metadata2",
-                "name" => "metadata2",
-                "description" => "metadata2",
-                "source" => __DIR__ . "/Mocks/package/dependencies/metadata2",
-                "dir" => "/dependencies/metadata2", // relative to root dir
-                "version" => "1.0.0",
+            $group->hasDownloadable = false;
+            $group->internalRoot = $group->internalMetas["i0"];
+            $group->internalMetas["i1/i1"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE, [
+                "source" => "/s0/deps/s1",
                 "structure" => [
                     "cache" => "/cache",
                     "extensions" => [
-                        "/extensions"
+                        "/ex"
                     ],
                     "sources" => []
                 ]
             ]);
 
-            if (!file_exists($ballast) && !mkdir($ballast, 0777, true))
-                throw new Exception(
-                    "Cannot create directory \"$ballast\""
-                );
+            $create =
+            $put =
+            $filenames =
+            $delete = [];
+
+            // i0, i1 cache dirs must exist
+            $directory->create = function (string $dir) use (&$create) {
+                $create[] = $dir;
+            };
+
+            // i1 has obsolete i2 extension
+            $directory->delete = function (string $file) use (&$delete) {
+                $delete[] = $file;
+            };
+
+            // checks custom ext dirs inside dep
+            $dirWrapper->is = function (string $dir) {
+                return $dir == "/s0/deps/s1/ex" ||
+                    $dir == "/s0/deps/s1/ex/i0" ||
+                    $dir == "/s0/deps/s1/ex/i1" ||
+                    $dir == "/s0/deps/s1/ex/i1/i1" ||
+                    $dir == "/s0/deps/s1/ex/i2";
+            };
+
+            // filter custom extensions
+            // inside dependency package
+            $dirWrapper->filenames = function (string $dir) use (&$filenames) {
+                $filenames[] = $dir;
+
+                if ($dir == "/s0/deps/s1/ex")
+                    return ["i0", "i1", "i2"];
+
+                if ($dir == "/s0/deps/s1/ex/i1")
+                    return ["i1"];
+
+                return [];
+            };
+
+            // extensions.php
+            $fileWrapper->put = function (string $file, string $content) use (&$put) {
+                $put[] = [
+                    "file" => $file,
+                    "content" => $content
+                ];
+
+                // pass
+                return 1;
+            };
 
             $task->execute();
-            $this->testRefreshExtensionsFiles();
-            $this->testRefreshExtensionsOrder();
-            $this->testRefreshBallast();
 
-            // clear previous metadata
+            // prepare cache dirs
+            if ($create != ["/s0/cache", "/s0/deps/s1/cache"])
+                $this->handleFailedTest();
+
+            // delete obsolete extension
+            if ($delete != ["/s0/deps/s1/ex/i2"])
+                $this->handleFailedTest();
+
+            // implication
+            if ($filenames != ["/s0/deps/s1/ex", "/s0/deps/s1/ex/i1"])
+                $this->handleFailedTest();
+
+            if ($put != [[
+                    "file" => "/s0/cache/extensions.php",
+                    "content" => "<?php\n" .
+                        "// Auto-generated by Fusion package manager. \n" .
+                        "// Do not modify.\n" .
+                        "return [" .
+                        "\n];"
+                ], [
+                    "file" => "/s0/deps/s1/cache/extensions.php",
+                    "content" => "<?php\n" .
+                        "// Auto-generated by Fusion package manager. \n" .
+                        "// Do not modify.\n" .
+                        "return [" .
+
+                        // test order
+                        "\n\t\"/ex\" => [" .
+                        "\n\t\t0 => \"i1/i1\"," .
+                        "\n\t\t1 => \"i0\"," .
+                        "\n\t]," .
+                        "\n];"
+
+                ]]) $this->handleFailedTest();
+
+        } catch (Exception) {
+            $this->handleFailedTest();
+        }
+    }
+
+    public function testNewState(): void
+    {
+        try {
             $group = new GroupMock;
-            $box->group = $group;
-            $group->hasDownloadable = true;
+            $directory = new DirectoryMock;
+            $dirWrapper = new DirMock;
+            $fileWrapper = new FileMock;
+            $task = new Extend(
+                $this->box,
+                $group,
+                $this->log,
+                $directory,
+                $fileWrapper,
+                $dirWrapper,
+                []);
 
-            $from = "$this->cache/metadata3/dependencies/metadata2/extensions/metadata3";
-            $to = "$this->cache/metadata2/extensions/metadata3";
-            $ballast = "$this->cache/metadata2/extensions/metadata6";
-            $task = new Extend([]);
-
-            // new state
-            // implication contains at least one downloadable (metadata3) package
-            // loop packages inside cached state
             $group->internalMetas = [
-                "metadata1" => new InternalMetadataMock([
-                    "id" => "metadata1",
-                    "name" => "metadata1",
-                    "description" => "metadata1",
-                    "source" => __DIR__ . "/Mocks/package",
+                "i0" => new InternalMetadataMock(
+                    InternalCategory::OBSOLETE, [
+                    "id" => "i0",
                     "dir" => "", // relative to root dir
-                    "version" => "1.0.0",
                     "structure" => [
                         "cache" => "/cache",
                         "extensions" => [],
                         "sources" => [
-                            "/dependencies" => []
+                            "/deps" => []
                         ]
                     ]
                 ])
             ];
 
-            $group->internalRoot = $group->internalMetas["metadata1"];
+            $group->hasDownloadable = true;
+            $group->internalRoot = $group->internalMetas["i0"];
             $group->implication = [
-                "metadata1" => [
+                "i0" => [
                     "implication" => [
-                        "metadata2" => [
+                        "i1" => [
                             "implication" => []
                         ],
-                        "metadata3" => [
+                        "i2" => [
                             "implication" => [
-                                "metadata2" => [
+                                "i1" => [
                                     "implication" => []
                                 ]
                             ]
@@ -175,230 +242,181 @@ class ExtendTest extends Test
                 ]
             ];
 
-            $group->externalMetas["metadata1"] = new ExternalMetadataMock(
+            $group->externalMetas["i0"] = new ExternalMetadataMock(
                 ExternalCategory::DOWNLOADABLE, [
-                    "id" => "metadata1",
-                    "name" => "metadata1",
-                    "description" => "metadata1",
-                    "source" => "/package",
-                    "dir" => "", // relative to root dir
-                    "version" => "1.0.0",
-                    "structure" => [
-                        "cache" => "/cache",
-                        "extensions" => [],
-                        "sources" => [
-                            "/dependencies" => [
-                                "metadata2",
-                                "metadata3"
-                            ]
-                        ]
-                    ]
-                ]);
-
-            $group->externalMetas["metadata2"] = new ExternalMetadataMock(
-                ExternalCategory::REDUNDANT, [
-                "id" => "metadata2",
-                "name" => "metadata2",
-                "description" => "metadata2",
-                "source" => "/package/dependencies/metadata2",
-                "dir" => "/dependencies/metadata2",
-                "version" => "1.0.0",
-                "structure" => [
-                    "cache" => "/cache",
-                    "extensions" => [
-                        "/extensions"
-                    ],
-                    "sources" => []
-                ]
-            ]);
-
-            $group->externalMetas["metadata3"] = new ExternalMetadataMock(
-                ExternalCategory::DOWNLOADABLE, [
-                "id" => "metadata3",
-                "name" => "metadata3",
-                "description" => "metadata3",
-                "source" => "whatever/metadata3",
-                "dir" => "/dependencies/metadata3",
-                "version" => "1.0.0",
+                "id" => "i0",
+                "dir" => "", // relative to root dir
                 "structure" => [
                     "cache" => "/cache",
                     "extensions" => [],
                     "sources" => [
-                        "/dependencies" => ["metadata2"]
+                        "/deps" => [
+                            "i1",
+                            "i2"
+                        ]
                     ]
                 ]
             ]);
 
-            if (!file_exists($from) && !mkdir($from, 0777, true))
-                throw new Exception(
-                    "Cannot create from directory \"$from\""
-                );
+            $group->externalMetas["i1"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT, [
+                "id" => "i1",
+                "dir" => "/deps/i1",
+                "structure" => [
+                    "cache" => "/cache",
+                    "sources" => [],
+                    "extensions" => [
+                        "/ex"
+                    ]
+                ]
+            ]);
 
-            if (is_dir($to) && !rmdir($to))
-                throw new Exception(
-                    "Cannot delete to directory \"$to\""
-                );
+            $group->externalMetas["i2"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE, [
+                "id" => "i2",
+                "dir" => "/deps/i2",
+                "structure" => [
+                    "cache" => "/cache",
+                    "extensions" => [],
+                    "sources" => [
+                        "/deps" => ["i1"]
+                    ]
+                ]
+            ]);
 
-            if (!file_exists($ballast) && !mkdir($ballast, 0777, true))
-                throw new Exception(
-                    "Cannot create ballast directory \"$ballast\""
-                );
+            $create =
+            $put =
+            $filenames =
+            $rename =
+            $clear =
+            $delete = [];
+
+            // cached individual packages
+            $directory->cache = function () {
+                return "/p";
+            };
+
+            // deps dirs
+            // i0, i1, i2 cache dirs must exist
+            $directory->create = function (string $dir) use (&$create) {
+                $create[] = $dir;
+            };
+
+            $dirWrapper->is = function (string $dir) {
+
+                // downloaded with deps
+                return $dir == "/p/i0/deps/i1/ex/i0" ||
+                    $dir == "/p/i2/deps/i1/ex/i2" ||
+
+                    // renamed into individual package
+                    $dir == "/p/i1/ex" ||
+                    $dir == "/p/i1/ex/i0" ||
+                    $dir == "/p/i1/ex/i2";
+            };
+
+            $directory->clear = function (string $dir, string $path) use (&$clear) {
+                $clear[] = [
+                    "dir" => $dir,
+                    "path" => $path
+                ];
+            };
+
+            $directory->rename = function (string $from, string $to) use (&$rename) {
+                $rename[] = [
+                    "from" => $from,
+                    "to" => $to
+                ];
+            };
+
+            // prepare to dirs
+            $directory->delete = function (string $file) use (&$delete) {
+                $delete[] = $file;
+            };
+
+            // filter custom extensions
+            // inside dependency package
+            $dirWrapper->filenames = function (string $dir) use (&$filenames) {
+                $filenames[] = $dir;
+
+                if ($dir == "/p/i1/ex")
+                    return ["i0", "i2"];
+
+                return [];
+            };
+
+            // extensions.php
+            $fileWrapper->put = function (string $file, string $content) use (&$put) {
+                $put[] = [
+                    "file" => $file,
+                    "content" => $content
+                ];
+
+                // pass
+                return 1;
+            };
 
             $task->execute();
-            $this->testNewStateExtensionsFiles();
-            $this->testNewStateExtensionsOrder();
-            $this->testNewStateBallast();
-            $this->testNewStateExtension();
-            $box::unsetInstance();
 
-        } catch (Exception $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-            echo "\n " . $exception->getMessage();
+            if ($create != ["/p/i1/ex/i0", "/p/i1/ex/i2",
+                    "/p/i0/cache", "/p/i1/cache", "/p/i2/cache"])
+                $this->handleFailedTest();
 
-            $this->result = false;
+            if ($delete != ["/p/i1/ex/i0", "/p/i1/ex/i2"])
+                $this->handleFailedTest();
+
+            if ($rename != [[
+                    "from" => "/p/i0/deps/i1/ex/i0",
+                    "to" => "/p/i1/ex/i0"
+                ],[
+                    "from" => "/p/i2/deps/i1/ex/i2",
+                    "to" => "/p/i1/ex/i2"
+                ]]) $this->handleFailedTest();
+
+            if ($clear != [[
+                    "dir" => "/p/i0/deps",
+                    "path" => "/i1/ex/i0"
+                ],[
+                    "dir" => "/p/i2/deps",
+                    "path" => "/i1/ex/i2"
+                ]]) $this->handleFailedTest();
+
+            // implication
+            if ($filenames != ["/p/i1/ex"])
+                $this->handleFailedTest();
+
+            if ($put != [[
+                    "file" => "/p/i0/cache/extensions.php",
+                    "content" => "<?php\n" .
+                        "// Auto-generated by Fusion package manager. \n" .
+                        "// Do not modify.\n" .
+                        "return [" .
+                        "\n];"
+                ], [
+                    "file" => "/p/i1/cache/extensions.php",
+                    "content" => "<?php\n" .
+                        "// Auto-generated by Fusion package manager. \n" .
+                        "// Do not modify.\n" .
+                        "return [" .
+
+                        // test order
+                        "\n\t\"/ex\" => [" .
+                        "\n\t\t2 => \"i2\"," .
+                        "\n\t\t3 => \"i0\"," .
+                        "\n\t\t4 => \"i0\"," .
+                        "\n\t]," .
+                        "\n];"
+
+                ],[
+                    "file" => "/p/i2/cache/extensions.php",
+                    "content" => "<?php\n" .
+                        "// Auto-generated by Fusion package manager. \n" .
+                        "// Do not modify.\n" .
+                        "return [" .
+                        "\n];"
+                ]]) $this->handleFailedTest();
+
+        } catch (Exception) {
+            $this->handleFailedTest();
         }
-
-        $box::unsetInstance();
-    }
-
-    public function testRefreshExtensionsFiles(): void
-    {
-        $file1 = __DIR__ . "/Mocks/package/cache/extensions.php";
-        $file2 = __DIR__ . "/Mocks/package/dependencies/metadata2/cache/extensions.php";
-
-        if (file_exists($file1) && filemtime($file1) >= $this->time &&
-            file_exists($file2) && filemtime($file2) >= $this->time)
-            return;
-
-        $this->handleFailedTest();
-    }
-
-    public function testRefreshExtensionsOrder(): void
-    {
-        $file1 = __DIR__ . "/Mocks/package/cache/extensions.php";
-        $file2 = __DIR__ . "/Mocks/package/dependencies/metadata2/cache/extensions.php";
-
-        $content1 = include $file1;
-        $content2 = include $file2;
-
-        if ($content1 == [] && ($content2["/extensions"] ?? null) == [
-                0 => "metadata2",
-                1 => "metadata1"
-            ])
-            return;
-
-        $this->handleFailedTest();
-    }
-
-    public function testRefreshBallast(): void
-    {
-        $filenames = $this->getFilenames($this->dir);
-        $assertion = [
-            "$this->dir/metadata1",
-            "$this->dir/metadata2",
-        ];
-
-        if ($filenames == $assertion)
-            return;
-
-        $this->handleFailedTest();
-    }
-
-    public function testNewStateExtensionsFiles(): void
-    {
-        $file1 = "$this->cache/metadata1/cache/extensions.php";
-        $file2 = "$this->cache/metadata2/cache/extensions.php";
-        $file3 = "$this->cache/metadata3/cache/extensions.php";
-
-        if (file_exists($file1) && filemtime($file1) >= $this->time &&
-            file_exists($file2) && filemtime($file2) >= $this->time &&
-            file_exists($file3) && filemtime($file3) >= $this->time)
-            return;
-
-        $this->handleFailedTest();
-    }
-
-    public function testNewStateExtensionsOrder(): void
-    {
-        $file1 = "$this->cache/metadata1/cache/extensions.php";
-        $file2 = "$this->cache/metadata2/cache/extensions.php";
-        $file3 = "$this->cache/metadata3/cache/extensions.php";
-
-        $content1 = include $file1;
-        $content2 = include $file2;
-        $content3 = include $file3;
-
-        if ($content1 == [] && $content3 == [] &&
-            ($content2["/extensions"] ?? null) == [
-
-                // top down order
-                0 => "metadata2", // dep of meta1
-                1 => "metadata2", // dep of meta3
-                2 => "metadata3",
-                3 => "metadata1",
-                4 => "metadata1"
-            ])
-            return;
-
-        $this->handleFailedTest();
-    }
-
-    public function testNewStateBallast(): void
-    {
-        if (!file_exists("$this->cache/metadata2/extensions/metadata6"))
-            return;
-
-        $this->handleFailedTest();
-    }
-
-    public function testNewStateExtension(): void
-    {
-        // moved extension to metadata2
-    }
-
-    private function getFilenames(string $dir): array
-    {
-        $content = [];
-
-        if (is_dir($dir)) {
-            $filenames = scandir($dir);
-
-            if ($filenames !== false) {
-                foreach ($filenames as $filename) {
-                    if ($filename === '.' || $filename === '..')
-                        continue;
-
-                    $file = $dir . '/' . $filename;
-                    $content[] = $file;
-
-                    if (is_dir($file))
-                        $content = array_merge($content, $this->getFilenames($file));
-                }
-            }
-        }
-
-        return $content;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function delete(string $file): void
-    {
-        if (is_dir($file)) {
-            foreach (scandir($file, SCANDIR_SORT_NONE) as $filename)
-                if ($filename != "." && $filename != "..")
-                    $this->delete("$file/$filename");
-
-            if (!rmdir($file))
-                throw new Exception(
-                    "Cannot delete directory \"$file\""
-                );
-
-        } elseif (is_file($file))
-            if (!unlink($file))
-                throw new Exception(
-                    "Cannot delete file \"$file\""
-                );
     }
 }

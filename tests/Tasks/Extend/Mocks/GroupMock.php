@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Extend\Mocks;
 
-use Valvoid\Fusion\Group\Proxy\Proxy;
+use Valvoid\Fusion\Group\Group;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 
@@ -27,7 +27,7 @@ use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class GroupMock implements Proxy
+class GroupMock implements Group
 {
     public array $implication;
     public array $internalMetas;

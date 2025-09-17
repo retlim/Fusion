@@ -30,8 +30,8 @@ use Valvoid\Fusion\Config\Proxy\Logic as ConfigLogic;
 use Valvoid\Fusion\Config\Proxy\Proxy as ConfigProxy;
 use Valvoid\Fusion\Dir\Logic as DirLogic;
 use Valvoid\Fusion\Dir\Proxy as DirProxy;
-use Valvoid\Fusion\Group\Proxy\Logic as GroupLogic;
-use Valvoid\Fusion\Group\Proxy\Proxy as GroupProxy;
+use Valvoid\Fusion\Group\Group as GroupProxy;
+use Valvoid\Fusion\Group\Logic as GroupLogic;
 use Valvoid\Fusion\Hub\Proxy\Logic as HubLogic;
 use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
@@ -41,8 +41,8 @@ use Valvoid\Fusion\Log\Events\Event as LogEvent;
 use Valvoid\Fusion\Log\Events\Infos\Id;
 use Valvoid\Fusion\Log\Events\Infos\Name;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Proxy\Logic as LogLogic;
-use Valvoid\Fusion\Log\Proxy\Proxy as LogProxy;
+use Valvoid\Fusion\Log\Logic as LogLogic;
+use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Tasks\Task;
 
 /**
@@ -53,9 +53,6 @@ use Valvoid\Fusion\Tasks\Task;
  */
 class Fusion
 {
-    /** @var Box Dependency injection container. */
-    private Box $box;
-
     /** @var ?Fusion Runtime instance. */
     private static ?Fusion $instance = null;
 
@@ -78,11 +75,12 @@ class Fusion
      * @throws InternalError Internal error.
      * @throws Exception Internal error.
      */
-    private function __construct(Box $box, array $config = [])
+    private function __construct(
+        private readonly Box $box,
+        array $config = [])
     {
         $this->root = dirname(__DIR__);
         $this->lazy = require "$this->root/cache/loadable/lazy.php";
-        $this->box = $box;
 
         spl_autoload_register($this->loadLazyLoadable(...));
 
@@ -210,7 +208,8 @@ class Fusion
 
             /** @var Task $task */
             if (isset($entry["task"])) {
-                $task = new $entry["task"]($entry);
+                $task = $fusion->box->get($entry["task"],
+                    config: $entry);
 
                 if (is_subclass_of($task, Interceptor::class)) {
                     $log->addInterceptor($task);
@@ -224,7 +223,8 @@ class Fusion
                 foreach ($entry as $taskId => $task) {
                     $log->info(new Name($taskId));
 
-                    $task = new $task["task"]($task);
+                    $task = $fusion->box->get($task["task"],
+                        config: $task);
 
                     if (is_subclass_of($task, Interceptor::class)) {
                         $log->addInterceptor($task);

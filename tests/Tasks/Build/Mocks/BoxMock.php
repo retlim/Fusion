@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
 
-use Valvoid\Fusion\Box\Box;
 use Closure;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
 use Valvoid\Fusion\Hub\Responses\Cache\Versions;
 use Valvoid\Fusion\Log\Events\Event;
@@ -30,6 +30,7 @@ use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 use Valvoid\Fusion\Tasks\Build\SAT\Solver;
+
 /**
  * Mocked container.
  *
@@ -47,8 +48,8 @@ class BoxMock extends Box
     public function get(string $class, ...$args): object
     {
         if ($this->case === 0) {
-            if ($class === \Valvoid\Fusion\Log\Proxy\Proxy::class)
-                return new class implements \Valvoid\Fusion\Log\Proxy\Proxy
+            if ($class === \Valvoid\Fusion\Log\Proxy::class)
+                return new class implements \Valvoid\Fusion\Log\Proxy
                 {
                     public function addInterceptor(Interceptor $interceptor): void {}
                     public function removeInterceptor(): void {}
@@ -60,8 +61,8 @@ class BoxMock extends Box
                     public function debug(string|Event $event): void {}
                 };
 
-            if ($class === \Valvoid\Fusion\Group\Proxy\Proxy::class)
-                return $this->group ??= new class implements \Valvoid\Fusion\Group\Proxy\Proxy
+            if ($class === \Valvoid\Fusion\Group\Group::class)
+                return $this->group ??= new class implements \Valvoid\Fusion\Group\Group
                 {
                     private array $implication;
                     private array $metas;
@@ -299,8 +300,8 @@ class BoxMock extends Box
 
         }
         elseif ($this->case === 1) {
-            if ($class === \Valvoid\Fusion\Log\Proxy\Proxy::class)
-                return new class implements \Valvoid\Fusion\Log\Proxy\Proxy
+            if ($class === \Valvoid\Fusion\Log\Proxy::class)
+                return new class implements \Valvoid\Fusion\Log\Proxy
                 {
                     public function addInterceptor(Interceptor $interceptor): void {}
                     public function removeInterceptor(): void {}
@@ -312,8 +313,8 @@ class BoxMock extends Box
                     public function debug(string|Event $event): void {}
                 };
 
-            if ($class === \Valvoid\Fusion\Group\Proxy\Proxy::class)
-                return $this->group ??= new class implements \Valvoid\Fusion\Group\Proxy\Proxy
+            if ($class === \Valvoid\Fusion\Group\Group::class)
+                return $this->group ??= new class implements \Valvoid\Fusion\Group\Group
                 {
                     private array $implication;
                     private array $metas;
@@ -557,8 +558,8 @@ class BoxMock extends Box
                 }
             };
         }
-        else {if ($class === \Valvoid\Fusion\Log\Proxy\Proxy::class)
-            return new class implements \Valvoid\Fusion\Log\Proxy\Proxy
+        else {if ($class === \Valvoid\Fusion\Log\Proxy::class)
+            return new class implements \Valvoid\Fusion\Log\Proxy
             {
                 public function addInterceptor(Interceptor $interceptor): void {}
                 public function removeInterceptor(): void {}
@@ -570,8 +571,8 @@ class BoxMock extends Box
                 public function debug(string|Event $event): void {}
             };
 
-            if ($class === \Valvoid\Fusion\Group\Proxy\Proxy::class)
-                return $this->group ??= new class implements \Valvoid\Fusion\Group\Proxy\Proxy
+            if ($class === \Valvoid\Fusion\Group\Group::class)
+                return $this->group ??= new class implements \Valvoid\Fusion\Group\Group
                 {
                     private array $implication;
                     private array $metas;
