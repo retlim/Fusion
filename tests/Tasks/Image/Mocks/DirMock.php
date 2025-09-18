@@ -17,32 +17,27 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tasks\Image\Config;
+namespace Valvoid\Fusion\Tests\Tasks\Image\Mocks;
 
-use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
+use Closure;
+use Valvoid\Fusion\Wrappers\Dir;
 
 /**
- * Image task config normalizer.
- *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
-class Normalizer extends ConfigNormalizer
+class DirMock extends Dir
 {
-    /**
-     * Normalizes the config.
-     *
-     * @param array $breadcrumb Index path inside the config.
-     * @param array $config Config to normalize.
-     */
-    public static function normalize(array $breadcrumb, array &$config): void
-    {
-        // $breadcrumb[0] -> "tasks"
-        if (isset($breadcrumb[2])) {
-            $config["group"] = $breadcrumb[1];
-            $config["id"] = $breadcrumb[2];
+    public Closure $filenames;
+    public Closure $is;
 
-        } else
-            $config["id"] = $breadcrumb[1];
+    public function getFilenames(string $dir, int $order = SCANDIR_SORT_ASCENDING): array|false
+    {
+        return call_user_func($this->filenames, $dir, $order);
+    }
+
+    public function is(string $dir): bool
+    {
+        return call_user_func($this->is, $dir);
     }
 }
