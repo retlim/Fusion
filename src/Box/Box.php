@@ -23,6 +23,7 @@ use Exception;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionNamedType;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 
 /**
  * Dependency injection container that abstracts project logic
@@ -57,6 +58,11 @@ class Box
             $this->references[self::class] = $this;
 
         self::$instance = $this;
+        $this->arguments[Error::class] =
+
+            // workaround
+            // until box supports defaults
+            ["previous" => null];
     }
 
     /**
@@ -171,13 +177,14 @@ class Box
             foreach ($constructor->getParameters() as $param) {
                 $name = $param->getName();
 
-                // consume static argument
-                if (isset($arguments[$name])) {
+                // consume on-demand static argument
+                if (array_key_exists($name, $arguments)) {
                     $params[$name] = $arguments[$name];
                     unset($arguments[$name]);
 
-                    // consume default static
-                } elseif (isset($this->arguments[$class][$name]))
+                // consume default static
+                } elseif (isset($this->arguments[$class]) &&
+                    array_key_exists($name, $this->arguments[$class]))
                     $params[$name] = $this->arguments[$class][$name];
 
                 else {

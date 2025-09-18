@@ -29,31 +29,21 @@ use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
  */
 class GroupMock implements Group
 {
-    public array $internalMetas;
-    public array $externalMetas;
+    public array $metas = [];
 
-    public bool $hasDownloadable;
-    protected InternalMeta $internalRootMeta;
     public function setImplication(array $implication): void{}
 
     public function setExternalMetas(array $metas): void{}
     public function getExternalMetas(): array
     {
-        return $this->externalMetas;
+        return [];
     }
 
     public function getImplication(): array{return [];}
 
     public function setInternalMetas(array $metas): void
     {
-        $this->internalMetas = $metas;
-
-        foreach ($metas as $meta)
-            if (!$meta->getDir()) {
-                $this->internalRootMeta = $meta;
-
-                break;
-            }
+        $this->metas = $metas;
     }
 
     public function getExternalRootMetadata(): ?ExternalMeta {
@@ -61,17 +51,17 @@ class GroupMock implements Group
     }
     public function getInternalRootMetadata(): InternalMeta
     {
-        return $this->internalRootMeta;
+        return $this->metas[0];
     }
 
     public function getRootMetadata(): ExternalMeta|InternalMeta {
-        return $this->externalMetas[-1];
+        return $this->metas[0];
     }
     public function hasDownloadable(): bool {
-        return $this->hasDownloadable;
+        return false;
     }
     public function getInternalMetas(): array {
-        return $this->internalMetas;
+        return [];
     }
     public function setImplicationBreadcrumb(array $breadcrumb): void {}
     public function getPath(string $source): array {

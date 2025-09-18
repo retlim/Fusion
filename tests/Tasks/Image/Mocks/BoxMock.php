@@ -19,12 +19,14 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Image\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Group\Group;
+use Valvoid\Fusion\Log\Events\Infos\Content;
+use Valvoid\Fusion\Metadata\Internal\Builder;
 
 /**
- * Mocked container.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
@@ -32,32 +34,25 @@ class BoxMock extends Box
 {
     public BusMock $bus;
     public GroupMock $group;
-    public LogMock $log;
+    public ConfigMock $config;
+    public Closure $builder;
+
     public function get(string $class, ...$args): object
     {
         if ($class === Proxy::class)
             return $this->bus;
 
-        if ($class === \Valvoid\Fusion\Group\Group::class)
+        if ($class === Content::class)
+            return new ContentMock;
+
+        if ($class === Group::class)
             return $this->group;
 
-        if ($class === \Valvoid\Fusion\Log\Proxy::class)
-            return $this->log;
-
         if ($class === \Valvoid\Fusion\Config\Proxy\Proxy::class)
-            return  new class implements \Valvoid\Fusion\Config\Proxy\Proxy
-            {
-                public function get(string ...$breadcrumb): mixed
-                {
-                    return __DIR__ . "/package";
-                }
+            return $this->config;
 
-                // @phpstan-ignore-next-line
-                public function __construct(string $root = "", array &$lazy = [], array $config = []) {}
-                public function build(): void {}
-                public function getLazy(): array {return [];}
-                public function hasLazy(string $class): bool {return false;}
-            };
+        if ($class === Builder::class)
+            return call_user_func($this->builder, $args);
 
         return parent::get($class, ...$args);
     }

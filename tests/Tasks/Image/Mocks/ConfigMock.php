@@ -17,32 +17,33 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tasks\Image\Config;
+namespace Valvoid\Fusion\Tests\Tasks\Image\Mocks;
 
-use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
+use Closure;
+use Valvoid\Fusion\Config\Proxy\Proxy;
 
 /**
- * Image task config normalizer.
- *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
-class Normalizer extends ConfigNormalizer
+class ConfigMock implements Proxy
 {
-    /**
-     * Normalizes the config.
-     *
-     * @param array $breadcrumb Index path inside the config.
-     * @param array $config Config to normalize.
-     */
-    public static function normalize(array $breadcrumb, array &$config): void
-    {
-        // $breadcrumb[0] -> "tasks"
-        if (isset($breadcrumb[2])) {
-            $config["group"] = $breadcrumb[1];
-            $config["id"] = $breadcrumb[2];
+    public Closure $get;
+    public Closure $lazy;
+    public Closure $has;
 
-        } else
-            $config["id"] = $breadcrumb[1];
+    public function get(string ...$breadcrumb): mixed
+    {
+        return call_user_func($this->get, $breadcrumb);
+    }
+
+    public function getLazy(): array
+    {
+        return call_user_func($this->lazy);
+    }
+
+    public function hasLazy(string $class): bool
+    {
+        return call_user_func($this->has, $class);
     }
 }

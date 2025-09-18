@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,18 @@
 
 namespace Valvoid\Fusion\Tasks\Image;
 
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Group\Group;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Errors\Metadata as MetaError;
 use Valvoid\Fusion\Log\Events\Infos\Content;
-use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Log\Proxy as Log;
 use Valvoid\Fusion\Metadata\Internal\Builder as InternalMetadataBuilder;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
+use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Image task to get internal metas.
@@ -41,6 +44,25 @@ class Image extends Task
     private array $metas = [];
 
     /**
+     * Constructs the task.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Log $log Event log.
+     * @param File $file Standard file logic wrapper.
+     * @param Dir $dir Standard dir logic wrapper.
+     * @param array $config Task config.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Log $log,
+        private readonly File $file,
+        private readonly Dir $dir,
+        array $config)
+    {
+        parent::__construct($config);
+    }
+
+    /**
      * Executes the task.
      *
      * @throws MetaError Invalid meta exception.
@@ -48,14 +70,15 @@ class Image extends Task
      */
     public function execute(): void
     {
-        Log::info("image internal metas");
+        $this->log->info("image internal metas");
 
-        $root = Config::get("dir", "path");
+        $root = $this->box->get(Config::class)
+            ::get("dir", "path");
 
         // optional
         // internal packages may not exist yet
         // in case of built or replicate from remote source
-        if (!file_exists("$root/fusion.json"))
+        if (!$this->file->exists("$root/fusion.json"))
             return;
 
         // root meta
@@ -64,7 +87,9 @@ class Image extends Task
         $metadata = $this->getMetadata($root, "");
         $this->metas[$metadata->getId()] = $metadata;
 
-        Log::info(new Content($metadata->getContent()));
+        $this->log->info(
+            $this->box->get(Content::class,
+                content: $metadata->getContent()));
 
         // root structure
         // extract paths
@@ -81,12 +106,13 @@ class Image extends Task
                 // root package may in development state
                 // with untracked structure paths
                 // that exists after build
-                if (is_dir($dir))
+                if ($this->dir->is($dir))
                     $this->extractMetadata($dir, $path);
             }
 
         if (isset($this->config["group"]))
-            Group::setInternalMetas($this->metas);
+            $this->box->get(Group::class)
+                ->setInternalMetas($this->metas);
     }
 
     /**
@@ -98,19 +124,29 @@ class Image extends Task
      */
     private function extractMetadata(string $dir, string $path): void
     {
-        if (file_exists("$dir/fusion.json")) {
+        if ($this->file->exists("$dir/fusion.json")) {
             $metadata = $this->getMetadata($dir, $path);
             $this->metas[$metadata->getId()] = $metadata;
 
-            Log::info(new Content($metadata->getContent()));
+            $this->log->info(
+                $this->box->get(Content::class,
+                    content: $metadata->getContent()));
 
-        } else foreach (scandir($dir, SCANDIR_SORT_NONE) as $filename)
-            if ($filename != "." && $filename != "..") {
-                $file = "$dir/$filename";
+        } else {
+            $filenames = $this->dir->getFilenames($dir, SCANDIR_SORT_NONE);
 
-                if (is_dir($file))
-                    $this->extractMetadata($file, $path);
-            }
+            if ($filenames === false)
+                throw $this->box->get(InternalError::class,
+                    message: "Can't get filenames from dir '$dir'.");
+
+            foreach ($filenames as $filename)
+                if ($filename != "." && $filename != "..") {
+                    $file = "$dir/$filename";
+
+                    if ($this->dir->is($file))
+                        $this->extractMetadata($file, $path);
+                }
+        }
     }
 
     /**
@@ -124,14 +160,15 @@ class Image extends Task
      */
     private function getMetadata(string $dir, string $path): InternalMetadata
     {
-        $builder = new InternalMetadataBuilder($path, $dir);
         $file = "$dir/fusion.json";
-        $content = file_get_contents($file);
+        $content = $this->file->get($file);
+        $builder = $this->box->get(InternalMetadataBuilder::class,
+            source: $dir,
+            dir: $path);
 
         if ($content === false)
-            throw new InternalError(
-                "Can't get contents from the \"$file\" file."
-            );
+            throw $this->box->get(InternalError::class,
+                message: "Can't get contents from the '$file' file.");
 
         $builder->addProductionLayer($content, $file);
 
@@ -140,19 +177,19 @@ class Image extends Task
         if (!$path) {
             $file = "$dir/fusion.local.php";
 
-            if (file_exists($file))
+            if ($this->file->exists($file))
                 $builder->addLocalLayer($this->getLayerContent($file), $file);
 
             $file = "$dir/fusion.dev.php";
 
-            if (file_exists($file))
+            if ($this->file->exists($file))
                 $builder->addDevelopmentLayer($this->getLayerContent($file), $file);
         }
 
         // auto-generated content
         $file = "$dir/fusion.bot.php";
 
-        if (file_exists($file))
+        if ($this->file->exists($file))
             $builder->addBotLayer($this->getLayerContent($file), $file);
 
         return $builder->getMetadata();
@@ -167,12 +204,11 @@ class Image extends Task
      */
     private function getLayerContent(string $file): array
     {
-        $content = include $file;
+        $content = $this->file->require($file);
 
         if ($content === false)
-            throw new InternalError(
-                "Can't get contents from the \"$file\" file."
-            );
+            throw $this->box->get(InternalError::class,
+                message: "Can't get contents from the '$file' file.");
 
         return $content;
     }

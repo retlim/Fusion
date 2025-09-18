@@ -17,32 +17,32 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tasks\Image\Config;
+namespace Valvoid\Fusion\Tests\Tasks\Image\Mocks;
 
-use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
+use Closure;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
- * Image task config normalizer.
- *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
-class Normalizer extends ConfigNormalizer
+class FileMock extends File
 {
-    /**
-     * Normalizes the config.
-     *
-     * @param array $breadcrumb Index path inside the config.
-     * @param array $config Config to normalize.
-     */
-    public static function normalize(array $breadcrumb, array &$config): void
-    {
-        // $breadcrumb[0] -> "tasks"
-        if (isset($breadcrumb[2])) {
-            $config["group"] = $breadcrumb[1];
-            $config["id"] = $breadcrumb[2];
+    public Closure $get;
+    public Closure $require;
+    public Closure $exists;
 
-        } else
-            $config["id"] = $breadcrumb[1];
+    public function get(string $file): string|false
+    {
+        return call_user_func($this->get, $file);
+    }
+
+    public function require(string $file): mixed
+    {
+        return call_user_func($this->require, $file);
+    }
+    public function exists(string $file): bool
+    {
+        return call_user_func($this->exists, $file);
     }
 }

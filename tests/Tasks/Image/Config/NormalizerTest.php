@@ -17,32 +17,42 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tasks\Image\Config;
+namespace Valvoid\Fusion\Tests\Tasks\Image\Config;
 
-use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
+use Valvoid\Fusion\Tasks\Image\Config\Normalizer;
+use Valvoid\Fusion\Tests\Test;
 
 /**
- * Image task config normalizer.
- *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
-class Normalizer extends ConfigNormalizer
+class NormalizerTest extends Test
 {
-    /**
-     * Normalizes the config.
-     *
-     * @param array $breadcrumb Index path inside the config.
-     * @param array $config Config to normalize.
-     */
-    public static function normalize(array $breadcrumb, array &$config): void
-    {
-        // $breadcrumb[0] -> "tasks"
-        if (isset($breadcrumb[2])) {
-            $config["group"] = $breadcrumb[1];
-            $config["id"] = $breadcrumb[2];
+    protected string|array $coverage = Normalizer::class;
 
-        } else
-            $config["id"] = $breadcrumb[1];
+    public function __construct()
+    {
+        $this->testGroup();
+        $this->testId();
+    }
+
+    public function testGroup(): void
+    {
+        $config = [];
+
+        Normalizer::normalize(["t", "g", "i"], $config);
+
+        if ($config !== ["group" => "g", "id" => "i"])
+            $this->handleFailedTest();
+    }
+
+    public function testId(): void
+    {
+        $config = [];
+
+        Normalizer::normalize(["t", "i"], $config);
+
+        if ($config !== ["id" => "i"])
+            $this->handleFailedTest();
     }
 }
