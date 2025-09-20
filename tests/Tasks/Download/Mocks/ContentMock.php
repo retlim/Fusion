@@ -19,32 +19,13 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
 
-use Valvoid\Fusion\Metadata\External\External;
-use Valvoid\Fusion\Metadata\External\Category;
+use Valvoid\Fusion\Log\Events\Infos\Content;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ExternalMetadataMock extends External
+class ContentMock extends Content
 {
-    public function __construct(
-        public Category $category,
-        public array $content,
-        public array $layers = []){}
-
-    public function getContent(): array
-    {
-        return $this->content;
-    }
-
-    public function getCategory(): ?Category
-    {
-        return $this->category;
-    }
-
-    public function getLayers(): array
-    {
-        return $this->layers;
-    }
+    public function __construct(){}
 }

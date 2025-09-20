@@ -19,32 +19,25 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
 
-use Valvoid\Fusion\Metadata\External\External;
-use Valvoid\Fusion\Metadata\External\Category;
+use Closure;
+use Valvoid\Fusion\Wrappers\Dir;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ExternalMetadataMock extends External
+class DirMock extends Dir
 {
-    public function __construct(
-        public Category $category,
-        public array $content,
-        public array $layers = []){}
+    public Closure $filenames;
+    public Closure $is;
 
-    public function getContent(): array
+    public function getFilenames(string $dir, int $order = SCANDIR_SORT_ASCENDING): array|false
     {
-        return $this->content;
+        return call_user_func($this->filenames, $dir, $order);
     }
 
-    public function getCategory(): ?Category
+    public function is(string $dir): bool
     {
-        return $this->category;
-    }
-
-    public function getLayers(): array
-    {
-        return $this->layers;
+        return call_user_func($this->is, $dir);
     }
 }

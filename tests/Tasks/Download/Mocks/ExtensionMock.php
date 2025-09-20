@@ -19,32 +19,19 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
 
-use Valvoid\Fusion\Metadata\External\External;
-use Valvoid\Fusion\Metadata\External\Category;
+use Closure;
+use Valvoid\Fusion\Wrappers\Extension;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ExternalMetadataMock extends External
+class ExtensionMock extends Extension
 {
-    public function __construct(
-        public Category $category,
-        public array $content,
-        public array $layers = []){}
+    public Closure $loaded;
 
-    public function getContent(): array
+    public function loaded(string $extension): bool
     {
-        return $this->content;
-    }
-
-    public function getCategory(): ?Category
-    {
-        return $this->category;
-    }
-
-    public function getLayers(): array
-    {
-        return $this->layers;
+        return call_user_func($this->loaded, $extension);
     }
 }

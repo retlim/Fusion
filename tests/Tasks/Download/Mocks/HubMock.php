@@ -19,32 +19,29 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
 
-use Valvoid\Fusion\Metadata\External\External;
-use Valvoid\Fusion\Metadata\External\Category;
+use Closure;
+use Valvoid\Fusion\Hub\Proxy\Proxy;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ExternalMetadataMock extends External
+class HubMock implements Proxy
 {
-    public function __construct(
-        public Category $category,
-        public array $content,
-        public array $layers = []){}
+    public Closure $add;
+    public Closure $execute;
 
-    public function getContent(): array
+    public function addArchiveRequest(array $source): int
     {
-        return $this->content;
+        return call_user_func($this->add, $source);
     }
 
-    public function getCategory(): ?Category
+    public function executeRequests(Closure $callback): void
     {
-        return $this->category;
+        call_user_func($this->execute, $callback);
     }
 
-    public function getLayers(): array
-    {
-        return $this->layers;
-    }
+    public function addSnapshotRequest(array $source, string $path): int {return 0;}
+    public function addVersionsRequest(array $source): int {return 0;}
+    public function addMetadataRequest(array $source): int {return 0;}
 }

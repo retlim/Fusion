@@ -19,32 +19,30 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
 
-use Valvoid\Fusion\Metadata\External\External;
-use Valvoid\Fusion\Metadata\External\Category;
+use Closure;
+use ZipArchive;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ExternalMetadataMock extends External
+class ZipArchiveMock extends ZipArchive
 {
-    public function __construct(
-        public Category $category,
-        public array $content,
-        public array $layers = []){}
+    public Closure $open;
+    public Closure $extract;
 
-    public function getContent(): array
+    public function open($filename, $flags = null): int|bool
     {
-        return $this->content;
+        return call_user_func($this->open, $filename, $flags);
     }
 
-    public function getCategory(): ?Category
+    public function extractTo(string $pathto, array|string|null $files = null): bool
     {
-        return $this->category;
+        return call_user_func($this->extract, $pathto, $files);
     }
 
-    public function getLayers(): array
+    public function close(): bool
     {
-        return $this->layers;
+        return true;
     }
 }

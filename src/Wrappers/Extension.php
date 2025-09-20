@@ -17,34 +17,25 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
-
-use Valvoid\Fusion\Metadata\External\External;
-use Valvoid\Fusion\Metadata\External\Category;
+namespace Valvoid\Fusion\Wrappers;
 
 /**
+ * Extension wrapper.
+ *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ExternalMetadataMock extends External
+class Extension
 {
-    public function __construct(
-        public Category $category,
-        public array $content,
-        public array $layers = []){}
-
-    public function getContent(): array
+    /**
+     * Find out whether an extension is loaded
+     *
+     * @param string $extension The extension name.
+     * @return bool true if the extension identified
+     * by name is loaded, false otherwise.
+     */
+    public function loaded(string $extension): bool
     {
-        return $this->content;
-    }
-
-    public function getCategory(): ?Category
-    {
-        return $this->category;
-    }
-
-    public function getLayers(): array
-    {
-        return $this->layers;
+        return  extension_loaded($extension);
     }
 }

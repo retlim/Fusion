@@ -19,32 +19,25 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
 
-use Valvoid\Fusion\Metadata\External\External;
-use Valvoid\Fusion\Metadata\External\Category;
+use Closure;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ExternalMetadataMock extends External
+class FileMock extends File
 {
-    public function __construct(
-        public Category $category,
-        public array $content,
-        public array $layers = []){}
+    public Closure $put;
+    public Closure $exists;
 
-    public function getContent(): array
+    public function exists(string $file): bool
     {
-        return $this->content;
+        return call_user_func($this->exists, $file);
     }
 
-    public function getCategory(): ?Category
+    public function put(string $file, mixed $data): int|false
     {
-        return $this->category;
-    }
-
-    public function getLayers(): array
-    {
-        return $this->layers;
+        return call_user_func($this->put, $file, $data);
     }
 }
