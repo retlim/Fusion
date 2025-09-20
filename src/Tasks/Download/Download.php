@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,19 +21,23 @@ namespace Valvoid\Fusion\Tasks\Download;
 
 use Exception;
 use PharData;
-use Valvoid\Fusion\Dir\Dir;
-use Valvoid\Fusion\Hub\Hub;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Group\Group;
+use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
+use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\Extension;
+use Valvoid\Fusion\Wrappers\File;
 use ZipArchive;
 
 /**
@@ -54,6 +58,31 @@ class Download extends Task implements Interceptor
     private array $metas;
 
     /**
+     * Constructs the task.
+     *
+     * @param Box $box Dependency injection container.
+     * @param LogProxy $log Event log.
+     * @param DirProxy $directory Current working directory.
+     * @param Extension $extension Standard extension logic wrapper.
+     * @param File $file Standard file logic wrapper.
+     * @param Dir $dir Standard dir logic wrapper.
+     * @param array $config Task config.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Group $group,
+        private readonly LogProxy $log,
+        private readonly HubProxy $hub,
+        private readonly DirProxy $directory,
+        private readonly Extension $extension,
+        private readonly File $file,
+        private readonly Dir $dir,
+        array $config)
+    {
+        parent::__construct($config);
+    }
+
+    /**
      * Executes the task.
      *
      * @throws Error Internal exception.
@@ -61,29 +90,29 @@ class Download extends Task implements Interceptor
      */
     public function execute(): void
     {
-        Log::info("cache external packages");
+        $this->log->info("cache external packages");
 
-        if (!Group::hasDownloadable())
+        if (!$this->group->hasDownloadable())
             return;
 
-        $this->packagesDir = Dir::getPackagesDir();
-        $this->taskDir = Dir::getTaskDir() .
+        $this->packagesDir = $this->directory->getPackagesDir();
+        $this->taskDir = $this->directory->getTaskDir() .
             "/" . $this->config["id"];
 
         // enqueue all for parallel download
-        foreach (Group::getExternalMetas() as $metadata)
+        foreach ($this->group->getExternalMetas() as $metadata)
             if ($metadata->getCategory() == ExternalMetaCategory::DOWNLOADABLE) {
-                $id = Hub::addArchiveRequest($metadata->getSource());
+                $id = $this->hub->addArchiveRequest($metadata->getSource());
                 $this->metas[$id] = $metadata;
             }
 
         // download and
         // notify when done
-        Hub::executeRequests(
+        $this->hub->executeRequests(
 
             // recommended zip or
             // higher memory usage phar data
-            extension_loaded("zip") ?
+            $this->extension->loaded("zip") ?
                 $this->extractZipArchive(...) :
                 $this->extractPharData(...)
         );
@@ -98,7 +127,7 @@ class Download extends Task implements Interceptor
     private function extractZipArchive(Archive $response): void
     {
         $file = $response->getFile();
-        $archive = new ZipArchive;
+        $archive = $this->box->get(ZipArchive::class);
         $status = $archive->open($file);
 
         if ($status !== true)
@@ -139,15 +168,17 @@ class Download extends Task implements Interceptor
                 $archive->getStatusString()
             );
 
-        Dir::createDir($to);
+        $this->directory->createDir($to);
 
         // validate/normalize
         // get root directory
         $from = $this->getNormalizedFromDir($from, $file);
 
-        Dir::rename($from, $to);
+        $this->directory->rename($from, $to);
         $this->addBotLayer($to, $metadata->getLayers());
-        Log::info(new Content($metadata->getContent()));
+        $this->log->info(
+            $this->box->get(Content::class,
+                content: $metadata->getContent()));
     }
 
     /**
@@ -161,23 +192,26 @@ class Download extends Task implements Interceptor
         $file = $response->getFile();
 
         try {
-            $archive = new PharData($file);
             $metadata = $this->metas[$response->getId()];
             $id = $metadata->getId();
             $from = "$this->taskDir/$id";
             $to = "$this->packagesDir/$id";
+            $archive = $this->box->get(PharData::class,
+                filename: $file);
 
             $archive->extractTo($from, null, true);
 
-            Dir::createDir($to);
+            $this->directory->createDir($to);
 
             // validate/normalize
             // get root directory
             $from = $this->getNormalizedFromDir($from, $file);
 
-            Dir::rename($from, $to);
+            $this->directory->rename($from, $to);
             $this->addBotLayer($to, $metadata->getLayers());
-            Log::info(new Content($metadata->getContent()));
+            $this->log->info(
+                $this->box->get(Content::class,
+                    content: $metadata->getContent()));
 
         } catch (Exception $exception) {
             throw new Error($exception->getMessage());
@@ -196,10 +230,11 @@ class Download extends Task implements Interceptor
         // persist
         // runtime version = offset overlay
         if (isset($layers["object"]["version"])) {
-            $status = file_put_contents(
+            $status = $this->file->put(
                 "$to/fusion.bot.php",
                 "<?php\n" .
-                "// Auto-generated by Fusion package manager. \n// Do not modify.\n" .
+                "// Auto-generated by Fusion package manager.\n" .
+                "// Do not modify.\n" .
                 "return [\n" .
                 "\t\"version\" => \"" . $layers["object"]["version"] . "\"\n" .
                 "];"
@@ -207,7 +242,7 @@ class Download extends Task implements Interceptor
 
             if (!$status)
                 throw new Error(
-                    "Can't create the file \"$to/fusion.bot.php\"."
+                    "Can't create file '$to/fusion.bot.php'."
                 );
         }
     }
@@ -223,13 +258,20 @@ class Download extends Task implements Interceptor
     private function getNormalizedFromDir(string $dir, string $file): string
     {
         // without root directory
-        if (file_exists("$dir/fusion.json"))
+        if ($this->file->exists("$dir/fusion.json"))
             return $dir;
 
+        $filenames = $this->dir->getFilenames($dir, SCANDIR_SORT_NONE);
+
+        if ($filenames === false)
+            throw new Error(
+                "Can't read directory '$dir'."
+            );
+
         // most common prefixed
-        foreach (scandir($dir, SCANDIR_SORT_NONE) as $filename)
+        foreach ($filenames as $filename)
             if ($filename != "." && $filename != ".." &&
-                file_exists("$dir/$filename/fusion.json"))
+                $this->file->exists("$dir/$filename/fusion.json"))
                 return "$dir/$filename";
 
         // invalid package content
@@ -248,7 +290,7 @@ class Download extends Task implements Interceptor
     {
         if ($event instanceof Request)
             $event->setPath(
-                Group::getPath(
+                $this->group->getPath(
                     $this->metas[$event->getId()]->getLayers()
 
                         // object layer is raw

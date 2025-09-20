@@ -20,7 +20,6 @@
 namespace Valvoid\Fusion\Tests\Tasks\Image;
 
 use Exception;
-use Valvoid\Fusion\Metadata\Internal\Builder;
 use Valvoid\Fusion\Tasks\Image\Image;
 use Valvoid\Fusion\Tests\Tasks\Image\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Tasks\Image\Mocks\BuilderMock;
@@ -70,6 +69,8 @@ class ImageTest extends Test
                 $this->log,
                 $this->file,
                 $this->dir,
+
+                // task group id
                 ["group" => true]
             );
 

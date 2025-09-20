@@ -19,32 +19,21 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
 
-use Valvoid\Fusion\Metadata\External\External;
-use Valvoid\Fusion\Metadata\External\Category;
+use Closure;
+use PharData;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ExternalMetadataMock extends External
+class PharDataMock extends PharData
 {
-    public function __construct(
-        public Category $category,
-        public array $content,
-        public array $layers = []){}
+    public Closure $extract;
 
-    public function getContent(): array
-    {
-        return $this->content;
-    }
+    public function __construct(public string $filename){}
 
-    public function getCategory(): ?Category
+    public function extractTo($directory, $files = null, $overwrite = false): bool
     {
-        return $this->category;
-    }
-
-    public function getLayers(): array
-    {
-        return $this->layers;
+        return call_user_func($this->extract, $directory, $files, $overwrite);
     }
 }

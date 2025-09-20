@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,9 @@ spl_autoload_register(function (string $loadable) use ($root, $lazy)
 
 try {
     foreach ($lazy as $classname => $dir) {
+        if (!str_ends_with($classname, "Test"))
+            continue;
+
         $reflection = new ReflectionClass($classname);
 
         if ($reflection->isSubclassOf(Test::class)) {

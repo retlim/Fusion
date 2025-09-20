@@ -20,12 +20,11 @@
 namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
 
 use Closure;
+use PharData;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Logic;
-use Valvoid\Fusion\Hub\Responses\Cache\Archive as ArchiveResponse;
-use Valvoid\Fusion\Wrappers\Dir;
-use Valvoid\Fusion\Wrappers\File;
+use Valvoid\Fusion\Log\Events\Infos\Content;
+use ZipArchive;
 
 /**
  * Mocked container.
@@ -38,59 +37,22 @@ class BoxMock extends Box
     public BusMock $bus;
     public GroupMock $group;
     public LogMock $log;
+    public ZipArchiveMock $zip;
+    public Closure $phar;
+
     public function get(string $class, ...$args): object
     {
         if ($class === Proxy::class)
             return $this->bus;
 
-        if ($class === \Valvoid\Fusion\Group\Group::class)
-            return $this->group;
+        if ($class === Content::class)
+            return new ContentMock;
 
-        if ($class === \Valvoid\Fusion\Log\Proxy::class)
-            return $this->log;
+        if ($class === ZipArchive::class)
+            return $this->zip;
 
-
-        if ($class === \Valvoid\Fusion\Dir\Proxy::class)
-            return new class extends Logic
-            {
-                public function __construct()
-                {
-                    $this->root = __DIR__ . "/package";
-                    $this->cache = __DIR__ . "/package/cache";
-                    $this->file = new File();
-                    $this->dir = new Dir();
-                }
-            };
-
-        if ($class === \Valvoid\Fusion\Hub\Proxy\Proxy::class)
-            return new class implements \Valvoid\Fusion\Hub\Proxy\Proxy
-            {
-                public function addVersionsRequest(array $source): int
-                {
-                    return 0;
-                }
-
-                public function addMetadataRequest(array $source): int
-                {
-                    return 0;
-                }
-
-                public function addSnapshotRequest(array $source, string $path): int
-                {
-                    return 0;
-                }
-
-                public function addArchiveRequest(array $source): int
-                {
-                    // fake request id
-                    return 1;
-                }
-
-                public function executeRequests(Closure $callback): void
-                {
-                    $callback(new ArchiveResponse(1, __DIR__));
-                }
-            };
+        if ($class === PharData::class)
+            return call_user_func($this->phar, ...$args);
 
         return parent::get($class, ...$args);
     }

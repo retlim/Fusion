@@ -204,6 +204,7 @@ return [
 	'Valvoid\Fusion\Wrappers\CurlMulti' => '/src/Wrappers/CurlMulti.php',
 	'Valvoid\Fusion\Wrappers\CurlShare' => '/src/Wrappers/CurlShare.php',
 	'Valvoid\Fusion\Wrappers\Dir' => '/src/Wrappers/Dir.php',
+	'Valvoid\Fusion\Wrappers\Extension' => '/src/Wrappers/Extension.php',
 	'Valvoid\Fusion\Wrappers\File' => '/src/Wrappers/File.php',
 	'Valvoid\Fusion\Wrappers\Program' => '/src/Wrappers/Program.php',
 	'Valvoid\Fusion\Wrappers\Stream' => '/src/Wrappers/Stream.php',

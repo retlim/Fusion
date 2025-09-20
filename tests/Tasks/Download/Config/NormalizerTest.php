@@ -17,34 +17,42 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
+namespace Valvoid\Fusion\Tests\Tasks\Download\Config;
 
-use Valvoid\Fusion\Metadata\External\External;
-use Valvoid\Fusion\Metadata\External\Category;
+use Valvoid\Fusion\Tasks\Download\Config\Normalizer;
+use Valvoid\Fusion\Tests\Test;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ExternalMetadataMock extends External
+class NormalizerTest extends Test
 {
-    public function __construct(
-        public Category $category,
-        public array $content,
-        public array $layers = []){}
+    protected string|array $coverage = Normalizer::class;
 
-    public function getContent(): array
+    public function __construct()
     {
-        return $this->content;
+        $this->testGroup();
+        $this->testId();
     }
 
-    public function getCategory(): ?Category
+    public function testGroup(): void
     {
-        return $this->category;
+        $config = [];
+
+        Normalizer::normalize(["t", "g", "i"], $config);
+
+        if ($config !== ["group" => "g", "id" => "i"])
+            $this->handleFailedTest();
     }
 
-    public function getLayers(): array
+    public function testId(): void
     {
-        return $this->layers;
+        $config = [];
+
+        Normalizer::normalize(["t", "i"], $config);
+
+        if ($config !== ["id" => "i"])
+            $this->handleFailedTest();
     }
 }

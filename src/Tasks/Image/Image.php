@@ -25,7 +25,7 @@ use Valvoid\Fusion\Group\Group;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Errors\Metadata as MetaError;
 use Valvoid\Fusion\Log\Events\Infos\Content;
-use Valvoid\Fusion\Log\Proxy as Log;
+use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Metadata\Internal\Builder as InternalMetadataBuilder;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
 use Valvoid\Fusion\Tasks\Task;
@@ -47,14 +47,14 @@ class Image extends Task
      * Constructs the task.
      *
      * @param Box $box Dependency injection container.
-     * @param Log $log Event log.
+     * @param LogProxy $log Event log.
      * @param File $file Standard file logic wrapper.
      * @param Dir $dir Standard dir logic wrapper.
      * @param array $config Task config.
      */
     public function __construct(
         private readonly Box $box,
-        private readonly Log $log,
+        private readonly LogProxy $log,
         private readonly File $file,
         private readonly Dir $dir,
         array $config)
