@@ -19,6 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Dir\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Wrappers\Dir;
 
 /**
@@ -27,11 +28,11 @@ use Valvoid\Fusion\Wrappers\Dir;
  */
 class DirMock extends Dir
 {
-    public $is;
-    public $create;
-    public $filenames;
-    public $delete;
-    public $rename;
+    public Closure $is;
+    public Closure $create;
+    public Closure $filenames;
+    public Closure $delete;
+    public Closure $rename;
 
     public function is(string $dir): bool
     {
