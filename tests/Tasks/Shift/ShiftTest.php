@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@ use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\ExternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\GroupMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\InternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\LogMock;
-use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\MetadataMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**

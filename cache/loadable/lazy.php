@@ -208,4 +208,5 @@ return [
 	'Valvoid\Fusion\Wrappers\File' => '/src/Wrappers/File.php',
 	'Valvoid\Fusion\Wrappers\Program' => '/src/Wrappers/Program.php',
 	'Valvoid\Fusion\Wrappers\Stream' => '/src/Wrappers/Stream.php',
+	'Valvoid\Fusion\Wrappers\System' => '/src/Wrappers/System.php',
 ];

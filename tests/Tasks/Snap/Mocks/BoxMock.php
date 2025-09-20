@@ -54,8 +54,9 @@ class BoxMock extends Box
                 {
                     $this->root = __DIR__ . "/package";
                     $this->cache = __DIR__ . "/package/cache";
-                    $this->file = new File();
-                    $this->dir = new Dir();
+                    $this->temp = $this->cache;
+                    $this->file = new File;
+                    $this->dir = new Dir;
                 }
             };
 

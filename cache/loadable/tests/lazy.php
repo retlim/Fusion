@@ -36,6 +36,7 @@ return [
 	'Valvoid\Fusion\Tests\Dir\Mocks\BusMock' => '/tests/Dir/Mocks/BusMock.php',
 	'Valvoid\Fusion\Tests\Dir\Mocks\DirMock' => '/tests/Dir/Mocks/DirMock.php',
 	'Valvoid\Fusion\Tests\Dir\Mocks\FileMock' => '/tests/Dir/Mocks/FileMock.php',
+	'Valvoid\Fusion\Tests\Dir\Mocks\SystemMock' => '/tests/Dir/Mocks/SystemMock.php',
 	'Valvoid\Fusion\Tests\Group\GroupTest' => '/tests/Group/GroupTest.php',
 	'Valvoid\Fusion\Tests\Group\Mocks\BoxMock' => '/tests/Group/Mocks/BoxMock.php',
 	'Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Config\InterpreterTest' => '/tests/Hub/APIs/Local/Dir/Config/InterpreterTest.php',

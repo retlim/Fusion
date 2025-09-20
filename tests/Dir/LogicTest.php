@@ -25,9 +25,11 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tests\Dir\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Dir\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Dir\Mocks\FileMock;
+use Valvoid\Fusion\Tests\Dir\Mocks\SystemMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\Dir;
 use Valvoid\Fusion\Wrappers\File;
+use Valvoid\Fusion\Wrappers\System;
 
 /**
  * @copyright Valvoid
@@ -40,6 +42,7 @@ class LogicTest extends Test
 
         // ballast
         File::class,
+        System::class,
         Dir::class
     ];
 
@@ -47,12 +50,17 @@ class LogicTest extends Test
     protected BusMock $bus;
     protected DirMock $dir;
     protected FileMock $file;
+    private SystemMock $system;
 
     public function __construct()
     {
         $this->bus = new BusMock;
         $this->dir = new DirMock;
         $this->file = new FileMock;
+        $this->system = new SystemMock;
+        $this->system->temp = function () {
+            return "/temp";
+        };
 
         $this->testRecycleContent();
         $this->testGetCacheDir();
@@ -241,13 +249,13 @@ class LogicTest extends Test
 
     public function testGetTaskDir(): void
     {
-        if ($this->logic->getTaskDir() != "/#/c/task")
+        if ($this->logic->getTaskDir() != "/temp/valvoid_fusion/task")
             $this->handleFailedTest();
     }
 
     public function testGetStateDir(): void
     {
-        if ($this->logic->getStateDir() != "/#/c/state")
+        if ($this->logic->getStateDir() != "/temp/valvoid_fusion/state")
             $this->handleFailedTest();
     }
 
@@ -259,13 +267,13 @@ class LogicTest extends Test
 
     public function testGetOtherDir(): void
     {
-        if ($this->logic->getOtherDir() != "/#/c/other")
+        if ($this->logic->getOtherDir() != "/temp/valvoid_fusion/other")
             $this->handleFailedTest();
     }
 
     public function testGetPackagesDir(): void
     {
-        if ($this->logic->getPackagesDir() != "/#/c/packages")
+        if ($this->logic->getPackagesDir() != "/temp/valvoid_fusion/packages")
             $this->handleFailedTest();
     }
 
@@ -280,11 +288,12 @@ class LogicTest extends Test
         $this->dir->is = fn () => false;
         $this->dir->create = fn () => true;
         $this->file->copy = fn () => true;
-        $this->logic = new Logic([
+        $this->logic = new Logic(dir: $this->dir,
+            file: $this->file, system: $this->system,
+            bus: $this->bus, config: [
             "path" => "/#",
             "creatable" => true
-
-        ], $this->dir, $this->file, $this->bus);
+        ]);
 
         $oldCache = $this->logic->getCacheDir();
         $newCache = "$oldCache/newCachePath";
@@ -321,11 +330,11 @@ class LogicTest extends Test
             ]]);
         };
 
-        $this->logic = new Logic([
+        $this->logic = new Logic(dir: $this->dir,
+            file: $this->file, system: $this->system,
+            bus: $this->bus, config: [
             "path" => "/#",
-            "clearable" => false
-
-        ], $this->dir, $this->file, $this->bus);
+            "clearable" => false]);
 
         if ($this->logic->getRootDir() != "/#" ||
             $this->logic->getCacheDir() != "/#/c")
@@ -364,11 +373,11 @@ class LogicTest extends Test
             return true;
         };
 
-        $this->logic = new Logic([
+        $this->logic = new Logic(dir: $this->dir,
+            file: $this->file, system: $this->system,
+            bus: $this->bus, config: [
             "path" => "/#",
-            "clearable" => false
-
-        ], $this->dir, $this->file, $this->bus);
+            "clearable" => false]);
 
         if ($this->logic->getRootDir() != "/#" ||
             $this->logic->getCacheDir() != "/#/cache")
@@ -424,11 +433,11 @@ class LogicTest extends Test
             return true;
         };
 
-        $this->logic = new Logic([
+        $this->logic = new Logic(dir: $this->dir,
+            file: $this->file, system: $this->system,
+            bus: $this->bus, config: [
             "path" => "/#",
-            "clearable" => true
-
-        ], $this->dir, $this->file, $this->bus);
+            "clearable" => true]);
 
         if ($this->logic->getRootDir() != "/#" ||
             $this->logic->getCacheDir() != "/#/cache" ||
@@ -470,11 +479,11 @@ class LogicTest extends Test
             return true;
         };
 
-        $this->logic = new Logic([
+        $this->logic = new Logic(dir: $this->dir,
+            file: $this->file, system: $this->system,
+            bus: $this->bus, config: [
             "path" => "/#",
-            "creatable" => true
-
-        ], $this->dir, $this->file, $this->bus);
+            "creatable" => true]);
 
         if ($this->logic->getRootDir() != "/#" ||
             $this->logic->getCacheDir() != "/#/cache")
@@ -495,11 +504,11 @@ class LogicTest extends Test
                 return false;
             };
 
-            $this->logic = new Logic([
+            $this->logic = new Logic(dir: $this->dir,
+                file: $this->file, system: $this->system,
+                bus: $this->bus, config: [
                 "path" => "/#",
-                "creatable" => false,
-
-            ], $this->dir, $this->file, $this->bus);
+                "creatable" => false,]);
 
             $this->handleFailedTest();
 

@@ -20,42 +20,18 @@
 namespace Valvoid\Fusion\Tests\Dir\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Wrappers\File;
+use Valvoid\Fusion\Wrappers\System;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class FileMock extends File
+class SystemMock extends System
 {
-    public Closure $copy;
-    public Closure $exists;
-    public Closure $is;
-    public Closure $get;
-    public Closure $unlink;
+    public Closure $temp;
 
-    public function exists(string $file): bool
+    public function getTempDir(): string
     {
-        return call_user_func($this->exists, $file);
-    }
-
-    public function copy(string $from, string $to): bool
-    {
-        return call_user_func($this->copy, $from, $to);
-    }
-
-    public function get(string $file): string|false
-    {
-        return call_user_func($this->get, $file);
-    }
-
-    public function is(string $file): bool
-    {
-        return call_user_func($this->is, $file);
-    }
-
-    public function unlink(string $file): bool
-    {
-        return call_user_func($this->unlink, $file);
+        return call_user_func($this->temp);
     }
 }

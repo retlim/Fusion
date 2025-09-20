@@ -58,8 +58,9 @@ class BoxMock extends Box
                 {
                     $this->root = dirname(__DIR__) . "/cache";
                     $this->cache = dirname(__DIR__) . "/cache/cache";
-                    $this->file = new File();
-                    $this->dir = new Dir();
+                    $this->temp = $this->cache;
+                    $this->file = new File;
+                    $this->dir = new Dir;
 
                     Bus::addReceiver("whatever", $this->handleBusEvent(...),
                         Cache::class);
@@ -73,6 +74,7 @@ class BoxMock extends Box
                 protected function handleBusEvent(Cache $event): void
                 {
                     $this->cache = $event->getDir();
+                    $this->temp = $this->cache;
                 }
             };
 

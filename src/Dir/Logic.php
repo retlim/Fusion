@@ -24,6 +24,7 @@ use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Wrappers\File;
 use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\System;
 
 /**
  * Root package directory providing normalized filesystem operations.
@@ -33,17 +34,14 @@ use Valvoid\Fusion\Wrappers\Dir;
  */
 class Logic implements Proxy
 {
-    /** @var Dir Abstract standard dir logic. */
-    protected Dir $dir;
-
-    /** @var File Abstract standard file logic. */
-    protected File $file;
-
     /** @var string Constant package root dir. */
     protected string $root;
 
     /** @var string Dynamic package cache dir. */
     protected string $cache;
+
+    /** @var string System dir for temporary files. */
+    protected string $temp;
 
     /**
      * Constructs the directory.
@@ -54,12 +52,15 @@ class Logic implements Proxy
      * @param File $file Abstract standard file logic.
      * @throws Error Internal error exception.
      */
-    public function __construct(array $config, Dir $dir, File $file,
-                                BusProxy $bus)
+    public function __construct(
+        protected Dir $dir,
+        protected File $file,
+        System $system,
+        BusProxy $bus,
+        array $config)
     {
         $this->root = $config["path"];
-        $this->dir = $dir;
-        $this->file = $file;
+        $this->temp = $system->getTempDir() . "/valvoid_fusion";
 
         $bus->addReceiver(static::class, $this->handleBusEvent(...),
 
@@ -233,7 +234,7 @@ class Logic implements Proxy
      */
     public function getTaskDir(): string
     {
-        return "$this->cache/task";
+        return "$this->temp/task";
     }
 
     /**
@@ -243,7 +244,7 @@ class Logic implements Proxy
      */
     public function getStateDir(): string
     {
-        return "$this->cache/state";
+        return "$this->temp/state";
     }
 
     /**
@@ -263,7 +264,7 @@ class Logic implements Proxy
      */
     public function getOtherDir(): string
     {
-        return "$this->cache/other";
+        return "$this->temp/other";
     }
 
     /**
@@ -273,7 +274,7 @@ class Logic implements Proxy
      */
     public function getPackagesDir(): string
     {
-        return "$this->cache/packages";
+        return "$this->temp/packages";
     }
 
     /**
