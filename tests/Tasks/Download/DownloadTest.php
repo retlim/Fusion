@@ -58,7 +58,6 @@ class DownloadTest extends Test
     private FileMock $file;
     private ExtensionMock $extension;
     private ZipArchiveMock $zip;
-    private PharDataMock $phar;
     private Download $task;
 
     public function __construct()

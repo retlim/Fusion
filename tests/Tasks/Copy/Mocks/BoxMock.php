@@ -21,13 +21,11 @@ namespace Valvoid\Fusion\Tests\Tasks\Copy\Mocks;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Logic;
-use Valvoid\Fusion\Wrappers\Dir;
-use Valvoid\Fusion\Wrappers\File;
+use Valvoid\Fusion\Log\Events\Infos\Content;
+use Valvoid\Fusion\Util\Version\Interpreter;
+use Valvoid\Fusion\Util\Version\Parser;
 
 /**
- * Mocked container.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
@@ -35,30 +33,20 @@ class BoxMock extends Box
 {
     public BusMock $bus;
     public GroupMock $group;
-    public LogMock $log;
+
     public function get(string $class, ...$args): object
     {
         if ($class === Proxy::class)
             return $this->bus;
 
-        if ($class === \Valvoid\Fusion\Group\Group::class)
-            return $this->group;
+        if ($class === Content::class)
+            return new ContentMock;
 
-        if ($class === \Valvoid\Fusion\Log\Proxy::class)
-            return $this->log;
+        if ($class === Parser::class)
+            return new ParserMock;
 
-        if ($class === \Valvoid\Fusion\Dir\Proxy::class)
-            return new class extends Logic
-            {
-                public function __construct()
-                {
-                    $this->root = __DIR__ . "/package";
-                    $this->cache = __DIR__ . "/package/cache";
-                    $this->temp = $this->cache;
-                    $this->file = new File;
-                    $this->dir = new Dir;
-                }
-            };
+        if ($class === Interpreter::class)
+            return new InterpreterMock;
 
         return parent::get($class, ...$args);
     }

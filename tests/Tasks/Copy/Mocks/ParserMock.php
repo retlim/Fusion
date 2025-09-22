@@ -20,21 +20,18 @@
 namespace Valvoid\Fusion\Tests\Tasks\Copy\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Util\Version\Parser;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BusMock implements Proxy
+class ParserMock extends Parser
 {
-    public ?Event $event = null;
+    public static ?Closure $version;
 
-    public function addReceiver(string $id, Closure $callback, string ...$events): void{}
-    public function broadcast(Event $event): void
+    public static function getInflatedVersion(string $version): array
     {
-        $this->event = $event;
+        return call_user_func(static::$version, $version);
     }
-    public function removeReceiver(string $id, string ...$events): void {}
 }

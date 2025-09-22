@@ -20,21 +20,18 @@
 namespace Valvoid\Fusion\Tests\Tasks\Copy\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Util\Version\Interpreter;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BusMock implements Proxy
+class InterpreterMock extends Interpreter
 {
-    public ?Event $event = null;
+    public static ?Closure $compare;
 
-    public function addReceiver(string $id, Closure $callback, string ...$events): void{}
-    public function broadcast(Event $event): void
+    public static function isBiggerThan(array $a, array $b): bool
     {
-        $this->event = $event;
+        return call_user_func(static::$compare, $a, $b);
     }
-    public function removeReceiver(string $id, string ...$events): void {}
 }
