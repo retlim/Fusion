@@ -27,8 +27,6 @@ use Valvoid\Fusion\Log\Events\Infos\Content;
 use ZipArchive;
 
 /**
- * Mocked container.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */

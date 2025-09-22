@@ -23,7 +23,7 @@ use Exception;
 use PharData;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Proxy as DirProxy;
-use Valvoid\Fusion\Group\Group;
+use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive;
 use Valvoid\Fusion\Log\Events\Errors\Error;
@@ -61,6 +61,7 @@ class Download extends Task implements Interceptor
      * Constructs the task.
      *
      * @param Box $box Dependency injection container.
+     * @param GroupProxy $group Tasks group.
      * @param LogProxy $log Event log.
      * @param DirProxy $directory Current working directory.
      * @param Extension $extension Standard extension logic wrapper.
@@ -70,7 +71,7 @@ class Download extends Task implements Interceptor
      */
     public function __construct(
         private readonly Box $box,
-        private readonly Group $group,
+        private readonly GroupProxy $group,
         private readonly LogProxy $log,
         private readonly HubProxy $hub,
         private readonly DirProxy $directory,

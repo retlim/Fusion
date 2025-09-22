@@ -19,22 +19,13 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Copy\Mocks;
 
-use Closure;
-use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Log\Events\Infos\Content;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BusMock implements Proxy
+class ContentMock extends Content
 {
-    public ?Event $event = null;
-
-    public function addReceiver(string $id, Closure $callback, string ...$events): void{}
-    public function broadcast(Event $event): void
-    {
-        $this->event = $event;
-    }
-    public function removeReceiver(string $id, string ...$events): void {}
+    public function __construct(){}
 }

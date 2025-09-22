@@ -20,21 +20,24 @@
 namespace Valvoid\Fusion\Tests\Tasks\Copy\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Wrappers\Dir;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BusMock implements Proxy
+class DirMock extends Dir
 {
-    public ?Event $event = null;
+    public Closure $filenames;
+    public Closure $is;
 
-    public function addReceiver(string $id, Closure $callback, string ...$events): void{}
-    public function broadcast(Event $event): void
+    public function getFilenames(string $dir, int $order = SCANDIR_SORT_ASCENDING): array|false
     {
-        $this->event = $event;
+        return call_user_func($this->filenames, $dir, $order);
     }
-    public function removeReceiver(string $id, string ...$events): void {}
+
+    public function is(string $dir): bool
+    {
+        return call_user_func($this->is, $dir);
+    }
 }

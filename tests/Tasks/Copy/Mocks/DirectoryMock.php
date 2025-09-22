@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
+namespace Valvoid\Fusion\Tests\Tasks\Copy\Mocks;
 
 use Closure;
 use Valvoid\Fusion\Dir\Proxy;
@@ -30,16 +30,11 @@ class DirectoryMock implements Proxy
 {
     public Closure $cache;
     public Closure $create;
-    public Closure $rename;
-    public Closure $task;
+    public Closure $copy;
 
     public function getPackagesDir(): string
     {
         return call_user_func($this->cache);
-    }
-    public function getTaskDir(): string
-    {
-        return call_user_func($this->task);
     }
 
     public function createDir(string $dir, int $permissions = 0755): void
@@ -47,14 +42,15 @@ class DirectoryMock implements Proxy
         call_user_func($this->create, $dir, $permissions);
     }
 
-    public function rename(string $from, string $to): void
+    public function copy(string $from, string $to): void
     {
-        call_user_func($this->rename, $from, $to);
+        call_user_func($this->copy, $from, $to);
     }
 
+    public function rename(string $from, string $to): void {}
     public function delete(string $file): void {}
+    public function getTaskDir(): string {return "";}
     public function clear(string $dir, string $path): void {}
-    public function copy(string $from, string $to): void {}
     public function getStateDir(): string {return "";}
     public function getCacheDir(): string {return "";}
     public function getOtherDir(): string {return "";}

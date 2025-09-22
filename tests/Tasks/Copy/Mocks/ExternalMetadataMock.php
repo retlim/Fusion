@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Copy\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Metadata\External\Category;
 
@@ -28,6 +29,8 @@ use Valvoid\Fusion\Metadata\External\Category;
  */
 class ExternalMetadataMock extends External
 {
+    public Closure $migrate;
+
     public function __construct(
         public Category $category,
         public array $content){}
@@ -40,5 +43,10 @@ class ExternalMetadataMock extends External
     public function getCategory(): ?Category
     {
         return $this->category;
+    }
+
+    public function onMigrate(): bool
+    {
+        return call_user_func($this->migrate);
     }
 }

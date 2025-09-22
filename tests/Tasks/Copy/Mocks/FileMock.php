@@ -20,21 +20,18 @@
 namespace Valvoid\Fusion\Tests\Tasks\Copy\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BusMock implements Proxy
+class FileMock extends File
 {
-    public ?Event $event = null;
+    public Closure $is;
 
-    public function addReceiver(string $id, Closure $callback, string ...$events): void{}
-    public function broadcast(Event $event): void
+    public function is(string $file): bool
     {
-        $this->event = $event;
+        return call_user_func($this->is, $file);
     }
-    public function removeReceiver(string $id, string ...$events): void {}
 }
