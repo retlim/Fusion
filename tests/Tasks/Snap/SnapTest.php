@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,263 +20,304 @@
 namespace Valvoid\Fusion\Tests\Tasks\Snap;
 
 use Exception;
-use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tasks\Snap\Snap;
 use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\BoxMock;
-use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\DirectoryMock;
 use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\ExternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\GroupMock;
 use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\InternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Snap\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
+
 /**
- * Integration test case for the snap task.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
 class SnapTest extends Test
 {
     protected string|array $coverage = Snap::class;
-
+    private BoxMock $box;
     public function __construct()
     {
-        $box = new BoxMock;
-        $group = new GroupMock;
-        $box->group = $group;
-        $group->hasDownloadable = false;
-        $box->bus = new BusMock;
-        $box->log = new LogMock;
+        $this->box = new BoxMock;
 
+        // has external root package
+        // only production metas
+        $this->testCurrentRecursiveState();
+        $this->testNewRecursiveState();
+
+        // same root === no external root
+        // could be development env
+        // local, dev, prod metas === snaps
+        $this->testDependencyState();
+
+        $this->box::unsetInstance();
+    }
+
+    public function testCurrentRecursiveState(): void
+    {
         try {
-            $this->delete(__DIR__ . "/Mocks/package");
-            $group->implication = [
-                "metadata1" => [
-                    "implication" => [
-                        "metadata2" => [
-                            "implication" => []
-                        ],
-                        "metadata3" => [
-                            "implication" => []
-                        ]
-                    ]
-                ]
-            ];
-            $group->externalMetas["metadata1"] = new ExternalMetadataMock(
-                ExternalCategory::REDUNDANT,[
-                "id" => "metadata1",
-                "name" => "metadata1",
-                "description" => "metadata1",
-                "version" => "1.0.0",
-                "source" => [
-                    "api" => "",
-                    "path" => "",
-                    "prefix" => "",
-                    "reference" => ""
-                ],
-                "dir" => "", // test recursive root
-                "dependencies" => [
-
-                    // external === production only
-                    // production metadata has deps
-                    // fusion.json
-                    "production" => [
-                        "metadata2",
-                        "metadata3"
-                    ]
-                ]
-            ]);
-
-            $group->externalRoot = $group->externalMetas["metadata1"];
-            $group->externalMetas["metadata2"] = new ExternalMetadataMock(
-                ExternalCategory::REDUNDANT,[
-                "id" => "metadata2",
-                "name" => "metadata2",
-                "description" => "metadata2",
-                "version" => "3.2.1",
-                "source" => [
-                    "api" => "",
-                    "path" => "",
-                    "prefix" => "",
-                    "reference" => "offset" // version offset
-                ],
-                "dir" => "metadata2"
-            ],["object" => [
-                "version" => "3.2.1" // pseudo version for offset
-            ]]);
-            $group->externalMetas["metadata3"] = new ExternalMetadataMock(
-                ExternalCategory::REDUNDANT,[
-                "id" => "metadata3",
-                "name" => "metadata3",
-                "description" => "metadata3",
-                "version" => "1.2.3",
-                "source" => [
-                    "api" => "",
-                    "path" => "",
-                    "prefix" => "",
-                    "reference" => "1.2.3" // version
-                ],
-                "dir" => "metadata3"
-            ]);
-            $this->testRedundantCacheRefresh();
-
-            // clear
+            $directory = new DirectoryMock;
+            $file = new FileMock;
             $group = new GroupMock;
-            $box->group = $group;
-            $group->hasDownloadable = true;
+            $snap = new Snap(
+                box: $this->box,
+                group: $group,
+                log: new LogMock,
+                directory: $directory,
+                file: $file,
+                config: []
+            );
+
+            $group->hasDownloadable = false;
             $group->implication = [
-                "metadata1" => [
+                "i0" => [
                     "implication" => [
-                        "metadata2" => [
-                            "implication" => [
-                                "metadata3" => [
-                                    "implication" => []
-                                ]
-                            ]
-                        ]
+                        "i1" => ["implication" => []],
+                        "i2" => ["implication" => []]
                     ]
                 ]
             ];
 
-            $group->internalMetas["metadata1"] = new InternalMetadataMock(
-                InternalCategory::RECYCLABLE,[
-                "id" => "metadata1",
-                "name" => "metadata1",
-                "description" => "metadata1",
-                "source" => "", // project root
-                "dir" => "", // project root
-                "version" => "1.0.0",
+            $group->externalMetas["i0"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT,[
+                "id" => "i0",
+                "source" => ["reference" => ""],
                 "dependencies" => [
-
-                    // production metadata has deps
-                    // fusion.json
-                    "production" => [
-                        "metadata2"
-                    ],
-
-                    // optional empty dev metadata
-                    // fusion.dev.php
-                    "development" => [],
-
-                    // no optional local fusion metadata file
-                    // fusion.local.php
-                    "local" => null
-                ],
-                "structure" => [
-                    "cache" => "/cache"
+                    "production" => ["i1", "i2"]
                 ]
             ]);
 
-            $group->internalRoot = $group->internalMetas["metadata1"];
-            $group->externalMetas["metadata2"] = new ExternalMetadataMock(
-                ExternalCategory::DOWNLOADABLE,[
-                "id" => "metadata2",
-                "name" => "metadata2",
-                "description" => "metadata2",
-                "version" => "1.0.0",
-                "dir" => "metadata2",
-                "source" => [
-                    "api" => "",
-                    "path" => "",
-                    "prefix" => "",
-                    "reference" => "6.7.8" // version
-                ],
-
-            ]);
-            $group->externalMetas["metadata3"] = new ExternalMetadataMock(
+            $group->externalRoot = $group->externalMetas["i0"];
+            $group->externalMetas["i1"] = new ExternalMetadataMock(
                 ExternalCategory::REDUNDANT,[
-                "id" => "metadata3",
-                "name" => "metadata3",
-                "description" => "metadata3",
-                "version" => "1.0.0",
-                "dir" => "metadata3",
-                "source" => [
-                    "api" => "",
-                    "path" => "",
-                    "prefix" => "",
-                    "reference" => "offset" // version offset
-                ],
-            ],["object" => [
-                "version" => "5.4.3" // pseudo version for offset
-            ]]);
-            $this->testDownloadableCacheUpdate();
+                    "source" => ["reference" => "offset"],
+                ],[
+                    "object" => ["version" => "3.2.1"]
+                ]);
+
+            $group->externalMetas["i2"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT,[
+                "source" => ["reference" => "1.2.3"]
+            ]);
+
+            $create =
+            $put = [];
+
+            $directory->cache = function () {
+                return "/cache";
+            };
+
+            $directory->create = function (string $dir) use (&$create) {
+                $create[] = $dir;
+            };
+
+            $file->put = function (string $file, mixed $data) use (&$put) {
+                $put[] = [
+                    "file" => $file,
+                    "data" => $data
+                ];
+
+                return 1;
+            };
+
+            $snap->execute();
+
+            if ($create != ["/cache"] ||
+                $put != [[
+                    "file" => "/cache/snapshot.json",
+                    "data" => "{\n" .
+                        "    \"i1\": \"3.2.1:offset\",\n" .
+                        "    \"i2\": \"1.2.3\"\n" .
+                    "}"]])
+                $this->handleFailedTest();
 
         } catch (Exception) {
             $this->handleFailedTest();
         }
-
-        $box::unsetInstance();
     }
 
-    /**
-     * @throws Error
-     */
-    public function testRedundantCacheRefresh(): void
+    public function testNewRecursiveState(): void
     {
-        $snap = new Snap([]);
-        $snap->execute();
+        try {
+            $directory = new DirectoryMock;
+            $file = new FileMock;
+            $group = new GroupMock;
+            $snap = new Snap(
+                box: $this->box,
+                group: $group,
+                log: new LogMock,
+                directory: $directory,
+                file: $file,
+                config: []
+            );
 
-        $snapshot = file_get_contents(__DIR__ . "/Mocks/package/cache/snapshot.json");
+            $group->hasDownloadable = true;
+            $group->implication = [
+                "i0" => [
+                    "implication" => [
+                        "i1" => ["implication" => []],
+                        "i2" => ["implication" => []]
+                    ]
+                ]
+            ];
 
-        if ($snapshot) {
-            $snapshot = json_decode($snapshot, true);
+            $group->externalMetas["i0"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT,[
+                "id" => "i0",
+                "source" => ["reference" => ""],
+                "structure" => [
+                    "cache" => "/cache"
+                ],
+                "dependencies" => [
+                    "production" => ["i1", "i2"]
+                ]
+            ]);
 
-            // no recursive root
-            // offset
-            if (["metadata2" => "3.2.1:offset", "metadata3" => "1.2.3"] === $snapshot)
-                return;
+            $group->externalRoot = $group->externalMetas["i0"];
+            $group->externalMetas["i1"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT,[
+                "source" => ["reference" => "offset"],
+            ],[
+                "object" => ["version" => "3.2.1"]
+            ]);
+
+            $group->externalMetas["i2"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT,[
+                "source" => ["reference" => "1.2.3"]
+            ]);
+
+            $create =
+            $put = [];
+
+            $directory->packages = function () {
+                return "/tmp/packages";
+            };
+
+            $directory->create = function (string $dir) use (&$create) {
+                $create[] = $dir;
+            };
+
+            $file->put = function (string $file, mixed $data) use (&$put) {
+                $put[] = [
+                    "file" => $file,
+                    "data" => $data
+                ];
+
+                return 1;
+            };
+
+            $snap->execute();
+
+            if ($create != ["/tmp/packages/i0/cache"] ||
+                $put != [[
+                    "file" => "/tmp/packages/i0/cache/snapshot.json",
+                    "data" => "{\n" .
+                        "    \"i1\": \"3.2.1:offset\",\n" .
+                        "    \"i2\": \"1.2.3\"\n" .
+                        "}"]])
+                $this->handleFailedTest();
+
+        } catch (Exception) {
+            $this->handleFailedTest();
         }
-
-        $this->handleFailedTest();
     }
 
-    /**
-     * @throws Error
-     */
-    public function testDownloadableCacheUpdate(): void
+    public function testDependencyState(): void
     {
-        $prefix = __DIR__ . "/Mocks/package/cache/packages/metadata1/cache";
-        $snap = new Snap([]);
-        $snap->execute();
+        try {
+            $directory = new DirectoryMock;
+            $file = new FileMock;
+            $group = new GroupMock;
+            $snap = new Snap(
+                box: $this->box,
+                group: $group,
+                log: new LogMock,
+                directory: $directory,
+                file: $file,
+                config: []
+            );
 
-        // no local metadata
-        // fusion.local.php is null
-        if (!file_exists("$prefix/snapshot.local.json")) {
-            $snapshot = file_get_contents("$prefix/snapshot.json");
-            $devSnapshot = file_get_contents("$prefix/snapshot.dev.json");
+            $group->hasDownloadable = true;
+            $group->implication = [
+                "i1" => ["implication" => []],
+                "i2" => ["implication" => []]
+            ];
 
-            if ($snapshot && $devSnapshot) {
-                $snapshot = json_decode($snapshot, true);
-                $devSnapshot = json_decode($devSnapshot, true);
+            $group->internalMetas["i0"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE,[
+                "id" => "i0",
+                "source" => ["reference" => ""],
+                "structure" => [
+                    "cache" => "/cache"
+                ],
+                "dependencies" => [
+                    "production" => ["i1"],
+                    "development" => ["i2"],
+                    "local" => null
+                ]
+            ]);
 
-                // keep order but actually no matter
-                if (["metadata3" => "5.4.3:offset", "metadata2" => "6.7.8"] === $snapshot &&
+            $group->internalRoot = $group->internalMetas["i0"];
+            $group->externalMetas["i1"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT,[
+                "source" => ["reference" => "offset"],
+            ],[
+                "object" => ["version" => "3.2.1"]
+            ]);
 
-                    // existing fusion.dev.php contains no deps
-                    $devSnapshot === [] )
-                    return;
-            }
+            $group->externalMetas["i2"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT,[
+                "source" => ["reference" => "1.2.3"]
+            ]);
+
+            $create =
+            $delete =
+            $put = [];
+
+            $directory->packages = function () {
+                return "/tmp/packages";
+            };
+
+            $directory->create = function (string $dir) use (&$create) {
+                $create[] = $dir;
+            };
+
+            $directory->delete = function (string $file) use (&$delete) {
+                $delete[] = $file;
+            };
+
+            $file->put = function (string $file, mixed $data) use (&$put) {
+                $put[] = [
+                    "file" => $file,
+                    "data" => $data
+                ];
+
+                return 1;
+            };
+
+            $snap->execute();
+
+            if ($create != ["/tmp/packages/i0/cache"] ||
+                $delete != ["/tmp/packages/i0/cache/snapshot.local.json"] ||
+                $put != [[
+                    "file" => "/tmp/packages/i0/cache/snapshot.json",
+                    "data" => "{\n" .
+                        "    \"i1\": \"3.2.1:offset\"\n" .
+                        "}"],
+                    [
+                        "file" => "/tmp/packages/i0/cache/snapshot.dev.json",
+                        "data" => "{\n" .
+                            "    \"i2\": \"1.2.3\"\n" .
+                            "}"]])
+                $this->handleFailedTest();
+
+        } catch (Exception) {
+            $this->handleFailedTest();
         }
-
-       $this->handleFailedTest();
     }
 
-    /**
-     * @param string $file
-     * @return void
-     */
-    public function delete(string $file): void
-    {
-        if (is_dir($file)) {
-            foreach (scandir($file, SCANDIR_SORT_NONE) as $filename)
-                if ($filename != "." && $filename != "..")
-                    $this->delete("$file/$filename");
-
-            rmdir($file);
-
-        } elseif (is_file($file))
-            unlink($file);
-    }
 }
