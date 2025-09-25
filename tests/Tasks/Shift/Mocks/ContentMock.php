@@ -19,28 +19,13 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
 
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Logic;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BoxMock extends Box
+class ContentMock extends Content
 {
-    public BusMock $bus;
-    public Logic $dir;
-
-    public function get(string $class, ...$args): object
-    {
-        if ($class === Proxy::class)
-            return $this->bus;
-
-        if ($class === Content::class)
-            return new ContentMock;
-
-        return parent::get($class, ...$args);
-    }
+    public function __construct(){}
 }

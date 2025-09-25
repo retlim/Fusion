@@ -19,28 +19,31 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
 
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Logic;
-use Valvoid\Fusion\Log\Events\Infos\Content;
+use Closure;
+use Valvoid\Fusion\Wrappers\Dir;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BoxMock extends Box
+class DirMock extends Dir
 {
-    public BusMock $bus;
-    public Logic $dir;
+    public Closure $filenames;
+    public Closure $is;
+    public Closure $rename;
 
-    public function get(string $class, ...$args): object
+    public function getFilenames(string $dir, int $order = SCANDIR_SORT_ASCENDING): array|false
     {
-        if ($class === Proxy::class)
-            return $this->bus;
+        return call_user_func($this->filenames, $dir, $order);
+    }
 
-        if ($class === Content::class)
-            return new ContentMock;
+    public function is(string $dir): bool
+    {
+        return call_user_func($this->is, $dir);
+    }
 
-        return parent::get($class, ...$args);
+    public function rename(string $from, string $to): bool
+    {
+        return call_user_func($this->rename, $from, $to);
     }
 }

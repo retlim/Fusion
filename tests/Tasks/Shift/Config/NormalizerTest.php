@@ -17,30 +17,42 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
+namespace Valvoid\Fusion\Tests\Tasks\Shift\Config;
 
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Logic;
-use Valvoid\Fusion\Log\Events\Infos\Content;
+use Valvoid\Fusion\Tasks\Shift\Config\Normalizer;
+use Valvoid\Fusion\Tests\Test;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BoxMock extends Box
+class NormalizerTest extends Test
 {
-    public BusMock $bus;
-    public Logic $dir;
+    protected string|array $coverage = Normalizer::class;
 
-    public function get(string $class, ...$args): object
+    public function __construct()
     {
-        if ($class === Proxy::class)
-            return $this->bus;
+        $this->testGroup();
+        $this->testId();
+    }
 
-        if ($class === Content::class)
-            return new ContentMock;
+    public function testGroup(): void
+    {
+        $config = [];
 
-        return parent::get($class, ...$args);
+        Normalizer::normalize(["t", "g", "i"], $config);
+
+        if ($config !== ["group" => "g", "id" => "i"])
+            $this->handleFailedTest();
+    }
+
+    public function testId(): void
+    {
+        $config = [];
+
+        Normalizer::normalize(["t", "i"], $config);
+
+        if ($config !== ["id" => "i"])
+            $this->handleFailedTest();
     }
 }

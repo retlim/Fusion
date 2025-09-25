@@ -19,28 +19,37 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
 
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Logic;
-use Valvoid\Fusion\Log\Events\Infos\Content;
+use Closure;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BoxMock extends Box
+class FileMock extends File
 {
-    public BusMock $bus;
-    public Logic $dir;
+    public Closure $put;
+    public Closure $exists;
+    public Closure $is;
+    public Closure $get;
 
-    public function get(string $class, ...$args): object
+    public function put(string $file, mixed $data): int|false
     {
-        if ($class === Proxy::class)
-            return $this->bus;
+        return call_user_func($this->put, $file, $data);
+    }
 
-        if ($class === Content::class)
-            return new ContentMock;
+    public function exists(string $file): bool
+    {
+        return call_user_func($this->exists, $file);
+    }
 
-        return parent::get($class, ...$args);
+    public function is(string $file): bool
+    {
+        return call_user_func($this->is, $file);
+    }
+
+    public function get(string $file): string|false
+    {
+        return call_user_func($this->get, $file);
     }
 }
