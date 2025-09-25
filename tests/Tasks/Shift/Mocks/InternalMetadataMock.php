@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Metadata\Internal\Internal;
 use Valvoid\Fusion\Metadata\Internal\Category;
 
@@ -28,6 +29,9 @@ use Valvoid\Fusion\Metadata\Internal\Category;
  */
 class InternalMetadataMock extends Internal
 {
+    public Closure $delete;
+    public Closure $update;
+
     public function __construct(
         public Category $category,
         public array $content){}
@@ -45,5 +49,17 @@ class InternalMetadataMock extends Internal
     public function getId(): string
     {
         return $this->content["id"];
+    }
+
+    public function onDelete(): bool
+    {
+        call_user_func($this->delete);
+        return true;
+    }
+
+    public function onUpdate(): bool
+    {
+        call_user_func($this->update);
+        return true;
     }
 }

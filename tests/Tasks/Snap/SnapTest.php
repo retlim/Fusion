@@ -319,5 +319,4 @@ class SnapTest extends Test
             $this->handleFailedTest();
         }
     }
-
 }
