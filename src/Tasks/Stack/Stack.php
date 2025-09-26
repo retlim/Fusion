@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,19 +19,20 @@
 
 namespace Valvoid\Fusion\Tasks\Stack;
 
-use Valvoid\Fusion\Dir\Dir;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Infos\Content;
-use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Group\Group as GroupProxy;
+use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalMetaCategory;
 use Valvoid\Fusion\Metadata\Internal\Internal;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 
 /**
- * Stack task.
+ * Stack task to merge individual packages.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
@@ -42,31 +43,52 @@ class Stack extends Task
     private array $metas = [];
 
     /**
+     * Constructs the task.
+     *
+     * @param Box $box Dependency injection container.
+     * @param GroupProxy $group Tasks group.
+     * @param LogProxy $log Event log.
+     * @param DirProxy $directory Current working directory.
+     * @param array $config Task config.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly GroupProxy $group,
+        private readonly LogProxy $log,
+        private readonly DirProxy $directory,
+        array $config)
+    {
+        parent::__construct($config);
+    }
+
+    /**
      * Executes the task.
      *
      * @throws Error Internal error.
      */
     public function execute(): void
     {
-        Log::info("stack new state");
+        $this->log->info("stack new state");
 
-        if (!Group::hasDownloadable())
+        if (!$this->group->hasDownloadable())
             return;
 
-        $stateDir = Dir::getStateDir();
-        $packageDir = Dir::getPackagesDir();
-        $this->metas = Group::getExternalMetas();
-        $rootMetadata = Group::getExternalRootMetadata() ??
-            Group::getInternalRootMetadata();
+        $stateDir = $this->directory->getStateDir();
+        $packageDir = $this->directory->getPackagesDir();
+        $this->metas = $this->group->getExternalMetas();
+        $rootMetadata = $this->group->getExternalRootMetadata() ??
+            $this->group->getInternalRootMetadata();
 
-        Dir::createDir($stateDir);
-        Log::info(new Content($rootMetadata->getContent()));
-        Dir::rename("$packageDir/" . $rootMetadata->getId(),
+        $this->directory->createDir($stateDir);
+        $this->log->info(
+            $this->box->get(Content::class,
+                content: $rootMetadata->getContent()));
+        $this->directory->rename("$packageDir/" . $rootMetadata->getId(),
             $stateDir
         );
 
         // nested internal
-        foreach (Group::getInternalMetas() as $id => $meta) {
+        foreach ($this->group->getInternalMetas() as $id => $meta) {
             $category = $meta->getCategory();
 
             if ($category == InternalMetaCategory::OBSOLETE)
@@ -78,7 +100,9 @@ class Stack extends Task
             if (!$dir)
                 continue;
 
-            Log::info(new Content($meta->getContent()));
+            $this->log->info(
+                $this->box->get(Content::class,
+                    content: $meta->getContent()));
 
             // take new directory
             if ($category == InternalMetaCategory::MOVABLE)
@@ -86,25 +110,27 @@ class Stack extends Task
 
             $to = $stateDir . $dir;
 
-            Dir::createDir($to);
-            Dir::rename("$packageDir/$id", $to);
+            $this->directory->createDir($to);
+            $this->directory->rename("$packageDir/$id", $to);
         }
 
         // nested external
         foreach ($this->metas as $id => $meta) {
             if ($meta->getCategory() == ExternalMetaCategory::DOWNLOADABLE &&
                 $meta->getDir()) {
-                Log::info(new Content($meta->getContent()));
+                $this->log->info(
+                    $this->box->get(Content::class,
+                        content: $meta->getContent()));
 
                 $to = $stateDir . $meta->getDir();
 
-                Dir::createDir($to);
-                Dir::rename("$packageDir/$id", $to);
+                $this->directory->createDir($to);
+                $this->directory->rename("$packageDir/$id", $to);
             }
         }
 
         // trigger lifecycle callbacks
-        $this->triggerLifecycleCallbacks(Group::getImplication());
+        $this->triggerLifecycleCallbacks($this->group->getImplication());
 
         // root fallback
         // no recursive or source

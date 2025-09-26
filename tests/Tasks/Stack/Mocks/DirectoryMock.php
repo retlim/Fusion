@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,49 +19,46 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Stack\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Dir\Proxy;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class DirMock implements Proxy
+class DirectoryMock implements Proxy
 {
-    public string $stateDir = "state";
-    public string $packagesDir = "packages";
-    // state
-    public array $structure = [];
-
-    public array $errors = [];
+    public Closure $state;
+    public Closure $packages;
+    public Closure $create;
+    public Closure $rename;
 
     public function getStateDir(): string
     {
-        return $this->stateDir;
+        return call_user_func($this->state);
     }
 
     public function getPackagesDir(): string
     {
-        return $this->packagesDir;
+        return call_user_func($this->packages);
     }
 
-    public function createDir(string $dir, int $permissions): void
+    public function createDir(string $dir, int $permissions = 0755): void
     {
-        $this->structure[$dir] = [];
+        call_user_func($this->create, $dir, $permissions);
     }
 
     public function rename(string $from, string $to): void
     {
-        $this->structure[$to] = [
-            "from" => $from,
-            "to" => $to
-        ];
+        call_user_func($this->rename, $from, $to);
     }
 
-    public function getCacheDir(): string { return ""; }
-    public function getOtherDir(): string { return ""; }
-    public function getRootDir(): string { return ""; }
-    public function getTaskDir(): string { return ""; }
-    public function copy(string $from, string $to): void {}
     public function delete(string $file): void {}
     public function clear(string $dir, string $path): void {}
+    public function copy(string $from, string $to): void {}
+    public function getTaskDir(): string {return "";}
+    public function getOtherDir(): string {return "";}
+    public function getRootDir(): string {return "";}
+    public function getCacheDir(): string {return "";}
+
 }

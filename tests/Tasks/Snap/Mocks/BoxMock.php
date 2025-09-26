@@ -32,8 +32,6 @@ use Valvoid\Fusion\Log\Events\Infos\Content;
 class BoxMock extends Box
 {
     public BusMock $bus;
-    public GroupMock $group;
-    public LogMock $log;
     public function get(string $class, ...$args): object
     {
         if ($class === Proxy::class)
