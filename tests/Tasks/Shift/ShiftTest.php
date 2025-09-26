@@ -712,8 +712,6 @@ class ShiftTest extends Test
             };
             $task->execute();
 
-            #var_dump();
-
             if ($onUpdate != ["i0"] ||
                 $onDelete != ["i2", "i3"] ||
                 $onInstall != ["i1", "i2"] ||
@@ -742,6 +740,7 @@ class ShiftTest extends Test
                     "/tmp/state/di1",
                     "/tmp/state/di2"] ||
                 $exists != [
+                    "/root/c",
                     "/root/di1",
                     "/root/di1/d0",
                     "/root/di2",] ||
@@ -1150,6 +1149,7 @@ class ShiftTest extends Test
                     "/tmp/state/deps/valvoid/fusion/d1->$root/deps/valvoid/fusion/d1",
                     "/tmp/state/deps/valvoid/fusion/f5->$root/deps/valvoid/fusion/f5"] ||
                 $exists != [
+                    "$root/c",
                     "$root/deps/valvoid/fusion",
                     "$root/deps/valvoid/fusion/d1"] ||
                 $get != ["/tmp/state/deps/valvoid/fusion/fusion"] ||
