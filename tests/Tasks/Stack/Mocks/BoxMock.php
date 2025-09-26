@@ -21,6 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Stack\Mocks;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Log\Events\Infos\Content;
 
 /**
  * Mocked container.
@@ -31,23 +32,14 @@ use Valvoid\Fusion\Bus\Proxy\Proxy;
 class BoxMock extends Box
 {
     public BusMock $bus;
-    public GroupMock $group;
-    public LogMock $log;
-    public DirMock $dir;
 
     public function get(string $class, ...$args): object
     {
         if ($class === Proxy::class)
             return $this->bus;
 
-        if ($class === \Valvoid\Fusion\Group\Group::class)
-            return $this->group;
-
-        if ($class === \Valvoid\Fusion\Log\Proxy::class)
-            return $this->log;
-
-        if ($class === \Valvoid\Fusion\Dir\Proxy::class)
-            return $this->dir;
+        if ($class === Content::class)
+            return new ContentMock;
 
         return parent::get($class, ...$args);
     }

@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,14 @@ namespace Valvoid\Fusion\Tests\Tasks\Stack;
 
 use Exception;
 use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
+use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
 use Valvoid\Fusion\Tasks\Stack\Stack;
 use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\BoxMock;
-use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\BusMock;
-use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\DirMock;
+use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\DirectoryMock;
+use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\ExternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\GroupMock;
+use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\InternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
@@ -44,86 +47,124 @@ class StackTest extends Test
         Box::class
     ];
 
-    public BoxMock $box;
+    private BoxMock $box;
+    private LogMock $log;
 
     public function __construct()
     {
         $this->box = new BoxMock;
-        $this->box->group = new GroupMock;
-        $this->box->bus = new BusMock;
-        $this->box->log = new LogMock;
-        $this->box->dir = new DirMock;
+        $this->log = new LogMock;
 
-        try {
-
-            // set up
-            (new Stack([]))->execute();
-
-            // test
-            $this->testStateStructure();
-            $this->testLifecycle();
-
-
-        } catch (Exception) {
-            $this->handleFailedTest();
-        }
+        $this->test();
 
         $this->box::unsetInstance();
     }
 
-    public function testStateStructure(): void
+    public function test(): void
     {
-        if ($this->box->dir->structure === [
+        try {
+            $directory = new DirectoryMock;
+            $group = new GroupMock;
+            $stack = new Stack(
+                box: $this->box,
+                group: $group,
+                log: $this->log,
+                directory: $directory,
+                config: []
+            );
 
-            // internal root
-            "state" => [
-                "from"=> "packages/metadata1",
-                "to" => "state"
-            ],
+            $rename =
+            $onCopy =
+            $onDownload =
+            $create = [];
+            $directory->state = function () {return "/tmp/state";};
+            $directory->packages = function () {return "/tmp/packages";};
+            $group->hasDownloadable = true;
+            $group->implication = [
+                "i3" => ["implication" => []],
+                "i4" => ["implication" => [
+                    "i2" => ["implication" => []]
+                ]]
+            ];
 
-            // moveable
-            "state/deps/external/metadata3" => [
-                "from" => "packages/metadata3",
-                "to" => "state/deps/external/metadata3"
-            ],
+            $group->internalMetas["i0"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE, [
+                "id" => "i0",
+                "dir" => "",
+            ]);
 
-            // recycle
-            "state/whatever/metadata4" => [
-                "from" => "packages/metadata4",
-                "to" => "state/whatever/metadata4"
-            ],
-            "state/whatever/metadata5" => [
-                "from" => "packages/metadata5",
-                "to" => "state/whatever/metadata5"
-            ],
+            $group->internalMetas["i0"]->copy = function () use (&$onCopy) {
+                $onCopy[] = "i0";
+                return true;
+            };
+            $group->internalRoot = $group->internalMetas["i0"];
+            $group->internalMetas["i1"] = new InternalMetadataMock(
+                InternalCategory::OBSOLETE, [
+                "dir" => "/deps/d1",
+            ]);
 
-            // download
-            "state/deps/metadata6"=> [
-                "from" => "packages/metadata6",
-                "to" => "state/deps/metadata6"
-            ]
-        ])
-            return;
+            $group->internalMetas["i2"] = new InternalMetadataMock(
+                InternalCategory::MOVABLE, [
+                "dir" => "/deps/d2",
+            ]);
 
-        $this->handleFailedTest();
-    }
+            $group->internalMetas["i3"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE, [
+                "dir" => "/deps/d3",
+            ]);
 
-    public function testLifecycle(): void
-    {
-        // internal root copy inside state
-        foreach ($this->box->group->internalMetas as $id => $internalMeta)
-            if (($id == "metadata1" && $internalMeta->onCopy === false) ||
-                ($id != "metadata1" && $internalMeta->onCopy === true)) {
+            $group->externalMetas["i2"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT, [
+                "dir" => "/deps/d2",
+            ]);
+            $group->externalMetas["i2"]->copy = function () use (&$onCopy) {
+                $onCopy[] = "i2";
+                return true;
+            };
+            $group->externalMetas["i3"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT, [
+                "dir" => "/deps/d3",
+            ]);
+            $group->externalMetas["i3"]->copy = function () use (&$onCopy) {
+                $onCopy[] = "i3";
+                return true;
+            };
+            $group->externalMetas["i4"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE, [
+                "dir" => "/deps/d4",
+            ]);
+            $group->externalMetas["i4"]->download = function () use (&$onDownload) {
+                $onDownload[] = "i4";
+                return true;
+            };
+            $directory->create = function (string $file) use (&$create) {
+                $create[] = $file;
+            };
+
+            $directory->rename = function (string $from, string $to) use (&$rename) {
+                $rename[] = "$from->$to";
+            };
+
+            $stack->execute();
+
+            if ($create != [
+                    "/tmp/state",
+                    "/tmp/state/deps/d2",
+                    "/tmp/state/deps/d3",
+                    "/tmp/state/deps/d4",
+                ] ||
+                $onDownload != ["i4"] ||
+                $onCopy != ["i3", "i2", "i0"] ||
+                $rename != [
+                    "/tmp/packages/i0->/tmp/state",
+                    "/tmp/packages/i2->/tmp/state/deps/d2",
+                    "/tmp/packages/i3->/tmp/state/deps/d3",
+                    "/tmp/packages/i4->/tmp/state/deps/d4"
+                ])
                 $this->handleFailedTest();
-                break;
-            }
 
-        // external deps
-        foreach ($this->box->group->externalMetas as $id => $externalMeta)
-            if (($id == "metadata6" && $externalMeta->onDownload === false) ||
-                ($id != "metadata6" && $externalMeta->onCopy === false)) {
-                $this->handleFailedTest();
-                break;
-            }
+        } catch (Exception) {
+            $this->handleFailedTest();
+        }
     }
 }

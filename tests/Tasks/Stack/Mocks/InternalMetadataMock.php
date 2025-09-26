@@ -20,21 +20,43 @@
 namespace Valvoid\Fusion\Tests\Tasks\Stack\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Metadata\Internal\Internal;
+use Valvoid\Fusion\Metadata\Internal\Category;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BusMock implements Proxy
+class InternalMetadataMock extends Internal
 {
-    public ?Event $event = null;
+    public Closure $copy;
+    public function __construct(
+        public Category $category,
+        public array $content,
+        public array $layers = []){}
 
-    public function addReceiver(string $id, Closure $callback, string ...$events): void{}
-    public function broadcast(Event $event): void
+    public function getContent(): array
     {
-        $this->event = $event;
+        return $this->content;
     }
-    public function removeReceiver(string $id, string ...$events): void {}
+
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function getLayers(): array
+    {
+        return $this->layers;
+    }
+
+    public function getId(): string
+    {
+        return $this->content["id"];
+    }
+
+    public function onCopy(): bool
+    {
+        return call_user_func($this->copy);
+    }
 }
