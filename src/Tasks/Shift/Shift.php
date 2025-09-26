@@ -293,7 +293,14 @@ class Shift extends Task
                         $this->directory->getOtherDir()
                     ];
 
-                    $this->cleanUpDir($to);
+                    // temp files are now outside the cache dir
+                    // if this is a new build from fusion.json the
+                    // target dir may not exist yet
+                    if ($this->file->exists($to))
+                        $this->cleanUpDir($to);
+
+                    else $this->dir->create($to);
+
                     $this->copyDir($from, $to);
                 }
 
