@@ -49,15 +49,7 @@ class GroupMock implements Group
     }
     public function getInternalRootMetadata(): InternalMeta
     {
-        return new class extends InternalMeta {
-            public function __construct() {}
-            public function getStructureSources(): array
-            {
-                return [
-                    "" => ["metadata1"] // recursive
-                ];
-            }
-        };
+        return $this->internalMetas[-1];
     }
 
     public function getRootMetadata(): ExternalMeta|InternalMeta {

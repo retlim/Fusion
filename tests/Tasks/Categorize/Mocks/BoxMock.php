@@ -21,6 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Categorize\Mocks;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Log\Events\Infos\Content;
 
 /**
  * Mocked container.
@@ -38,11 +39,8 @@ class BoxMock extends Box
         if ($class === Proxy::class)
             return $this->bus;
 
-        if ($class === \Valvoid\Fusion\Group\Group::class)
-            return $this->group;
-
-        if ($class === \Valvoid\Fusion\Log\Proxy::class)
-            return $this->log;
+        if ($class === Content::class)
+            return new ContentMock;
 
         return parent::get($class, ...$args);
     }

@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@ namespace Valvoid\Fusion\Tests\Tasks\Categorize;
 use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
 use Valvoid\Fusion\Tasks\Categorize\Categorize;
+use Valvoid\Fusion\Tasks\Categorize\Config\Normalizer;
 use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\BoxMock;
-use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\ExternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\GroupMock;
 use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\InternalMetadataMock;
@@ -31,82 +31,76 @@ use Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Test case for the categorize task.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
 class CategorizeTest extends Test
 {
-    protected string|array $coverage = Categorize::class;
-    private GroupMock $group;
+    protected string|array $coverage = [
+        Categorize::class,
+
+        // ballast
+        Normalizer::class
+    ];
+
+    private BoxMock $box;
 
     public function __construct()
     {
-        $this->group = new GroupMock;
-        $box = new BoxMock;
-        $box->bus = new BusMock;
-        $box->group = $this->group;
-        $box->log = new LogMock;
-
-        $this->group->internalMetas["metadata1"] = new InternalMetadataMock([
-            "id" => "metadata1",
-            "name" => "metadata1",
-            "description" => "metadata1",
-            "source" => "metadata1",
-            "dir" => __DIR__,
-            "version" => "1.0.0"
-        ]);
-
-        $this->group->internalMetas["metadata2"] = new InternalMetadataMock([
-            "id" => "metadata2",
-            "name" => "metadata2",
-            "description" => "metadata2",
-            "source" => "metadata2",
-            "dir" => __DIR__,
-            "version" => "1.0.0"
-        ]);
-
-        $this->group->externalMetas["metadata1"] = new ExternalMetadataMock([
-            "id" => "metadata1",
-            "name" => "metadata1",
-            "description" => "metadata1",
-            "source" => "metadata1",
-            "dir" => __DIR__,
-            "version" => "1.0.1"
-        ]);
-
-        $this->group->externalMetas["metadata2"] = new ExternalMetadataMock([
-            "id" => "metadata2",
-            "name" => "metadata2",
-            "description" => "metadata2",
-            "source" => "metadata2",
-            "dir" => __DIR__ . "/whatever",
-            "version" => "1.0.0"
-        ]);
+        $this->box = new BoxMock;
 
         $this->testEfficientCategorization();
         $this->testRedundantCategorization();
 
-        $box::unsetInstance();
+        $this->box::unsetInstance();
     }
 
     public function testEfficientCategorization(): void
     {
-        // recycle
-        $categorize = new Categorize(["efficiently" => true]);
+        $group = new GroupMock;
+        $categorize = new Categorize(
+            box: $this->box,
+            group: $group,
+            log: new LogMock,
+            config: ["efficiently" => true]
+        );
+
+        $group->internalMetas["i0"] = new InternalMetadataMock([
+            "id" => "i0",
+            "dir" => "/d0",
+            "version" => "1.0.0"
+        ]);
+
+        $group->internalMetas["i1"] = new InternalMetadataMock([
+            "id" => "i1",
+            "dir" => "/d1",
+            "version" => "1.0.0"
+        ]);
+
+        $group->externalMetas["i0"] = new ExternalMetadataMock([
+            "id" => "i0",
+            "dir" => "/d0",
+            "version" => "1.0.1"
+        ]);
+
+        $group->externalMetas["i1"] = new ExternalMetadataMock([
+            "id" => "i1",
+            "dir" => "/d1/whatever",
+            "version" => "1.0.0"
+        ]);
+
 
         $categorize->execute();
 
-        foreach ($this->group->getInternalMetas() as $metadata) {
+        foreach ($group->getInternalMetas() as $metadata) {
 
             // assert diff version drop
-            if ($metadata->getId() == "metadata1" &&
+            if ($metadata->getId() == "i0" &&
                 $metadata->getCategory() === InternalCategory::OBSOLETE)
                 continue;
 
             // assert diff dir recycling
-            if ($metadata->getId() == "metadata2" &&
+            if ($metadata->getId() == "i1" &&
                 $metadata->getCategory() === InternalCategory::MOVABLE)
                 continue;
 
@@ -115,15 +109,15 @@ class CategorizeTest extends Test
             return;
         }
 
-        foreach ($this->group->getExternalMetas() as $metadata) {
+        foreach ($group->getExternalMetas() as $metadata) {
 
             // assert diff version download
-            if ($metadata->getId() == "metadata1" &&
+            if ($metadata->getId() == "i0" &&
                 $metadata->getCategory() === ExternalCategory::DOWNLOADABLE)
                 continue;
 
             // assert diff dir drop
-            if ($metadata->getId() == "metadata2" &&
+            if ($metadata->getId() == "i1" &&
                 $metadata->getCategory() === ExternalCategory::REDUNDANT)
                 continue;
 
@@ -135,13 +129,36 @@ class CategorizeTest extends Test
 
     public function testRedundantCategorization(): void
     {
-        // rebuild all
-        $categorize = new Categorize(["efficiently" => false]);
+        $group = new GroupMock;
+        $categorize = new Categorize(
+            box: $this->box,
+            group: $group,
+            log: new LogMock,
+            config: ["efficiently" => false]
+        );
+
+        $group->internalMetas["i0"] = new InternalMetadataMock([
+            "version" => "1.0.0"
+        ]);
+
+        $group->internalMetas["i1"] = new InternalMetadataMock([
+            "version" => "1.0.0"
+        ]);
+
+        $group->externalMetas["i0"] = new ExternalMetadataMock([
+            "dir" => "",
+            "version" => "1.0.1"
+        ]);
+
+        $group->externalMetas["i1"] = new ExternalMetadataMock([
+            "dir" => "/whatever",
+            "version" => "1.0.0"
+        ]);
 
         $categorize->execute();
 
         // assert internal drop
-        foreach ($this->group->getInternalMetas() as $metadata)
+        foreach ($group->getInternalMetas() as $metadata)
             if ($metadata->getCategory() !== InternalCategory::OBSOLETE) {
                 $this->handleFailedTest();
 
@@ -149,7 +166,7 @@ class CategorizeTest extends Test
             }
 
         // assert new external state
-        foreach ($this->group->getExternalMetas() as $metadata)
+        foreach ($group->getExternalMetas() as $metadata)
             if ($metadata->getCategory() !== ExternalCategory::DOWNLOADABLE) {
                 $this->handleFailedTest();
 

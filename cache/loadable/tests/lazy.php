@@ -208,6 +208,7 @@ return [
 	'Valvoid\Fusion\Tests\Tasks\Categorize\Config\InterpreterTest' => '/tests/Tasks/Categorize/Config/InterpreterTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\BoxMock' => '/tests/Tasks/Categorize/Mocks/BoxMock.php',
 	'Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\BusMock' => '/tests/Tasks/Categorize/Mocks/BusMock.php',
+	'Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\ContentMock' => '/tests/Tasks/Categorize/Mocks/ContentMock.php',
 	'Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\ExternalMetadataMock' => '/tests/Tasks/Categorize/Mocks/ExternalMetadataMock.php',
 	'Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\GroupMock' => '/tests/Tasks/Categorize/Mocks/GroupMock.php',
 	'Valvoid\Fusion\Tests\Tasks\Categorize\Mocks\InternalMetadataMock' => '/tests/Tasks/Categorize/Mocks/InternalMetadataMock.php',
