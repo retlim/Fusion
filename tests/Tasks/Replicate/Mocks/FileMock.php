@@ -17,12 +17,34 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
+namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
 
-use Valvoid\Fusion\Wrappers\Extension;
+use Closure;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ExtensionMock extends Extension {}
+class FileMock extends File
+{
+    public Closure $put;
+    public Closure $get;
+    public Closure $exists;
+
+    public function put(string $file, mixed $data): int|false
+    {
+        return call_user_func($this->put, $file, $data);
+    }
+
+    public function get(string $file): string|false
+    {
+        return call_user_func($this->get, $file);
+    }
+
+    public function exists(string $file): bool
+    {
+        return call_user_func($this->exists, $file);
+    }
+
+}

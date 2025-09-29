@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,34 +19,13 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
 
-use ReflectionClass;
-use ReflectionException;
-use Valvoid\Fusion\Metadata\Internal\Internal;
-use Valvoid\Fusion\Tasks\Group;
+use Valvoid\Fusion\Log\Events\Infos\Content;
 
 /**
- * Mocked internal and external metadata.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class MetadataMock
+class ContentMock extends Content
 {
-    public static function get(string $id): string
-    {
-        return json_encode([
-            "id" => "test/$id",
-            "name" => $id,
-            "description" => $id,
-            "version" => "1.0.0",
-            "structure" => [
-                "/cache" => "cache"
-            ],
-            "environment" => [
-                "php" => [
-                    "version" => "8.1.0",
-                ]
-            ]
-        ]);
-    }
+    public function __construct(){}
 }

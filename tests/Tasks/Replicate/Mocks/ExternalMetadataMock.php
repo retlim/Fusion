@@ -17,12 +17,32 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
+namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
 
-use Valvoid\Fusion\Wrappers\Extension;
+use Valvoid\Fusion\Metadata\External\External;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ExtensionMock extends Extension {}
+class ExternalMetadataMock extends External
+{
+    public function __construct(
+        public array $content,
+        public array $layers = []){}
+
+    public function getContent(): array
+    {
+        return $this->content;
+    }
+
+    public function getLayers(): array
+    {
+        return $this->layers;
+    }
+
+    public function getSource(): array
+    {
+        return $this->content["source"];
+    }
+}
