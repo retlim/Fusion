@@ -20,31 +20,37 @@
 namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Log\Events\Infos\Content;
-use Valvoid\Fusion\Metadata\External\Builder;
+use Valvoid\Fusion\Hub\Proxy\Proxy;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class BoxMock extends Box
+class HubMock implements Proxy
 {
-    public BusMock $bus;
-    public Closure $builder;
+    public Closure $version;
+    public Closure $metadata;
+    public Closure $execute;
+    public Closure $snapshot;
 
-    public function get(string $class, ...$args): object
+    public function addVersionsRequest(array $source): int
     {
-        if ($class === Proxy::class)
-            return $this->bus;
-
-        if ($class === Builder::class)
-            return call_user_func($this->builder, ...$args);
-
-        if ($class === Content::class)
-            return new ContentMock;
-
-        return parent::get($class, ...$args);
+        return call_user_func($this->version, $source);
     }
+
+    public function addMetadataRequest(array $source): int
+    {
+       return call_user_func($this->metadata, $source);
+    }
+
+    public function executeRequests(Closure $callback): void
+    {
+        call_user_func($this->execute, $callback);
+    }
+
+    public function addSnapshotRequest(array $source, string $path): int
+    {
+        return call_user_func($this->snapshot, $source, $path);
+    }
+    public function addArchiveRequest(array $source): int{return 0;}
 }

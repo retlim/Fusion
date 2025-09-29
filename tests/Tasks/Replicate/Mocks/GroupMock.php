@@ -35,7 +35,10 @@ class GroupMock implements Group
     public bool $hasDownloadable;
     public InternalMeta $internalRoot;
 
-    public function setImplication(array $implication): void{}
+    public function setImplication(array $implication): void
+    {
+        $this->implication = $implication;
+    }
 
     public function setExternalMetas(array $metas): void
     {

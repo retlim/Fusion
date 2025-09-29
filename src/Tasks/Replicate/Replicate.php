@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,11 @@
 
 namespace Valvoid\Fusion\Tasks\Replicate;
 
-use Valvoid\Fusion\Dir\Dir;
-use Valvoid\Fusion\Hub\Hub;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
+use Valvoid\Fusion\Group\Group as GroupProxy;
+use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata as MetadataResponse;
 use Valvoid\Fusion\Hub\Responses\Cache\Snapshot;
 use Valvoid\Fusion\Hub\Responses\Cache\Versions;
@@ -31,16 +34,14 @@ use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Log;
-use Valvoid\Fusion\Metadata\External\Builder as ExternalMetaBuilder;
 use Valvoid\Fusion\Metadata\External\Builder as ExternalMetadataBuilder;
 use Valvoid\Fusion\Metadata\External\External as ExternalMetadata;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
 use Valvoid\Fusion\Metadata\Metadata;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 use Valvoid\Fusion\Util\Reference\Normalizer;
-use Valvoid\Fusion\Util\Metadata\Structure;
+use Valvoid\Fusion\Wrappers\Extension;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Replicate task to clone nested metas.
@@ -75,6 +76,31 @@ class Replicate extends Task implements Interceptor
     private array $implication = [];
 
     /**
+     * Constructs the task.
+     *
+     * @param Box $box Dependency injection container.
+     * @param GroupProxy $group Tasks group.
+     * @param HubProxy $hub Hub.
+     * @param DirProxy $directory Current working directory.
+     * @param Extension $extension Standard extension logic wrapper.
+     * @param LogProxy $log Event log.
+     * @param File $file Standard file logic wrapper.
+     * @param array $config Task config.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly GroupProxy $group,
+        private readonly HubProxy $hub,
+        private readonly DirProxy $directory,
+        private readonly Extension $extension,
+        private readonly LogProxy $log,
+        private readonly File $file,
+        array $config)
+    {
+        parent::__construct($config);
+    }
+
+    /**
      * Executes the task.
      *
      * @throws InternalError Internal exception.
@@ -83,12 +109,12 @@ class Replicate extends Task implements Interceptor
      */
     public function execute(): void
     {
-        Log::info("replicate nested metas");
+        $this->log->info("replicate nested metas");
 
         // external root package
         // remote snapshot file
         if ($this->config["source"]) {
-            Group::setImplicationBreadcrumb(["replicate", "source"]);
+            $this->group->setImplicationBreadcrumb(["replicate", "source"]);
             $this->replicateExternalRoot($this->config["source"]);
 
         // internal imaged root source
@@ -97,7 +123,7 @@ class Replicate extends Task implements Interceptor
         } else {
 
             // placeholder or "real" one
-            $metadata = Group::getInternalRootMetadata();
+            $metadata = $this->group->getInternalRootMetadata();
             $sources = $metadata->getStructureSources();
 
             // recursive root source
@@ -116,8 +142,8 @@ class Replicate extends Task implements Interceptor
                 $this->replicateNestedRoots($metadata);
         }
 
-        Group::setImplication($this->implication);
-        Group::setExternalMetas($this->metas);
+        $this->group->setImplication($this->implication);
+        $this->group->setExternalMetas($this->metas);
     }
 
     /**
@@ -131,19 +157,20 @@ class Replicate extends Task implements Interceptor
     private function replicateExternalRoot(string $source): void
     {
         // parse inline source
-        $builder = new ExternalMetaBuilder("", $source);
+        $builder = $this->box->get(ExternalMetadataBuilder::class,
+            dir: "", source: $source);
 
-        Log::info("...");
+        $this->log->info("...");
 
         // request topmost version
-        $reqId = Hub::addVersionsRequest($builder->getParsedSource());
+        $reqId = $this->hub->addVersionsRequest($builder->getParsedSource());
         $this->requests[$reqId] = [
             "builder" => $builder,
             "source" => $source,
             "metas" => []
         ];
 
-        Hub::executeRequests(function (Versions $response) use ($builder) {
+        $this->hub->executeRequests(function (Versions $response) use ($builder) {
 
             // replace pattern reference with version
             // it's also a tag, commit, branch, ...
@@ -155,7 +182,7 @@ class Replicate extends Task implements Interceptor
 
         // metadata
         // implication root
-        $reqId = Hub::addMetadataRequest($builder->getNormalizedSource());
+        $reqId = $this->hub->addMetadataRequest($builder->getNormalizedSource());
         $this->roots = [$reqId];
         $this->requests[$reqId] = [
             "builder" => $builder,
@@ -163,7 +190,7 @@ class Replicate extends Task implements Interceptor
             "metas" => []
         ];
 
-        Hub::executeRequests(function (MetadataResponse $response) use ($builder) {
+        $this->hub->executeRequests(function (MetadataResponse $response) use ($builder) {
             $builder->addProductionLayer(
                 $response->getContent(),
                 $response->getFile()
@@ -179,7 +206,7 @@ class Replicate extends Task implements Interceptor
         );
 
         // get remote production snapshot file
-        $snapId = Hub::addSnapshotRequest($metadata->getSource(), $metadata->getStructureCache());
+        $snapId = $this->hub->addSnapshotRequest($metadata->getSource(), $metadata->getStructureCache());
         $this->requests[$snapId] = [
 
             // optional snapshot file path
@@ -187,7 +214,7 @@ class Replicate extends Task implements Interceptor
             "source" => $source
         ];
 
-        Hub::executeRequests(function (Snapshot $response) {
+        $this->hub->executeRequests(function (Snapshot $response) {
             $this->addSnapshot(
                 $response->getContent(),
                 $response->getFile()
@@ -234,10 +261,10 @@ class Replicate extends Task implements Interceptor
     private function replicateNestedRoots(InternalMetadata $metadata): void
     {
         foreach (["", ".dev", ".local"] as $filename) {
-            $file = Dir::getCacheDir() . "/snapshot$filename.json";
+            $file = $this->directory->getCacheDir() . "/snapshot$filename.json";
 
-            if (file_exists($file)) {
-                $snapshot = file_get_contents($file);
+            if ($this->file->exists($file)) {
+                $snapshot = $this->file->get($file);
 
                 if ($snapshot === false)
                     throw new InternalError(
@@ -253,7 +280,7 @@ class Replicate extends Task implements Interceptor
                 );
         }
 
-        Log::info("...");
+        $this->log->info("...");
 
         $this->addMetadataRequests($metadata, $this->roots, "");
         $this->buildRequests();
@@ -284,11 +311,11 @@ class Replicate extends Task implements Interceptor
                         "metas" => []
                     ];
 
-                    $builder = new ExternalMetadataBuilder(
+                    $builder = $this->box->get(ExternalMetadataBuilder::class,
 
                         // inherit or
                         // direct directory
-                        $directory ?: $dir, $source);
+                        dir: $directory ?: $dir, source: $source);
 
                     $packageId = $builder->getId();
                     $reference = $this->snapshot[$packageId] ??
@@ -304,7 +331,7 @@ class Replicate extends Task implements Interceptor
                     unset($metas["meta"]);
                     unset($this->requests["meta"]);
 
-                    $id = Hub::addMetadataRequest($builder->getNormalizedSource());
+                    $id = $this->hub->addMetadataRequest($builder->getNormalizedSource());
                     $metas[] = $id;
                     $this->requests[$id] = [
                         "builder" => $builder,
@@ -325,7 +352,7 @@ class Replicate extends Task implements Interceptor
 
         // recursive loop
         // add new request before queue "done" check
-        Hub::executeRequests(function (MetadataResponse $response) use ($environment)
+        $this->hub->executeRequests(function (MetadataResponse $response) use ($environment)
         {
             // parent
             $id = $response->getId();
@@ -362,8 +389,8 @@ class Replicate extends Task implements Interceptor
             $this->roots
         );
 
-        Group::setImplication($this->implication);
-        Group::setExternalMetas($this->metas);
+        $this->group->setImplication($this->implication);
+        $this->group->setExternalMetas($this->metas);
     }
 
     /**
@@ -405,7 +432,8 @@ class Replicate extends Task implements Interceptor
 
         // validate version and
         // modules
-        if (!Normalizer::getFilteredVersions($environment, $php["version"])) {
+        if (!$this->box->get(Normalizer::class)
+                ::getFilteredVersions($environment, $php["version"])) {
             $layers = $metadata->getLayers();
             $this->buildImplication();
 
@@ -414,13 +442,13 @@ class Replicate extends Task implements Interceptor
                 "\". The current PHP version \"" . $environment[0]["major"] . "." .
                 $environment[0]["minor"] . "." . $environment[0]["patch"].
                 "\" does not pass the pattern.",
-                Group::getPath($layers["object"]["source"]),
+                $this->group->getPath($layers["object"]["source"]),
                 array_key_first($layers),
                 ["environment", "php", "version"]
             );
         }
 
-        $extensions = get_loaded_extensions();
+        $extensions = $this->extension->getLoaded();
 
         foreach ($extensions as $key => $extension)
             $extensions[$key] = strtolower($extension);
@@ -433,13 +461,15 @@ class Replicate extends Task implements Interceptor
                 throw new EnvironmentError(
                     "Can't replicate the package \"" . $metadata->getId() .
                     "\". It requires the missing module \"$module\".",
-                    Group::getPath($layers["object"]["source"]),
+                    $this->group->getPath($layers["object"]["source"]),
                     array_key_first($layers),
                     ["environment", "php", "modules"]
                 );
             }
 
-        Log::info(new Content($metadata->getContent()));
+        $this->log->info(
+            $this->box->get(Content::class,
+                content: $metadata->getContent()));
     }
 
     /**
@@ -452,7 +482,7 @@ class Replicate extends Task implements Interceptor
         if ($event instanceof Request) {
             $this->buildImplication();
             $event->setPath(
-                Group::getPath(
+                $this->group->getPath(
                     $this->requests[$event->getId()]["source"]
                 )
             );
@@ -460,7 +490,7 @@ class Replicate extends Task implements Interceptor
         } elseif ($event instanceof MetadataError) {
             $this->buildImplication();
             $event->setPath(
-                Group::getPath(
+                $this->group->getPath(
                     $event->getSource()
                 )
             );

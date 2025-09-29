@@ -34,10 +34,10 @@ use Valvoid\Fusion\Wrappers\Dir;
 class Logic implements Proxy
 {
     /** @var string Constant package root dir. */
-    protected string $root;
+    private string $root;
 
     /** @var string Dynamic package cache dir. */
-    protected string $cache;
+    private string $cache;
 
     /**
      * Constructs the directory.
@@ -49,8 +49,8 @@ class Logic implements Proxy
      * @throws Error Internal error exception.
      */
     public function __construct(
-        protected Dir $dir,
-        protected File $file,
+        private readonly Dir $dir,
+        private readonly File $file,
         BusProxy $bus,
         array $config)
     {
