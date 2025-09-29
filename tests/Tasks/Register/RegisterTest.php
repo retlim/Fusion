@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,212 +23,308 @@ use Exception;
 use Valvoid\Fusion\Tasks\Register\Register;
 use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Tests\Tasks\Register\Mocks\BoxMock;
-use Valvoid\Fusion\Tests\Tasks\Register\Mocks\BusMock;
+use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
+use Valvoid\Fusion\Tests\Tasks\Register\Mocks\DirectoryMock;
 use Valvoid\Fusion\Tests\Tasks\Register\Mocks\ExternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Register\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Tasks\Register\Mocks\GroupMock;
 use Valvoid\Fusion\Tests\Tasks\Register\Mocks\InternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Register\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Integration test case for the register task.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
 class RegisterTest extends Test
 {
     protected string|array $coverage = Register::class;
-
-    private int $time;
+    private BoxMock $box;
 
     public function __construct()
     {
-        $box = new BoxMock;
-        $group = new GroupMock;
-        $box->group = $group;
-        $group->hasDownloadable = false;
-        $box->bus = new BusMock;
-        $box->log = new LogMock;
+        $this->box = new BoxMock;
 
-        try {
-            $this->time = time();
-            $task = new Register([]);
-            $group->implication = [
-                "metadata2" => [ // no external root
-                    "implication" => []
-                ], "metadata3" => [
-                    "implication" => []
-                ]];
+        $this->testRefreshAutoloader();
+        $this->testNewStateAutoloader();
 
-            $group->internalMetas["metadata1"] = new InternalMetadataMock([
-                "id" => "metadata1",
-                "name" => "metadata1",
-                "description" => "metadata1",
-                "source" => __DIR__ . "/Mocks/package",
-                "dir" => "", // relative to root dir
-                "version" => "1.0.0",
-                "structure" => [
-                    "cache" => "/cache",
-                    "namespaces" => [],
-                ]
-            ]);
-
-            $group->internalRoot = $group->internalMetas["metadata1"];
-            $group->internalMetas["metadata2"] = new InternalMetadataMock([
-                "id" => "metadata2",
-                "name" => "metadata2",
-                "description" => "metadata2",
-                "source" => __DIR__ . "/Mocks/package/dependencies/metadata2",
-                "dir" => "/dependencies/metadata2", // relative to root dir
-                "version" => "1.0.0",
-                "structure" => [
-                    "cache" => "/cache",
-                    "namespaces" => []
-                ]
-            ]);
-
-            $group->internalMetas["metadata3"] = new InternalMetadataMock([
-                "id" => "metadata3",
-                "name" => "metadata3",
-                "description" => "metadata3",
-                "source" => __DIR__ . "/Mocks/package/dependencies/metadata3",
-                "dir" => "/dependencies/metadata3", // relative to root dir
-                "version" => "1.0.0",
-                "structure" => [
-                    "cache" => "/cache",
-                    "namespaces" => []
-                ]
-            ]);
-
-            $task->execute();
-            $this->testRefreshAutoloader();
-
-            $group = new GroupMock;
-            $box->group = $group;
-            $group->hasDownloadable = true;
-            $group->implication = [
-                "metadata1" => [
-                    "implication" => [
-                        "metadata2" => [
-                            "implication" => []
-                        ],
-                        "metadata3" => [
-                            "implication" => [
-                                "metadata2" => [
-                                    "implication" => []
-                                ]
-                            ]
-                        ],
-                    ]
-                ]
-            ];
-            $group->internalMetas = ["metadata1" => new InternalMetadataMock([
-                "id" => "metadata1",
-                "name" => "metadata1",
-                "description" => "metadata1",
-                "source" => __DIR__ . "/Mocks/package",
-                "dir" => "", // relative to root dir
-                "version" => "1.0.0",
-                "structure" => [
-                    "namespaces" => [],
-                    "cache" => "/cache",
-                    "extensions" => [],
-                    "sources" => [
-                        "/dependencies" => []
-                    ]
-                ]
-            ])];
-            $group->internalRoot = $group->internalMetas["metadata1"];
-            $group->externalMetas["metadata1"] = new ExternalMetadataMock(
-                ExternalCategory::DOWNLOADABLE,[
-                "id" => "metadata1",
-                "name" => "metadata1",
-                "description" => "metadata1",
-                "source" => "/package",
-                "dir" => "", // relative to root dir
-                "version" => "1.0.0",
-                "structure" => [
-                    "cache" => "/cache",
-                    "namespaces" => [],
-                    "extensions" => [],
-                    "sources" => [
-                        "/dependencies" => [
-                            "metadata2",
-                            "metadata3"
-                        ]
-                    ]
-                ]
-            ]);
-
-            $group->externalMetas["metadata2"] = new ExternalMetadataMock(
-                ExternalCategory::DOWNLOADABLE,[
-                "id" => "metadata2",
-                "name" => "metadata2",
-                "description" => "metadata2",
-                "source" => "/package/dependencies/metadata2",
-                "dir" => "/dependencies/metadata2",
-                "version" => "1.0.0",
-                "structure" => [
-                    "namespaces" => [],
-                    "cache" => "/cache",
-                    "extensions" => [
-                        "/extensions"
-                    ],
-                    "sources" => []
-                ]
-            ]);
-
-            $group->externalMetas["metadata3"] = new ExternalMetadataMock(
-                ExternalCategory::DOWNLOADABLE,[
-                "id" => "metadata3",
-                "name" => "metadata3",
-                "description" => "metadata3",
-                "source" => "whatever/metadata3",
-                "dir" => "/dependencies/metadata3",
-                "version" => "1.0.0",
-                "structure" => [
-                    "cache" => "/cache",
-                    "extensions" => [],
-                    "namespaces" => [],
-                    "sources" => [
-                        "/dependencies" => ["metadata2"]
-                    ]
-                ]
-            ]);
-            $task = new Register([]);
-
-            $task->execute();
-            $this->testNewStateAutoloader();
-            $box::unsetInstance();
-
-        } catch (Exception $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-            echo "\n " . $exception->getMessage();
-
-            $box::unsetInstance();
-
-            $this->result = false;
-        }
+        $this->box::unsetInstance();
     }
 
     public function testRefreshAutoloader(): void
     {
-        $autoloader = __DIR__ . "/Mocks/package/cache/Autoloader.php";
+        try {
+            $group = new GroupMock;
+            $directory = new DirectoryMock;
+            $file = new FileMock;
+            $register = new Register(
+                box: $this->box,
+                group: $group,
+                directory: $directory,
+                log: new LogMock,
+                file: $file,
+                config: []
+            );
 
-        if (is_file($autoloader) && filemtime($autoloader) >= $this->time)
-            return;
+            $group->hasDownloadable = false;
+            $group->internalMetas["i0"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE, [
+                "source" => "/s0",
+                "dir" => "",
+                "structure" => [
+                    "cache" => "/c0",
+                ]
+            ]);
 
-        $this->handleFailedTest();
+            $group->internalRoot = $group->internalMetas["i0"];
+            $group->internalMetas["i1"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE, [
+                "source" => "/s1",
+                "dir" => "/deps/i1",
+                "structure" => [
+                    "cache" => "/c1"
+                ]
+            ]);
+
+            $group->internalMetas["i2"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE, [
+                "source" => "/s2",
+                "dir" => "/deps/i2",
+                "structure" => [
+                    "cache" => "/c2"
+                ]
+            ]);
+
+            $group->internalMetas["i3"] = new InternalMetadataMock(
+                InternalCategory::OBSOLETE, []);
+
+            $get =
+            $create =
+            $put =
+            $exists =
+            $require = [];
+            $directory->cache = function () {return "/#";};
+            $directory->create = function (string $dir) use (&$create) {
+                $create[] = $dir;
+            };
+
+            $file->get = function (string $file) use (&$get) {
+                $get[] = $file;
+                return "ASAP = [];LAZY = []";
+            };
+
+            $file->put = function (string $file, mixed $data) use (&$put) {
+                $put[] = [
+                    "file" => $file,
+                    "data" => $data
+                ];
+                return 1;
+            };
+
+            $file->exists = function (string $file) use (&$exists) {
+                $exists[] = $file;
+                return true;
+            };
+
+            $file->require = function (string $file) use (&$require) {
+                $require[] = $file;
+                if ($file == "/s0/c0/loadable/lazy.php")
+                    return ["I0" => "/d0/f0.php"];
+
+                if ($file == "/s0/c0/loadable/asap.php")
+                    return ["/f1.php"];
+
+                if ($file == "/s1/c1/loadable/lazy.php")
+                    return ["I1" => "/d1/f2.php"];
+
+                if ($file == "/s1/c1/loadable/asap.php")
+                    return ["/f3.php"];
+
+                if ($file == "/s2/c2/loadable/lazy.php")
+                    return ["I2" => "/d2/f4.php"];
+
+                if ($file == "/s2/c2/loadable/asap.php")
+                    return ["/f5.php"];
+
+                return [];
+            };
+
+            $register->execute();
+
+            if ($require != [
+                    "/s0/c0/loadable/lazy.php",
+                    "/s0/c0/loadable/asap.php",
+                    "/s1/c1/loadable/lazy.php",
+                    "/s1/c1/loadable/asap.php",
+                    "/s2/c2/loadable/lazy.php",
+                    "/s2/c2/loadable/asap.php"] ||
+                $exists != [
+                    "/s0/c0/loadable/lazy.php",
+                    "/s0/c0/loadable/asap.php",
+                    "/s1/c1/loadable/lazy.php",
+                    "/s1/c1/loadable/asap.php",
+                    "/s2/c2/loadable/lazy.php",
+                    "/s2/c2/loadable/asap.php"] ||
+                $create != ["/#"] ||
+                $get != [dirname(__DIR__, 3) .
+                    "/src/Tasks/Register/Autoloader.php"] ||
+                $put != [[
+                    "file" => "/#/Autoloader.php",
+                    "data" => "ASAP = [" .
+                        "\n\t\t'/f1.php'," .
+		                "\n\t\t'/deps/i1/f3.php'," .
+		                "\n\t\t'/deps/i2/f5.php'," .
+                    "\n\t];LAZY = [" .
+                        "\n\t\t'I0' => '/d0/f0.php'," .
+                        "\n\t\t'I1' => '/deps/i1/d1/f2.php'," .
+                        "\n\t\t'I2' => '/deps/i2/d2/f4.php'," .
+	                "\n\t]"
+                ]])
+                $this->handleFailedTest();
+
+        } catch (Exception) {
+            $this->handleFailedTest();
+        }
     }
 
     public function testNewStateAutoloader(): void
     {
-        $autoloader = __DIR__ . "/Mocks/package/cache/packages/metadata1/cache/Autoloader.php";
+        try {
+            $group = new GroupMock;
+            $directory = new DirectoryMock;
+            $file = new FileMock;
+            $register = new Register(
+                box: $this->box,
+                group: $group,
+                directory: $directory,
+                log: new LogMock,
+                file: $file,
+                config: []
+            );
 
-        if (is_file($autoloader) && filemtime($autoloader) >= $this->time)
-            return;
+            $group->hasDownloadable = true;
+            $group->internalMetas = ["i0" => new InternalMetadataMock(
+                InternalCategory::OBSOLETE, [
+                "id" => "i0",
+                "dir" => "",
+                "structure" => [
+                    "cache" => "/c0"
+                ]
+            ])];
+            $group->internalRoot = $group->internalMetas["i0"];
+            $group->externalMetas["i0"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE,[
+                "dir" => "",
+                "structure" => [
+                    "cache" => "/c0",
+                ]
+            ]);
 
-        $this->handleFailedTest();
+            $group->externalMetas["i1"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE,[
+                "dir" => "/deps/i1",
+                "structure" => [
+                    "cache" => "/c1"
+                ]
+            ]);
+
+            $group->externalMetas["i2"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE,[
+                "dir" => "/deps/i2",
+                "structure" => [
+                    "cache" => "/c2",
+                ]
+            ]);
+
+            $get =
+            $create =
+            $put =
+            $exists =
+            $require = [];
+            $directory->packages = function () {return "/#";};
+            $directory->create = function (string $dir) use (&$create) {
+                $create[] = $dir;
+            };
+
+            $file->get = function (string $file) use (&$get) {
+                $get[] = $file;
+
+                return "ASAP = [];LAZY = []";
+            };
+
+            $file->put = function (string $file, mixed $data) use (&$put) {
+                $put[] = [
+                    "file" => $file,
+                    "data" => $data
+                ];
+
+                return 1;
+            };
+
+            $file->exists = function (string $file) use (&$exists) {
+                $exists[] = $file;
+                return true;
+            };
+
+            $file->require = function (string $file) use (&$require) {
+                $require[] = $file;
+
+                if ($file == "/#/i0/c0/loadable/lazy.php")
+                    return ["I0" => "/d0/f0.php"];
+
+                if ($file == "/#/i0/c0/loadable/asap.php")
+                    return ["/f1.php"];
+
+                if ($file == "/#/i1/c1/loadable/lazy.php")
+                    return ["I1" => "/d1/f2.php"];
+
+                if ($file == "/#/i1/c1/loadable/asap.php")
+                    return ["/f3.php"];
+
+                if ($file == "/#/i2/c2/loadable/lazy.php")
+                    return ["I2" => "/d2/f4.php"];
+
+                if ($file == "/#/i2/c2/loadable/asap.php")
+                    return ["/f5.php"];
+
+                return [];
+            };
+
+            $register->execute();
+
+            if ($require != [
+                    "/#/i0/c0/loadable/lazy.php",
+                    "/#/i0/c0/loadable/asap.php",
+                    "/#/i1/c1/loadable/lazy.php",
+                    "/#/i1/c1/loadable/asap.php",
+                    "/#/i2/c2/loadable/lazy.php",
+                    "/#/i2/c2/loadable/asap.php"] ||
+                $exists != [
+                    "/#/i0/c0/loadable/lazy.php",
+                    "/#/i0/c0/loadable/asap.php",
+                    "/#/i1/c1/loadable/lazy.php",
+                    "/#/i1/c1/loadable/asap.php",
+                    "/#/i2/c2/loadable/lazy.php",
+                    "/#/i2/c2/loadable/asap.php"] ||
+                $create != ["/#/i0/c0"] ||
+                $get != [dirname(__DIR__, 3) .
+                    "/src/Tasks/Register/Autoloader.php"] ||
+                $put != [[
+                    "file" => "/#/i0/c0/Autoloader.php",
+                    "data" => "ASAP = [" .
+                        "\n\t\t'/f1.php'," .
+                        "\n\t\t'/deps/i1/f3.php'," .
+                        "\n\t\t'/deps/i2/f5.php'," .
+                        "\n\t];LAZY = [" .
+                        "\n\t\t'I0' => '/d0/f0.php'," .
+                        "\n\t\t'I1' => '/deps/i1/d1/f2.php'," .
+                        "\n\t\t'I2' => '/deps/i2/d2/f4.php'," .
+                        "\n\t]"
+                ]])
+                $this->handleFailedTest();
+
+        } catch (Exception) {
+            $this->handleFailedTest();
+        }
     }
 }

@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,30 +19,53 @@
 
 namespace Valvoid\Fusion\Tasks\Register;
 
-use Valvoid\Fusion\Dir\Dir;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Infos\Content;
-use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalMetaCategory;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
- * Register task.
+ * Register task to create common autoloader.
  *
  * @Copyright Valvoid
  * @license GNU GPLv3
  */
 class Register extends Task
 {
+    /**
+     * Constructs the task.
+     *
+     * @param Box $box Dependency injection container.
+     * @param GroupProxy $group Tasks group.
+     * @param DirProxy $directory Current working directory.
+     * @param LogProxy $log Event log.
+     * @param File $file Standard file logic wrapper.
+     * @param array $config Task config.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly GroupProxy $group,
+        private readonly DirProxy $directory,
+        private readonly LogProxy $log,
+        private readonly File $file,
+        array $config)
+    {
+        parent::__construct($config);
+    }
+
     /** Executes the task. */
     public function execute(): void
     {
         // optional
         // register new state
-        Group::hasDownloadable() ?
+        $this->group->hasDownloadable() ?
             $this->registerNewState() :
             $this->registerCurrentState();
     }
@@ -50,14 +73,17 @@ class Register extends Task
     /** Register external new state. */
     private function registerNewState(): void
     {
-        Log::info("register loadable, recyclable, and movable packages");
+        $this->log->info("register loadable, recyclable, and movable packages");
 
-        $packagesDir = Dir::getPackagesDir();
+        $packagesDir = $this->directory->getPackagesDir();
         $lazy = $asap = [];
 
-        foreach (Group::getExternalMetas() as $id => $meta)
+        foreach ($this->group->getExternalMetas() as $id => $meta)
             if ($meta->getCategory() == ExternalMetaCategory::DOWNLOADABLE) {
-                Log::info(new Content($meta->getContent()));
+                $this->log->info(
+                    $this->box->get(Content::class,
+                        content: $meta->getContent()));
+
                 $this->appendInflated($lazy, $asap,
 
                     // absolute loadable direction
@@ -69,9 +95,12 @@ class Register extends Task
                 );
             }
 
-        foreach (Group::getInternalMetas() as $id => $meta)
+        foreach ($this->group->getInternalMetas() as $id => $meta)
             if ($meta->getCategory() != InternalMetaCategory::OBSOLETE) {
-                Log::info(new Content($meta->getContent()));
+                $this->log->info(
+                    $this->box->get(Content::class,
+                        content: $meta->getContent()));
+
                 $this->appendInflated($lazy, $asap,
 
                     // absolute loadable direction
@@ -83,27 +112,30 @@ class Register extends Task
                 );
             }
 
-        $rootMeta = Group::getExternalRootMetadata() ??
-            Group::getInternalRootMetadata();
+        $rootMeta = $this->group->getExternalRootMetadata() ??
+            $this->group->getInternalRootMetadata();
 
         $path = $rootMeta->getStructureCache();
 
-        $this->writeAutoloader(Dir::getPackagesDir() . "/" .
+        $this->writeAutoloader($this->directory->getPackagesDir() . "/" .
             $rootMeta->getId() . $path, $path, $asap, $lazy);
     }
 
     /** Register internal state. */
     private function registerCurrentState(): void
     {
-        Log::info("register internal packages");
+        $this->log->info("register internal packages");
 
         $lazy = $asap = [];
 
-        foreach (Group::getInternalMetas() as $meta) {
+        foreach ($this->group->getInternalMetas() as $meta) {
             if ($meta->getCategory() == InternalMetaCategory::OBSOLETE)
                 continue;
 
-            Log::info(new Content($meta->getContent()));
+            $this->log->info(
+                $this->box->get(Content::class,
+                    content: $meta->getContent()));
+
             $this->appendInflated($lazy, $asap,
 
                 // absolute loadable direction
@@ -115,10 +147,10 @@ class Register extends Task
             );
         }
 
-        $this->writeAutoloader(Dir::getCacheDir(),
+        $this->writeAutoloader($this->directory->getCacheDir(),
 
             // cache path
-            Group::getInternalRootMetadata()->getStructureCache(),
+            $this->group->getInternalRootMetadata()->getStructureCache(),
             $asap, $lazy
         );
     }
@@ -136,8 +168,8 @@ class Register extends Task
     {
         $file = "$dir/lazy.php";
 
-        if (file_exists($file)) {
-            $map = require $file;
+        if ($this->file->exists($file)) {
+            $map = $this->file->require($file);
 
             foreach ($map as $loadable => $file)
                 $lazy[$loadable] = $path . $file;
@@ -145,8 +177,8 @@ class Register extends Task
 
         $file = "$dir/asap.php";
 
-        if (file_exists($file)) {
-            $list = require $file;
+        if ($this->file->exists($file)) {
+            $list = $this->file->require($file);
 
             foreach ($list as $file)
                 $asap[] = $path . $file;
@@ -167,13 +199,13 @@ class Register extends Task
     private function writeAutoloader(string $dir, string $path, array $asap,
                                      array $lazy): void
     {
-        Dir::createDir($dir);
+        $this->directory->createDir($dir);
 
         // sort key list
         ksort($lazy, SORT_STRING);
 
         $depth = substr_count($path, '/');
-        $autoloader = file_get_contents(__DIR__ . "/Autoloader.php");
+        $autoloader = $this->file->get(__DIR__ . "/Autoloader.php");
 
         if ($autoloader === false)
             throw new InternalError(
@@ -213,7 +245,7 @@ class Register extends Task
             );
         }
 
-        if (!file_put_contents("$dir/Autoloader.php", $autoloader))
+        if (!$this->file->put("$dir/Autoloader.php", $autoloader))
             throw new Error(
                 "Can't write to the file \"$dir/Autoloader.php\"."
             );
