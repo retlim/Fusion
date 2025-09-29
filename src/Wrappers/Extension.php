@@ -34,8 +34,21 @@ class Extension
      * @return bool true if the extension identified
      * by name is loaded, false otherwise.
      */
-    public function loaded(string $extension): bool
+    public function isLoaded(string $extension): bool
     {
-        return  extension_loaded($extension);
+        return extension_loaded($extension);
+    }
+
+    /**
+     * Returns an array with the names of all modules compiled and loaded
+     *
+     * @param bool $zend_extensions [optional]
+     * Only return Zend extensions, if not then regular extensions,
+     * like mysqli are listed. Defaults to false (return regular extensions).
+     * @return string[] an indexed array of all the modules names.
+     */
+    public function getLoaded(bool $zend_extensions = false): array
+    {
+        return get_loaded_extensions($zend_extensions);
     }
 }

@@ -25,11 +25,9 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Tests\Dir\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Dir\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Dir\Mocks\FileMock;
-use Valvoid\Fusion\Tests\Dir\Mocks\SystemMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\Dir;
 use Valvoid\Fusion\Wrappers\File;
-use Valvoid\Fusion\Wrappers\System;
 
 /**
  * @copyright Valvoid
@@ -42,7 +40,6 @@ class LogicTest extends Test
 
         // ballast
         File::class,
-        System::class,
         Dir::class
     ];
 
@@ -50,17 +47,11 @@ class LogicTest extends Test
     protected BusMock $bus;
     protected DirMock $dir;
     protected FileMock $file;
-    private SystemMock $system;
-
     public function __construct()
     {
         $this->bus = new BusMock;
         $this->dir = new DirMock;
         $this->file = new FileMock;
-        $this->system = new SystemMock;
-        $this->system->temp = function () {
-            return "/temp";
-        };
 
         $this->testRecycleContent();
         $this->testGetCacheDir();
@@ -249,13 +240,13 @@ class LogicTest extends Test
 
     public function testGetTaskDir(): void
     {
-        if ($this->logic->getTaskDir() != "/temp/valvoid_fusion/task")
+        if ($this->logic->getTaskDir() != "/#/c/task")
             $this->handleFailedTest();
     }
 
     public function testGetStateDir(): void
     {
-        if ($this->logic->getStateDir() != "/temp/valvoid_fusion/state")
+        if ($this->logic->getStateDir() != "/#/c/state")
             $this->handleFailedTest();
     }
 
@@ -267,13 +258,13 @@ class LogicTest extends Test
 
     public function testGetOtherDir(): void
     {
-        if ($this->logic->getOtherDir() != "/temp/valvoid_fusion/other")
+        if ($this->logic->getOtherDir() != "/#/c/other")
             $this->handleFailedTest();
     }
 
     public function testGetPackagesDir(): void
     {
-        if ($this->logic->getPackagesDir() != "/temp/valvoid_fusion/packages")
+        if ($this->logic->getPackagesDir() != "/#/c/packages")
             $this->handleFailedTest();
     }
 
@@ -289,7 +280,7 @@ class LogicTest extends Test
         $this->dir->create = fn () => true;
         $this->file->copy = fn () => true;
         $this->logic = new Logic(dir: $this->dir,
-            file: $this->file, system: $this->system,
+            file: $this->file,
             bus: $this->bus, config: [
             "path" => "/#",
             "creatable" => true
@@ -331,7 +322,7 @@ class LogicTest extends Test
         };
 
         $this->logic = new Logic(dir: $this->dir,
-            file: $this->file, system: $this->system,
+            file: $this->file,
             bus: $this->bus, config: [
             "path" => "/#",
             "clearable" => false]);
@@ -374,7 +365,7 @@ class LogicTest extends Test
         };
 
         $this->logic = new Logic(dir: $this->dir,
-            file: $this->file, system: $this->system,
+            file: $this->file,
             bus: $this->bus, config: [
             "path" => "/#",
             "clearable" => false]);
@@ -434,7 +425,7 @@ class LogicTest extends Test
         };
 
         $this->logic = new Logic(dir: $this->dir,
-            file: $this->file, system: $this->system,
+            file: $this->file,
             bus: $this->bus, config: [
             "path" => "/#",
             "clearable" => true]);
@@ -480,7 +471,7 @@ class LogicTest extends Test
         };
 
         $this->logic = new Logic(dir: $this->dir,
-            file: $this->file, system: $this->system,
+            file: $this->file,
             bus: $this->bus, config: [
             "path" => "/#",
             "creatable" => true]);
@@ -505,7 +496,7 @@ class LogicTest extends Test
             };
 
             $this->logic = new Logic(dir: $this->dir,
-                file: $this->file, system: $this->system,
+                file: $this->file,
                 bus: $this->bus, config: [
                 "path" => "/#",
                 "creatable" => false,]);

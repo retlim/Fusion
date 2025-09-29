@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,816 +19,1117 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Build;
 
+use Closure;
 use Exception;
+use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
+use Valvoid\Fusion\Hub\Responses\Cache\Versions;
 use Valvoid\Fusion\Tasks\Build\Build;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tests\Tasks\Build\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Tasks\Build\Mocks\BuilderMock;
-use Valvoid\Fusion\Tests\Tasks\Build\Mocks\ContainerMock;
+use Valvoid\Fusion\Tests\Tasks\Build\Mocks\ExtensionMock;
+use Valvoid\Fusion\Tests\Tasks\Build\Mocks\ExternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Build\Mocks\GroupMock;
 use Valvoid\Fusion\Tests\Tasks\Build\Mocks\HubMock;
+use Valvoid\Fusion\Tests\Tasks\Build\Mocks\InternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Build\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Tasks\Build\Mocks\SolverMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Test case for the build task.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
 class BuildTest extends Test
 {
     protected string|array $coverage = Build::class;
-
     private BoxMock $box;
+    private LogMock $log;
+    private SolverMock $solver;
+    private array $env = [
+        "php" => [
+            "version" => [
+                "major" => 8,
+                "minor" => 1,
+                "patch" => 0,
+                "build" => "",
+                "release" => ""
+            ]
+        ]
+    ];
 
     public function __construct()
     {
         $this->box = new BoxMock;
+        $this->log = new LogMock;
+        $this->solver = new SolverMock;
 
-        try {
-            $this->testExternalRootSourceImplication();
-            $this->testRecursiveMetadataImplication();
-            $this->testNestedMetadataImplication();
-
-        } catch (Exception $exception) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-            echo "\n " . $exception->getMessage();
-
-            if (isset($this->box))
-                $this->box::unsetInstance();
-
-            if (isset($this->groupMock))
-                $this->groupMock->destroy();
-        }
+        $this->testExternalRootSourceImplication();
+        $this->testRecursiveMetadataImplication();
+        $this->testNestedMetadataImplication();
 
         $this->box::unsetInstance();
     }
 
-    public function testNestedMetadataImplication(): void
+    public function testExternalRootSourceImplication(): void
     {
-        $this->box->case = 2;
-        $this->box->metas = [];
-        $this->box->implication = [];
-        unset($this->box->hub);
-        unset($this->box->group);
+        try {
+            $hub = new HubMock;
+            $group = new GroupMock;
+            $extension = new ExtensionMock;
+            $task = new Build(
+                box: $this->box,
+                group: $group,
+                hub: $hub,
+                extension: $extension,
+                log: $this->log,
+                config: [
+                    "source" => "metadata1", // runtime layer
+                    "environment" => $this->env
+                ]);
 
-        // get nested deps from root metadata
-        $task = new Build([
-            "source" => false,
-            "environment" => [
-                "php" => [
-                    "version" => [
-                        "major" => 8,
-                        "minor" => 1,
-                        "patch" => 0,
-                        "build" => "",
-                        "release" => ""
-                    ]
-                ]
-            ]]);
+            $counter = 0;
+            $versions =
+            $implication =
+            $metas = [];
+            $hub->version = function (array $source) use (&$counter, &$versions) {
+                $versions[$counter] = $source;
+                return $counter++;
+            };
 
-        $task->execute();
+            $hub->metadata = function (array $source) use (&$counter, &$metas)  {
+                $metas[$counter] = $source;
+                return $counter++;
+            };
 
-        // invalid raw version implication passed to solver
-        if ($this->box->implication != [
-                "metadata2" => [
-                    "source" => "metadata2",
-                    "implication" => [
-                        "1.0.0" => []
+            $hub->execute = function (Closure $callback) use (&$versions, &$metas) {
+                while ($versions || $metas) {
+                    foreach ($versions as $id => $versionRequest) {
+                        unset($versions[$id]);
+
+                        if ($versionRequest[0] == "metadata3")
+                            $callback(new Versions($id, ["2.30.1", "2.0.0:offset", "1.0.0"]));
+
+                        else $callback(new Versions($id, ["1.0.0"]));
+                    }
+
+                    foreach ($metas as $id => $metaRequest) {
+                        unset($metas[$id]);
+
+                        $callback(new Metadata($id, "", json_encode($metaRequest)));
+                    }
+                }
+            };
+
+            $this->solver->satisfiable = function () {return true;};
+            $this->solver->path = function () {
+                return [
+                    "metadata1" => "1.0.0",
+                    "metadata2" => "1.0.0",
+                    "metadata3" => "2.0.0:offset",
+                    "metadata4" => "1.0.0",
+                    "metadata5" => "1.0.0",
+                    "metadata6" => "1.0.0",
+                    "metadata7" => "1.0.0"
+                ];
+            };
+            $this->box->solver = function (...$args) use (&$implication){
+                # implication, version, id
+                $implication[] = $args["implication"];
+                return $this->solver;
+            };
+
+            $this->box->builder = function (...$args) {
+                # implication, version, id
+
+                $mock = new BuilderMock(...$args);
+                $mock->metadata = function ($source, $dir, $version) {
+                    // parsed/normalized structure
+                    if ($source == "metadata1")
+                        $structure = ["sources" => [
+                            "/dir1" => [
+                                "metadata2",
+                                "metadata4"
+                            ],
+                            "/dir2/dir3" => [
+                                "metadata3"
+                            ],
+                        ]];
+
+                    elseif ($source == "metadata3") {
+                        $structure = ["sources" => [
+                            "/dir4" => [ // nested
+                                "metadata5",
+                                "metadata2"
+                            ]
+                        ]];
+
+                    } elseif ($source == "metadata5") {
+                        $structure = ["sources" => [
+                            "/dir5" => [ // nested
+                                "metadata6"
+                            ],
+                            "/dir6" => [ // nested
+                                "metadata7"
+                            ]
+                        ]];
+
+                    } else
+                        $structure = ["sources" => []];
+
+                    return new ExternalMetadataMock([
+                        "id" => $source,
+                        "version" => $version,
+                        "dir" => $dir,
+                        "structure" => $structure,
+                        "environment" => [
+                            "php" => [
+                                "modules" => [],
+                                "version" => [[
+                                    "major" => 8,
+                                    "minor" => 1,
+                                    "patch" => 0,
+                                    "sign" => "", // default >=
+                                    "release" => "",
+                                    "build" => ""
+                                ]]
+                            ]
+                        ],
+                    ]);
+                };
+
+                return $mock;
+            };
+
+            $task->execute();
+
+            // raw implication
+            if ($implication != [[
+                    "metadata2" => [
+                        "source" => "metadata2",
+                        "implication" => [
+                            "1.0.0" => []
+                        ],
                     ],
-                ],
-                "metadata4" => [
-                    "source" => "metadata4",
-                    "implication" => [
-                        "1.0.0" => []
-                    ]
-                ],
-                "metadata3" => [
-                    "source" => "metadata3",
-                    "implication"=> [
-                        "2.30.1"=> [
-                            "metadata5" => [
-                                "source" => "metadata5",
-                                "implication" => [
-                                    "1.0.0" => [
-                                        "metadata6" => [
-                                            "source"=> "metadata6",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ],
-                                        "metadata7"=> [
-                                            "source" => "metadata7",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            "metadata2"=> [
-                                "source" => "metadata2",
-                                "implication" => [
-                                    "1.0.0" =>[]
-                                ]
-                            ]
-                        ],
-                        "2.0.0:offset"=> [
-                            "metadata5" => [
-                                "source" => "metadata5",
-                                "implication" => [
-                                    "1.0.0" => [
-                                        "metadata6" => [
-                                            "source"=> "metadata6",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ],
-                                        "metadata7" => [
-                                            "source" => "metadata7",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            "metadata2" => [
-                                "source" => "metadata2",
-                                "implication" => [
-                                    "1.0.0" => []
-                                ]
-                            ]
-                        ],
-                        "1.0.0" => [
-                            "metadata5" => [
-                                "source" => "metadata5",
-                                "implication" => [
-                                    "1.0.0" => [
-                                        "metadata6"=> [
-                                            "source" => "metadata6",
-                                            "implication"=> [
-                                                "1.0.0"=> []
-                                            ]
-                                        ],
-                                        "metadata7" => [
-                                            "source" => "metadata7",
-                                            "implication" => [
-                                                "1.0.0"=> []
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            "metadata2" => [
-                                "source" => "metadata2",
-                                "implication" => [
-                                    "1.0.0" => []
-                                ]
-                            ]
+                    "metadata4" => [
+                        "source" => "metadata4",
+                        "implication" => [
+                            "1.0.0" => []
                         ]
-                    ]
-                ]
-            ])
-            $this->handleFailedTest();
-
-        // invalid implication
-        // without internal root
-        if (Group::getImplication() != [
-                "metadata2" => [
-                    "source" => "metadata2",
-                    "implication"=> []
-                ],
-                "metadata4" => [
-                    "source" => "metadata4",
-                    "implication" => []
-                ],
-                "metadata3" => [
-                    "source" => "metadata3",
-                    "implication" => [
-                        "metadata5" => [
-                            "source" => "metadata5",
-                            "implication" => [
-                                "metadata6" => [
-                                    "source" => "metadata6",
-                                    "implication" => []
+                    ],
+                    "metadata3" => [
+                        "source" => "metadata3",
+                        "implication"=> [
+                            "2.30.1"=> [
+                                "metadata5" => [
+                                    "source" => "metadata5",
+                                    "implication" => [
+                                        "1.0.0" => [
+                                            "metadata6" => [
+                                                "source"=> "metadata6",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ],
+                                            "metadata7"=> [
+                                                "source" => "metadata7",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ]
+                                        ]
+                                    ]
                                 ],
-                                "metadata7" => [
-                                    "source" => "metadata7",
-                                    "implication" => []
+                                "metadata2"=> [
+                                    "source" => "metadata2",
+                                    "implication" => [
+                                        "1.0.0" =>[]
+                                    ]
+                                ]
+                            ],
+                            "2.0.0:offset"=> [
+                                "metadata5" => [
+                                    "source" => "metadata5",
+                                    "implication" => [
+                                        "1.0.0" => [
+                                            "metadata6" => [
+                                                "source"=> "metadata6",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ],
+                                            "metadata7" => [
+                                                "source" => "metadata7",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ],
+                                "metadata2" => [
+                                    "source" => "metadata2",
+                                    "implication" => [
+                                        "1.0.0" => []
+                                    ]
+                                ]
+                            ],
+                            "1.0.0" => [
+                                "metadata5" => [
+                                    "source" => "metadata5",
+                                    "implication" => [
+                                        "1.0.0" => [
+                                            "metadata6"=> [
+                                                "source" => "metadata6",
+                                                "implication"=> [
+                                                    "1.0.0"=> []
+                                                ]
+                                            ],
+                                            "metadata7" => [
+                                                "source" => "metadata7",
+                                                "implication" => [
+                                                    "1.0.0"=> []
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ],
+                                "metadata2" => [
+                                    "source" => "metadata2",
+                                    "implication" => [
+                                        "1.0.0" => []
+                                    ]
                                 ]
                             ]
-                        ],
-                        "metadata2" => [
-                            "source" => "metadata2",
-                            "implication" => []
+                        ]
+                    ]]])
+                $this->handleFailedTest();
+
+            // solved implication
+            if ($group->getImplication() != [
+                    "metadata1"=> [
+                        "source" => "metadata1",
+                        "implication"=> [
+                            "metadata2" => [
+                                "source" => "metadata2",
+                                "implication"=> []
+                            ],
+                            "metadata4" => [
+                                "source" => "metadata4",
+                                "implication" => []
+                            ],
+                            "metadata3" => [
+                                "source" => "metadata3",
+                                "implication" => [
+                                    "metadata5" => [
+                                        "source" => "metadata5",
+                                        "implication" => [
+                                            "metadata6" => [
+                                                "source" => "metadata6",
+                                                "implication" => []
+                                            ],
+                                            "metadata7" => [
+                                                "source" => "metadata7",
+                                                "implication" => []
+                                            ]
+                                        ]
+                                    ],
+                                    "metadata2" => [
+                                        "source" => "metadata2",
+                                        "implication" => []
+                                    ]
+                                ]
+                            ]
                         ]
                     ]
-                ]
-            ])
-            $this->handleFailedTest();
+                ])
+                $this->handleFailedTest();
 
-        $metas = Group::getExternalMetas();
-        $line = "";
+            if (array_diff([
+                "metadata1",
+                "metadata2",
+                "metadata3",
+                "metadata4",
+                "metadata5",
+                "metadata6",
+                "metadata7"
+            ], array_keys($group->externalMetas)))
+                $this->handleFailedTest();
 
-        // missing identifier
-        if (array_diff([
-            "metadata2",
-            "metadata3",
-            "metadata4",
-            "metadata5",
-            "metadata6",
-            "metadata7"
-        ], array_keys($metas)))
-            $this->handleFailedTest();
+            // ids equal solver path
+            // stacked dirs
+            foreach ($group->externalMetas as $id => $metadata) {
+                switch ($id) {
+                    case "metadata1":
+                        if ($metadata->getDir() != "" ||
+                            $metadata->getVersion() != "1.0.0")
+                                $this->handleFailedTest();
 
-        // ids equal solver path
-        // stacked dirs
-        foreach ($metas as $id => $metadata) {
-            switch ($id) {
-                case "metadata2":
-                    // from metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
+                        break;
 
-                        else $line = __LINE__;
+                    case "metadata2":
+                        // from metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                                $this->handleFailedTest();
 
-                    } else $line = __LINE__;
+                        break;
 
-                case "metadata3":
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "2.0.0:offset")
-                            continue 2;
+                    case "metadata3":
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "2.0.0:offset")
+                                $this->handleFailedTest();
 
-                        else $line = __LINE__;
+                        break;
 
-                    } else $line = __LINE__;
+                    case "metadata4":
+                        if ($metadata->getDir() != "/dir1" ||
+                            $metadata->getVersion() != "1.0.0")
+                                $this->handleFailedTest();
 
-                case "metadata4":
-                    if ($metadata->getDir() == "/dir1") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
+                        break;
 
-                        else $line = __LINE__;
+                    case "metadata5":
+                        // from metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                                $this->handleFailedTest();
 
-                    } else $line = __LINE__;
+                        break;
 
-                case "metadata5":
-                    // from metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
+                    case "metadata6":
+                        // from metadata5 to metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                                $this->handleFailedTest();
 
-                        else $line = __LINE__;
+                        break;
 
-                    } else $line = __LINE__;
-
-                case "metadata6":
-                    // from metadata5 to metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
-
-                        else $line = __LINE__;
-
-                    } else $line = __LINE__;
-
-                case "metadata7":
-                    // from metadata5 to metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
-
-                        else $line = __LINE__;
-
-                    } else $line = __LINE__;
+                    case "metadata7":
+                        // from metadata5 to metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
+                }
             }
 
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | $line";
-
-            $this->result = false;
+        } catch (Exception) {
+            $this->handleFailedTest();
         }
     }
 
     public function testRecursiveMetadataImplication(): void
     {
-        $this->box->case = 1;
-        $this->box->metas = [];
-        $this->box->implication = [];
-        unset($this->box->hub);
-        unset($this->box->group);
-        // get source from root metadata
-        $task = new Build([
-            "source" => false,
-            "environment" => [
-                "php" => [
-                    "version" => [
-                        "major" => 8,
-                        "minor" => 1,
-                        "patch" => 0,
-                        "build" => "",
-                        "release" => ""
-                    ]
+        try {
+            $hub = new HubMock;
+            $group = new GroupMock;
+            $extension = new ExtensionMock;
+            $task = new Build(
+                box: $this->box,
+                group: $group,
+                hub: $hub,
+                extension: $extension,
+                log: $this->log,
+                config: [
+                    "source" => false, // runtime layer
+                    "environment" => $this->env
+                ]);
+
+            $group->internalRoot = new InternalMetadataMock([
+                "structure" => [
+                    "sources" => ["" => ["metadata1"]]
                 ]
-            ]]);
+            ]);
 
-        $task->execute();
+            $counter = 0;
+            $versions =
+            $implication =
+            $metas = [];
+            $hub->version = function (array $source) use (&$counter, &$versions) {
+                $versions[$counter] = $source;
+                return $counter++;
+            };
 
-        // invalid raw version implication passed to solver
-        if ($this->box->implication != [
-                "metadata2" => [
-                    "source" => "metadata2",
-                    "implication" => [
-                        "1.0.0" => []
+            $hub->metadata = function (array $source) use (&$counter, &$metas)  {
+                $metas[$counter] = $source;
+                return $counter++;
+            };
+
+            $hub->execute = function (Closure $callback) use (&$versions, &$metas) {
+                while ($versions || $metas) {
+                    foreach ($versions as $id => $versionRequest) {
+                        unset($versions[$id]);
+
+                        if ($versionRequest[0] == "metadata3")
+                            $callback(new Versions($id, ["2.30.1", "2.0.0:offset", "1.0.0"]));
+
+                        else $callback(new Versions($id, ["1.0.0"]));
+                    }
+
+                    foreach ($metas as $id => $metaRequest) {
+                        unset($metas[$id]);
+
+                        $callback(new Metadata($id, "", json_encode($metaRequest)));
+                    }
+                }
+            };
+
+            $this->solver->satisfiable = function () {return true;};
+            $this->solver->path = function () {
+                return [
+                    "metadata1" => "1.0.0",
+                    "metadata2" => "1.0.0",
+                    "metadata3" => "2.0.0:offset",
+                    "metadata4" => "1.0.0",
+                    "metadata5" => "1.0.0",
+                    "metadata6" => "1.0.0",
+                    "metadata7" => "1.0.0"
+                ];
+            };
+            $this->box->solver = function (...$args) use (&$implication){
+                # implication, version, id
+                $implication[] = $args["implication"];
+                return $this->solver;
+            };
+
+            $this->box->builder = function (...$args) {
+                # implication, version, id
+
+                $mock = new BuilderMock(...$args);
+                $mock->metadata = function ($source, $dir, $version) {
+                    // parsed/normalized structure
+                    if ($source == "metadata1")
+                        $structure = ["sources" => [
+                            "/dir1" => [
+                                "metadata2",
+                                "metadata4"
+                            ],
+                            "/dir2/dir3" => [
+                                "metadata3"
+                            ],
+                        ]];
+
+                    elseif ($source == "metadata3") {
+                        $structure = ["sources" => [
+                            "/dir4" => [ // nested
+                                "metadata5",
+                                "metadata2"
+                            ]
+                        ]];
+
+                    } elseif ($source == "metadata5") {
+                        $structure = ["sources" => [
+                            "/dir5" => [ // nested
+                                "metadata6"
+                            ],
+                            "/dir6" => [ // nested
+                                "metadata7"
+                            ]
+                        ]];
+
+                    } else
+                        $structure = ["sources" => []];
+
+                    return new ExternalMetadataMock([
+                        "id" => $source,
+                        "version" => $version,
+                        "dir" => $dir,
+                        "structure" => $structure,
+                        "environment" => [
+                            "php" => [
+                                "modules" => [],
+                                "version" => [[
+                                    "major" => 8,
+                                    "minor" => 1,
+                                    "patch" => 0,
+                                    "sign" => "", // default >=
+                                    "release" => "",
+                                    "build" => ""
+                                ]]
+                            ]
+                        ],
+                    ]);
+                };
+
+                return $mock;
+            };
+
+            $task->execute();
+
+            // raw implication
+            if ($implication != [[
+                    "metadata2" => [
+                        "source" => "metadata2",
+                        "implication" => [
+                            "1.0.0" => []
+                        ],
                     ],
-                ],
-                "metadata4" => [
-                    "source" => "metadata4",
-                    "implication" => [
-                        "1.0.0" => []
-                    ]
-                ],
-                "metadata3" => [
-                    "source" => "metadata3",
-                    "implication"=> [
-                        "2.30.1"=> [
-                            "metadata5" => [
-                                "source" => "metadata5",
-                                "implication" => [
-                                    "1.0.0" => [
-                                        "metadata6" => [
-                                            "source"=> "metadata6",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ],
-                                        "metadata7"=> [
-                                            "source" => "metadata7",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            "metadata2"=> [
-                                "source" => "metadata2",
-                                "implication" => [
-                                    "1.0.0" =>[]
-                                ]
-                            ]
-                        ],
-                        "2.0.0:offset"=> [
-                            "metadata5" => [
-                                "source" => "metadata5",
-                                "implication" => [
-                                    "1.0.0" => [
-                                        "metadata6" => [
-                                            "source"=> "metadata6",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ],
-                                        "metadata7" => [
-                                            "source" => "metadata7",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            "metadata2" => [
-                                "source" => "metadata2",
-                                "implication" => [
-                                    "1.0.0" => []
-                                ]
-                            ]
-                        ],
-                        "1.0.0" => [
-                            "metadata5" => [
-                                "source" => "metadata5",
-                                "implication" => [
-                                    "1.0.0" => [
-                                        "metadata6"=> [
-                                            "source" => "metadata6",
-                                            "implication"=> [
-                                                "1.0.0"=> []
-                                            ]
-                                        ],
-                                        "metadata7" => [
-                                            "source" => "metadata7",
-                                            "implication" => [
-                                                "1.0.0"=> []
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            "metadata2" => [
-                                "source" => "metadata2",
-                                "implication" => [
-                                    "1.0.0" => []
-                                ]
-                            ]
+                    "metadata4" => [
+                        "source" => "metadata4",
+                        "implication" => [
+                            "1.0.0" => []
                         ]
-                    ]
-                ]
-            ])
-            $this->handleFailedTest();
-
-        // invalid implication
-        if (Group::getImplication() != [
-                "metadata1"=> [
-                    "source" => "metadata1",
-                    "implication"=> [
-                        "metadata2" => [
-                            "source" => "metadata2",
-                            "implication"=> []
-                        ],
-                        "metadata4" => [
-                            "source" => "metadata4",
-                            "implication" => []
-                        ],
-                        "metadata3" => [
-                            "source" => "metadata3",
-                            "implication" => [
+                    ],
+                    "metadata3" => [
+                        "source" => "metadata3",
+                        "implication"=> [
+                            "2.30.1"=> [
                                 "metadata5" => [
                                     "source" => "metadata5",
                                     "implication" => [
-                                        "metadata6" => [
-                                            "source" => "metadata6",
-                                            "implication" => []
-                                        ],
-                                        "metadata7" => [
-                                            "source" => "metadata7",
-                                            "implication" => []
+                                        "1.0.0" => [
+                                            "metadata6" => [
+                                                "source"=> "metadata6",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ],
+                                            "metadata7"=> [
+                                                "source" => "metadata7",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ],
+                                "metadata2"=> [
+                                    "source" => "metadata2",
+                                    "implication" => [
+                                        "1.0.0" =>[]
+                                    ]
+                                ]
+                            ],
+                            "2.0.0:offset"=> [
+                                "metadata5" => [
+                                    "source" => "metadata5",
+                                    "implication" => [
+                                        "1.0.0" => [
+                                            "metadata6" => [
+                                                "source"=> "metadata6",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ],
+                                            "metadata7" => [
+                                                "source" => "metadata7",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ]
                                         ]
                                     ]
                                 ],
                                 "metadata2" => [
                                     "source" => "metadata2",
-                                    "implication" => []
+                                    "implication" => [
+                                        "1.0.0" => []
+                                    ]
+                                ]
+                            ],
+                            "1.0.0" => [
+                                "metadata5" => [
+                                    "source" => "metadata5",
+                                    "implication" => [
+                                        "1.0.0" => [
+                                            "metadata6"=> [
+                                                "source" => "metadata6",
+                                                "implication"=> [
+                                                    "1.0.0"=> []
+                                                ]
+                                            ],
+                                            "metadata7" => [
+                                                "source" => "metadata7",
+                                                "implication" => [
+                                                    "1.0.0"=> []
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ],
+                                "metadata2" => [
+                                    "source" => "metadata2",
+                                    "implication" => [
+                                        "1.0.0" => []
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]]])
+                $this->handleFailedTest();
+
+            // solved implication
+            if ($group->getImplication() != [
+                    "metadata1"=> [
+                        "source" => "metadata1",
+                        "implication"=> [
+                            "metadata2" => [
+                                "source" => "metadata2",
+                                "implication"=> []
+                            ],
+                            "metadata4" => [
+                                "source" => "metadata4",
+                                "implication" => []
+                            ],
+                            "metadata3" => [
+                                "source" => "metadata3",
+                                "implication" => [
+                                    "metadata5" => [
+                                        "source" => "metadata5",
+                                        "implication" => [
+                                            "metadata6" => [
+                                                "source" => "metadata6",
+                                                "implication" => []
+                                            ],
+                                            "metadata7" => [
+                                                "source" => "metadata7",
+                                                "implication" => []
+                                            ]
+                                        ]
+                                    ],
+                                    "metadata2" => [
+                                        "source" => "metadata2",
+                                        "implication" => []
+                                    ]
                                 ]
                             ]
                         ]
                     ]
-                ]
-            ])
-            $this->handleFailedTest();
+                ])
+                $this->handleFailedTest();
 
-        $metas = Group::getExternalMetas();
-        $line = "";
+            if (array_diff([
+                "metadata1",
+                "metadata2",
+                "metadata3",
+                "metadata4",
+                "metadata5",
+                "metadata6",
+                "metadata7"
+            ], array_keys($group->externalMetas)))
+                $this->handleFailedTest();
 
-        // missing identifier
-        if (array_diff([
-            "metadata1",
-            "metadata2",
-            "metadata3",
-            "metadata4",
-            "metadata5",
-            "metadata6",
-            "metadata7"
-        ], array_keys($metas)))
-            $this->handleFailedTest();
+            // ids equal solver path
+            // stacked dirs
+            foreach ($group->externalMetas as $id => $metadata) {
+                switch ($id) {
+                    case "metadata1":
+                        if ($metadata->getDir() != "" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
 
-        // ids equal solver path
-        // stacked dirs
-        foreach ($metas as $id => $metadata) {
-            switch ($id) {
-                case "metadata1":
-                    if ($metadata->getDir() == "") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
+                        break;
 
-                        else $line = __LINE__;
+                    case "metadata2":
+                        // from metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
 
-                    } else $line = __LINE__;
+                        break;
 
-                case "metadata2":
-                    // from metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
+                    case "metadata3":
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "2.0.0:offset")
+                            $this->handleFailedTest();
 
-                        else $line = __LINE__;
+                        break;
 
-                    } else $line = __LINE__;
+                    case "metadata4":
+                        if ($metadata->getDir() != "/dir1" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
 
-                case "metadata3":
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "2.0.0:offset")
-                            continue 2;
+                        break;
 
-                        else $line = __LINE__;
+                    case "metadata5":
+                        // from metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
 
-                    } else $line = __LINE__;
+                        break;
 
-                case "metadata4":
-                    if ($metadata->getDir() == "/dir1") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
+                    case "metadata6":
+                        // from metadata5 to metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
 
-                        else $line = __LINE__;
+                        break;
 
-                    } else $line = __LINE__;
-
-                case "metadata5":
-                    // from metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
-
-                        else $line = __LINE__;
-
-                    } else $line = __LINE__;
-
-                case "metadata6":
-                    // from metadata5 to metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
-
-                        else $line = __LINE__;
-
-                    } else $line = __LINE__;
-
-                case "metadata7":
-                    // from metadata5 to metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
-
-                        else $line = __LINE__;
-
-                    } else $line = __LINE__;
+                    case "metadata7":
+                        // from metadata5 to metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
+                }
             }
 
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | $line";
-
-            $this->result = false;
+        } catch (Exception) {
+            $this->handleFailedTest();
         }
     }
 
-    public function testExternalRootSourceImplication(): void
+    public function testNestedMetadataImplication(): void
     {
-        $this->box->case = 0;
-        $this->box->metas = [];
-        $this->box->implication = [];
-        unset($this->box->hub);
-        unset($this->box->group);
+        try {
+            $hub = new HubMock;
+            $group = new GroupMock;
+            $extension = new ExtensionMock;
+            $task = new Build(
+                box: $this->box,
+                group: $group,
+                hub: $hub,
+                extension: $extension,
+                log: $this->log,
+                config: [
+                    "source" => false, // runtime layer
+                    "environment" => $this->env
+                ]);
 
-        $task = new Build([
-            "source" => "metadata1", // runtime layer
-            "environment" => [
-                "php" => [
-                    "version" => [
-                        "major" => 8,
-                        "minor" => 1,
-                        "patch" => 0,
-                        "build" => "",
-                        "release" => ""
-                    ]
-                ]
-            ]]);
+            $group->internalRoot = new InternalMetadataMock([
+                "id" => "metadata1",
+                "version" => "1.0.0",
+                "structure" => [
 
-        $task->execute();
-
-        // invalid raw version implication passed to solver
-        if ($this->box->implication != [
-                "metadata2" => [
-                    "source" => "metadata2",
-                    "implication" => [
-                        "1.0.0" => []
-                    ],
-                ],
-                "metadata4" => [
-                    "source" => "metadata4",
-                    "implication" => [
-                        "1.0.0" => []
-                    ]
-                ],
-                "metadata3" => [
-                    "source" => "metadata3",
-                    "implication"=> [
-                        "2.30.1"=> [
-                            "metadata5" => [
-                                "source" => "metadata5",
-                                "implication" => [
-                                    "1.0.0" => [
-                                        "metadata6" => [
-                                            "source"=> "metadata6",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ],
-                                        "metadata7"=> [
-                                            "source" => "metadata7",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            "metadata2"=> [
-                                "source" => "metadata2",
-                                "implication" => [
-                                    "1.0.0" =>[]
-                                ]
-                            ]
+                    // nested deps
+                    "sources" => [
+                        "/dir1" => [
+                            "metadata2",
+                            "metadata4"
                         ],
-                        "2.0.0:offset"=> [
-                            "metadata5" => [
-                                "source" => "metadata5",
-                                "implication" => [
-                                    "1.0.0" => [
-                                        "metadata6" => [
-                                            "source"=> "metadata6",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ],
-                                        "metadata7" => [
-                                            "source" => "metadata7",
-                                            "implication" => [
-                                                "1.0.0" => []
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            "metadata2" => [
-                                "source" => "metadata2",
-                                "implication" => [
-                                    "1.0.0" => []
-                                ]
-                            ]
-                        ],
-                        "1.0.0" => [
-                            "metadata5" => [
-                                "source" => "metadata5",
-                                "implication" => [
-                                    "1.0.0" => [
-                                        "metadata6"=> [
-                                            "source" => "metadata6",
-                                            "implication"=> [
-                                                "1.0.0"=> []
-                                            ]
-                                        ],
-                                        "metadata7" => [
-                                            "source" => "metadata7",
-                                            "implication" => [
-                                                "1.0.0"=> []
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ],
-                            "metadata2" => [
-                                "source" => "metadata2",
-                                "implication" => [
-                                    "1.0.0" => []
-                                ]
-                            ]
+                        "/dir2/dir3" => [
+                            "metadata3"
                         ]
                     ]
+                ],
+                "environment" => [
+                    "php" => [
+                        "version" => [[
+                            "major" => 8,
+                            "minor" => 1,
+                            "patch" => 0,
+                            "sign" => "" // default >=
+                        ]]
+                    ]
                 ]
-            ])
-            $this->handleFailedTest();
+            ]);
 
-        // invalid implication
-        if (Group::getImplication() != [
-                "metadata1"=> [
-                    "source" => "metadata1",
-                    "implication"=> [
-                        "metadata2" => [
-                            "source" => "metadata2",
-                            "implication"=> []
+            $counter = 0;
+            $versions =
+            $implication =
+            $metas = [];
+            $hub->version = function (array $source) use (&$counter, &$versions) {
+                $versions[$counter] = $source;
+                return $counter++;
+            };
+
+            $hub->metadata = function (array $source) use (&$counter, &$metas)  {
+                $metas[$counter] = $source;
+                return $counter++;
+            };
+
+            $hub->execute = function (Closure $callback) use (&$versions, &$metas) {
+                while ($versions || $metas) {
+                    foreach ($versions as $id => $versionRequest) {
+                        unset($versions[$id]);
+
+                        if ($versionRequest[0] == "metadata3")
+                            $callback(new Versions($id, ["2.30.1", "2.0.0:offset", "1.0.0"]));
+
+                        else $callback(new Versions($id, ["1.0.0"]));
+                    }
+
+                    foreach ($metas as $id => $metaRequest) {
+                        unset($metas[$id]);
+
+                        $callback(new Metadata($id, "", json_encode($metaRequest)));
+                    }
+                }
+            };
+
+            $this->solver->satisfiable = function () {return true;};
+            $this->solver->path = function () {
+                return [
+                    "metadata1" => "1.0.0",
+                    "metadata2" => "1.0.0",
+                    "metadata3" => "2.0.0:offset",
+                    "metadata4" => "1.0.0",
+                    "metadata5" => "1.0.0",
+                    "metadata6" => "1.0.0",
+                    "metadata7" => "1.0.0"
+                ];
+            };
+            $this->box->solver = function (...$args) use (&$implication){
+                # implication, version, id
+                $implication[] = $args["implication"];
+                return $this->solver;
+            };
+
+            $this->box->builder = function (...$args) {
+                # implication, version, id
+
+                $mock = new BuilderMock(...$args);
+                $mock->metadata = function ($source, $dir, $version) {
+                    // parsed/normalized structure
+                    if ($source == "metadata1")
+                        $structure = ["sources" => [
+                            "/dir1" => [
+                                "metadata2",
+                                "metadata4"
+                            ],
+                            "/dir2/dir3" => [
+                                "metadata3"
+                            ],
+                        ]];
+
+                    elseif ($source == "metadata3") {
+                        $structure = ["sources" => [
+                            "/dir4" => [ // nested
+                                "metadata5",
+                                "metadata2"
+                            ]
+                        ]];
+
+                    } elseif ($source == "metadata5") {
+                        $structure = ["sources" => [
+                            "/dir5" => [ // nested
+                                "metadata6"
+                            ],
+                            "/dir6" => [ // nested
+                                "metadata7"
+                            ]
+                        ]];
+
+                    } else
+                        $structure = ["sources" => []];
+
+                    return new ExternalMetadataMock([
+                        "id" => $source,
+                        "version" => $version,
+                        "dir" => $dir,
+                        "structure" => $structure,
+                        "environment" => [
+                            "php" => [
+                                "modules" => [],
+                                "version" => [[
+                                    "major" => 8,
+                                    "minor" => 1,
+                                    "patch" => 0,
+                                    "sign" => "", // default >=
+                                    "release" => "",
+                                    "build" => ""
+                                ]]
+                            ]
                         ],
-                        "metadata4" => [
-                            "source" => "metadata4",
-                            "implication" => []
+                    ]);
+                };
+
+                return $mock;
+            };
+
+            $task->execute();
+
+            // raw implication
+            if ($implication != [[
+                    "metadata2" => [
+                        "source" => "metadata2",
+                        "implication" => [
+                            "1.0.0" => []
                         ],
-                        "metadata3" => [
-                            "source" => "metadata3",
-                            "implication" => [
+                    ],
+                    "metadata4" => [
+                        "source" => "metadata4",
+                        "implication" => [
+                            "1.0.0" => []
+                        ]
+                    ],
+                    "metadata3" => [
+                        "source" => "metadata3",
+                        "implication"=> [
+                            "2.30.1"=> [
                                 "metadata5" => [
                                     "source" => "metadata5",
                                     "implication" => [
-                                        "metadata6" => [
-                                            "source" => "metadata6",
-                                            "implication" => []
-                                        ],
-                                        "metadata7" => [
-                                            "source" => "metadata7",
-                                            "implication" => []
+                                        "1.0.0" => [
+                                            "metadata6" => [
+                                                "source"=> "metadata6",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ],
+                                            "metadata7"=> [
+                                                "source" => "metadata7",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ],
+                                "metadata2"=> [
+                                    "source" => "metadata2",
+                                    "implication" => [
+                                        "1.0.0" =>[]
+                                    ]
+                                ]
+                            ],
+                            "2.0.0:offset"=> [
+                                "metadata5" => [
+                                    "source" => "metadata5",
+                                    "implication" => [
+                                        "1.0.0" => [
+                                            "metadata6" => [
+                                                "source"=> "metadata6",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ],
+                                            "metadata7" => [
+                                                "source" => "metadata7",
+                                                "implication" => [
+                                                    "1.0.0" => []
+                                                ]
+                                            ]
                                         ]
                                     ]
                                 ],
                                 "metadata2" => [
                                     "source" => "metadata2",
-                                    "implication" => []
+                                    "implication" => [
+                                        "1.0.0" => []
+                                    ]
+                                ]
+                            ],
+                            "1.0.0" => [
+                                "metadata5" => [
+                                    "source" => "metadata5",
+                                    "implication" => [
+                                        "1.0.0" => [
+                                            "metadata6"=> [
+                                                "source" => "metadata6",
+                                                "implication"=> [
+                                                    "1.0.0"=> []
+                                                ]
+                                            ],
+                                            "metadata7" => [
+                                                "source" => "metadata7",
+                                                "implication" => [
+                                                    "1.0.0"=> []
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ],
+                                "metadata2" => [
+                                    "source" => "metadata2",
+                                    "implication" => [
+                                        "1.0.0" => []
+                                    ]
                                 ]
                             ]
                         ]
                     ]
-                ]
-            ]) $this->handleFailedTest();
+                ]])
+                $this->handleFailedTest();
 
-        $metas = Group::getExternalMetas();
-        $line = "";
+            // solved implication
+            if ($group->getImplication() != [
+                    "metadata2" => [
+                        "source" => "metadata2",
+                        "implication"=> []
+                    ],
+                    "metadata4" => [
+                        "source" => "metadata4",
+                        "implication" => []
+                    ],
+                    "metadata3" => [
+                        "source" => "metadata3",
+                        "implication" => [
+                            "metadata5" => [
+                                "source" => "metadata5",
+                                "implication" => [
+                                    "metadata6" => [
+                                        "source" => "metadata6",
+                                        "implication" => []
+                                    ],
+                                    "metadata7" => [
+                                        "source" => "metadata7",
+                                        "implication" => []
+                                    ]
+                                ]
+                            ],
+                            "metadata2" => [
+                                "source" => "metadata2",
+                                "implication" => []
+                            ]
+                        ]
+                    ]
+                ])
+                $this->handleFailedTest();
 
-        // missing identifier
-        if (array_diff([
-            "metadata1",
-            "metadata2",
-            "metadata3",
-            "metadata4",
-            "metadata5",
-            "metadata6",
-            "metadata7"
-        ], array_keys($metas)))
-            $this->handleFailedTest();
+            if (array_diff([
+                "metadata2",
+                "metadata3",
+                "metadata4",
+                "metadata5",
+                "metadata6",
+                "metadata7"
+            ], array_keys($group->externalMetas)))
+                $this->handleFailedTest();
 
-        // ids equal solver path
-        // stacked dirs
-        foreach ($metas as $id => $metadata) {
-            switch ($id) {
-                case "metadata1":
-                    if ($metadata->getDir() == "") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
+            // ids equal solver path
+            // stacked dirs
+            foreach ($group->externalMetas as $id => $metadata) {
+                switch ($id) {
+                    case "metadata2":
+                        // from metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
 
-                        else $line = __LINE__;
+                        break;
 
-                    } else $line = __LINE__;
+                    case "metadata3":
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "2.0.0:offset")
+                            $this->handleFailedTest();
 
-                case "metadata2":
-                    // from metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
+                        break;
 
-                        else $line = __LINE__;
+                    case "metadata4":
+                        if ($metadata->getDir() != "/dir1" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
 
-                    } else $line = __LINE__;
+                        break;
 
-                case "metadata3":
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "2.0.0:offset")
-                            continue 2;
+                    case "metadata5":
+                        // from metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
 
-                        else $line = __LINE__;
+                        break;
 
-                    } else $line = __LINE__;
+                    case "metadata6":
+                        // from metadata5 to metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
 
-                case "metadata4":
-                    if ($metadata->getDir() == "/dir1") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
+                        break;
 
-                        else $line = __LINE__;
-
-                    } else $line = __LINE__;
-
-                case "metadata5":
-                    // from metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
-
-                        else $line = __LINE__;
-
-                    } else $line = __LINE__;
-
-                case "metadata6":
-                    // from metadata5 to metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
-
-                        else $line = __LINE__;
-
-                    } else $line = __LINE__;
-
-                case "metadata7":
-                    // from metadata5 to metadata3 parent
-                    if ($metadata->getDir() == "/dir2/dir3") {
-                        if ($metadata->getVersion() == "1.0.0")
-                            continue 2;
-
-                        else $line = __LINE__;
-
-                    } else $line = __LINE__;
+                    case "metadata7":
+                        // from metadata5 to metadata3 parent
+                        if ($metadata->getDir() != "/dir2/dir3" ||
+                            $metadata->getVersion() != "1.0.0")
+                            $this->handleFailedTest();
+                }
             }
 
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__ . " | $line";
-
-            $this->result = false;
+        } catch (Exception) {
+            $this->handleFailedTest();
         }
     }
 }

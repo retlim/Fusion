@@ -17,38 +17,36 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Build\Config;
+namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
 
-use Valvoid\Fusion\Tasks\Build\Config\Parser;
-use Valvoid\Fusion\Tests\Test;
+use Closure;
+use Valvoid\Fusion\Hub\Proxy\Proxy;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ParserTest extends Test
+class HubMock implements Proxy
 {
-    protected string|array $coverage = Parser::class;
+    public Closure $version;
+    public Closure $metadata;
+    public Closure $execute;
 
-    public function __construct()
+    public function addVersionsRequest(array $source): int
     {
-        $this->testPhpVersion();
+        return call_user_func($this->version, $source);
     }
 
-    public function testPhpVersion(): void
+    public function addMetadataRequest(array $source): int
     {
-        $config["environment"]["php"]["version"] = "1.23.4-beta";
-        $assertion["environment"]["php"]["version"] = [
-            "build" => "",
-            "release" => "beta",
-            "major" => "1",
-            "minor" => "23",
-            "patch" => "4"
-        ];
-
-        Parser::parse([], $config);
-
-        if ($config !== $assertion)
-            $this->handleFailedTest();
+       return call_user_func($this->metadata, $source);
     }
+
+    public function executeRequests(Closure $callback): void
+    {
+        call_user_func($this->execute, $callback);
+    }
+
+    public function addSnapshotRequest(array $source, string $path): int {return 0;}
+    public function addArchiveRequest(array $source): int{return 0;}
 }

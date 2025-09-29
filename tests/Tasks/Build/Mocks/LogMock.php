@@ -17,38 +17,24 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Build\Config;
+namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
 
-use Valvoid\Fusion\Tasks\Build\Config\Parser;
-use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Log\Events\Event;
+use Valvoid\Fusion\Log\Events\Interceptor;
+use Valvoid\Fusion\Log\Proxy;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ParserTest extends Test
+class LogMock implements Proxy
 {
-    protected string|array $coverage = Parser::class;
-
-    public function __construct()
-    {
-        $this->testPhpVersion();
-    }
-
-    public function testPhpVersion(): void
-    {
-        $config["environment"]["php"]["version"] = "1.23.4-beta";
-        $assertion["environment"]["php"]["version"] = [
-            "build" => "",
-            "release" => "beta",
-            "major" => "1",
-            "minor" => "23",
-            "patch" => "4"
-        ];
-
-        Parser::parse([], $config);
-
-        if ($config !== $assertion)
-            $this->handleFailedTest();
-    }
+    public function addInterceptor(Interceptor $interceptor): void {}
+    public function removeInterceptor(): void {}
+    public function error(string|Event $event): void {}
+    public function warning(string|Event $event): void {}
+    public function notice(string|Event $event): void {}
+    public function info(string|Event $event): void {}
+    public function verbose(string|Event $event): void {}
+    public function debug(string|Event $event): void {}
 }

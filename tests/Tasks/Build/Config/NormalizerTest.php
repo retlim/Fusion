@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@ use Valvoid\Fusion\Tasks\Build\Config\Normalizer;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Config normalizer test.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
@@ -59,11 +57,8 @@ class NormalizerTest extends Test
 
         Normalizer::normalize([], $config);
 
-        if ($config !== $assertion) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($config !== $assertion)
+            $this->handleFailedTest();
     }
 
     public function testDefaultSource(): void
@@ -86,11 +81,8 @@ class NormalizerTest extends Test
 
         Normalizer::normalize([], $config);
 
-        if ($config != $assertion) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($config != $assertion)
+            $this->handleFailedTest();
     }
 
     public function testDefaultPhpVersion(): void
@@ -115,10 +107,7 @@ class NormalizerTest extends Test
 
         Normalizer::normalize([], $config);
 
-        if ($config != $assertion) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($config != $assertion)
+            $this->handleFailedTest();
     }
 }

@@ -113,7 +113,7 @@ class Download extends Task implements Interceptor
 
             // recommended zip or
             // higher memory usage phar data
-            $this->extension->loaded("zip") ?
+            $this->extension->isLoaded("zip") ?
                 $this->extractZipArchive(...) :
                 $this->extractPharData(...)
         );

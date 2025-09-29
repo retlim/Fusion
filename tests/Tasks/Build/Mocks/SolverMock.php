@@ -17,38 +17,29 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Build\Config;
+namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
 
-use Valvoid\Fusion\Tasks\Build\Config\Parser;
-use Valvoid\Fusion\Tests\Test;
+use Closure;
+use Valvoid\Fusion\Tasks\Build\SAT\Solver;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ParserTest extends Test
-{
-    protected string|array $coverage = Parser::class;
+class SolverMock extends Solver {
 
-    public function __construct()
+    public Closure $path;
+    public Closure $satisfiable;
+
+    public function __construct() {}
+
+    public function isStructureSatisfiable(): bool
     {
-        $this->testPhpVersion();
+        return call_user_func($this->satisfiable);
     }
 
-    public function testPhpVersion(): void
+    public function getPath(): array
     {
-        $config["environment"]["php"]["version"] = "1.23.4-beta";
-        $assertion["environment"]["php"]["version"] = [
-            "build" => "",
-            "release" => "beta",
-            "major" => "1",
-            "minor" => "23",
-            "patch" => "4"
-        ];
-
-        Parser::parse([], $config);
-
-        if ($config !== $assertion)
-            $this->handleFailedTest();
+        return call_user_func($this->path);
     }
 }

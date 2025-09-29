@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,6 @@ use Valvoid\Fusion\Tasks\Build\SAT\Graph;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Implication graph test.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
@@ -69,11 +67,8 @@ class GraphTest extends Test
             $clause->getState() !== State::UNIT ||
             sizeof($literals) !== 2 ||
             isset($literals[1]) !== true ||
-            isset($literals[5]) !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            isset($literals[5]) !== true)
+            $this->handleFailedTest();
     }
 
     public function testConflictSeparation(): void
@@ -94,11 +89,8 @@ class GraphTest extends Test
 
         // assert equal
         // conflict node is separated
-        if ($graph->getNodes() !== $expectation) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($graph->getNodes() !== $expectation)
+            $this->handleFailedTest();
     }
 
     public function testNodeMutation(): void
@@ -128,10 +120,7 @@ class GraphTest extends Test
         $graph->addRootNode(0, false, 2);
 
         // assert equal
-        if ($graph->getNodes() !== $expectation) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($graph->getNodes() !== $expectation)
+            $this->handleFailedTest();
     }
 }
