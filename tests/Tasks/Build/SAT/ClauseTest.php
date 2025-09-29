@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,11 +53,8 @@ class ClauseTest extends Test
         $clause->updateState();
 
         // assert equal
-        if ($clause->getState() !== State::UNIT) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($clause->getState() !== State::UNIT)
+            $this->handleFailedTest();
     }
 
     public function testSatisfiedState(): void
@@ -70,11 +67,8 @@ class ClauseTest extends Test
         $clause->updateState();
 
         // assert equal
-        if ($clause->getState() !== State::SATISFIED) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($clause->getState() !== State::SATISFIED)
+            $this->handleFailedTest();
     }
 
     public function testUnsatisfiedState(): void
@@ -87,10 +81,7 @@ class ClauseTest extends Test
         $clause->updateState();
 
         // assert equal
-        if ($clause->getState() !== State::UNSATISFIED) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($clause->getState() !== State::UNSATISFIED)
+            $this->handleFailedTest();
     }
 }

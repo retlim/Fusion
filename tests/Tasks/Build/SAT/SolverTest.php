@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,6 @@ use Valvoid\Fusion\Tasks\Build\SAT\Solver;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Solver test.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
@@ -92,11 +90,8 @@ class SolverTest extends Test
         $solver = new Solver("root", "1.2.0", $this->structure);
 
         // assert equal
-        if ($solver->isStructureSatisfiable() !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($solver->isStructureSatisfiable() !== true)
+            $this->handleFailedTest();
     }
 
     public function testUnsatisfiable(): void
@@ -106,11 +101,8 @@ class SolverTest extends Test
         $solver = new Solver("root", "1.0.0", $this->structure);
 
         // assert equal
-        if ($solver->isStructureSatisfiable() !== false) {
-           echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-          $this->result = false;
-        }
+        if ($solver->isStructureSatisfiable() !== false)
+            $this->handleFailedTest();
     }
 
     public function testDeadlock(): void
@@ -126,10 +118,7 @@ class SolverTest extends Test
 
         // assert equal
         if ($solver->isStructureSatisfiable() !== false ||
-            $solver->getDeadlock() != $expectation) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            $solver->getDeadlock() != $expectation)
+            $this->handleFailedTest();
     }
 }

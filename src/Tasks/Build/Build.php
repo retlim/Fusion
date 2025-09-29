@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,9 @@ namespace Valvoid\Fusion\Tasks\Build;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Fusion;
-use Valvoid\Fusion\Hub\Hub;
+use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
+use Valvoid\Fusion\Group\Group as GroupProxy;
+use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata as MetadataResponse;
 use Valvoid\Fusion\Hub\Responses\Cache\Versions as VersionsResponse;
 use Valvoid\Fusion\Log\Events\Errors\Deadlock as DeadlockError;
@@ -32,16 +34,15 @@ use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Builder as ExternalMetadataBuilder;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
 use Valvoid\Fusion\Metadata\Metadata;
 use Valvoid\Fusion\Tasks\Build\SAT\Solver;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 use Valvoid\Fusion\Util\Metadata\Structure;
 use Valvoid\Fusion\Util\Reference\Normalizer;
+use Valvoid\Fusion\Wrappers\Extension;
 
 /**
  * Build task to get external package metas.
@@ -72,6 +73,27 @@ class Build extends Task implements Interceptor
     private array $metas = [];
 
     /**
+     * Constructs the task.
+     *
+     * @param Box $box Dependency injection container.
+     * @param GroupProxy $group Tasks group.
+     * @param HubProxy $hub Hub.
+     * @param Extension $extension Standard extension logic wrapper.
+     * @param LogProxy $log Event log.
+     * @param array $config Task config.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly GroupProxy $group,
+        private readonly HubProxy $hub,
+        private readonly Extension $extension,
+        private readonly LogProxy $log,
+        array $config)
+    {
+        parent::__construct($config);
+    }
+
+    /**
      * Executes the task.
      *
      * @throws Error Hub exception.
@@ -81,12 +103,12 @@ class Build extends Task implements Interceptor
      */
     public function execute(): void
     {
-        Log::info("build external metas");
+        $this->log->info("build external metas");
 
         // external source
         // build remote metadata
         if ($this->config["source"]) {
-            Group::setImplicationBreadcrumb(["built", "source"]);
+            $this->group->setImplicationBreadcrumb(["built", "source"]);
             $this->buildExternalRoot($this->config["source"]);
 
         // internal imaged root source
@@ -95,7 +117,7 @@ class Build extends Task implements Interceptor
         } else {
 
             // placeholder or "real" one
-            $metadata = Group::getInternalRootMetadata();
+            $metadata = $this->group->getInternalRootMetadata();
             $sources = $metadata->getStructureSources();
 
             // recursive root source
@@ -123,24 +145,24 @@ class Build extends Task implements Interceptor
      */
     private function buildExternalRoot(string $source): void
     {
-        Log::info("...");
+        $this->log->info("...");
 
         // parse inline source
         $versions = [];
-        $builder = Box::getInstance()->get(ExternalMetadataBuilder::class,
+        $builder = $this->box->get(ExternalMetadataBuilder::class,
             source: $source,
             dir: ""
         );
 
         // get all versions
-        $reqId = Hub::addVersionsRequest($builder->getParsedSource());
+        $reqId = $this->hub->addVersionsRequest($builder->getParsedSource());
         $this->requests[$reqId] = [
             "builder" => $builder,
             "source" => $source,
             "metas" => []
         ];
 
-        Hub::executeRequests(function (VersionsResponse $response) use (&$versions) {
+        $this->hub->executeRequests(function (VersionsResponse $response) use (&$versions) {
             $versions = $response->getEntries();
         });
 
@@ -153,7 +175,7 @@ class Build extends Task implements Interceptor
             $builder->normalizeReference($version);
 
             // get metadata
-            $metasId = Hub::addMetadataRequest($builder->getNormalizedSource());
+            $metasId = $this->hub->addMetadataRequest($builder->getNormalizedSource());
             $this->requests[$reqId]["metas"][] = $metasId;
             $this->requests[$metasId] = [
                 "builder" => $builder,
@@ -161,7 +183,7 @@ class Build extends Task implements Interceptor
                 "versions" => []
             ];
 
-            Hub::executeRequests(function (MetadataResponse $response) use ($builder) {
+            $this->hub->executeRequests(function (MetadataResponse $response) use ($builder) {
                 $builder->addProductionLayer(
                     $response->getContent(),
                     $response->getFile()
@@ -183,7 +205,7 @@ class Build extends Task implements Interceptor
             $id = $metadata->getId();
             $version = $metadata->getVersion();
 
-            $solver = Box::getInstance()->get(Solver::class,
+            $solver = $this->box->get(Solver::class,
                 implication: $this->implication[$id]["implication"][$version],
                 version: $version,
                 id: $id,
@@ -249,7 +271,7 @@ class Build extends Task implements Interceptor
                         "metas" => []
                     ];
 
-                    $builder = Box::getInstance()->get(ExternalMetadataBuilder::class,
+                    $builder = $this->box->get(ExternalMetadataBuilder::class,
 
                         // inherit or
                         // direct directory
@@ -263,7 +285,7 @@ class Build extends Task implements Interceptor
                     unset($this->requests["meta"]);
 
                     // add real entry
-                    $id = Hub::addVersionsRequest($builder->getParsedSource());
+                    $id = $this->hub->addVersionsRequest($builder->getParsedSource());
                     $versions[] = $id;
                     $this->requests[$id] = [
                         "builder" => $builder,
@@ -284,7 +306,7 @@ class Build extends Task implements Interceptor
      */
     private function buildNestedRoots(InternalMetadata $metadata): void
     {
-        Log::info("...");
+        $this->log->info("...");
 
         // fake versions wrapper
         $wrapper = [];
@@ -295,7 +317,7 @@ class Build extends Task implements Interceptor
         $this->buildRequests();
         $this->buildImplication();
 
-        $solver = Box::getInstance()->get(Solver::class,
+        $solver = $this->box->get(Solver::class,
             implication: $this->implication,
             version: $version,
             id: $id,
@@ -326,7 +348,7 @@ class Build extends Task implements Interceptor
     {
         // recursive loop
         // add new request before queue "done" check
-        Hub::executeRequests(function (VersionsResponse|MetadataResponse $response)
+        $this->hub->executeRequests(function (VersionsResponse|MetadataResponse $response)
         {
             $id = $response->getId();
             $builder = $this->requests[$id]["builder"];
@@ -339,7 +361,7 @@ class Build extends Task implements Interceptor
                     // replace pattern
                     $builder->normalizeReference($version);
 
-                    $metasId = Hub::addMetadataRequest($builder->getNormalizedSource());
+                    $metasId = $this->hub->addMetadataRequest($builder->getNormalizedSource());
                     $this->requests[$id]["metas"][] = $metasId;
                     $this->requests[$metasId] = [
                         "builder" => $builder,
@@ -479,7 +501,7 @@ class Build extends Task implements Interceptor
                 );
             }
 
-            $extensions = get_loaded_extensions();
+            $extensions = $this->extension->getLoaded();
 
             foreach ($extensions as $key => $extension)
                 $extensions[$key] = strtolower($extension);
@@ -497,11 +519,13 @@ class Build extends Task implements Interceptor
                     );
                 }
 
-            Log::info(new Content($metadata->getContent()));
+            $this->log->info(
+                $this->box->get(Content::class,
+                    content: $metadata->getContent()));
         }
 
-        Group::setExternalMetas($metas);
-        Group::setImplication(
+        $this->group->setExternalMetas($metas);
+        $this->group->setImplication(
             Trace::getTree($this->implication, $path)
         );
     }
@@ -566,7 +590,7 @@ class Build extends Task implements Interceptor
                 }
 
         } else
-            $metadata = Group::getInternalRootMetadata();
+            $metadata = $this->group->getInternalRootMetadata();
 
         foreach ($implicationPath as $id => $entry) {
             if (isset($metadata))

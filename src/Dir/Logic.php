@@ -24,7 +24,6 @@ use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Wrappers\File;
 use Valvoid\Fusion\Wrappers\Dir;
-use Valvoid\Fusion\Wrappers\System;
 
 /**
  * Root package directory providing normalized filesystem operations.
@@ -40,9 +39,6 @@ class Logic implements Proxy
     /** @var string Dynamic package cache dir. */
     protected string $cache;
 
-    /** @var string System dir for temporary files. */
-    protected string $temp;
-
     /**
      * Constructs the directory.
      *
@@ -55,12 +51,10 @@ class Logic implements Proxy
     public function __construct(
         protected Dir $dir,
         protected File $file,
-        System $system,
         BusProxy $bus,
         array $config)
     {
         $this->root = $config["path"];
-        $this->temp = $system->getTempDir() . "/valvoid_fusion";
 
         $bus->addReceiver(static::class, $this->handleBusEvent(...),
 
@@ -234,7 +228,7 @@ class Logic implements Proxy
      */
     public function getTaskDir(): string
     {
-        return "$this->temp/task";
+        return "$this->cache/task";
     }
 
     /**
@@ -244,7 +238,7 @@ class Logic implements Proxy
      */
     public function getStateDir(): string
     {
-        return "$this->temp/state";
+        return "$this->cache/state";
     }
 
     /**
@@ -264,7 +258,7 @@ class Logic implements Proxy
      */
     public function getOtherDir(): string
     {
-        return "$this->temp/other";
+        return "$this->cache/other";
     }
 
     /**
@@ -274,7 +268,7 @@ class Logic implements Proxy
      */
     public function getPackagesDir(): string
     {
-        return "$this->temp/packages";
+        return "$this->cache/packages";
     }
 
     /**

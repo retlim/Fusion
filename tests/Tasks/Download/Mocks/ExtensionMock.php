@@ -30,7 +30,7 @@ class ExtensionMock extends Extension
 {
     public Closure $loaded;
 
-    public function loaded(string $extension): bool
+    public function isLoaded(string $extension): bool
     {
         return call_user_func($this->loaded, $extension);
     }

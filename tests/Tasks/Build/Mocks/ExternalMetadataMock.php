@@ -17,38 +17,27 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Build\Config;
+namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
 
-use Valvoid\Fusion\Tasks\Build\Config\Parser;
-use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Metadata\External\External;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class ParserTest extends Test
+class ExternalMetadataMock extends External
 {
-    protected string|array $coverage = Parser::class;
+    public function __construct(
+        public array $content,
+        public array $layers = []){}
 
-    public function __construct()
+    public function getContent(): array
     {
-        $this->testPhpVersion();
+        return $this->content;
     }
 
-    public function testPhpVersion(): void
+    public function getLayers(): array
     {
-        $config["environment"]["php"]["version"] = "1.23.4-beta";
-        $assertion["environment"]["php"]["version"] = [
-            "build" => "",
-            "release" => "beta",
-            "major" => "1",
-            "minor" => "23",
-            "patch" => "4"
-        ];
-
-        Parser::parse([], $config);
-
-        if ($config !== $assertion)
-            $this->handleFailedTest();
+        return $this->layers;
     }
 }

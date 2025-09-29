@@ -17,21 +17,27 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Dir\Mocks;
+namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
 
-use Closure;
-use Valvoid\Fusion\Wrappers\System;
+use Valvoid\Fusion\Metadata\Internal\Internal;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class SystemMock extends System
+class InternalMetadataMock extends Internal
 {
-    public Closure $temp;
+    public function __construct(
+        public array $content,
+        public array $layers = []){}
 
-    public function getTempDir(): string
+    public function getContent(): array
     {
-        return call_user_func($this->temp);
+        return $this->content;
+    }
+
+    public function getLayers(): array
+    {
+        return $this->layers;
     }
 }
