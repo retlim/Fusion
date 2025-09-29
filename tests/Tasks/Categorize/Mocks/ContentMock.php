@@ -17,26 +17,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tasks\Categorize\Config;
+namespace Valvoid\Fusion\Tests\Tasks\Categorize\Mocks;
 
-use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
+use Valvoid\Fusion\Log\Events\Infos\Content;
 
 /**
- * Categorize task config normalizer.
- *
- * @Copyright Valvoid
+ * @copyright Valvoid
  * @license GNU GPLv3
  */
-class Normalizer extends ConfigNormalizer
+class ContentMock extends Content
 {
-    /**
-     * Normalizes the config.
-     *
-     * @param array $breadcrumb Index path inside the config to the passed sub config.
-     * @param array $config Sub config to normalize.
-     */
-    public static function normalize(array $breadcrumb, array &$config): void
-    {
-        $config["efficiently"] ??= true;
-    }
+    public function __construct(){}
 }

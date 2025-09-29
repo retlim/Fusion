@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,14 @@
 
 namespace Valvoid\Fusion\Tasks\Categorize;
 
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Group\Group as GroupProxy;
+use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Log\Events\Infos\Content;
-use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalMetaCategory;
 use Valvoid\Fusion\Metadata\Internal\Internal;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 
 /**
@@ -55,11 +56,28 @@ class Categorize extends Task
     private array $movable = [];
 
     /**
+     * Constructs the task.
+     *
+     * @param Box $box Dependency injection container.
+     * @param GroupProxy $group Tasks group.
+     * @param LogProxy $log Event log.
+     * @param array $config Task config.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly GroupProxy $group,
+        private readonly LogProxy $log,
+        array $config)
+    {
+        parent::__construct($config);
+    }
+
+    /**
      * Executes the task.
      */
     public function execute(): void
     {
-        $this->metas = Group::getInternalMetas();
+        $this->metas = $this->group->getInternalMetas();
 
         $this->config["efficiently"] ?
             $this->categorizeEfficiently() :
@@ -69,10 +87,10 @@ class Categorize extends Task
     /** Categorizes redundant. */
     private function categorizeRedundant(): void
     {
-        Log::info("categorize metas redundant");
+        $this->log->info("categorize metas redundant");
 
         // identifier is common then
-        foreach (Group::getExternalMetas() as $id => $meta) {
+        foreach ($this->group->getExternalMetas() as $id => $meta) {
             $dir = $meta->getDir();
             $this->loadable[$id] = $meta;
 
@@ -105,10 +123,10 @@ class Categorize extends Task
     /** Categorizes efficiently. */
     private function categorizeEfficiently(): void
     {
-        Log::info("categorize metas efficiently");
+        $this->log->info("categorize metas efficiently");
 
         // identifier is common then
-        foreach (Group::getExternalMetas() as $id => $meta) {
+        foreach ($this->group->getExternalMetas() as $id => $meta) {
             $dir = $meta->getDir();
 
             // empty director = root
@@ -199,31 +217,39 @@ class Categorize extends Task
     private function notify(): void
     {
         if ($this->recyclable) {
-            Log::info("recycle:");
+            $this->log->info("recycle:");
 
             foreach ($this->recyclable as $meta)
-                Log::info(new Content($meta->getContent()));
+                $this->log->info(
+                    $this->box->get(Content::class,
+                        content: $meta->getContent()));
         }
 
         if ($this->loadable) {
-            Log::info("download:");
+            $this->log->info("download:");
 
             foreach ($this->loadable as $meta)
-                Log::info(new Content($meta->getContent()));
+                $this->log->info(
+                    $this->box->get(Content::class,
+                        content: $meta->getContent()));
         }
 
         if ($this->obsolete) {
-            Log::info("delete:");
+            $this->log->info("delete:");
 
             foreach ($this->obsolete as $meta)
-                Log::info(new Content($meta->getContent()));
+                $this->log->info(
+                    $this->box->get(Content::class,
+                        content: $meta->getContent()));
         }
 
         if ($this->movable) {
-            Log::info("move:");
+            $this->log->info("move:");
 
             foreach ($this->movable as $meta)
-                Log::info(new Content($meta->getContent()));
+                $this->log->info(
+                    $this->box->get(Content::class,
+                        content: $meta->getContent()));
         }
     }
 }
