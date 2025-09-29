@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,17 @@
 namespace Valvoid\Fusion\Tasks\Inflate;
 
 use PhpToken;
-use Valvoid\Fusion\Dir\Dir;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Infos\Content;
-use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalMetaCategory;
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
+use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Inflate task to generate normalized package state.
@@ -50,6 +53,29 @@ class Inflate extends Task
     private array $lazy = [];
 
     /**
+     * Constructs the task.
+     *
+     * @param Box $box Dependency injection container.
+     * @param GroupProxy $group Tasks group.
+     * @param DirProxy $directory Current working directory.
+     * @param LogProxy $log Event log.
+     * @param File $file Standard file logic wrapper.
+     * @param Dir $dir Standard dir logic wrapper.
+     * @param array $config Task config.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly GroupProxy $group,
+        private readonly DirProxy $directory,
+        private readonly LogProxy $log,
+        private readonly File $file,
+        private readonly Dir $dir,
+        array $config)
+    {
+        parent::__construct($config);
+    }
+
+    /**
      * Executes the task.
      * @throws Error
      */
@@ -57,7 +83,7 @@ class Inflate extends Task
     {
         // optional
         // register new state
-        Group::hasDownloadable() ?
+        $this->group->hasDownloadable() ?
             $this->inflateNewState() :
             $this->inflateCurrentState();
     }
@@ -67,13 +93,15 @@ class Inflate extends Task
      */
     private function inflateNewState(): void
     {
-        Log::info("inflate new packages");
+        $this->log->info("inflate new packages");
 
-        $packagesDir = Dir::getPackagesDir();
+        $packagesDir = $this->directory->getPackagesDir();
 
-        foreach (Group::getInternalMetas() as $id => $meta)
+        foreach ($this->group->getInternalMetas() as $id => $meta)
             if ($meta->getCategory() != InternalMetaCategory::OBSOLETE) {
-                Log::info(new Content($meta->getContent()));
+                $this->log->info(
+                    $this->box->get(Content::class,
+                        content: $meta->getContent()));
 
                 // dynamic root
                 // take current
@@ -85,9 +113,11 @@ class Inflate extends Task
                 $this->inflatePackage($dir, $cache);
             }
 
-        foreach (Group::getExternalMetas() as $id => $meta)
+        foreach ($this->group->getExternalMetas() as $id => $meta)
             if ($meta->getCategory() == ExternalMetaCategory::DOWNLOADABLE) {
-                Log::info(new Content($meta->getContent()));
+                $this->log->info(
+                    $this->box->get(Content::class,
+                        content: $meta->getContent()));
 
                 // dynamic root
                 // take current
@@ -107,13 +137,15 @@ class Inflate extends Task
      */
     private function inflateCurrentState(): void
     {
-        Log::info("inflate current packages");
+        $this->log->info("inflate current packages");
 
-        foreach (Group::getInternalMetas() as $id => $meta) {
+        foreach ($this->group->getInternalMetas() as $id => $meta) {
             if ($meta->getCategory() == InternalMetaCategory::OBSOLETE)
                 continue;
 
-            Log::info(new Content($meta->getContent()));
+            $this->log->info(
+                $this->box->get(Content::class,
+                    content: $meta->getContent()));
 
             // static state root
             // take absolute source dir as it is
@@ -141,7 +173,7 @@ class Inflate extends Task
 
         $this->extractLoadableFiles($dir, "", $cache);
 
-        Dir::delete("$cache/loadable");
+        $this->directory->delete("$cache/loadable");
 
         $this->writeLazy($this->lazy, $cache);
         $this->writeAsap($this->asap, $cache);
@@ -157,31 +189,35 @@ class Inflate extends Task
     private function extractLoadableFiles(string $dir, string $breadcrumb,
                                           string $cache): void
     {
-        $filenames = scandir($dir, SCANDIR_SORT_ASCENDING);
+        $filenames = $this->dir->getFilenames($dir, SCANDIR_SORT_ASCENDING);
 
-        if ($filenames)
-            foreach ($filenames as $filename)
-                if ($filename != "." && $filename != "..") {
-                    $file = "$dir/$filename";
+        if ($filenames === false)
+            throw new Error(
+                "Can't read directory '$dir'."
+            );
 
-                    if (is_dir($file)) {
-                        if ($file != $cache)
-                            $this->extractLoadableFiles($file,
-                                "$breadcrumb/$filename", $cache);
+        foreach ($filenames as $filename)
+            if ($filename != "." && $filename != "..") {
+                $file = "$dir/$filename";
 
-                    // only php files
-                    } elseif (str_ends_with($file, ".php")) {
-                        $content = file_get_contents($file);
+                if ($this->dir->is($file)) {
+                    if ($file != $cache)
+                        $this->extractLoadableFiles($file,
+                            "$breadcrumb/$filename", $cache);
 
-                        if ($content === false)
-                            throw new Error(
-                                "Can't read the file \"$file\"."
-                            );
+                // only php files
+                } elseif (str_ends_with($file, ".php")) {
+                    $content = $this->file->get($file);
 
-                        $this->extractLoadable("$breadcrumb/$filename",
-                            $content);
-                    }
+                    if ($content === false)
+                        throw new Error(
+                            "Can't read the file \"$file\"."
+                        );
+
+                    $this->extractLoadable("$breadcrumb/$filename",
+                        $content);
                 }
+            }
     }
 
     /**
@@ -400,16 +436,17 @@ class Inflate extends Task
 
             $directory = "$dir/loadable$root";
 
-            Dir::createDir($directory);
+            $this->directory->createDir($directory);
 
-            if (!file_put_contents(
+            if (!$this->file->put(
                 "$directory/asap.php",
                 "<?php\n" .
-                "// Auto-generated by Fusion package manager. \n// Do not modify.\n" .
+                "// Auto-generated by Fusion package manager.\n".
+                "// Do not modify.\n" .
                 "return [$content\n];"
-            ))
-                throw new Error(
-                    "Can't write to the file \"$directory/asap.php\"."
+
+            )) throw new Error(
+                    "Can't write to the file '$directory/asap.php'."
                 );
         }
     }
@@ -431,16 +468,17 @@ class Inflate extends Task
 
             $directory = "$dir/loadable$root";
 
-            Dir::createDir($directory);
+            $this->directory->createDir($directory);
 
-            if (!file_put_contents(
+            if (!$this->file->put(
                 "$directory/lazy.php",
                 "<?php\n" .
-                "// Auto-generated by Fusion package manager. \n// Do not modify.\n" .
+                "// Auto-generated by Fusion package manager.\n" .
+                "// Do not modify.\n" .
                 "return [$content\n];"
-            ))
-                throw new Error(
-                    "Can't write to the file \"$directory/lazy.php\"."
+
+            )) throw new Error(
+                    "Can't write to the file '$directory/lazy.php'."
                 );
         }
     }

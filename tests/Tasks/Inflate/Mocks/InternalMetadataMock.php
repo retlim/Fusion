@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Inflate\Mocks;
 
+use Valvoid\Fusion\Metadata\Internal\Category;
 use Valvoid\Fusion\Metadata\Internal\Internal;
 
 /**
@@ -27,5 +28,28 @@ use Valvoid\Fusion\Metadata\Internal\Internal;
  */
 class InternalMetadataMock extends Internal
 {
-    public function __construct(public array $content){}
+    public function __construct(
+        public Category $category,
+        public array $content,
+        public array $layers = []){}
+
+    public function getContent(): array
+    {
+        return $this->content;
+    }
+
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function getLayers(): array
+    {
+        return $this->layers;
+    }
+
+    public function getId(): string
+    {
+        return $this->content["id"];
+    }
 }
