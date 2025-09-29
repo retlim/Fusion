@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,18 @@
 namespace Valvoid\Fusion\Tests\Tasks\Inflate;
 
 use Exception;
+use Valvoid\Fusion\Metadata\Internal\Category;
 use Valvoid\Fusion\Tasks\Inflate\Inflate;
 use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\BoxMock;
-use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\DirectoryMock;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\ExternalMetadataMock;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\GroupMock;
 use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\InternalMetadataMock;
-use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\LogMock;
+use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
 use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
+use Valvoid\Fusion\Tests\Tasks\Inflate\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -39,272 +43,390 @@ use Valvoid\Fusion\Tests\Test;
 class InflateTest extends Test
 {
     protected string|array $coverage = Inflate::class;
-    private string $cache = __DIR__ . "/Mocks/package/cache/packages";
-    private string $dependencies = __DIR__ . "/Mocks/package/dependencies";
-    private int $time;
+    private BoxMock $box;
 
     public function __construct()
     {
-        $box = new BoxMock;
-        $group = new GroupMock;
-        $box->group = $group;
-        $group->hasDownloadable = false;
-        $box->bus = new BusMock;
-        $box->log = new LogMock;
+        $this->box = new BoxMock;
 
+        $this->testRefresh();
+        $this->testDownloadable();
+
+        $this->box::unsetInstance();
+    }
+
+    public function testRefresh(): void
+    {
         try {
-            $this->time = time();
-            $task = new Inflate([]);
-            $group->implication = [
-                "metadata2" => [ // no external root
-                    "implication" => []
-                ], "metadata3" => [
-                    "implication" => []
-                ]];
-
-            $group->internalMetas["metadata1"] = new InternalMetadataMock([
-                "id" => "metadata1",
-                "name" => "metadata1",
-                "description" => "metadata1",
-                "source" => __DIR__ . "/Mocks/package",
-                "dir" => "", // relative to root dir
-                "version" => "1.0.0",
-                "structure" => [
-                    "cache" => "/cache",
-                    "namespaces" => [],
-                ]
-            ]);
-
-            $group->internalMetas["metadata2"] = new InternalMetadataMock([
-                "id" => "metadata2",
-                "name" => "metadata2",
-                "description" => "metadata2",
-                "source" => __DIR__ . "/Mocks/package/dependencies/metadata2",
-                "dir" => "/dependencies/metadata2", // relative to root dir
-                "version" => "1.0.0",
-                "structure" => [
-                    "cache" => "/cache",
-                    "namespaces" => []
-                ]
-            ]);
-
-            $group->internalMetas["metadata3"] = new InternalMetadataMock([
-                "id" => "metadata3",
-                "name" => "metadata3",
-                "description" => "metadata3",
-                "source" => __DIR__ . "/Mocks/package/dependencies/metadata3",
-                "dir" => "/dependencies/metadata3", // relative to root dir
-                "version" => "1.0.0",
-                "structure" => [
-                    "cache" => "/cache",
-                    "namespaces" => []
-                ]
-            ]);
-
-            $task->execute();
-            $this->testRefreshClassAndFunction();
-            $this->testRefreshInterface();
-            $this->testRefreshTrait();
-
+            $directory = new DirectoryMock;
+            $file = new FileMock;
+            $dir = new DirMock;
             $group = new GroupMock;
-            $box->group = $group;
-            $group->hasDownloadable = true;
-            $group->internalMetas = ["metadata1" => new InternalMetadataMock([
-                "id" => "metadata1",
-                "name" => "metadata1",
-                "description" => "metadata1",
-                "source" => __DIR__ . "/Mocks/package",
-                "dir" => "", // relative to root dir
-                "version" => "1.0.0",
-                "structure" => [
-                    "namespaces" => [],
-                    "cache" => "/cache",
-                    "extensions" => [],
-                    "sources" => [
-                        "/dependencies" => []
-                    ]
-                ]
-            ])];
+            $inflate = new Inflate(
+                box: $this->box,
+                group: $group,
+                directory: $directory,
+                log: new LogMock,
+                file: $file,
+                dir: $dir,
+                config: []
+            );
 
-            $group->externalMetas["metadata1"] = new ExternalMetadataMock(
-                ExternalCategory::DOWNLOADABLE,[
-                "id" => "metadata1",
-                "name" => "metadata1",
-                "description" => "metadata1",
-                "source" => "/package",
-                "dir" => "", // relative to root dir
-                "version" => "1.0.0",
+            $group->hasDownloadable = false;
+            $group->internalMetas["i0"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE, [
+                "source" => "/s0",
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "/c0",
                     "namespaces" => [],
-                    "extensions" => [],
-                    "sources" => [
-                        "/dependencies" => [
-                            "metadata2",
-                            "metadata3"
-                        ]
-                    ]
                 ]
             ]);
 
-            $group->externalMetas["metadata2"] = new ExternalMetadataMock(
-                ExternalCategory::DOWNLOADABLE,[
-                "id" => "metadata2",
-                "name" => "metadata2",
-                "description" => "metadata2",
-                "source" => "/package/dependencies/metadata2",
-                "dir" => "/dependencies/metadata2",
-                "version" => "1.0.0",
+            $group->internalMetas["i1"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE, [
+                "source" =>"/s1",
                 "structure" => [
-                    "namespaces" => [],
-                    "cache" => "/cache",
-                    "extensions" => [
-                        "/extensions"
+                    "cache" => "/c1",
+                    "namespaces" => []
+                ]
+            ]);
+
+            $group->internalMetas["i2"] = new InternalMetadataMock(
+                InternalCategory::RECYCLABLE, [
+                "source" => "/s2",
+                "structure" => [
+                    "cache" => "/c2",
+                    "namespaces" => []
+                ]
+            ]);
+
+            // do not loop
+            $group->internalMetas["i3"] = new InternalMetadataMock(
+                InternalCategory::OBSOLETE, []);
+
+            $filenames =
+            $isDir =
+            $get =
+            $create =
+            $delete = [];
+
+            $dir->filenames = function (string $dir) use (&$filenames) {
+                $filenames[] = $dir;
+
+                if ($dir == "/s0")
+                    return ["d0", "f0.php"];
+
+                // read dir
+                if ($dir == "/s0/d0")
+                    return ["f1.php", "f2"]; // .php extension
+
+                if ($dir == "/s1")
+                    return ["f3.php"];
+
+                if ($dir == "/s2")
+                    return ["f4.php", "f5.php"];
+
+                return [];
+            };
+
+            $dir->is = function (string $dir) use (&$isDir) {
+                $isDir[] = $dir;
+                return $dir == "/s0/d0";
+            };
+
+            $directory->create = function (string $dir) use (&$create) {
+                $create[] = $dir;
+            };
+
+            $directory->delete = function (string $dir) use (&$delete) {
+                $delete[] = $dir;
+            };
+
+            $file->put = function (string $file, mixed $data) use (&$put) {
+                $put[] = [
+                    "file" => $file,
+                    "data" => $data
+                ];
+
+                return 1;
+            };
+
+            $file->get = function (string $file) use (&$get) {
+                $get[] = $file;
+
+                if ($file == "/s0/f0.php")
+                    return "<?php\n" .
+                        "namespace I0;\n".
+                        "class Any {}";
+
+                if ($file == "/s0/d0/f1.php")
+                    return "<?php\n" .
+                        "namespace I0 {\n" .
+                            "function whatever() {}\n" .
+                        "}";
+
+                if ($file == "/s1/f3.php")
+                    return "<?php\n" .
+                        "namespace I1\Any;\n". // prefix
+                        "interface Any {}";
+
+                if ($file == "/s2/f4.php")
+                    return "<?php\n" .
+                        "namespace I2;\n".
+                        "trait Any {}";
+
+                if ($file == "/s2/f5.php")
+                    return "<?php\n" .
+                        "namespace I;\n". // prefix but no segment
+                        "class Any {}";
+
+                return "#";
+            };
+
+            $inflate->execute();
+
+            if ($get != [
+                    "/s0/d0/f1.php",
+                    "/s0/f0.php",
+                    "/s1/f3.php",
+                    "/s2/f4.php",
+                    "/s2/f5.php"] ||
+                $create != [
+                    "/s0/c0/loadable",
+                    "/s0/c0/loadable",
+                    "/s1/c1/loadable",
+                    "/s2/c2/loadable"] ||
+                $filenames != [
+                    "/s0",
+                    "/s0/d0",
+                    "/s1",
+                    "/s2"] ||
+                $isDir != [
+                    "/s0/d0",
+                    "/s0/d0/f1.php",
+                    "/s0/d0/f2",
+                    "/s0/f0.php",
+                    "/s1/f3.php",
+                    "/s2/f4.php",
+                    "/s2/f5.php"] ||
+                $delete != [
+                    "/s0/c0/loadable",
+                    "/s1/c1/loadable",
+                    "/s2/c2/loadable"] ||
+                $put != [
+                    [
+                        "file" => "/s0/c0/loadable/lazy.php",
+                        "data" => "<?php\n" .
+                            "// Auto-generated by Fusion package manager.\n" .
+                            "// Do not modify.\n" .
+                            "return [\n" .
+                            "\t'I0\Any' => '/f0.php',\n" .
+                            "];"
                     ],
-                    "sources" => []
-                ]
-            ]);
-
-            $group->externalMetas["metadata3"] = new ExternalMetadataMock(
-                ExternalCategory::DOWNLOADABLE,[
-                "id" => "metadata3",
-                "name" => "metadata3",
-                "description" => "metadata3",
-                "source" => "whatever/metadata3",
-                "dir" => "/dependencies/metadata3",
-                "version" => "1.0.0",
-                "structure" => [
-                    "cache" => "/cache",
-                    "extensions" => [],
-                    "namespaces" => [],
-                    "sources" => [
-                        "/dependencies" => ["metadata2"]
+                    [
+                        "file" => "/s0/c0/loadable/asap.php",
+                        "data" => "<?php\n" .
+                            "// Auto-generated by Fusion package manager.\n" .
+                            "// Do not modify.\n" .
+                            "return [\n" .
+                            "\t'/d0/f1.php',\n" .
+                            "];"
+                    ],
+                    [
+                        "file" => "/s1/c1/loadable/lazy.php",
+                        "data" => "<?php\n" .
+                            "// Auto-generated by Fusion package manager.\n" .
+                            "// Do not modify.\n" .
+                            "return [\n" .
+                            "\t'I1\Any\Any' => '/f3.php',\n" .
+                            "];"
+                    ],
+                    [
+                        "file" => "/s2/c2/loadable/lazy.php",
+                        "data" => "<?php\n" .
+                            "// Auto-generated by Fusion package manager.\n" .
+                            "// Do not modify.\n" .
+                            "return [\n" .
+                            "\t'I2\Any' => '/f4.php',\n" .
+                            "];"
                     ]
-                ]
-            ]);
 
-            $task = new Inflate([]);
-            $group->implication = [
-                "metadata1" => [
-                    "implication" => [
-                        "metadata2" => [
-                            "implication" => []
-                        ],
-                        "metadata3" => [
-                            "implication" => [
-                                "metadata2" => [
-                                    "implication" => []
-                                ]
-                            ]
-                        ],
-                    ]
-                ]
-            ];
-
-            $task->execute();
-            $this->testNewStateFinalClass();
-            $this->testNewStateAbstractClass();
-            $this->testNewStateEnum();
-            $box::unsetInstance();
+                ]) $this->handleFailedTest();
 
         } catch (Exception) {
             $this->handleFailedTest();
         }
-
-        $box::unsetInstance();
     }
 
-    public function testRefreshClassAndFunction(): void
+    public function testDownloadable(): void
     {
-        $loadable = __DIR__ . "/Mocks/package/cache/loadable";
-        $asap = "$loadable/asap.php";
-        $lazy = "$loadable/lazy.php";
+        try {
+            $directory = new DirectoryMock;
+            $file = new FileMock;
+            $dir = new DirMock;
+            $group = new GroupMock;
+            $inflate = new Inflate(
+                box: $this->box,
+                group: $group,
+                directory: $directory,
+                log: new LogMock,
+                file: $file,
+                dir: $dir,
+                config: []
+            );
 
-        if (is_file($asap) && is_file($lazy) &&
-            filemtime($asap) >= $this->time && filemtime($lazy) >= $this->time) {
-            $asap = include "$loadable/asap.php";
-            $lazy = include "$loadable/lazy.php";
+            $group->hasDownloadable = true;
+            $group->internalMetas = ["i0" => new InternalMetadataMock(
+                Category::OBSOLETE, [])];
 
-            if ($lazy == ['Metadata1\Metadata1' => '/Metadata1.php'] &&
-                $asap == ["/metadata_1.php"])
-                return;
+            $group->externalMetas["i0"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE,[
+                "structure" => [
+                    "cache" => "/cache",
+                    "namespaces" => []
+                ]
+            ]);
+
+            $group->externalMetas["i1"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE,[
+                "structure" => [
+                    "namespaces" => [],
+                    "cache" => "/cache"
+                ]
+            ]);
+
+            $group->externalMetas["i2"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE,[
+                "structure" => [
+                    "cache" => "/cache",
+                    "namespaces" => []
+                ]
+            ]);
+
+            $filenames =
+            $isDir =
+            $get =
+            $create =
+            $delete = [];
+            $directory->packages = function () {return "/#";};
+            $directory->delete = function (string $dir) use (&$delete) {
+                $delete[] = $dir;
+            };
+
+            $dir->filenames = function (string $dir) use (&$filenames) {
+                $filenames[] = $dir;
+
+                if ($dir == "/#/i0")
+                    return ["d0", "f0.php"];
+
+                if ($dir == "/#/i0/d0")
+                    return ["f1"];
+
+                if ($dir == "/#/i1")
+                    return ["f2.php"];
+
+                if ($dir == "/#/i2")
+                    return ["f3.php"];
+
+                return [];
+            };
+
+            $dir->is = function (string $dir) use (&$isDir) {
+                $isDir[] = $dir;
+                return $dir == "/#/i0/d0";
+            };
+
+            $file->get = function (string $file) use (&$get) {
+                $get[] = $file;
+
+                if ($file == "/#/i0/f0.php")
+                    return "<?php\n" .
+                        "namespace I0;\n".
+                        "final class Any {}";
+
+                if ($file == "/#/i1/f2.php")
+                    return "<?php\n" .
+                        "namespace I1;\n".
+                        "abstract class Any {}";
+
+                if ($file == "/#/i2/f3.php")
+                    return "<?php\n" .
+                        "namespace I2;\n".
+                        "enum Any {}";
+
+                return "#";
+            };
+
+            $directory->create = function (string $dir) use (&$create) {
+                $create[] = $dir;
+            };
+
+            $file->put = function (string $file, mixed $data) use (&$put) {
+                $put[] = [
+                    "file" => $file,
+                    "data" => $data
+                ];
+
+                return 1;
+            };
+
+            $inflate->execute();
+
+            if ($get != [
+                    "/#/i0/f0.php",
+                    "/#/i1/f2.php",
+                    "/#/i2/f3.php"] ||
+                $create != [
+                    "/#/i0/cache/loadable",
+                    "/#/i1/cache/loadable",
+                    "/#/i2/cache/loadable"] ||
+                $filenames != [
+                    "/#/i0",
+                    "/#/i0/d0",
+                    "/#/i1",
+                    "/#/i2"] ||
+                $isDir != [
+                    "/#/i0/d0",
+                    "/#/i0/d0/f1",
+                    "/#/i0/f0.php",
+                    "/#/i1/f2.php",
+                    "/#/i2/f3.php"] ||
+                $delete != [
+                    "/#/i0/cache/loadable",
+                    "/#/i1/cache/loadable",
+                    "/#/i2/cache/loadable"] ||
+                $put != [[
+                        "file" => "/#/i0/cache/loadable/lazy.php",
+                        "data" => "<?php\n" .
+                            "// Auto-generated by Fusion package manager.\n" .
+                            "// Do not modify.\n" .
+                            "return [\n" .
+                            "\t'I0\Any' => '/f0.php',\n" .
+                            "];"
+                    ],
+                    [
+                        "file" => "/#/i1/cache/loadable/lazy.php",
+                        "data" => "<?php\n" .
+                            "// Auto-generated by Fusion package manager.\n" .
+                            "// Do not modify.\n" .
+                            "return [\n" .
+                            "\t'I1\Any' => '/f2.php',\n" .
+                            "];"
+                    ],
+                    [
+                        "file" => "/#/i2/cache/loadable/lazy.php",
+                        "data" => "<?php\n" .
+                            "// Auto-generated by Fusion package manager.\n" .
+                            "// Do not modify.\n" .
+                            "return [\n" .
+                            "\t'I2\Any' => '/f3.php',\n" .
+                            "];"
+                    ]
+
+                ]) $this->handleFailedTest();
+
+        } catch (Exception) {
+            $this->handleFailedTest();
         }
-
-        $this->handleFailedTest();
-    }
-
-    public function testRefreshInterface(): void
-    {
-        $loadable = "$this->dependencies/metadata2/cache/loadable";
-        $lazy = "$loadable/lazy.php";
-
-        if (is_file($lazy) && filemtime($lazy) >= $this->time) {
-            $lazy = include "$loadable/lazy.php";
-
-            if ($lazy == ['Metadata2\Whatever\Metadata2' => '/Metadata2.php'])
-                return;
-        }
-
-        $this->handleFailedTest();
-    }
-
-    public function testRefreshTrait(): void
-    {
-        $loadable = "$this->dependencies/metadata3/cache/loadable";
-        $lazy = "$loadable/lazy.php";
-
-        if (is_file($lazy) && filemtime($lazy) >= $this->time) {
-            $lazy = include "$loadable/lazy.php";
-
-            if ($lazy == ['Metadata3\Metadata3' => '/Metadata3.php'])
-                return;
-        }
-
-        $this->handleFailedTest();
-    }
-
-    public function testNewStateFinalClass(): void
-    {
-        $loadable = "$this->cache/metadata1/cache/loadable";
-        $lazy = "$loadable/lazy.php";
-
-        if (is_file($lazy) && filemtime($lazy) >= $this->time) {
-            $lazy = include "$loadable/lazy.php";
-
-            if ($lazy == ['Metadata1\Final\Metadata1' => '/Metadata1.php'])
-                return;
-        }
-
-        $this->handleFailedTest();
-    }
-
-    public function testNewStateAbstractClass(): void
-    {
-        $loadable = "$this->cache/metadata2/cache/loadable";
-        $lazy = "$loadable/lazy.php";
-
-        if (is_file($lazy) && filemtime($lazy) >= $this->time) {
-            $lazy = include "$loadable/lazy.php";
-
-            if ($lazy == ['Metadata2\Metadata2' => '/Metadata2.php'])
-                return;
-        }
-
-        $this->handleFailedTest();
-    }
-
-    public function testNewStateEnum(): void
-    {
-        $loadable = "$this->cache/metadata3/cache/loadable";
-        $lazy = "$loadable/lazy.php";
-
-        if (is_file($lazy) && filemtime($lazy) >= $this->time) {
-            $lazy = include "$loadable/lazy.php";
-
-            if ($lazy == ['Metadata3\Enum\Metadata3' => '/Metadata3.php'])
-                return;
-        }
-
-        $this->handleFailedTest();
     }
 }
