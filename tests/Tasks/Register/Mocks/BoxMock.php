@@ -21,9 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Register\Mocks;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Proxy\Proxy;
-use Valvoid\Fusion\Dir\Logic;
-use Valvoid\Fusion\Wrappers\Dir;
-use Valvoid\Fusion\Wrappers\File;
+use Valvoid\Fusion\Log\Events\Infos\Content;
 
 /**
  * Mocked container.
@@ -41,23 +39,8 @@ class BoxMock extends Box
         if ($class === Proxy::class)
             return $this->bus;
 
-        if ($class === \Valvoid\Fusion\Group\Group::class)
-            return $this->group;
-
-        if ($class === \Valvoid\Fusion\Log\Proxy::class)
-            return $this->log;
-
-        if ($class === \Valvoid\Fusion\Dir\Proxy::class)
-            return new class extends Logic
-            {
-                public function __construct()
-                {
-                    $this->root = __DIR__ . "/package";
-                    $this->cache = __DIR__ . "/package/cache";
-                    $this->file = new File;
-                    $this->dir = new Dir;
-                }
-            };
+        if ($class === Content::class)
+            return new ContentMock;
 
         return parent::get($class, ...$args);
     }
