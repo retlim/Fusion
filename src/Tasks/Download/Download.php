@@ -24,7 +24,7 @@ use PharData;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Proxy as DirProxy;
 use Valvoid\Fusion\Group\Group as GroupProxy;
-use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
+use Valvoid\Fusion\Hub\Proxy as HubProxy;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;

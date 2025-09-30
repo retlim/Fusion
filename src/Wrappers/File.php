@@ -108,4 +108,17 @@ class File
     {
         return copy($from, $to);
     }
+
+    /**
+     * Gets file modification time
+     *
+     * @param string $file Path to the file.
+     * @return int|false the time the file was last modified,
+     * or false on failure. The time is returned as a Unix
+     * timestamp, which is suitable for the date function.
+     */
+    public function time(string $file): int|false
+    {
+        return filemtime($file);
+    }
 }

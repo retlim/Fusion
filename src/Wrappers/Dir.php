@@ -88,4 +88,18 @@ class Dir
     {
         return rename($from, $to);
     }
+
+    /**
+     * Returns canonicalized absolute pathname
+     *
+     * @param string $path The path being checked.
+     * @return string|false the canonicalized absolute pathname
+     * on success. The resulting path will have no symbolic link,
+     * '/./' or '/../' components. realpath returns false on
+     * failure, e.g. if the file does not exist.
+     */
+    public function getRealPath(string $path): string|false
+    {
+        return realpath($path);
+    }
 }

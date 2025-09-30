@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,18 +20,20 @@
 namespace Valvoid\Fusion\Tests\Hub\Cache;
 
 use Valvoid\Fusion\Hub\Cache;
+use Valvoid\Fusion\Tests\Hub\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Hub\Mocks\DirectoryMock;
+use Valvoid\Fusion\Tests\Hub\Mocks\DirMock;
+use Valvoid\Fusion\Tests\Hub\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Hub cache test.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
 class CacheTest extends Test
 {
     protected string|array $coverage = Cache::class;
-
+    private BoxMock $box;
     private Cache $cache;
 
     private array $versions = [
@@ -46,13 +48,27 @@ class CacheTest extends Test
 
     public function __construct()
     {
-        $this->cache = new Cache("");
+        $this->box = new BoxMock;
+        $dir = new DirMock;
+        $dir->is = function (string $dir) {
+            return false;
+        };
+
+        $this->cache = new Cache(
+            box: $this->box,
+            root: "",
+            directory: new DirectoryMock,
+            dir: $dir,
+            file: new FileMock
+        );
 
         foreach ($this->versions as $version)
             $this->cache->addVersion("test", "test", $version);
 
         $this->testLogicalReference();
         $this->testIllogicalReference();
+
+        $this->box::unsetInstance();
     }
 
     public function testLogicalReference(): void
@@ -80,11 +96,8 @@ class CacheTest extends Test
         ];
 
         // assert equal
-        if ($versions !== $expectation) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($versions !== $expectation)
+            $this->handleFailedTest();
     }
 
     public function testIllogicalReference(): void
@@ -127,10 +140,7 @@ class CacheTest extends Test
         ]);
 
         // assert equal
-        if ($versions !== []) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($versions !== [])
+            $this->handleFailedTest();
     }
 }

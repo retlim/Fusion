@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ namespace Valvoid\Fusion\Tests\Hub;
 
 use Exception;
 use Valvoid\Fusion\Hub\Hub;
-use Valvoid\Fusion\Hub\Proxy\Logic;
+use Valvoid\Fusion\Hub\Logic;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive as CacheArchive;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
@@ -35,6 +35,7 @@ use Valvoid\Fusion\Hub\Responses\Remote\Offset as RemoteOffset;
 use Valvoid\Fusion\Hub\Responses\Remote\References as RemoteReferences;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Tests\Hub\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Hub\Mocks\ConfigMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\CurlMulti;
 use Valvoid\Fusion\Wrappers\CurlShare;
@@ -65,18 +66,18 @@ class HubTest extends Test
         CurlMulti::class
     ];
 
-    private BoxMock $container;
+    private BoxMock $box;
 
     public function __construct()
     {
-        $this->container = new BoxMock;
+        $this->box = new BoxMock;
 
         // static
-        $this->container->setUpStaticTests();
+        $this->box->setUpStaticTests();
         $this->testStaticInterface();
 
         // logic
-        $this->container->setUpLogicTests();
+        $this->box->setUpLogicTests();
         $this->testErrorRequest();
 
         // all request are cache first and
@@ -85,12 +86,17 @@ class HubTest extends Test
         $this->testFileCacheRequest();
         $this->testArchiveCacheRequest();
 
-        $this->container::unsetInstance();
+        $this->box::unsetInstance();
     }
 
     public function testArchiveCacheRequest(): void
     {
-        $hub = new Logic;
+        $hub = new Logic(
+            box: $this->box,
+            curlMulti: new CurlMulti,
+            curlShare: new CurlShare,
+            conf: new ConfigMock);
+
         $source = [
             "api" => "test",
             "path" => "/-",
@@ -121,7 +127,12 @@ class HubTest extends Test
 
     public function testFileCacheRequest(): void
     {
-        $hub = new Logic;
+        $hub = new Logic(
+            box: $this->box,
+            curlMulti: new CurlMulti,
+            curlShare: new CurlShare,
+            conf: new ConfigMock);
+
         $source = [
             "api" => "test",
             "path" => "/-",
@@ -167,7 +178,12 @@ class HubTest extends Test
 
     public function testVersionsCacheRequest(): void
     {
-        $hub = new Logic;
+        $hub = new Logic(
+            box: $this->box,
+            curlMulti: new CurlMulti,
+            curlShare: new CurlShare,
+            conf: new ConfigMock);
+
         $source = [
             "api" => "test",
             "path" => "/-",
@@ -208,7 +224,11 @@ class HubTest extends Test
     {
         // unknown api
         $source = ["api" => "whatever"];
-        $hub = new Logic;
+        $hub = new Logic(
+            box: $this->box,
+            curlMulti: new CurlMulti,
+            curlShare: new CurlShare,
+            conf: new ConfigMock);
 
         try {
             $hub->addVersionsRequest($source);
@@ -272,7 +292,7 @@ class HubTest extends Test
         Hub::executeRequests(function (){});
 
         // static functions connected to same non-static functions
-        if ($this->container->hub->calls !== [
+        if ($this->box->hub->calls !== [
                 "addVersionsRequest",
                 "addMetadataRequest",
                 "addSnapshotRequest",

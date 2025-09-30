@@ -17,25 +17,42 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks;
+namespace Valvoid\Fusion\Tests\Hub\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Dir\Proxy;
 
 /**
  * @copyright Valvoid
  * @license GNU GPLv3
  */
-class DirMock implements Proxy
+class DirectoryMock implements Proxy
 {
-    public function getRootDir(): string{return "";}
+    public Closure $cache;
+    public Closure $create;
+    public Closure $copy;
+
+    public function getPackagesDir(): string
+    {
+        return call_user_func($this->cache);
+    }
+
+    public function createDir(string $dir, int $permissions = 0755): void
+    {
+        call_user_func($this->create, $dir, $permissions);
+    }
+
+    public function copy(string $from, string $to): void
+    {
+        call_user_func($this->copy, $from, $to);
+    }
+
+    public function rename(string $from, string $to): void {}
+    public function delete(string $file): void {}
     public function getTaskDir(): string {return "";}
+    public function clear(string $dir, string $path): void {}
     public function getStateDir(): string {return "";}
     public function getCacheDir(): string {return "";}
     public function getOtherDir(): string {return "";}
-    public function getPackagesDir(): string {return "";}
-    public function createDir(string $dir, int $permissions): void {}
-    public function rename(string $from, string $to): void {}
-    public function copy(string $from, string $to): void{}
-    public function delete(string $file): void {}
-    public function clear(string $dir, string $path): void {}
+    public function getRootDir(): string {return "";}
 }

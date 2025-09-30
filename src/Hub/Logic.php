@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -10,24 +10,22 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Hub\Proxy;
+namespace Valvoid\Fusion\Hub;
 
 use Closure;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Config\Proxy\Proxy as ConfigProxy;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Offset as RemoteOffsetApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
-use Valvoid\Fusion\Hub\Cache;
-use Valvoid\Fusion\Hub\Parser;
 use Valvoid\Fusion\Hub\Requests\Cache\Archive as CacheArchiveRequest;
 use Valvoid\Fusion\Hub\Requests\Cache\Cache as CacheRequest;
 use Valvoid\Fusion\Hub\Requests\Cache\Error as CacheErrorRequest;
@@ -58,27 +56,21 @@ use Valvoid\Fusion\Wrappers\CurlShare;
  */
 class Logic implements Proxy
 {
-    /** @var CurlMulti Curl multi wrapper. */
-    protected CurlMulti $curlMulti;
-
-    /** @var CurlShare Curl share wrapper. */
-    protected CurlShare $curlShare;
-
     /** @var array<string, RemoteApi|LocalApi> APIs. */
-    protected array $apis;
+    private array $apis;
 
     /** @var Cache Cache. */
-    protected Cache $cache;
+    private Cache $cache;
 
     /** @var int Unique request ID. */
-    protected int $id = 0;
+    private int $id = 0;
 
     /** @var array{
      *     cache: array<int, CacheRequest>,
      *     local: array<int, LocalRequest>,
      *     remote: array<int, RemoteRequest>
      * } Request queues. */
-    protected array $queues = [
+    private array $queues = [
         "cache" => [],
         "local" => [],
         "remote" => []
@@ -87,22 +79,25 @@ class Logic implements Proxy
     /**
      * Constructs the logic.
      *
+     * @param Box $box Dependency injection container.
+     * @param CurlMulti $curlMulti Curl multi wrapper.
+     * @param CurlShare $curlShare Curl share wrapper.
+     * @param ConfigProxy $conf Config.
      * @throws HubError Hub error.
      */
-    public function __construct()
+    public function __construct(
+        private readonly Box $box,
+        private readonly CurlMulti $curlMulti,
+        private readonly CurlShare $curlShare,
+        ConfigProxy $conf)
     {
-        $config = Config::get("hub");
-        $this->curlShare = Box::getInstance()->get(CurlShare::class);
-        $this->curlMulti = Box::getInstance()->get(CurlMulti::class);
-
         // local API root
-        $root = Config::get("dir", "path");
+        $root = $conf->get("dir", "path");
         $root = dirname($root);
-        $this->cache = Box::getInstance()->get(Cache::class,
-            root: $root
-        );
+        $this->cache = $this->box->get(Cache::class,
+            root: $root);
 
-        foreach ($config["apis"] as $id => $api)
+        foreach ($conf->get("hub", "apis") as $id => $api)
             $this->apis[$id] = (is_subclass_of($api["api"], LocalApi::class)) ?
                 new $api["api"]($root, $api) :
                 new $api["api"]($api);
@@ -134,12 +129,11 @@ class Logic implements Proxy
      */
     protected function addErrorRequest(array $source): int
     {
-        $request = Box::getInstance()->get(CacheErrorRequest::class,
+        $request = $this->box->get(CacheErrorRequest::class,
             id: $this->id,
             cache: $this->cache,
             source: $source,
-            api: null
-        );
+            api: null);
 
         $this->queues["cache"][$this->id] = $request;
 
@@ -167,13 +161,12 @@ class Logic implements Proxy
         // hub caches everything
         $id = $this->id++;
         $offsets = Parser::getOffsets($source["reference"]);
-        $request = Box::getInstance()->get(CacheVersionsRequest::class,
+        $request = $this->box->get(CacheVersionsRequest::class,
             id: $id,
             cache: $this->cache,
             source: $source,
             api: $api,
-            offsets: $offsets
-        );
+            offsets: $offsets);
 
         $this->queues["cache"][$id] = $request;
 
@@ -187,7 +180,7 @@ class Logic implements Proxy
                     // no synchronization yet
                     // create sub sync request
                     if ($state === false) {
-                        $sync = Box::getInstance()->get(LocalOffsetRequest::class,
+                        $sync = $this->box->get(LocalOffsetRequest::class,
                             id: $this->id,
                             cache: $this->cache,
                             source: $source,
@@ -214,12 +207,11 @@ class Logic implements Proxy
             // no synchronization yet
             // create sub sync request
             if ($state === false) {
-                $sync = Box::getInstance()->get(LocalReferencesRequest::class,
+                $sync = $this->box->get(LocalReferencesRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,
-                    api: $api
-                );
+                    api: $api);
 
                 $this->queues["local"][$this->id] = $sync;
 
@@ -243,14 +235,13 @@ class Logic implements Proxy
                     // no synchronization yet
                     // create sub sync request
                     if ($state === false) {
-                        $sync = Box::getInstance()->get(RemoteOffsetRequest::class,
+                        $sync = $this->box->get(RemoteOffsetRequest::class,
                             id: $this->id,
                             cache: $this->cache,
                             source: $source,
                             api: $api,
                             inline: $offset["version"],
-                            inflated: $offset["entry"]
-                        );
+                            inflated: $offset["entry"]);
 
                         $this->addRemoteRequest($api, $sync);
                         $sync->addCacheId($id);
@@ -269,12 +260,11 @@ class Logic implements Proxy
             // no synchronization yet
             // create sub sync request
             if ($state === false) {
-                $sync = Box::getInstance()->get(RemoteReferencesRequest::class,
+                $sync = $this->box->get(RemoteReferencesRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,
-                    api: $api
-                );
+                    api: $api);
 
                 $this->addRemoteRequest($api, $sync);
                 $sync->addCacheId($id);
@@ -348,14 +338,13 @@ class Logic implements Proxy
 
         // visible external request
         $id = $this->id++;
-        $request = Box::getInstance()->get(CacheFileRequest::class,
+        $request = $this->box->get(CacheFileRequest::class,
             id: $id,
             cache: $this->cache,
             source: $source,
             path: $path,
             filename: $file,
-            api: $api
-        );
+            api: $api);
 
         $this->queues["cache"][$id] = $request;
 
@@ -365,26 +354,24 @@ class Logic implements Proxy
         // create sub sync request
         if ($state === false) {
             if ($api instanceof LocalApi) {
-                $sync = Box::getInstance()->get(LocalFileRequest::class,
+                $sync = $this->box->get(LocalFileRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,
                     path: $path,
                     filename: $file,
-                    api: $api
-                );
+                    api: $api);
 
                 $this->queues["local"][$this->id] = $sync;
 
             } else {
-                $sync = Box::getInstance()->get(RemoteFileRequest::class,
+                $sync = $this->box->get(RemoteFileRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,
                     path: $path,
                     filename: $file,
-                    api: $api
-                );
+                    api: $api);
 
                 $this->addRemoteRequest($api, $sync);
             }
@@ -426,12 +413,11 @@ class Logic implements Proxy
 
         // visible external request
         $id = $this->id++;
-        $request = Box::getInstance()->get(CacheArchiveRequest::class,
+        $request = $this->box->get(CacheArchiveRequest::class,
             id: $id,
             cache: $this->cache,
             source: $source,
-            api: $api
-        );
+            api: $api);
 
         $this->queues["cache"][$id] = $request;
 
@@ -441,22 +427,20 @@ class Logic implements Proxy
         // create sub sync request
         if ($state === false) {
             if ($api instanceof LocalApi) {
-                $sync = Box::getInstance()->get(LocalArchiveRequest::class,
+                $sync = $this->box->get(LocalArchiveRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,
-                    api: $api
-                );
+                    api: $api);
 
                 $this->queues["local"][$this->id] = $sync;
 
             } else {
-                $sync = Box::getInstance()->get(RemoteArchiveRequest::class,
+                $sync = $this->box->get(RemoteArchiveRequest::class,
                     id: $this->id,
                     cache: $this->cache,
                     source: $source,
-                    api: $api
-                );
+                    api: $api);
 
                 $this->addRemoteRequest($api, $sync);
             }

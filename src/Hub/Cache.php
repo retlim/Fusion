@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,16 @@
 
 namespace Valvoid\Fusion\Hub;
 
-use Valvoid\Fusion\Dir\Dir;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Dir\Proxy as DirProxy;
 use Valvoid\Fusion\Hub\APIs\Local\Local;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Util\Reference\Normalizer;
 use Valvoid\Fusion\Util\Version\Interpreter as VersionInterpreter;
 use Valvoid\Fusion\Util\Version\Parser;
+use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Hub cache.
@@ -41,21 +44,22 @@ class Cache
     /** @var array Metadata, lock, and archive files. */
     private array $files = [];
 
-    /** @var string Projects current working directory. */
-    private string $root;
-
     /**
      * Constructs the cache.
      *
      * @param string $root Projects current working directory.
      * @throws Error Internal error.
      */
-    public function __construct(string $root)
+    public function __construct(
+        private readonly Box $box,
+        private readonly string $root,
+        private readonly DirProxy $directory,
+        private readonly Dir $dir,
+        private readonly File $file)
     {
-        $this->root = $root;
         $cache = dirname(__DIR__, 2) . "/cache/hub";
 
-        if (is_dir($cache))
+        if ($this->dir->is($cache))
             $this->normalizeFiles($cache);
     }
 
@@ -67,25 +71,30 @@ class Cache
      */
     private function normalizeFiles(string $dir): void
     {
-        $filenames = scandir($dir, SCANDIR_SORT_NONE);
+        $filenames = $this->dir->getFilenames($dir, SCANDIR_SORT_NONE);
+
+        if ($filenames === false)
+            throw new Error(
+                "Can't normalize directory '$dir'"
+            );
 
         // more than only dots
         if (!isset($filenames[2]))
-            Dir::delete($dir);
+            $this->directory->delete($dir);
 
         else foreach ($filenames as $filename)
             if ($filename != '.' && $filename != "..") {
                 $file = "$dir/$filename";
 
-                if (is_dir($file))
+                if ($this->dir->is($file))
                     $this->normalizeFiles($file);
 
                 // unknown ballast or
                 // expired - older than x days
                 elseif (($filename != "fusion.json" && $filename != "snapshot.json" &&
                     $filename != "archive.zip") ||
-                    (time() - filemtime($file)) > 86400 * 7)
-                    Dir::delete($file);
+                    (time() - $this->file->time($file)) > 86400 * 7)
+                    $this->directory->delete($file);
             }
     }
 
@@ -221,7 +230,7 @@ class Cache
 
         $file = $dir . $filename;
 
-        if (file_exists($file)) {
+        if ($this->file->exists($file)) {
             $type = $this->versions[$api][$path]["state"][$reference]["type"] ??
                 null;
 
@@ -231,7 +240,7 @@ class Cache
             if ("branch" != $type)
                 return true;
 
-            Dir::delete(dirname($file));
+            $this->directory->delete(dirname($file));
         }
 
         // download
@@ -258,7 +267,8 @@ class Cache
             // recycle parser logic
             // inflated values are for:
             // sort, pattern selections (source reference), ...
-            Parser::getInflatedVersion($inline);
+            $this->box->get(Parser::class)
+                ::getInflatedVersion($inline);
 
         return true;
     }
@@ -287,9 +297,10 @@ class Cache
         if (str_starts_with($id, $offset))
             $type = "commit";
 
-        elseif (VersionInterpreter::isSemanticVersion(
-            substr($offset,
-                strlen($source["prefix"]))))
+        elseif ($this->box->get(VersionInterpreter::class)
+            ::isSemanticVersion(
+                substr($offset,
+                    strlen($source["prefix"]))))
             $type = "tag";
 
         else
@@ -365,7 +376,7 @@ class Cache
             $source["api"] . $source["path"] . "/" .
             $source["reference"];
 
-        Dir::createDir($dir);
+        $this->directory->createDir($dir);
 
         return $dir;
     }
@@ -381,7 +392,7 @@ class Cache
     {
         // clear symbolic "./.."
         $path = str_replace("'", "", $source["path"]);
-        $dir = realpath($this->root . $path);
+        $dir = $this->dir->getRealPath($this->root . $path);
 
         if ($dir === false)
             throw new Error(
@@ -395,7 +406,7 @@ class Cache
         $dir = dirname(__DIR__, 2) . "/cache/hub$dir/" .
             $source["reference"];
 
-        Dir::createDir($dir);
+        $this->directory->createDir($dir);
 
         return $dir;
     }
@@ -410,9 +421,10 @@ class Cache
      */
     public function getVersions(string $api, string $path, array $reference): array
     {
-        $versions = $this->versions[$api][$path]["entries"] ?? [];
-        $versions = Normalizer::getFilteredVersions($versions, $reference);
         $match = [];
+        $versions = $this->versions[$api][$path]["entries"] ?? [];
+        $versions = $this->box->get(Normalizer::class)
+            ::getFilteredVersions($versions, $reference);
 
         // sort descending order
         // by inflated values
@@ -425,11 +437,12 @@ class Cache
 
                 // 1 = $b > $a
                 // -1 = $a > $b
-                return (VersionInterpreter::isBiggerThan(
+                return ($this->box->get(VersionInterpreter::class)
+                    ::isBiggerThan(
 
-                    // descending
-                    // ($a, $b) switch params for ascending
-                    $b, $a)) ? 1 : -1;
+                        // descending
+                        // ($a, $b) switch params for ascending
+                        $b, $a)) ? 1 : -1;
             });
 
         // references

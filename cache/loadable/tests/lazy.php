@@ -80,6 +80,8 @@ return [
 	'Valvoid\Fusion\Tests\Hub\Mocks\BoxMock' => '/tests/Hub/Mocks/BoxMock.php',
 	'Valvoid\Fusion\Tests\Hub\Mocks\CacheMock' => '/tests/Hub/Mocks/CacheMock.php',
 	'Valvoid\Fusion\Tests\Hub\Mocks\ConfigMock' => '/tests/Hub/Mocks/ConfigMock.php',
+	'Valvoid\Fusion\Tests\Hub\Mocks\DirMock' => '/tests/Hub/Mocks/DirMock.php',
+	'Valvoid\Fusion\Tests\Hub\Mocks\DirectoryMock' => '/tests/Hub/Mocks/DirectoryMock.php',
 	'Valvoid\Fusion\Tests\Hub\Mocks\FileMock' => '/tests/Hub/Mocks/FileMock.php',
 	'Valvoid\Fusion\Tests\Hub\Mocks\LocalApiMock' => '/tests/Hub/Mocks/LocalApiMock.php',
 	'Valvoid\Fusion\Tests\Hub\Mocks\ProxyMock' => '/tests/Hub/Mocks/ProxyMock.php',

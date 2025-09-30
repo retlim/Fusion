@@ -21,9 +21,8 @@ namespace Valvoid\Fusion\Tasks\Build;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Fusion;
-use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
 use Valvoid\Fusion\Group\Group as GroupProxy;
-use Valvoid\Fusion\Log\Proxy as LogProxy;
+use Valvoid\Fusion\Hub\Proxy as HubProxy;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata as MetadataResponse;
 use Valvoid\Fusion\Hub\Responses\Cache\Versions as VersionsResponse;
 use Valvoid\Fusion\Log\Events\Errors\Deadlock as DeadlockError;
@@ -34,6 +33,7 @@ use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Events\Interceptor;
+use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Metadata\External\Builder as ExternalMetadataBuilder;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;

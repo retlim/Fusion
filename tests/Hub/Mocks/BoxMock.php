@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,10 @@
 namespace Valvoid\Fusion\Tests\Hub\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Hub\Proxy\Proxy as HubProxy;
-use Valvoid\Fusion\Hub\Proxy\Logic;
+use Valvoid\Fusion\Hub\Logic;
+use Valvoid\Fusion\Hub\Proxy as HubProxy;
 
 /**
- * Mocked container.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
@@ -37,14 +35,12 @@ class BoxMock extends Box
 
     public array $classes = [
         "Valvoid\Fusion\Hub\Cache" => CacheMock::class,
-        "Valvoid\Fusion\Config\Proxy\Proxy" => ConfigMock::class,
         "Valvoid\Fusion\Wrappers\File" => FileMock::class
     ];
     public function get(string $class, ...$args): object
     {
         return match ($class) {
-            "Valvoid\Fusion\Config\Proxy\Proxy" => $this->config ??= new ($this->classes[$class]),
-            "Valvoid\Fusion\Hub\Proxy\Proxy" => $this->hub ??= new ($this->classes[$class]),
+            "Valvoid\Fusion\Hub\Proxy" => $this->hub ??= new ($this->classes[$class]),
             "Valvoid\Fusion\Hub\Cache" => $this->cache ??= new ($this->classes[$class]),
             "Valvoid\Fusion\Wrappers\File" => new ($this->classes[$class]),
             default => new $class(...$args)
@@ -53,7 +49,7 @@ class BoxMock extends Box
 
     public function setUpStaticTests(): void
     {
-        $this->classes["Valvoid\Fusion\Hub\Proxy\Proxy"] = ProxyMock::class;
+        $this->classes["Valvoid\Fusion\Hub\Proxy"] = ProxyMock::class;
     }
 
     public function setUpLogicTests(): void
@@ -61,6 +57,6 @@ class BoxMock extends Box
         // reset
         unset($this->hub);
 
-        $this->classes["Valvoid\Fusion\Hub\Proxy\Proxy"] = Logic::class;
+        $this->classes["Valvoid\Fusion\Hub\Proxy"] = Logic::class;
     }
 }
