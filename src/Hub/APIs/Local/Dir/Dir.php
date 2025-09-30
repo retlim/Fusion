@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 
 namespace Valvoid\Fusion\Hub\APIs\Local\Dir;
 
+use Exception;
 use PharData;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
@@ -42,7 +43,7 @@ class Dir extends LocalApi
      * @param string $path Path relative to config root.
      * @return References|string Response or error message.
      * @throws Error Internal error.
-     * @throws \Exception
+     * @throws Exception
      */
     public function getReferences(string $path): References|string
     {
@@ -93,7 +94,7 @@ class Dir extends LocalApi
      * @param string $filename Filename.
      * @return File|string Response or error message.
      * @throws Error Internal error.
-     * @throws \Exception
+     * @throws Exception
      */
     public function getFileContent(string $path, string $reference, string $filename): File|string
     {
@@ -124,7 +125,7 @@ class Dir extends LocalApi
      * @param string $dir Directory.
      * @return Archive|string Response or error message.
      * @throws Error Internal error.
-     * @throws \Exception
+     * @throws Exception
      */
     public function createArchive(string $path, string $reference, string $dir): Archive|string
     {
