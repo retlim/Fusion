@@ -1,6 +1,11 @@
 # Changelog
 
-## [1.0.7](/../../compare/1.0.6...1.0.7) - August 15, 2025
+## [1.0.8](/../../compare/1.0.7...1.0.8) - Sep 30, 2025
+
+- Fix: Redundant snap task output ([#25](https://gitlab.com/valvoid/fusion/php/code/-/issues/25))
+- Fix: Refresh flow should update structure and remove packages deleted from metadata  ([#24](https://gitlab.com/valvoid/fusion/php/code/-/issues/24))
+
+## [1.0.7](/../../compare/1.0.6...1.0.7) - Aug 15, 2025
 
 - Fixes CLI script exit code on failed task ([#22](https://gitlab.com/valvoid/fusion/php/code/-/issues/22))
 
