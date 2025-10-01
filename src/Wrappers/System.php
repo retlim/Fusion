@@ -30,12 +30,12 @@ class System
     /**
      * Gets the value of an environment variable
      *
-     * @param string|null $name The variable name.
+     * @param string $name The variable name.
      * @return array|string|false the value of the environment variable
      * varname or an associative array with all environment variables
      * if no variable name is provided, or false on an error.
      */
-    public function getEnvVariable(string $name = null): array|string|false
+    public function getEnvVariable(string $name): array|string|false
     {
         return getenv($name);
     }
