@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Build\Config\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Bus\Proxy;
 
 /**
  * Mocked container.

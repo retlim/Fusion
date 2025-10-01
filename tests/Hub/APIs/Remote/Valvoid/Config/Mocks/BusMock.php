@@ -19,9 +19,9 @@
 
 namespace Valvoid\Fusion\Tests\Hub\APIs\Remote\Valvoid\Config\Mocks;
 
-use Valvoid\Fusion\Bus\Events\Event;
 use Closure;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Bus\Events\Event;
+use Valvoid\Fusion\Bus\Proxy;
 
 /**
  * @copyright Valvoid

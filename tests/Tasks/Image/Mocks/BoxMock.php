@@ -21,7 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Image\Mocks;
 
 use Closure;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Bus\Proxy;
 use Valvoid\Fusion\Group\Group;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Metadata\Internal\Builder;
@@ -48,7 +48,7 @@ class BoxMock extends Box
         if ($class === Group::class)
             return $this->group;
 
-        if ($class === \Valvoid\Fusion\Config\Proxy\Proxy::class)
+        if ($class === \Valvoid\Fusion\Config\Proxy::class)
             return $this->config;
 
         if ($class === Builder::class)

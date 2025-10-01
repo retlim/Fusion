@@ -55,4 +55,6 @@ class DirectoryMock implements Proxy
     public function getCacheDir(): string {return "";}
     public function getOtherDir(): string {return "";}
     public function getRootDir(): string {return "";}
+    public function getHubDir(): string {return "";}
+    public function getLogDir(): string {return "";}
 }

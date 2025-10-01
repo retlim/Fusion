@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Image\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Config\Proxy\Proxy;
+use Valvoid\Fusion\Config\Proxy;
 
 /**
  * @copyright Valvoid

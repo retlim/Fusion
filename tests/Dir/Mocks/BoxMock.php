@@ -95,6 +95,18 @@ class BoxMock extends Box
             {
                 $this->calls[] = __FUNCTION__;
             }
+
+            public function getHubDir(): string
+            {
+                $this->calls[] = __FUNCTION__;
+                return "";
+            }
+
+            public function getLogDir(): string
+            {
+                $this->calls[] = __FUNCTION__;
+                return "";
+            }
         };
     }
 }

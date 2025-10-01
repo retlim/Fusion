@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -10,18 +10,19 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Config\Proxy;
+namespace Valvoid\Fusion\Config;
 
-use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Boot;
-use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Config\Interpreter\Dir as DirectoryInterpreter;
 use Valvoid\Fusion\Config\Interpreter\Interpreter;
 use Valvoid\Fusion\Config\Normalizer\Dir as DirectoryNormalizer;
@@ -30,7 +31,6 @@ use Valvoid\Fusion\Config\Parser\Dir as DirectoryParser;
 use Valvoid\Fusion\Config\Parser\Parser;
 use Valvoid\Fusion\Fusion;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
-use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Metadata;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Log\Log;
@@ -43,34 +43,31 @@ use Valvoid\Fusion\Log\Log;
  */
 class Logic implements Proxy
 {
-    /** @var string @var Package manager root directory. */
-    protected string $root;
-
-    /** @var array Lazy code registry. */
-    protected array $lazy;
-
     /** @var array Separated raw settings. */
-    protected array $configs;
+    private array $configs;
 
     /** @var array Composite settings. */
-    protected array $content = [];
+    private array $content = [];
 
     /** @var string Current source. */
-    protected string $layer = "runtime";
+    private string $layer = "runtime";
 
     /**
      * Constructs the config.
      *
-     * @param BusProxy $bus
-     * @param string $root
-     * @param array $lazy
+     * @param Box $box Dependency injection container.
+     * @param string $root Package manager root directory.
+     * @param array $lazy Lazy code registry.
      * @param array $config Runtime config layer.
+     * @param BusProxy $bus Event bus.
      */
-    public function __construct(BusProxy $bus, string $root, array $lazy,
-                                array $config)
+    public function __construct(
+        private readonly Box $box,
+        private readonly string $root,
+        private readonly array $lazy,
+        array $config,
+        BusProxy $bus)
     {
-        $this->root = $root;
-        $this->lazy = $lazy;
         $this->configs = [
             "runtime" => $config,
             "persistence" => [],
@@ -85,7 +82,7 @@ class Logic implements Proxy
 
             $this->build();
 
-            // lazy build due to self reference
+        // lazy build due to self reference
         }, Boot::class);
     }
 
@@ -103,15 +100,19 @@ class Logic implements Proxy
         // exceptional entry
         // individually before all other entries, as they are based on it
         if (isset($config["dir"])) {
-            DirectoryInterpreter::interpret($config);
+            $this->box->get(DirectoryInterpreter::class)
+                ::interpret($config);
 
             if (isset($config["dir"]["path"]))
-                DirectoryParser::parse($config);
+                $this->box->get(DirectoryParser::class)
+                    ::parse($config);
         }
 
         // individually before all other entries
         // init default first for reverse content checks
-        DirectoryNormalizer::normalize($config);
+        $this->box->get(DirectoryNormalizer::class)
+            ->normalize($config);
+
         $this->initDefaultLayer();
         $this->initPersistenceLayer();
 

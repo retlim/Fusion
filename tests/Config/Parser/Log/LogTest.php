@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,6 @@ use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\SerializerMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Config log parser test.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
@@ -79,11 +77,8 @@ class LogTest extends Test
             ]
         ];
 
-        if ($config !== $assertion) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($config !== $assertion)
+            $this->handleFailedTest();
     }
 
     public function testConfiguredSerializerConfig(): void
@@ -102,11 +97,8 @@ class LogTest extends Test
         Log::parse($config);
 
         // no custom parser
-        if (class_exists(Parser::class, false)) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if (class_exists(Parser::class, false))
+            $this->handleFailedTest();
     }
 
     public function testConfiguredParsableSerializerConfig(): void
@@ -126,10 +118,7 @@ class LogTest extends Test
         Log::parse($config);
 
         // passed to custom parser
-        if (!class_exists(Parser::class, false)) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if (!class_exists(Parser::class, false))
+            $this->handleFailedTest();
     }
 }

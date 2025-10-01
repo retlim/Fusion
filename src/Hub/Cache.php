@@ -38,6 +38,9 @@ use Valvoid\Fusion\Wrappers\File;
  */
 class Cache
 {
+    /** @var string  */
+    private string $storage;
+
     /** @var array Versions. */
     private array $versions = [];
 
@@ -47,20 +50,24 @@ class Cache
     /**
      * Constructs the cache.
      *
+     * @param DirProxy $directory Root package directory.
+     * @param Box $box Dependency injection container.
      * @param string $root Projects current working directory.
+     * @param Dir $dir Wrapper for standard directory operations.
+     * @param File $file Wrapper for standard file operations.
      * @throws Error Internal error.
      */
     public function __construct(
+        private readonly DirProxy $directory,
         private readonly Box $box,
         private readonly string $root,
-        private readonly DirProxy $directory,
         private readonly Dir $dir,
         private readonly File $file)
     {
-        $cache = dirname(__DIR__, 2) . "/cache/hub";
+        $this->storage = $this->directory->getHubDir();
 
-        if ($this->dir->is($cache))
-            $this->normalizeFiles($cache);
+        if ($this->dir->is($this->storage))
+            $this->normalizeFiles($this->storage);
     }
 
     /**
@@ -372,7 +379,7 @@ class Cache
      */
     public function getRemoteDir(array $source): string
     {
-        $dir = dirname(__DIR__, 2) . "/cache/hub/" .
+        $dir = $this->storage . "/" .
             $source["api"] . $source["path"] . "/" .
             $source["reference"];
 
@@ -403,7 +410,7 @@ class Cache
         if ($dir[0] !== DIRECTORY_SEPARATOR)
             $dir = "/$dir";
 
-        $dir = dirname(__DIR__, 2) . "/cache/hub$dir/" .
+        $dir = $this->storage . "$dir/" .
             $source["reference"];
 
         $this->directory->createDir($dir);

@@ -25,7 +25,7 @@ use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Events\Config;
 use Valvoid\Fusion\Bus\Events\Metadata;
 use Valvoid\Fusion\Bus\Events\Root;
-use Valvoid\Fusion\Bus\Proxy\Logic;
+use Valvoid\Fusion\Bus\Logic;
 use Valvoid\Fusion\Tests\Bus\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Bus\Mocks\EventMock;
 use Valvoid\Fusion\Tests\Test;

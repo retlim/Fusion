@@ -56,6 +56,8 @@ class DirTest extends Test
             Dir::copy("","");
             Dir::delete("");
             Dir::clear("", "");
+            Dir::getHubDir();
+            Dir::getLogDir();
 
             // static functions connected to same non-static functions
             if ($this->box->dir->calls !== [
@@ -69,7 +71,9 @@ class DirTest extends Test
                     "rename",
                     "copy",
                     "delete",
-                    "clear"])
+                    "clear",
+                    "getHubDir",
+                    "getLogDir"])
                 $this->handleFailedTest();
 
         } catch (Throwable) {

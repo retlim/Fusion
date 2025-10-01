@@ -28,12 +28,15 @@ namespace Valvoid\Fusion\Wrappers;
 class System
 {
     /**
-     * Returns directory path used for temporary files.
+     * Gets the value of an environment variable
      *
-     * @return string the path of the temporary directory.
+     * @param string|null $name The variable name.
+     * @return array|string|false the value of the environment variable
+     * varname or an associative array with all environment variables
+     * if no variable name is provided, or false on an error.
      */
-    public function getTempDir(): string
+    public function getEnvVariable(string $name = null): array|string|false
     {
-        return sys_get_temp_dir();
+        return getenv($name);
     }
 }

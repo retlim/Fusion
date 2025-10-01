@@ -55,9 +55,9 @@ class CacheTest extends Test
         };
 
         $this->cache = new Cache(
+            directory: new DirectoryMock,
             box: $this->box,
             root: "",
-            directory: new DirectoryMock,
             dir: $dir,
             file: new FileMock
         );

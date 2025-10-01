@@ -20,7 +20,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Copy\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Bus\Proxy;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Util\Version\Interpreter;
 use Valvoid\Fusion\Util\Version\Parser;

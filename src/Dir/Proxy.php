@@ -22,7 +22,8 @@ namespace Valvoid\Fusion\Dir;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 
 /**
- * Root package directory providing normalized filesystem operations.
+ * Root package directory providing normalized filesystem operations
+ * and locations.
  *
  * @copyright Valvoid
  * @license GNU GPLv3
@@ -30,16 +31,17 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
 interface Proxy
 {
     /**
-     * Returns current (locked) task cache directory.
+     * Returns the directory used for temporary task data during
+     * package operations.
      *
-     * @return string Directory.
+     * @return string Absolute path to the task directory.
      */
     public function getTaskDir(): string;
 
     /**
-     * Returns current (locked) task cache directory.
+     * Returns the directory used to store the new state.
      *
-     * @return string Directory.
+     * @return string Absolute path to the state directory.
      */
     public function getStateDir(): string;
 
@@ -58,11 +60,27 @@ interface Proxy
     public function getOtherDir(): string;
 
     /**
-     * Returns packages directory.
+     * Returns the storage directory where packages for the new state
+     * are stored individually by their ID subdirectories.
      *
-     * @return string Directory.
+     * @return string Absolute path to the new state packages directory.
      */
     public function getPackagesDir(): string;
+
+    /**
+     * Returns the storage directory where downloaded packages
+     * are stored.
+     *
+     * @return string Absolute path to the hub directory.
+     */
+    public function getHubDir(): string;
+
+    /**
+     * Returns the storage directory where logs are stored.
+     *
+     * @return string Absolute path to the log directory.
+     */
+    public function getLogDir(): string;
 
     /**
      * Returns root directory.

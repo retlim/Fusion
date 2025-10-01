@@ -22,7 +22,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
 use Closure;
 use PharData;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Bus\Proxy;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use ZipArchive;
 

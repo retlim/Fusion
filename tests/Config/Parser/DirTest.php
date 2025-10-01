@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@ use Valvoid\Fusion\Config\Parser\Dir;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Config dir parser test.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
@@ -42,10 +40,7 @@ class DirTest extends Test
         $dir = Dir::getNonNestedPath(__DIR__);
         $assertion = dirname(__DIR__, 3);
 
-        if ($dir !== $assertion) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($dir !== $assertion)
+            $this->handleFailedTest();
     }
 }

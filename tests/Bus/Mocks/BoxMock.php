@@ -19,10 +19,10 @@
 
 namespace Valvoid\Fusion\Tests\Bus\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Event;
-use Closure;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Bus\Proxy;
 
 /**
  * Mocked container.

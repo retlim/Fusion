@@ -19,6 +19,7 @@
 
 namespace Valvoid\Fusion\Log;
 
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Infos\Error as ErrorInfo;
@@ -42,12 +43,15 @@ class Logic implements Proxy
     protected Interceptor $interceptor;
 
     /** Constructs the log. */
-    public function __construct()
+    public function __construct(
+        private readonly Box $box
+    )
     {
         $config = Config::get("log");
 
         foreach ($config["serializers"] as $serializer)
-            $this->serializers[] = new $serializer["serializer"]($serializer);
+            $this->serializers[] = $this->box->get($serializer["serializer"],
+                config: $serializer);
 
         // verbose debug log
         // wrap all to extended serializer info

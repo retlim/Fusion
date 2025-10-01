@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
 
 namespace Valvoid\Fusion\Log\Serializers\Files\JSON;
 
-use Valvoid\Fusion\Dir\Dir;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Dir\Proxy as DirProxy;
 use Valvoid\Fusion\Log\Events\Errors\Config;
 use Valvoid\Fusion\Log\Events\Errors\Deadlock;
 use Valvoid\Fusion\Log\Events\Errors\Environment;
@@ -49,6 +50,12 @@ class JSON implements File
     /** @var string Filename. */
     private string $filename;
 
+    /** @var DirProxy Root package directory. */
+    private DirProxy $directory;
+
+    /** @var string Storage dir. */
+    private string $storage;
+
     /**
      * Constructs the JSON file serializer.
      *
@@ -58,6 +65,9 @@ class JSON implements File
     {
         $this->threshold = $config["threshold"];
         $this->filename = $config["filename"];
+
+        $this->directory = Box::getInstance()->get(DirProxy::class);
+        $this->storage = $this->directory->getLogDir();
     }
 
     /**
@@ -110,9 +120,7 @@ class JSON implements File
         else
             $content = self::getGeneric($level, $event->__toString());
 
-        // cache dir is dynamic
-        $dir = Dir::getCacheDir() . "/log";
-        $file = "$dir/$this->filename";
+        $file = "$this->storage/$this->filename";
 
         if (is_file($file)) {
             $events = file_get_contents($file);
@@ -137,7 +145,7 @@ class JSON implements File
                 $events = [$content];
 
         } else {
-            Dir::createDir($dir);
+            $this->directory->createDir($this->storage);
 
             // has always wrapper
             $events = [$content];

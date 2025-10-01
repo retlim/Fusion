@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ class Dir
             match($key) {
                 "path" => self::interpretPath($value),
                 "creatable" => self::interpretCreatable($value),
+                "storage" => self::interpretStorage($value),
                 "clearable" => self::interpretClearable($value),
                 default => Bus::broadcast(new ConfigEvent(
                     "The unknown \"$key\" index must be \"path\", " .
@@ -58,6 +59,11 @@ class Dir
                     ["dir", $key]
                 ))
             };
+    }
+
+    private static function interpretStorage(mixed $entry): void
+    {
+
     }
 
     /**

@@ -21,7 +21,7 @@ namespace Valvoid\Fusion\Hub;
 
 use Closure;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Config\Proxy\Proxy as ConfigProxy;
+use Valvoid\Fusion\Config\Proxy as ConfigProxy;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Offset as RemoteOffsetApi;

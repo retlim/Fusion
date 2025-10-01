@@ -20,11 +20,11 @@
 namespace Valvoid\Fusion\Tasks\Shift;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
-use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Events\Root;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Lifecycle;
 use Valvoid\Fusion\Log\Events\Infos\Content;
@@ -61,7 +61,7 @@ class Shift extends Task
     private array $externalMetas;
 
     /** @var string[] Cache and nested source dirs. */
-    private array $lockedDirs;
+    private array $lockedDirs = [];
 
     /** @var string[] Normalized file deletions. */
     private array $executedFiles = [];
@@ -169,8 +169,11 @@ class Shift extends Task
         // executed files
         $this->cleanUpDir($this->root);
 
+        // has internal cache dir - since storage is outside
+        // - init build may have no dir
         // new cache directory
-        if ($internalCachePath != $externalCachePath) {
+        if ($this->dir->is($this->root . $internalCachePath) &&
+            $internalCachePath != $externalCachePath) {
             $oldCacheDir = $this->root . $internalCachePath;
             $newCacheDir = $this->root . $externalCachePath;
 

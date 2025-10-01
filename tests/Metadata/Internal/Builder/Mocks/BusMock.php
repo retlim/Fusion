@@ -20,8 +20,8 @@
 namespace Valvoid\Fusion\Tests\Metadata\Internal\Builder\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
 use Valvoid\Fusion\Bus\Events\Event;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 
 /**
  * Mocked container.

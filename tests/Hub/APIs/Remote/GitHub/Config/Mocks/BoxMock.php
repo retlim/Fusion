@@ -20,9 +20,7 @@
 namespace Valvoid\Fusion\Tests\Hub\APIs\Remote\GitHub\Config\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Events\Event;
-use Closure;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Bus\Proxy;
 
 /**
  * @copyright Valvoid

@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@ use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\TaskMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
- * Config tasks parser test.
- *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
@@ -75,11 +73,8 @@ class TasksTest extends Test
             ]
         ];
 
-        if ($config != $assertion) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($config != $assertion)
+            $this->handleFailedTest();
     }
 
     public function testConfiguredTaskConfig(): void

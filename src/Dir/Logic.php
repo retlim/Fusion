@@ -20,32 +20,43 @@
 namespace Valvoid\Fusion\Dir;
 
 use Valvoid\Fusion\Bus\Events\Cache;
-use Valvoid\Fusion\Bus\Proxy\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
-use Valvoid\Fusion\Wrappers\File;
 use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
- * Root package directory providing normalized filesystem operations.
+ * Root package directory providing normalized filesystem operations
+ * and locations.
  *
  * @copyright Valvoid
  * @license GNU GPLv3
  */
 class Logic implements Proxy
 {
-    /** @var string Constant package root dir. */
+    /** @var string Root dir of the package. */
     private string $root;
 
-    /** @var string Dynamic package cache dir. */
+    /**
+     * @var string Mutable package cache dir. May change via bus
+     * event during migration if the new package version defines a
+     * different cache path in its metadata structure.
+     */
     private string $cache;
+
+    /**
+     * @var string OS-level storage dir for runtime and downloaded
+     * packages, located outside the current package.
+     */
+    private string $storage;
 
     /**
      * Constructs the directory.
      *
-     * @param array $config Config.
+     * @param Dir $dir Wrapper for standard directory operations.
+     * @param File $file Wrapper for standard file operations.
      * @param BusProxy $bus Event bus.
-     * @param Dir $dir Abstract standard dir logic.
-     * @param File $file Abstract standard file logic.
+     * @param array $config Config.
      * @throws Error Internal error exception.
      */
     public function __construct(
@@ -54,6 +65,7 @@ class Logic implements Proxy
         BusProxy $bus,
         array $config)
     {
+        $this->storage = $config["storage"];
         $this->root = $config["path"];
 
         $bus->addReceiver(static::class, $this->handleBusEvent(...),
@@ -222,23 +234,45 @@ class Logic implements Proxy
     }
 
     /**
-     * Returns current (locked) task cache directory.
+     * Returns the directory used for temporary task data during
+     * package operations.
      *
-     * @return string Directory.
+     * @return string Absolute path to the task directory.
      */
     public function getTaskDir(): string
     {
-        return "$this->cache/task";
+        return "$this->storage/task";
     }
 
     /**
-     * Returns current (locked) task cache directory.
+     * Returns the storage directory where downloaded packages
+     * are stored.
      *
-     * @return string Directory.
+     * @return string Absolute path to the hub directory.
+     */
+    public function getHubDir(): string
+    {
+        return "$this->storage/hub";
+    }
+
+    /**
+     * Returns the storage directory where logs are stored.
+     *
+     * @return string Absolute path to the log directory.
+     */
+    public function getLogDir(): string
+    {
+        return "$this->storage/log";
+    }
+
+    /**
+     * Returns the directory used to store the new state.
+     *
+     * @return string Absolute path to the state directory.
      */
     public function getStateDir(): string
     {
-        return "$this->cache/state";
+        return "$this->storage/state";
     }
 
     /**
@@ -258,17 +292,18 @@ class Logic implements Proxy
      */
     public function getOtherDir(): string
     {
-        return "$this->cache/other";
+        return "$this->storage/other";
     }
 
     /**
-     * Returns packages directory.
+     * Returns the storage directory where packages for the new state
+     * are stored individually by their ID subdirectories.
      *
-     * @return string Directory.
+     * @return string Absolute path to the new state packages directory.
      */
     public function getPackagesDir(): string
     {
-        return "$this->cache/packages";
+        return "$this->storage/packages";
     }
 
     /**

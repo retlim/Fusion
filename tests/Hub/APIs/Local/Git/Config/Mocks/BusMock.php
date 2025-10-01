@@ -21,7 +21,7 @@ namespace Valvoid\Fusion\Tests\Hub\APIs\Local\Git\Config\Mocks;
 
 use Closure;
 use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Bus\Proxy;
 
 /**
  * @copyright Valvoid

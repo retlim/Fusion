@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Hub\Mocks;
 
-use Valvoid\Fusion\Config\Proxy\Proxy;
+use Valvoid\Fusion\Config\Proxy;
 
 /**
  * @copyright Valvoid

@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
 
 namespace Valvoid\Fusion\Log\Serializers\Files\Text;
 
-use Valvoid\Fusion\Dir\Dir;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Dir\Proxy as DirProxy;
 use Valvoid\Fusion\Log\Events\Errors\Config;
 use Valvoid\Fusion\Log\Events\Errors\Deadlock;
 use Valvoid\Fusion\Log\Events\Errors\Environment;
@@ -49,6 +50,12 @@ class Text implements File
     /** @var string Filename. */
     private string $filename;
 
+    /** @var DirProxy Root package directory. */
+    private DirProxy $directory;
+
+    /** @var string Storage dir. */
+    private string $storage;
+
     /**
      * Constructs the text file serializer.
      *
@@ -58,6 +65,9 @@ class Text implements File
     {
         $this->threshold = $config["threshold"];
         $this->filename = $config["filename"];
+
+        $this->directory = Box::getInstance()->get(DirProxy::class);
+        $this->storage = $this->directory->getLogDir();
     }
 
     /**
@@ -110,14 +120,11 @@ class Text implements File
         else
             $content = $this->getGeneric($level, $event->__toString());
 
-        // cache dir is dynamic
-        $dir = Dir::getCacheDir() . "/log";
+        $this->directory->createDir($this->storage);
 
-        Dir::createDir($dir);
-
-        if (!file_put_contents("$dir/$this->filename", $content, FILE_APPEND))
+        if (!file_put_contents("$this->storage/$this->filename", $content, FILE_APPEND))
             throw new Error(
-                "Can't write to the file \"$dir/$this->filename\"."
+                "Can't write to the file \"$this->storage/$this->filename\"."
             );
     }
 

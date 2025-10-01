@@ -32,9 +32,10 @@ use Valvoid\Fusion\Log\Events\Errors\Error;
 class Dir
 {
     /**
-     * Returns current (locked) task cache directory.
+     * Returns the directory used for temporary task data during
+     * package operations.
      *
-     * @return string Directory.
+     * @return string Absolute path to the task directory.
      * @throws Error|Exception Internal error.
      */
     public static function getTaskDir(): string
@@ -44,9 +45,9 @@ class Dir
     }
 
     /**
-     * Returns current (locked) task cache directory.
+     * Returns the directory used to store the new state.
      *
-     * @return string Directory.
+     * @return string Absolute path to the state directory.
      * @throws Error|Exception Internal error.
      */
     public static function getStateDir(): string
@@ -80,9 +81,35 @@ class Dir
     }
 
     /**
-     * Returns packages directory.
+     * Returns the storage directory where downloaded packages
+     * are stored.
      *
-     * @return string Directory.
+     * @return string Absolute path to the hub directory.
+     * @throws Exception
+     */
+    public static function getHubDir(): string
+    {
+        return Box::getInstance()->get(Proxy::class)
+            ->getHubDir();
+    }
+
+    /**
+     * Returns the storage directory where logs are stored.
+     *
+     * @return string Absolute path to the log directory.
+     * @throws Exception
+     */
+    public static function getLogDir(): string
+    {
+        return Box::getInstance()->get(Proxy::class)
+            ->getLogDir();
+    }
+
+    /**
+     * Returns the storage directory where packages for the new state
+     * are stored individually by their ID subdirectories.
+     *
+     * @return string Absolute path to the new state packages directory.
      * @throws Error|Exception Internal error.
      */
     public static function getPackagesDir(): string

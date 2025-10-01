@@ -21,7 +21,7 @@ namespace Valvoid\Fusion\Tests\Tasks\Build\Config\Mocks;
 
 use Closure;
 use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy\Proxy;
+use Valvoid\Fusion\Bus\Proxy;
 
 /**
  * @copyright Valvoid

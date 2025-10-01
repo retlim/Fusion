@@ -45,4 +45,6 @@ class DirMock implements Proxy
     public function copy(string $from, string $to): void {}
     public function delete(string $file): void {}
     public function clear(string $dir, string $path): void {}
+    public function getHubDir(): string {return "";}
+    public function getLogDir(): string {return "";}
 }

@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,11 +62,8 @@ class HubTest extends Test
         HubInterpreter::interpret(null);
 
         // assert nothing
-        if ($this->event !== null) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($this->event !== null)
+            $this->handleFailedTest();
 
         Bus::removeReceiver(self::class);
     }
@@ -84,11 +81,8 @@ class HubTest extends Test
             $this->result = false;
 
         } catch (Exception) {
-            if ($this->event === null || $this->event->getLevel() !== Level::ERROR) {
-                echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-                $this->result = false;
-            }
+            if ($this->event === null || $this->event->getLevel() !== Level::ERROR)
+                $this->handleFailedTest();
         }
 
         $this->throwException = false;
@@ -103,11 +97,8 @@ class HubTest extends Test
         Bus::addReceiver(self::class, $this->handleBusEvent(...), ConfigEvent::class);
         HubInterpreter::interpret(["key" => true]);
 
-        if ($this->event === null || $this->event->getLevel() !== Level::ERROR) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        if ($this->event === null || $this->event->getLevel() !== Level::ERROR)
+            $this->handleFailedTest();
 
         Bus::removeReceiver(self::class);
     }

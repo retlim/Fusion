@@ -93,4 +93,7 @@ class DirectoryMock implements Proxy
     {
         return call_user_func($this->root);
     }
+
+    public function getHubDir(): string {return "";}
+    public function getLogDir(): string {return "";}
 }

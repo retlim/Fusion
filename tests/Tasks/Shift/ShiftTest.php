@@ -259,6 +259,7 @@ class ShiftTest extends Test
                     "/root/d0",
                     "/root/d0/f3",
                     "/root/f0",
+                    "/root/c",
                     "/tmp/state/c",
                     "/tmp/state/f1",
                 ])
@@ -397,6 +398,7 @@ class ShiftTest extends Test
                     "/root/c0/log",
                     "/root/c0/f2",
                     "/root/f0",
+                    "/root/c0",
                     "/tmp/state/c1",
                     "/tmp/state/c1/f3",
                     "/tmp/state/f1",
@@ -534,6 +536,7 @@ class ShiftTest extends Test
                     "/root/c/log",
                     "/root/c/f2",
                     "/root/f0",
+                    "/root/c",
                     "/tmp/state/c",
                     "/tmp/state/c/f3",
                     "/tmp/state/f1",
@@ -722,7 +725,7 @@ class ShiftTest extends Test
                     "/si2/f5",
                     "/si2",
                     "/si3/f6",
-                    "/si3",] ||
+                    "/si3"] ||
                 $create != [
                     "/root/di1",
                     "/root/di1/d0",
@@ -743,7 +746,7 @@ class ShiftTest extends Test
                     "/root/c",
                     "/root/di1",
                     "/root/di1/d0",
-                    "/root/di2",] ||
+                    "/root/di2"] ||
                 $copy != ["/tmp/state/c/f4->/root/c/f4"] ||
                 $isFile != ["/tmp/state/c/f4"] ||
                 $isDir != [
@@ -951,6 +954,7 @@ class ShiftTest extends Test
                     "$root/d0/f3",
                     "$root/f0",
                     "$root/fusion",
+                    "$root/c",
                     "/tmp/state/c",
                     "/tmp/state/f1",
                     "/tmp/state/fusion"

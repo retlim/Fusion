@@ -240,13 +240,13 @@ class LogicTest extends Test
 
     public function testGetTaskDir(): void
     {
-        if ($this->logic->getTaskDir() != "/#/c/task")
+        if ($this->logic->getTaskDir() != "/s/task")
             $this->handleFailedTest();
     }
 
     public function testGetStateDir(): void
     {
-        if ($this->logic->getStateDir() != "/#/c/state")
+        if ($this->logic->getStateDir() != "/s/state")
             $this->handleFailedTest();
     }
 
@@ -258,13 +258,13 @@ class LogicTest extends Test
 
     public function testGetOtherDir(): void
     {
-        if ($this->logic->getOtherDir() != "/#/c/other")
+        if ($this->logic->getOtherDir() != "/s/other")
             $this->handleFailedTest();
     }
 
     public function testGetPackagesDir(): void
     {
-        if ($this->logic->getPackagesDir() != "/#/c/packages")
+        if ($this->logic->getPackagesDir() != "/s/packages")
             $this->handleFailedTest();
     }
 
@@ -283,6 +283,7 @@ class LogicTest extends Test
             file: $this->file,
             bus: $this->bus, config: [
             "path" => "/#",
+                "storage" => "/s",
             "creatable" => true
         ]);
 
@@ -325,6 +326,7 @@ class LogicTest extends Test
             file: $this->file,
             bus: $this->bus, config: [
             "path" => "/#",
+            "storage" => "/s",
             "clearable" => false]);
 
         if ($this->logic->getRootDir() != "/#" ||
@@ -368,6 +370,7 @@ class LogicTest extends Test
             file: $this->file,
             bus: $this->bus, config: [
             "path" => "/#",
+                "storage" => "/s",
             "clearable" => false]);
 
         if ($this->logic->getRootDir() != "/#" ||
@@ -428,6 +431,7 @@ class LogicTest extends Test
             file: $this->file,
             bus: $this->bus, config: [
             "path" => "/#",
+                "storage" => "/s",
             "clearable" => true]);
 
         if ($this->logic->getRootDir() != "/#" ||
@@ -474,6 +478,7 @@ class LogicTest extends Test
             file: $this->file,
             bus: $this->bus, config: [
             "path" => "/#",
+                "storage" => "/s",
             "creatable" => true]);
 
         if ($this->logic->getRootDir() != "/#" ||
@@ -499,6 +504,7 @@ class LogicTest extends Test
                 file: $this->file,
                 bus: $this->bus, config: [
                 "path" => "/#",
+                    "storage" => "/s",
                 "creatable" => false,]);
 
             $this->handleFailedTest();

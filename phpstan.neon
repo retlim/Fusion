@@ -6,9 +6,7 @@ parameters:
   earlyTerminatingMethodCalls:
     Valvoid\Fusion\Hub\Requests\Remote\Remote:
       - throwError
-    Valvoid\Fusion\Container\Proxy\Logic:
-      - throwNormalizedError
-    Valvoid\Fusion\Config\Proxy\Logic:
+    Valvoid\Fusion\Config\Logic:
       - throwMetaError
     Valvoid\Fusion\Box\Box:
       - throwNormalizedError
