@@ -153,6 +153,7 @@ return [
 	'Valvoid\Fusion\Metadata\Parser\Environment' => '/src/Metadata/Parser/Environment.php',
 	'Valvoid\Fusion\Metadata\Parser\Parser' => '/src/Metadata/Parser/Parser.php',
 	'Valvoid\Fusion\Metadata\Parser\Structure' => '/src/Metadata/Parser/Structure.php',
+	'Valvoid\Fusion\Options\Version' => '/src/Options/Version.php',
 	'Valvoid\Fusion\Tasks\Build\Build' => '/src/Tasks/Build/Build.php',
 	'Valvoid\Fusion\Tasks\Build\Config\Interpreter' => '/src/Tasks/Build/Config/Interpreter.php',
 	'Valvoid\Fusion\Tasks\Build\Config\Normalizer' => '/src/Tasks/Build/Config/Normalizer.php',

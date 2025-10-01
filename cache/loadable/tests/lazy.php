@@ -187,6 +187,8 @@ return [
 	'Valvoid\Fusion\Tests\Metadata\Parser\EnvironmentTest' => '/tests/Metadata/Parser/EnvironmentTest.php',
 	'Valvoid\Fusion\Tests\Metadata\Parser\ParserTest' => '/tests/Metadata/Parser/ParserTest.php',
 	'Valvoid\Fusion\Tests\Metadata\Parser\StructureTest' => '/tests/Metadata/Parser/StructureTest.php',
+	'Valvoid\Fusion\Tests\Options\Mocks\FileMock' => '/tests/Options/Mocks/FileMock.php',
+	'Valvoid\Fusion\Tests\Options\VersionTest' => '/tests/Options/VersionTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\BuildTest' => '/tests/Tasks/Build/BuildTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\Config\InterpreterTest' => '/tests/Tasks/Build/Config/InterpreterTest.php',
 	'Valvoid\Fusion\Tests\Tasks\Build\Config\Mocks\BoxMock' => '/tests/Tasks/Build/Config/Mocks/BoxMock.php',

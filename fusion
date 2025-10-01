@@ -23,16 +23,43 @@ use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Log\Serializers\Streams\Terminal\Terminal;
+use Valvoid\Fusion\Options\Version;
+use Valvoid\Fusion\Wrappers\File;
 
 echo "
  ___ _   _ ___ ___ ___  _  _
 | __| | | / __|_ _/ _ \| \| |
 | _|| |_| \__ \| | (_) | .` |
 |_|  \___/|___/___\___/|_|\_|
-\033[2m------\033[0m
-boot via command line interface";
+\033[2m------\033[0m";
 
 try {
+    $options = getopt("vh", ["version", "help"]);
+
+    if ($options) {
+        switch (array_key_first($options)) {
+            case 'version':
+            case 'v':
+                require_once __DIR__ . "/src/Options/Version.php";
+                require_once __DIR__ . "/src/Wrappers/File.php";
+
+                $version = new Version(new File());
+
+                echo "\nVersion " . $version->getSemver();
+                break;
+
+            case 'help':
+            case 'h':
+                echo "\navailable options:" .
+                    "\n-v | --version   Current Fusion version".
+                    "\n-h | --help      This information";
+        }
+
+        echo "\n\n";
+        exit;
+    }
+
+    echo "\nboot via command line interface";
 
     // remove filename
     array_shift($argv);
