@@ -24,7 +24,7 @@ use Valvoid\Fusion\Tasks\Build\SAT\Solver;
 
 /**
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class SolverMock extends Solver {
 

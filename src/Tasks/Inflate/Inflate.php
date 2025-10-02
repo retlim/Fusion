@@ -35,8 +35,8 @@ use Valvoid\Fusion\Wrappers\File;
 /**
  * Inflate task to generate normalized package state.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Inflate extends Task
 {

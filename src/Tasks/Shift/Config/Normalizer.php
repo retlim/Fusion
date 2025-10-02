@@ -24,8 +24,8 @@ use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
 /**
  * Shift task config normalizer.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Normalizer extends ConfigNormalizer
 {

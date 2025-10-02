@@ -32,8 +32,8 @@ use Valvoid\Fusion\Tasks\Task;
 /**
  * Categorize task to sort metas.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Categorize extends Task
 {

@@ -30,7 +30,7 @@ use Valvoid\Fusion\Wrappers\File as Wrapper;
  * Local file synchronization request.
  *
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class File extends Local
 {

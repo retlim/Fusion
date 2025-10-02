@@ -40,7 +40,7 @@ use Valvoid\Fusion\Log\Serializers\Files\File;
  * Text file serializer.
  *
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Text implements File
 {

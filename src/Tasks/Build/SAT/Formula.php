@@ -25,8 +25,8 @@ use Valvoid\Fusion\Tasks\Build\SAT\Clause\State;
 /**
  * Conjunctive normal form (CNF) formula.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Formula
 {

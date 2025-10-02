@@ -22,8 +22,8 @@ namespace Valvoid\Fusion\Tasks;
 /**
  * Task.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 abstract class Task
 {

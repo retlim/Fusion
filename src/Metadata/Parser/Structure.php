@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@ namespace Valvoid\Fusion\Metadata\Parser;
 /**
  * Environment parser.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Structure
 {
@@ -87,7 +87,11 @@ class Structure
                 // prefixed source suffix
                 // directory cant be value
                 // prevent directory to source transformation
-                } elseif (is_string($value) && $value[0] !== '/') {
+                } elseif (is_string($value) &&
+                    $value[0] !== '/' &&
+
+                    // : mapped extension indicator
+                    $value[0] !== ':') {
                     $valueParts = explode('/', $value, 2);
 
                     // multi space value
@@ -112,7 +116,12 @@ class Structure
             // prefixed source suffix
             // directory cant be value
             // prevent directory to source transformation
-            elseif (is_string($value) && $value[0] !== '/') {
+            // : map indicator
+            elseif (is_string($value) &&
+                $value[0] !== '/' &&
+
+                // : mapped extension indicator
+                $value[0] !== ':') {
                 $valueParts = explode('/', $value, 2);
 
                 // multi space value

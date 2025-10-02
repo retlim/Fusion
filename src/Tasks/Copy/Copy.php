@@ -35,8 +35,8 @@ use Valvoid\Fusion\Wrappers\File;
 /**
  * Copy task to cache non-obsolete internal packages.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Copy extends Task
 {

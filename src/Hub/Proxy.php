@@ -27,7 +27,7 @@ use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
  * Hub.
  *
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 interface Proxy
 {

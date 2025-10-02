@@ -32,7 +32,7 @@ use Valvoid\Fusion\Log\Serializers\Streams\Stream;
  * Default event log implementation.
  *
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Logic implements Proxy
 {

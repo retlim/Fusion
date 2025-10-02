@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@ use Valvoid\Fusion\Log\Log;
 /**
  * Metadata.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 abstract class Metadata
 {
@@ -119,6 +119,16 @@ abstract class Metadata
     public function getStructureExtensions(): array
     {
         return $this->content["structure"]["extensions"];
+    }
+
+    /**
+     * Returns structure mappings category sub meta.
+     *
+     * @return string[] Structure extension.
+     */
+    public function getStructureMappings(): array
+    {
+        return $this->content["structure"]["mappings"];
     }
 
     /**

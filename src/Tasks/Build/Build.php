@@ -48,7 +48,7 @@ use Valvoid\Fusion\Wrappers\Extension;
  * Build task to get external package metas.
  *
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Build extends Task implements Interceptor
 {

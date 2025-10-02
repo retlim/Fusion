@@ -24,8 +24,8 @@ use Valvoid\Fusion\Tasks\Build\SAT\Clause\Clause;
 /**
  * Satisfiability (SAT) solver to find a structure path.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Solver
 {

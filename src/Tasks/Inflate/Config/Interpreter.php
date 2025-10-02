@@ -28,8 +28,8 @@ use Valvoid\Fusion\Tasks\Inflate\Inflate;
 /**
  * Inflate task config interpreter.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Interpreter extends ConfigInterpreter
 {

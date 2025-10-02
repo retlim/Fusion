@@ -25,7 +25,7 @@ use Valvoid\Fusion\Hub\Cache;
  * Hub request.
  *
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 abstract class Request
 {

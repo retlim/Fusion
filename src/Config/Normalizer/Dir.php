@@ -31,7 +31,7 @@ use Valvoid\Fusion\Wrappers\Dir as DirWrapper;
  * Working directory config normalizer.
  *
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Dir
 {

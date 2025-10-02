@@ -33,7 +33,7 @@ use Valvoid\Fusion\Wrappers\Curl;
 
 /**
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class OffsetTest extends Test
 {

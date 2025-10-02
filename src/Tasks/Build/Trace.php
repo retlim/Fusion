@@ -24,8 +24,8 @@ use Valvoid\Fusion\Metadata\External\Builder;
 /**
  * Multi version path util.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Trace
 {

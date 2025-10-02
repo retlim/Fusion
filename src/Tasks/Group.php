@@ -29,7 +29,7 @@ use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
  * Static task group proxy.
  *
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Group
 {

@@ -23,7 +23,7 @@ namespace Valvoid\Fusion\Hub\APIs\Remote;
  * Common remote API status codes.
  *
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 enum Status
 {

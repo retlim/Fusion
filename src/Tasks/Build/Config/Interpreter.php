@@ -29,8 +29,8 @@ use Valvoid\Fusion\Util\Version\Interpreter as VersionInterpreter;
 /**
  * Build task config interpreter.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Interpreter extends ConfigInterpreter
 {

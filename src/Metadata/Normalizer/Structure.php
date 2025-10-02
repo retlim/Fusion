@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * Metadata structure normalizer.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Structure
 {
@@ -36,6 +36,9 @@ class Structure
 
     /** @var array<string, string[]> Source category. */
     private array $source = [];
+
+    /** @var array<string, string[]> Mapping category. */
+    private array $mappings = [];
 
     /** @var string[] Extension category. */
     private array $extension = [];
@@ -76,6 +79,7 @@ class Structure
             "cache" => "",
             "sources" => [],
             "extensions" => [],
+            "mappings" => [],
             "namespaces" => [],
             "states" => []
         ];
@@ -91,6 +95,9 @@ class Structure
                 $structure->source,
                 $meta["structure"]["sources"]
             );
+
+        if ($structure->mappings)
+            $meta["structure"]["mappings"] = $structure->mappings;
 
         if ($structure->extension)
             Extension::normalize(
@@ -111,7 +118,6 @@ class Structure
                 $meta["structure"]["namespaces"]
             );
     }
-
 
     /**
      * Extracts structure into categories.
@@ -168,6 +174,12 @@ class Structure
                     $path . $key :
                     $path;
 
+            // mapped extension
+            elseif (str_starts_with($value, ':') && !$source)
+                (($key[0] ?? null) === '/') ?
+                    $this->mappings[$path . $key] = $value :
+                    $this->mappings[$path] = $value;
+
             // loadable
             // nested cache dir structure
             elseif (str_contains($value, '\\') && !$source)
@@ -191,9 +203,10 @@ class Structure
 
             // seq source reference
             // tag, branch, commit, etc.
-            else
+            else {
                 $this->source[] = [
                     $path => "$source/$value"
                 ];
+            }
     }
 }

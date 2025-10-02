@@ -22,8 +22,8 @@ namespace Valvoid\Fusion\Tasks\Build\SAT\Clause;
 /**
  * Clause state.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 enum State
 {

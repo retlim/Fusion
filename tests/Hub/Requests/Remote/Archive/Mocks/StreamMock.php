@@ -23,7 +23,7 @@ use Valvoid\Fusion\Wrappers\Stream;
 
 /**
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class StreamMock extends Stream
 {

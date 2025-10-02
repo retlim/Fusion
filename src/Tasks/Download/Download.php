@@ -43,8 +43,8 @@ use ZipArchive;
 /**
  * Download task to fetch external packages.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Download extends Task implements Interceptor
 {

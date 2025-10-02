@@ -34,8 +34,8 @@ use Valvoid\Fusion\Wrappers\File;
 /**
  * Register task to create common autoloader.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Register extends Task
 {

@@ -49,7 +49,7 @@ use Valvoid\Fusion\Tasks\Task;
  * Package manager for PHP-based projects.
  *
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Fusion
 {

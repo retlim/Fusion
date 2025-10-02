@@ -1,7 +1,7 @@
 <?php
 /**
- * Fusion. A package manager for PHP-based projects.
- * Copyright Valvoid
+ * Fusion - PHP Package Manager
+ * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ use Valvoid\Fusion\Tests\Test;
 /**
  *
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class NormalizerTest extends Test
 {
@@ -63,6 +63,7 @@ class NormalizerTest extends Test
                     "cache" => "/cache",
                     "sources" => [],
                     "extensions" => [],
+                    "mappings" => [],
                     "namespaces" => [],
                     "states" => []
                 ],
@@ -71,11 +72,7 @@ class NormalizerTest extends Test
                         "modules" => []
                     ]
                 ]
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]) $this->handleFailedTest();
     }
 
     public function testOverlay(): void
@@ -91,10 +88,6 @@ class NormalizerTest extends Test
                 "key1" => null,
                 "whatever",
                 "key2" => "value2"
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]) $this->handleFailedTest();
     }
 }

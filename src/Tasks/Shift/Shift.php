@@ -40,8 +40,8 @@ use Valvoid\Fusion\Wrappers\File;
 /**
  * Shift task to switch states.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Shift extends Task
 {

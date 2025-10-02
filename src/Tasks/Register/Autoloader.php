@@ -20,8 +20,8 @@
 /**
  * Autoloader to access lazy and ASAP package code.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Autoloader
 {

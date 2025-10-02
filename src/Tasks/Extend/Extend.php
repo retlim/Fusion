@@ -34,10 +34,10 @@ use Valvoid\Fusion\Wrappers\Dir;
 use Valvoid\Fusion\Wrappers\File;
 
 /**
- * Extend task to handle stackable package customizations.
+ * Task that handles package extensions.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Extend extends Task
 {
@@ -48,7 +48,7 @@ class Extend extends Task
     private string $packagesDir;
 
     /** @var array Sorted identifiers. */
-    private array $ids = [];
+    private array $indexes = [];
 
     /** @var array  Structures. */
     private array $structures = [];
@@ -103,6 +103,7 @@ class Extend extends Task
         // flat implication to sorted ids
         $this->initIds($implication);
         $this->initFilters($implication, []);
+        $mappings = [];
 
         // extend new state
         if ($this->group->hasDownloadable()) {
@@ -130,6 +131,15 @@ class Extend extends Task
                     $this->box->get(Content::class,
                         content: $metadata->getContent()));
 
+                foreach ($metadata->getStructureMappings() as $dir => $mapping)
+                    $mappings[$mapping][$id] =
+
+                        // absolute dir since deps (extensions.php)
+                        // should not be in repo what result in a build
+                        $this->directory->getRootDir() .
+                        $metadata->getDir() .
+                        $dir;
+
                 $this->structures[$id] = [
                     "dir" => "$this->packagesDir/$id",
                     "cache" => $metadata->getStructureCache(),
@@ -149,6 +159,11 @@ class Extend extends Task
                         $this->box->get(Content::class,
                             content: $metadata->getContent()));
 
+                    foreach ($metadata->getStructureMappings() as $dir => $mapping)
+                        $mappings[$mapping][$id] = $this->directory->getRootDir() .
+                            $metadata->getDir() .
+                            $dir;
+
                     $this->structures[$id] = [
                         "dir" => $metadata->getSource(),
                         "extensions" => $metadata->getStructureExtensions(),
@@ -166,21 +181,29 @@ class Extend extends Task
 
             foreach ($structure["extensions"] as $extension) {
                 $content .= "\n\t\"$extension\" => [";
+                $dirs = $mappings[":$id$extension"] ??
+                    [];
 
                 // only existing content
                 // prevent redundant checks after
                 if ($this->dir->is("$dir$extension")) {
                     $this->filterExtension("$dir$extension", $filter);
 
+                    // add mapping or
                     // shift ordered identifiers
-                    foreach ($this->ids as $index => $id)
-                        if ($this->dir->is("$dir$extension/$id"))
+                    foreach ($this->indexes as $index => $id)
+                        if (isset($dirs[$id]))
+                            $content .= "\n\t\t$index => \"" . $dirs[$id] . "\",";
+
+                        elseif ($this->dir->is("$dir$extension/$id"))
                             $content .= "\n\t\t$index => \"$id\",";
 
-                    $content .= "\n\t";
-                }
+                } else foreach ($dirs as $identifier => $directory)
+                    foreach ($this->indexes as $index => $id)
+                        if ($identifier == $id)
+                            $content .= "\n\t\t$index => \"$directory\",";
 
-                $content .= "],";
+                $content .= "\n\t],";
             }
 
             $cache = $dir . $structure["cache"];
@@ -246,7 +269,7 @@ class Extend extends Task
         foreach ($tree as $id => $subtree) {
             $this->initIds($subtree["implication"]);
 
-            $this->ids[] = $id;
+            $this->indexes[] = $id;
         }
     }
 

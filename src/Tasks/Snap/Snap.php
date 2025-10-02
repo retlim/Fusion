@@ -33,8 +33,8 @@ use Valvoid\Fusion\Wrappers\File;
 /**
  * Snap task to persist current built state.
  *
- * @Copyright Valvoid
- * @license GNU GPLv3
+ * @copyright Valvoid
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Snap extends Task
 {

@@ -35,7 +35,7 @@ use Valvoid\Fusion\Tests\Test;
 
 /**
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class ExtendTest extends Test
 {
@@ -78,8 +78,12 @@ class ExtendTest extends Test
                 InternalCategory::RECYCLABLE, [
                 "id" => "i0",
                 "source" => "/s0",
+                "dir" => "/d0",
                 "structure" => [
                     "cache" => "/cache",
+                    "mappings" => [
+                        "/###" => ":i1/i1/ex"
+                    ],
                     "extensions" => [],
                     "sources" => [
                         "/deps" => []
@@ -94,6 +98,7 @@ class ExtendTest extends Test
                 "source" => "/s0/deps/s1",
                 "structure" => [
                     "cache" => "/cache",
+                    "mappings" => [],
                     "extensions" => [
                         "/ex"
                     ],
@@ -181,7 +186,7 @@ class ExtendTest extends Test
                         // test order
                         "\n\t\"/ex\" => [" .
                         "\n\t\t0 => \"i1/i1\"," .
-                        "\n\t\t1 => \"i0\"," .
+                        "\n\t\t1 => \"/d0/###\"," .
                         "\n\t]," .
                         "\n];"
 
@@ -215,6 +220,7 @@ class ExtendTest extends Test
                     "dir" => "", // relative to root dir
                     "structure" => [
                         "cache" => "/cache",
+                        "mappings" => [],
                         "extensions" => [],
                         "sources" => [
                             "/deps" => []
@@ -248,6 +254,9 @@ class ExtendTest extends Test
                 "dir" => "", // relative to root dir
                 "structure" => [
                     "cache" => "/cache",
+                    "mappings" => [
+                        "/###i0" => ":i1/ex"
+                    ],
                     "extensions" => [],
                     "sources" => [
                         "/deps" => [
@@ -264,6 +273,7 @@ class ExtendTest extends Test
                 "dir" => "/deps/i1",
                 "structure" => [
                     "cache" => "/cache",
+                    "mappings" => [],
                     "sources" => [],
                     "extensions" => [
                         "/ex"
@@ -277,6 +287,9 @@ class ExtendTest extends Test
                 "dir" => "/deps/i2",
                 "structure" => [
                     "cache" => "/cache",
+                    "mappings" => [
+                        "/###i2" => ":i1/ex"
+                    ],
                     "extensions" => [],
                     "sources" => [
                         "/deps" => ["i1"]
@@ -292,7 +305,7 @@ class ExtendTest extends Test
             $delete = [];
 
             // cached individual packages
-            $directory->cache = function () {
+            $directory->packages = function () {
                 return "/p";
             };
 
@@ -400,9 +413,9 @@ class ExtendTest extends Test
 
                         // test order
                         "\n\t\"/ex\" => [" .
-                        "\n\t\t2 => \"i2\"," .
-                        "\n\t\t3 => \"i0\"," .
-                        "\n\t\t4 => \"i0\"," .
+                        "\n\t\t2 => \"/deps/i2/###i2\"," .
+                        "\n\t\t3 => \"/###i0\"," .
+                        "\n\t\t4 => \"/###i0\"," .
                         "\n\t]," .
                         "\n];"
 

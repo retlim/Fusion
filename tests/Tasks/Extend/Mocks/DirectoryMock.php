@@ -24,11 +24,11 @@ use Valvoid\Fusion\Dir\Proxy;
 
 /**
  * @copyright Valvoid
- * @license GNU GPLv3
+ * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class DirectoryMock implements Proxy
 {
-    public Closure $cache;
+    public Closure $packages;
     public Closure $create;
     public Closure $delete;
     public Closure $rename;
@@ -36,7 +36,7 @@ class DirectoryMock implements Proxy
 
     public function getPackagesDir(): string
     {
-        return call_user_func($this->cache);
+        return call_user_func($this->packages);
     }
 
     public function createDir(string $dir, int $permissions = 0755): void
