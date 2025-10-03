@@ -82,16 +82,22 @@ class Dir
             $config["dir"]["path"]);
 
         if (PHP_OS_FAMILY == 'Windows') {
-            $base = $this->system->getEnvVariable('LOCALAPPDATA') ?:
-                ($this->system->getEnvVariable('USERPROFILE') . '/AppData/Local');
+            $localAppData = $this->system->getEnvVariable('LOCALAPPDATA')
+                ?: ($this->system->getEnvVariable('USERPROFILE') . '/AppData/Local');
 
-            $config["dir"]["storage"] = "$base/Valvoid/Fusion";
+            $config["cache"]["path"] = "$localAppData/Valvoid/Fusion/cache";
+            $config["config"]["path"] = "$localAppData/Valvoid/Fusion/config";
+            $config["state"]["path"] = "$localAppData/Valvoid/Fusion/state";
 
         } else {
-            $base = $this->system->getEnvVariable('XDG_CACHE_HOME') ?:
-                ($this->system->getEnvVariable('HOME') . '/.cache');
+            $home = $this->system->getEnvVariable('HOME');
+            $cache = $this->system->getEnvVariable('XDG_CACHE_HOME') ?: "$home/.cache";
+            $conf  = $this->system->getEnvVariable('XDG_CONFIG_HOME') ?: "$home/.config";
+            $state = $this->system->getEnvVariable('XDG_STATE_HOME') ?: "$home/.local/state";
 
-            $config["dir"]["storage"] = "$base/valvoid/fusion";
+            $config["cache"]["path"] = "$cache/valvoid/fusion";
+            $config["config"]["path"] = "$conf/valvoid/fusion";
+            $config["state"]["path"] = "$state/valvoid/fusion";
         }
     }
 }

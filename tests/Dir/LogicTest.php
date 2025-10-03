@@ -57,6 +57,8 @@ class LogicTest extends Test
         $this->testGetCacheDir();
         $this->testGetOtherDir();
         $this->testGetStateDir();
+        $this->testGetHubDir();
+        $this->testGetLogDir();
         $this->testGetPackagesDir();
         $this->testGetTaskDir();
         $this->testGetRootDir();
@@ -240,13 +242,25 @@ class LogicTest extends Test
 
     public function testGetTaskDir(): void
     {
-        if ($this->logic->getTaskDir() != "/s/task")
+        if ($this->logic->getTaskDir() != "/#s/task")
+            $this->handleFailedTest();
+    }
+
+    public function testGetHubDir(): void
+    {
+        if ($this->logic->getHubDir() != "/#c/hub")
+            $this->handleFailedTest();
+    }
+
+    public function testGetLogDir(): void
+    {
+        if ($this->logic->getLogDir() != "/#s/log")
             $this->handleFailedTest();
     }
 
     public function testGetStateDir(): void
     {
-        if ($this->logic->getStateDir() != "/s/state")
+        if ($this->logic->getStateDir() != "/#s/state")
             $this->handleFailedTest();
     }
 
@@ -258,13 +272,13 @@ class LogicTest extends Test
 
     public function testGetOtherDir(): void
     {
-        if ($this->logic->getOtherDir() != "/s/other")
+        if ($this->logic->getOtherDir() != "/#s/other")
             $this->handleFailedTest();
     }
 
     public function testGetPackagesDir(): void
     {
-        if ($this->logic->getPackagesDir() != "/s/packages")
+        if ($this->logic->getPackagesDir() != "/#s/packages")
             $this->handleFailedTest();
     }
 
@@ -282,10 +296,12 @@ class LogicTest extends Test
         $this->logic = new Logic(dir: $this->dir,
             file: $this->file,
             bus: $this->bus, config: [
-            "path" => "/#",
-                "storage" => "/s",
-            "creatable" => true
-        ]);
+                "dir" => [
+                    "path" => "/#",
+                    "creatable" => true
+                ],
+                "state" => ["path" =>"/#s"],
+                "cache" => ["path" =>"/#c"]]);
 
         $oldCache = $this->logic->getCacheDir();
         $newCache = "$oldCache/newCachePath";
@@ -325,9 +341,12 @@ class LogicTest extends Test
         $this->logic = new Logic(dir: $this->dir,
             file: $this->file,
             bus: $this->bus, config: [
-            "path" => "/#",
-            "storage" => "/s",
-            "clearable" => false]);
+            "dir" => [
+                "path" => "/#",
+                "clearable" => false
+            ],
+            "state" => ["path" =>"/#s"],
+            "cache" => ["path" =>"/#c"]]);
 
         if ($this->logic->getRootDir() != "/#" ||
             $this->logic->getCacheDir() != "/#/c")
@@ -369,9 +388,12 @@ class LogicTest extends Test
         $this->logic = new Logic(dir: $this->dir,
             file: $this->file,
             bus: $this->bus, config: [
-            "path" => "/#",
-                "storage" => "/s",
-            "clearable" => false]);
+                "dir" => [
+                    "path" => "/#",
+                    "clearable" => false
+                ],
+                "state" => ["path" =>"/#s"],
+                "cache" => ["path" =>"/#c"]]);
 
         if ($this->logic->getRootDir() != "/#" ||
             $this->logic->getCacheDir() != "/#/cache")
@@ -429,10 +451,13 @@ class LogicTest extends Test
 
         $this->logic = new Logic(dir: $this->dir,
             file: $this->file,
-            bus: $this->bus, config: [
-            "path" => "/#",
-                "storage" => "/s",
-            "clearable" => true]);
+            bus: $this->bus, config:         [
+                "dir" => [
+                    "path" => "/#",
+                    "clearable" => true
+                ],
+                "state" => ["path" =>"/#s"],
+                "cache" => ["path" =>"/#c"]]);
 
         if ($this->logic->getRootDir() != "/#" ||
             $this->logic->getCacheDir() != "/#/cache" ||
@@ -477,9 +502,12 @@ class LogicTest extends Test
         $this->logic = new Logic(dir: $this->dir,
             file: $this->file,
             bus: $this->bus, config: [
-            "path" => "/#",
-                "storage" => "/s",
-            "creatable" => true]);
+                "dir" => [
+                    "path" => "/#",
+                    "creatable" => true
+                ],
+                "state" => ["path" =>"/#s"],
+                "cache" => ["path" =>"/#c"]]);
 
         if ($this->logic->getRootDir() != "/#" ||
             $this->logic->getCacheDir() != "/#/cache")
@@ -503,9 +531,12 @@ class LogicTest extends Test
             $this->logic = new Logic(dir: $this->dir,
                 file: $this->file,
                 bus: $this->bus, config: [
-                "path" => "/#",
-                    "storage" => "/s",
-                "creatable" => false,]);
+                    "dir" => [
+                        "path" => "/#",
+                        "creatable" => false
+                    ],
+                    "state" => ["path" =>"/#s"],
+                    "cache" => ["path" =>"/#c"]]);
 
             $this->handleFailedTest();
 

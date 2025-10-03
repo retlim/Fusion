@@ -42,13 +42,19 @@ class Logic implements Proxy
      * event during migration if the new package version defines a
      * different cache path in its metadata structure.
      */
-    private string $cache;
+    private string $state;
 
     /**
-     * @var string OS-level storage dir for runtime and downloaded
-     * packages, located outside the current package.
+     * @var string OS-level cache directory for immutable artifacts
+     * like downloaded packages.
      */
-    private string $storage;
+    private string $osCache;
+
+    /**
+     * @var string OS-level state directory for mutable runtime data
+     * like logs or build flow directories.
+     */
+    private string $osState;
 
     /**
      * Constructs the directory.
@@ -65,8 +71,9 @@ class Logic implements Proxy
         BusProxy $bus,
         array $config)
     {
-        $this->storage = $config["storage"];
-        $this->root = $config["path"];
+        $this->osState = $config["state"]["path"];
+        $this->osCache = $config["cache"]["path"];
+        $this->root = $config["dir"]["path"];
 
         $bus->addReceiver(static::class, $this->handleBusEvent(...),
 
@@ -76,12 +83,12 @@ class Logic implements Proxy
         // replace existing content with placeholder or
         // recycle package / empty dir content
         if ($dir->is($this->root))
-            $config["clearable"] ?
+            $config["dir"]["clearable"] ?
                 $this->replaceContent() :
                 $this->recycleContent();
 
         // create new placeholder package
-        elseif ($config["creatable"])
+        elseif ($config["dir"]["creatable"])
             $this->createContent();
 
         else throw new Error(
@@ -122,7 +129,7 @@ class Logic implements Proxy
             $this->copy(__DIR__ . "/placeholder.json", $file);
 
             // default placeholder cache
-            $this->cache = "$this->root/cache";
+            $this->state = "$this->root/cache";
 
             return;
         }
@@ -155,7 +162,7 @@ class Logic implements Proxy
                 "of invalid content."
             );
 
-        $this->cache = $this->root . $path;
+        $this->state = $this->root . $path;
     }
 
     /**
@@ -177,7 +184,7 @@ class Logic implements Proxy
             "$this->root/fusion.json");
 
         // default placeholder
-        $this->cache = "$this->root/cache";
+        $this->state = "$this->root/cache";
     }
 
     /**
@@ -205,7 +212,7 @@ class Logic implements Proxy
             "$this->root/fusion.json");
 
         // default placeholder
-        $this->cache = "$this->root/cache";
+        $this->state = "$this->root/cache";
     }
 
     /**
@@ -241,7 +248,7 @@ class Logic implements Proxy
      */
     public function getTaskDir(): string
     {
-        return "$this->storage/task";
+        return "$this->osState/task";
     }
 
     /**
@@ -252,7 +259,7 @@ class Logic implements Proxy
      */
     public function getHubDir(): string
     {
-        return "$this->storage/hub";
+        return "$this->osCache/hub";
     }
 
     /**
@@ -262,7 +269,7 @@ class Logic implements Proxy
      */
     public function getLogDir(): string
     {
-        return "$this->storage/log";
+        return "$this->osState/log";
     }
 
     /**
@@ -272,7 +279,7 @@ class Logic implements Proxy
      */
     public function getStateDir(): string
     {
-        return "$this->storage/state";
+        return "$this->osState/state";
     }
 
     /**
@@ -282,7 +289,7 @@ class Logic implements Proxy
      */
     public function getCacheDir(): string
     {
-        return $this->cache;
+        return $this->state;
     }
 
     /**
@@ -292,7 +299,7 @@ class Logic implements Proxy
      */
     public function getOtherDir(): string
     {
-        return "$this->storage/other";
+        return "$this->osState/other";
     }
 
     /**
@@ -303,7 +310,7 @@ class Logic implements Proxy
      */
     public function getPackagesDir(): string
     {
-        return "$this->storage/packages";
+        return "$this->osState/packages";
     }
 
     /**
@@ -447,6 +454,6 @@ class Logic implements Proxy
      */
     protected function handleBusEvent(Cache $event): void
     {
-        $this->cache = $event->getDir();
+        $this->state = $event->getDir();
     }
 }

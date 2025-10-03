@@ -54,7 +54,7 @@ class Interpreter
                 "tasks" => Tasks::interpret($value),
                 "log" => Log::interpret($value),
                 "hub" => Hub::interpret($value),
-                "dir" => "", // already done
+                "dir", "state", "cache", "config" => "", // already done
                 default =>  Bus::broadcast(new ConfigEvent(
                     "The unknown \"$key\" index must be \"dir\", " .
                     "\"persistence\", \"hub\", \"tasks\" or \"log\" string.",

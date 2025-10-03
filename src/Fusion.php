@@ -117,7 +117,7 @@ class Fusion
             Root::class);
 
         $box->inject(DirLogic::class,
-            config: $config->get("dir"));
+            config: $config->get());
     }
 
     /**
