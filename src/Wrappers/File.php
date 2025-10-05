@@ -75,6 +75,17 @@ class File
     }
 
     /**
+     * Returns included file content.
+     *
+     * @param string $file File.
+     * @return mixed Content.
+     */
+    public function include(string $file): mixed
+    {
+        return include $file;
+    }
+
+    /**
      * Tells whether the filename is a regular file
      *
      * @param string $file Path to the file.

@@ -17,41 +17,27 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Valvoid\Fusion\Tests\Options;
+namespace Valvoid\Fusion\Tests\Options\Mocks;
 
-use Throwable;
-use Valvoid\Fusion\Options\Version;
-use Valvoid\Fusion\Tests\Options\Mocks\FileMock;
-use Valvoid\Fusion\Tests\Test;
+use Closure;
+use Valvoid\Fusion\Wrappers\System;
 
 /**
  * @copyright Valvoid
  * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
-class VersionTest extends Test
+class SystemMock extends System
 {
-    protected string|array $coverage = Version::class;
+    public Closure $getEnvVariable;
+    public Closure $getOsFamily;
 
-    public function __construct()
+    public function getEnvVariable(string $name): array|string|false
     {
-        $this->testSemanticVersion();
+        return call_user_func($this->getEnvVariable, $name);
     }
 
-    public function testSemanticVersion(): void
+    public function getOsFamily(): string
     {
-        try {
-            $file = new FileMock;
-            $file->get = function () {
-                return "{\"version\": \"###\"}";
-            };
-
-            $version = new Version($file);
-
-            if ($version->semver !== "###")
-                $this->handleFailedTest();
-
-        } catch (Throwable) {
-            $this->handleFailedTest();
-        }
+        return call_user_func($this->getOsFamily);
     }
 }

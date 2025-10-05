@@ -102,4 +102,20 @@ class Dir
     {
         return realpath($path);
     }
+
+    /**
+     * Returns a parent directory's path
+     *
+     * @param string $path A path.
+     * @param int $levels The number of parent directories to go up.
+     * This must be an integer greater than 0.
+     * @return string the name of the directory. If there are no
+     * slashes in path, a dot ('.') is returned, indicating the
+     * current directory. Otherwise, the returned string is path
+     * with any trailing /component removed.
+     */
+    public function getDirname(string $path, int $levels = 1): string
+    {
+        return dirname($path, $levels);
+    }
 }

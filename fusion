@@ -23,54 +23,61 @@ use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Log\Serializers\Streams\Terminal\Terminal;
+use Valvoid\Fusion\Options\Paths;
 use Valvoid\Fusion\Options\Version;
+use Valvoid\Fusion\Settings\Config\Config;
 use Valvoid\Fusion\Wrappers\File;
-
-echo "
- ___ _   _ ___ ___ ___  _  _
-| __| | | / __|_ _/ _ \| \| |
-| _|| |_| \__ \| | (_) | .` |
-|_|  \___/|___/___\___/|_|\_|
-\033[2m------\033[0m";
+use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\System;
 
 try {
-    $options = getopt("vh", ["version", "help"]);
+    $options = getopt("vhp", ["version", "help", "paths"]);
 
-    if ($options) {
+    if ($options)
         switch (array_key_first($options)) {
             case 'version':
             case 'v':
                 require_once __DIR__ . "/src/Options/Version.php";
                 require_once __DIR__ . "/src/Wrappers/File.php";
 
-                $version = new Version(new File());
+                $version = new Version(new File);
 
-                echo "\nVersion " . $version->getSemver();
-                break;
+                echo "\n\033[4;32mFusion - PHP Package Manager\033[0m" .
+                    "\nVersion $version->semver\n\n";
+                exit;
+
+            case 'paths':
+            case 'p':
+                require_once __DIR__ . "/src/Options/Paths.php";
+                require_once __DIR__ . "/src/Wrappers/File.php";
+                require_once __DIR__ . "/src/Wrappers/Dir.php";
+                require_once __DIR__ . "/src/Wrappers/System.php";
+
+                $paths = new Paths(new Dir, new File, new System);
+
+                echo "\n\033[4;32mroot, config, state, and cache paths\033[0m" .
+                    "\n$paths->path" .
+                    "\n$paths->config" .
+                    "\n$paths->state" .
+                    "\n$paths->cache\n\n";
+                exit;
 
             case 'help':
-            case 'h':
-                echo "\navailable options:" .
-                    "\n-v | --version   Current Fusion version".
-                    "\n-h | --help      This information";
+            case 'h': showHelp(0);
+            default: showHelp();
         }
-
-        echo "\n\n";
-        exit;
-    }
-
-    echo "\nboot via command line interface";
 
     // remove filename
     array_shift($argv);
+    $argv = array_filter($argv, fn ($argument) =>
 
-    $taskId = array_shift($argv);
-    $config = [];
+        // flag options only for now
+        // drop all with dash
+        $argument[0] !== '-');
 
-    if (!is_string($taskId) || !$taskId)
-        throwError(
-            "No arguments. Fusion require at least a task argument to run."
-        );
+    $arguments = [];
+    $command = array_shift($argv) ??
+        showHelp();
 
     // inflate inline config
     foreach ($argv as $argument) {
@@ -87,7 +94,7 @@ try {
 
         if ($path[0] != "dir" && $path[0] != "persistence" &&
             $path[0] != "log" && $path[0] != "hub")
-            $path = ["tasks", $taskId, ...$path];
+            $path = ["tasks", $command, ...$path];
 
         // handle bool value
         if ($argumentParts[1] == "false")
@@ -100,14 +107,15 @@ try {
         elseif ($argumentParts[1] == "null")
             $argumentParts[1] = null;
 
-        inflateArgumentValue($config, $path, $argumentParts[1]);
+        inflateArgumentValue($arguments, $path, $argumentParts[1]);
     }
+
 
     require_once __DIR__ . "/src/Fusion.php";
 
-    Fusion::init($config);
+    Fusion::init($arguments);
 
-    if (Fusion::manage($taskId) === false) {
+    if (Fusion::manage($command) === false) {
         echo "\n\n";
         exit(1);
     }
@@ -163,8 +171,22 @@ function inflateArgumentValue(mixed &$config, array $path, mixed $value): void
         $config[] = $value;
 
     // add
-    else
-        $config = $value;
+    else $config = $value;
+}
+
+function showHelp(int $code = 1): void
+{
+    echo "\n\033[4;32musage\033[0m" .
+        "\nfusion [command] ?args       Workload with optional (?) arguments" .
+        "\nfusion [option]              Manager information" .
+
+        "\n\n\033[4;32mflag options\033[0m" .
+        "\n-v | --version               Show current Fusion version".
+        "\n-h | --help                  Show this information" .
+        "\n-p | --paths                 Show root, config, state, and cache paths".
+        "\n\n";
+
+    exit($code);
 }
 
 /**

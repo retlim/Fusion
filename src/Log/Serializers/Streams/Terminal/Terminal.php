@@ -45,6 +45,9 @@ class Terminal implements Stream
     /** @var Level  */
     private Level $threshold;
 
+    /** @var bool Has previous line */
+    private bool $header = true;
+
     /**
      * Constructs the terminal stream serializer.
      *
@@ -101,6 +104,8 @@ class Terminal implements Stream
         // generic message fallback
         else
             $this->formatGeneric($level, $event->__toString());
+
+        $this->header = false;
     }
 
     /**
@@ -358,6 +363,7 @@ class Terminal implements Stream
      */
     private function formatName(Level $level, Name $name): void
     {
-        echo "\n\n\033[1;4;32m" . $name->getName() . "\033[0m";
+        echo ($this->header ? "\n" : "\n\n") .
+            "\033[4;32m" . $name->getName() . "\033[0m";
     }
 }

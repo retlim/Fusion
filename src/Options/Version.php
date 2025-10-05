@@ -31,7 +31,7 @@ use Valvoid\Fusion\Wrappers\File;
 class Version
 {
     /** @var string Semantic version. */
-    private string $semver;
+    public readonly string $semver;
 
     /**
      * Constructs the option.
@@ -57,13 +57,5 @@ class Version
             );
 
         $this->semver = $metadata["version"];
-    }
-
-    /**
-     * @return string
-     */
-    public function getSemver(): string
-    {
-        return $this->semver;
     }
 }

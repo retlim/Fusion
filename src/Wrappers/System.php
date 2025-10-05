@@ -39,4 +39,15 @@ class System
     {
         return getenv($name);
     }
+
+    /**
+     * The operating system family PHP was built for.
+     *
+     * @return string Either of 'Windows', 'BSD', 'Darwin',
+     * 'Solaris', 'Linux' or 'Unknown'.
+     */
+    public function getOsFamily(): string
+    {
+        return PHP_OS_FAMILY;
+    }
 }
