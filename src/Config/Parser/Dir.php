@@ -19,12 +19,15 @@
 
 namespace Valvoid\Fusion\Config\Parser;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Log\Events\Level;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Wrappers\Dir as DirWrapper;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
- * Working directory config parser.
+ * Directories config parser.
  *
  * @copyright Valvoid
  * @license SPDX-License-Identifier: GPL-3.0-or-later
@@ -32,13 +35,27 @@ use Valvoid\Fusion\Log\Events\Level;
 class Dir
 {
     /**
+     * Constructs the parser.
+     *
+     * @param Box $box Dependency injection container.
+     * @param DirWrapper $dir Wrapper for standard directory operations.
+     * @param BusProxy $bus Event bus.
+     * @param File $file Wrapper for standard file operations.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly DirWrapper $dir,
+        private readonly BusProxy $bus,
+        private readonly File $file) {}
+
+    /**
      * Parses the working directory config.
      *
      * @param array $config Directory config to parse.
      */
-    public static function parse(array &$config): void
+    public function parse(array &$config): void
     {
-        self::parsePath($config["dir"]["path"]);
+        $this->parsePath($config["dir"]["path"]);
     }
 
     /**
@@ -46,7 +63,7 @@ class Dir
      *
      * @param string $path Path entry.
      */
-    private static function parsePath(string &$path): void
+    private function parsePath(string &$path): void
     {
         $path = str_replace('\\', '/', $path);
         $path = explode('/', $path);
@@ -57,14 +74,16 @@ class Dir
                 if (!empty($filenames))
                     array_pop($filenames);
 
-                else
-                    Bus::broadcast(new ConfigEvent(
-                        "The value of the \"path\" key, the " .
-                        "current working directory, does not point to anything, " .
-                        "as it contains a reference (double dot) to a " .
-                        "non-existent parent directory.",
-                        Level::ERROR,
-                        ["dir", "path"]
+                else $this->bus->broadcast(
+                    $this->box->get(ConfigEvent::class,
+                        message: "The value of the 'path' key, the " .
+                        "current working directory, does not point " .
+                        "to anything, as it contains a reference " .
+                        "(double dot) to a non-existent parent " .
+                        "directory.",
+                        level: Level::ERROR,
+                        breadcrumb: ["dir", "path"],
+                        abstract: []
                     ));
 
             elseif ($filename != '.')
@@ -79,15 +98,15 @@ class Dir
      * @param string $path Directory to start.
      * @return string|null Root.
      */
-    public static function getNonNestedPath(string $path): ?string
+    public function getRootPath(string $path): ?string
     {
         $match = null;
 
         while ($path) {
-            if (is_file("$path/fusion.json"))
+            if ($this->file->is("$path/fusion.json"))
                 $match = $path;
 
-            $parent = dirname($path);
+            $parent = $this->dir->getDirname($path);
 
             if ($path == $parent)
                 break;

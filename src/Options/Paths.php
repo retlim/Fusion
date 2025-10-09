@@ -89,8 +89,8 @@ class Paths
         } else $identifier = "valvoid/fusion";
 
         if ($system->getOsFamily() == 'Windows') {
-            $localAppData = $system->getEnvVariable('LOCALAPPDATA')
-                ?: ($system->getEnvVariable('USERPROFILE') . '/AppData/Local');
+            $localAppData = $system->getEnvVariable('LOCALAPPDATA') ?:
+                $system->getEnvVariable('USERPROFILE') . '/AppData/Local';
 
             $identifier = ucwords($identifier, '/');
             $this->cache = "$localAppData/$identifier/cache";
@@ -99,9 +99,15 @@ class Paths
 
         } else {
             $home = $system->getEnvVariable('HOME');
-            $cache = $system->getEnvVariable('XDG_CACHE_HOME') ?: "$home/.cache";
-            $config  = $system->getEnvVariable('XDG_CONFIG_HOME') ?: "$home/.config";
-            $state = $system->getEnvVariable('XDG_STATE_HOME') ?: "$home/.local/state";
+            $cache = $system->getEnvVariable('XDG_CACHE_HOME') ?:
+                "$home/.cache";
+
+            $config = $system->getEnvVariable('XDG_CONFIG_HOME') ?:
+                "$home/.config";
+
+            $state = $system->getEnvVariable('XDG_STATE_HOME') ?:
+                "$home/.local/state";
+
             $this->cache = "$cache/$identifier";
             $this->config = "$config/$identifier";
             $this->state = "$state/$identifier";

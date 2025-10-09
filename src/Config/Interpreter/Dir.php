@@ -19,13 +19,14 @@
 
 namespace Valvoid\Fusion\Config\Interpreter;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Config\Parser\Dir as DirectoryParser;
 use Valvoid\Fusion\Log\Events\Level;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 
 /**
- * Working directory config interpreter.
+ * Directories config interpreter.
  *
  * @copyright Valvoid
  * @license SPDX-License-Identifier: GPL-3.0-or-later
@@ -33,37 +34,42 @@ use Valvoid\Fusion\Log\Events\Level;
 class Dir
 {
     /**
+     * Constructs the interpreter.
+     *
+     * @param Box $box Dependency injection container.
+     * @param BusProxy $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly BusProxy $bus) {}
+
+    /**
      * Interprets current working directory entry.
      *
      * @param array $config Entry.
      */
-    public static function interpret(array $config): void
+    public function interpret(array $config): void
     {
-        if (!is_array($config["dir"]) || empty($config["dir"]))
-            Bus::broadcast(new ConfigEvent(
-                "The value of the \"dir\" index must be an assoc array.",
+        if (!is_array($config["dir"]) ||
+            empty($config["dir"]))
+            $this->broadcastConfigEvent(
+                "The value of the 'dir' index must be an assoc array.",
                 Level::ERROR,
                 ["dir"]
-            ));
+            );
 
         foreach ($config["dir"] as $key => $value)
             match($key) {
-                "path" => self::interpretPath($value),
-                "creatable" => self::interpretCreatable($value),
-                "storage" => self::interpretStorage($value),
-                "clearable" => self::interpretClearable($value),
-                default => Bus::broadcast(new ConfigEvent(
-                    "The unknown \"$key\" index must be \"path\", " .
-                    "\"clearable\" or \"creatable\" string.",
+                "path" => $this->interpretPath($value),
+                "creatable" => $this->interpretCreatable($value),
+                "clearable" => $this->interpretClearable($value),
+                default => $this->broadcastConfigEvent(
+                    "The unknown '$key' index must be 'path', " .
+                    "'clearable' or 'creatable' string.",
                     Level::ERROR,
                     ["dir", $key]
-                ))
+                )
             };
-    }
-
-    private static function interpretStorage(mixed $entry): void
-    {
-
     }
 
     /**
@@ -71,56 +77,58 @@ class Dir
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretPath(mixed $entry): void
+    private function interpretPath(mixed $entry): void
     {
         if (!is_string($entry) && $entry == "")
-            Bus::broadcast(new ConfigEvent(
-                "Must be non-empty string. Not empty. Absolute path ...",
+            $this->broadcastConfigEvent(
+                "Must be non-empty string. Not empty. " .
+                "Absolute path ...",
                 Level::ERROR,
                 ["dir", "path"]
-            ));
+            );
 
         if (str_starts_with($entry, "/..") ||
             str_starts_with($entry, "\\.."))
-            Bus::broadcast(new ConfigEvent(
-                "The value of the \"path\" key, " .
-                "the current working directory, does not point to anything, " .
-                "as it starts with a reference (double dot) to a non-existent " .
-                "parent directory.",
+            $this->broadcastConfigEvent(
+                "The value of the 'path' key, " .
+                "the current working directory, does not point to " .
+                "anything, as it starts with a reference (double dot) " .
+                "to a non-existent parent directory.",
                 Level::ERROR,
                 ["dir", "path"]
-            ));
+            );
 
         // trailing slash
         // directory separator
         if (str_ends_with($entry, '/') ||
             str_ends_with($entry, '\\'))
-            Bus::broadcast(new ConfigEvent(
+            $this->broadcastConfigEvent(
                 "Trailing slash is not a filename. " .
                 "Must be string. Absolute path ...",
                 Level::ERROR,
                 ["dir", "path"]
-            ));
+            );
 
         if (is_file($entry))
-            Bus::broadcast(new ConfigEvent(
-                "The value of the \"path\" key, the current " .
+            $this->broadcastConfigEvent(
+                "The value of the 'path' key, the current " .
                 "working directory must be a directory.",
                 Level::ERROR,
                 ["dir", "path"]
-            ));
+            );
 
-        $parentPath = DirectoryParser::getNonNestedPath($entry);
+        $parentPath = $this->box->get(DirectoryParser::class)
+            ->getRootPath($entry);
 
         // has parent package
         if ($parentPath && $parentPath != $entry)
-            Bus::broadcast(new ConfigEvent(
-                "The value of the \"path\" key, the current " .
+            $this->broadcastConfigEvent(
+                "The value of the 'path' key, the current " .
                 "working directory, is nested as it has a parent package " .
                 "structure.",
                 Level::ERROR,
                 ["dir", "path"]
-            ));
+            );
     }
 
     /**
@@ -128,15 +136,15 @@ class Dir
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretClearable(mixed $entry): void
+    private function interpretClearable(mixed $entry): void
     {
         if (!is_bool($entry))
-            Bus::broadcast(new ConfigEvent(
+            $this->broadcastConfigEvent(
                 "The value, clearable flag, of the index " .
-                "\"clearable\" must be a boolean.",
+                "'clearable' must be a boolean.",
                 Level::ERROR,
                 ["dir", "clearable"]
-            ));
+            );
     }
 
     /**
@@ -144,14 +152,33 @@ class Dir
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretCreatable(mixed $entry): void
+    private function interpretCreatable(mixed $entry): void
     {
         if (!is_bool($entry))
-            Bus::broadcast(new ConfigEvent(
+            $this->broadcastConfigEvent(
                 "The value, creatable flag, of the index " .
-                "\"creatable\" must be a boolean.",
+                "'creatable' must be a boolean.",
                 Level::ERROR,
                 ["dir", "creatable"]
+            );
+    }
+
+    /**
+     * Broadcasts config event.
+     *
+     * @param string $message
+     * @param Level $level
+     * @param array $breadcrumb
+     */
+    private function broadcastConfigEvent(string $message, Level $level,
+                                          array $breadcrumb): void
+    {
+        $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: $message,
+                level: $level,
+                breadcrumb: $breadcrumb,
+                abstract: []
             ));
     }
 }

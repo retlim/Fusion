@@ -19,6 +19,8 @@
 
 namespace Valvoid\Fusion\Config\Normalizer;
 
+use Valvoid\Fusion\Box\Box;
+
 /**
  * Config normalizer.
  *
@@ -28,17 +30,34 @@ namespace Valvoid\Fusion\Config\Normalizer;
 class Normalizer
 {
     /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     */
+    public function __construct(private readonly Box $box) {}
+
+    /**
      * Normalizes the config.
      *
      * @param array $config Config.
      */
-    public static function normalize(array &$config): void
+    public function normalize(array &$config): void
     {
-        $config = self::removeResetEntries($config);
+        $config = $this->removeResetEntries($config);
 
-        Hub::normalize($config);
-        Tasks::normalize($config);
-        Log::normalize($config);
+        foreach ($config as $key => &$value)
+            match($key) {
+                "tasks" => $this->box->get(Tasks::class)
+                    ->normalize($value),
+
+                "log" => $this->box->get(Log::class)
+                    ->normalize($value),
+
+                "hub" => $this->box->get(Hub::class)
+                    ->normalize($value),
+
+                default => null
+            };
     }
 
     /**
@@ -47,11 +66,11 @@ class Normalizer
      * @param array $config Config.
      * @return array Cleared config.
      */
-    public static function removeResetEntries(array $config): array
+    private function removeResetEntries(array $config): array
     {
         foreach ($config as $key => $value) {
             if (is_array($value))
-                $config[$key] = self::removeResetEntries($value);
+                $config[$key] = $this->removeResetEntries($value);
 
             if ($config[$key] === null)
                 unset($config[$key]);
@@ -66,7 +85,7 @@ class Normalizer
      * @param array $config Composite config.
      * @param array $layer On top config.
      */
-    public static function overlay(array &$config, array $layer): void
+    public function overlay(array &$config, array $layer): void
     {
         foreach ($layer as $key => $value)
             if ($value === null)
@@ -78,7 +97,7 @@ class Normalizer
                 if (!isset($config[$key]) || !is_array($config[$key]))
                     $config[$key] = [];
 
-                self::overlay($config[$key], $value);
+                $this->overlay($config[$key], $value);
 
             // extend with seq value if not exist
             // one to many add rule
@@ -88,7 +107,6 @@ class Normalizer
 
             // override or set
             // one to one add rule
-            } else
-                $config[$key] = $value;
+            } else $config[$key] = $value;
     }
 }

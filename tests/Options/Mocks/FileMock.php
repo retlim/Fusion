@@ -29,7 +29,9 @@ use Valvoid\Fusion\Wrappers\File;
 class FileMock extends File
 {
     public Closure $get;
+    public Closure $put;
     public Closure $is;
+    public Closure $exists;
 
     public function get(string $file): string|false
     {
@@ -39,5 +41,15 @@ class FileMock extends File
     public function is(string $file): bool
     {
         return call_user_func($this->is, $file);
+    }
+
+    public function exists(string $file): bool
+    {
+        return call_user_func($this->exists, $file);
+    }
+
+    public function put(string $file, mixed $data): int|false
+    {
+        return call_user_func($this->put, $file, $data);
     }
 }

@@ -19,10 +19,11 @@
 
 namespace Valvoid\Fusion\Config\Normalizer;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Config\Normalizer;
+use Valvoid\Fusion\Config\Proxy as ConfigProxy;
 use Valvoid\Fusion\Log\Events\Level;
 
 /**
@@ -34,60 +35,117 @@ use Valvoid\Fusion\Log\Events\Level;
 class Log
 {
     /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     * @param ConfigProxy $config Config.
+     * @param BusProxy $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly ConfigProxy $config,
+        private readonly BusProxy $bus) {}
+
+    /**
      * Normalizes the log config.
      *
      * @param array $config Config.
      */
-    public static function normalize(array &$config): void
+    public function normalize(array &$config): void
     {
-        if (!isset($config["log"]))
-            Bus::broadcast(new ConfigEvent(
-                "Missing \"log\" key.",
-                Level::ERROR
-            ));
-
-        foreach ($config["log"]["serializers"] as $id => &$entry) {
-            if (is_string($entry))
-                $entry = [
-                    "serializer" => $entry
+        foreach ($config["serializers"] as $key => &$value)
+            if (is_string($value))
+                $value = [
+                    "serializer" => $value
                 ];
 
-            // configured serializer
-            if (is_array($entry))
-                self::normalizeSerializerConfig($id, $entry);
-        }
+            // configured api or group
+            elseif (is_array($value))
+
+                // identifiable
+                if (isset($value["serializer"]))
+                    $this->normalizeSerializer(["log", "serializers", $key], $value);
+
+                // identifier in composite layer
+                // custom normalizer already validated in prev layer
+                // just pass settings
+                elseif ($serializer = $this->config->get("log", "serializers", $key, "serializer")) {
+                    $class = substr($serializer, 0,
+
+                            // namespace length
+                            strrpos($serializer, '\\')) . "\Config\Normalizer";
+
+                    // registered file and
+                    // implements interface
+                    if ($this->config->hasLazy($class)) {
+                        $normalizer = $this->box->get($class);
+
+                        if (!is_subclass_of($normalizer, Normalizer::class))
+                            $this->broadcastConfigEvent(
+                                "The auto-generated '$class' " .
+                                "derivation of the 'serializer' value, serializer config normalizer, " .
+                                "must be a string, name of a class that implements the '" .
+                                Normalizer::class . "' interface.",
+                                Level::ERROR,
+                                ["log", "serializers", $key]
+                            );
+
+                        $normalizer::normalize(
+                            ["log", "serializers", $key],
+                            $value
+                        );
+                    }
+                }
     }
 
     /**
      * Normalizes serializer config.
      *
-     * @param string $id Serializer ID.
-     * @param array $config Config.
+     * @param array $breadcrumb Index path inside the config.
+     * * @param array $config
      */
-    private static function normalizeSerializerConfig(string $id, array &$config): void
+    private function normalizeSerializer(array $breadcrumb, array &$config): void
     {
-        $normalizer = substr($config["serializer"], 0,
+        $class = substr($config["serializer"], 0,
 
                 // namespace length
                 strrpos($config["serializer"], '\\')) . "\Config\Normalizer";
 
-        // optional
-        // only registered
-        if (Config::hasLazy($normalizer)) {
-            if (!is_subclass_of($normalizer, Normalizer::class))
-                Bus::broadcast(new ConfigEvent(
-                    "The auto-generated \"$normalizer\" " .
-                    "derivation of the \"serializer\" value, serializer config normalizer, " .
-                    "must be a string, name of a class that implements the \"" .
-                    Normalizer::class . "\" interface.",
-                    Level::ERROR,
-                    ["log", "serializers", $id, "serializer"]
-                ));
+        // registered file and
+        // implements interface
+        if ($this->config->hasLazy($class)) {
+            $normalizer = $this->box->get($class);
 
-            $normalizer::normalize(
-                ["log", "serializers", $id],
-                $config
-            );
+            if (!is_subclass_of($normalizer, Normalizer::class))
+                $this->broadcastConfigEvent(
+                    "The auto-generated '$class' " .
+                    "derivation of the 'serializer' value, serializer config normalizer, " .
+                    "must be a string, name of a class that implements the '" .
+                    Normalizer::class . "' interface.",
+                    Level::ERROR,
+                    [...$breadcrumb, "serializer"]
+                );
+
+            $normalizer::normalize($breadcrumb, $config);
         }
+    }
+
+    /**
+     * Broadcasts config event.
+     *
+     * @param string $message
+     * @param Level $level
+     * @param array $breadcrumb
+     */
+    private function broadcastConfigEvent(string $message, Level $level,
+                                          array $breadcrumb = []): void
+    {
+        $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: $message,
+                level: $level,
+                breadcrumb: $breadcrumb,
+                abstract: []
+            ));
     }
 }

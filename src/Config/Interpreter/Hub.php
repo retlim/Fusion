@@ -19,13 +19,14 @@
 
 namespace Valvoid\Fusion\Config\Interpreter;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Config\Interpreter;
+use Valvoid\Fusion\Config\Proxy as ConfigProxy;
 use Valvoid\Fusion\Hub\APIs\Local\Local;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote;
 use Valvoid\Fusion\Log\Events\Level;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 
 /**
  * Hub config interpreter.
@@ -36,32 +37,44 @@ use Valvoid\Fusion\Log\Events\Level;
 class Hub
 {
     /**
+     * Constructs the interpreter.
+     *
+     * @param Box $box Dependency injection container.
+     * @param ConfigProxy $config Config.
+     * @param BusProxy $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly ConfigProxy $config,
+        private readonly BusProxy $bus) {}
+
+    /**
      * Interprets the hub config.
      *
      * @param mixed $entry Potential config.
      */
-    public static function interpret(mixed $entry): void
+    public function interpret(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new ConfigEvent(
-                "The value of the \"hub\" index must be an assoc array.",
+            $this->broadcastConfigEvent(
+                "The value of the 'hub' index must be an assoc array.",
                 Level::ERROR,
                 ["hub"]
-            ));
+            );
 
         foreach ($entry as $key => $value)
             match($key) {
-                "apis" => self::interpretApis($value),
-                default => Bus::broadcast(new ConfigEvent(
-                    "The unknown \"$key\" index must be " .
-                    "\"apis\" string.",
+                "apis" => $this->interpretApis($value),
+                default => $this->broadcastConfigEvent(
+                    "The unknown '$key' index must be " .
+                    "'apis' string.",
                     Level::ERROR,
                     ["hub", $key]
-                ))};
+                )};
     }
 
     /**
@@ -69,95 +82,48 @@ class Hub
      *
      * @param mixed $entry
      */
-    private static function interpretApis(mixed $entry): void
+    private function interpretApis(mixed $entry): void
     {
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new ConfigEvent(
-                "The value, apis group, of the \"apis\" " .
+            $this->broadcastConfigEvent(
+                "The value, apis group, of the 'apis' " .
                 "index must be an assoc array.",
                 Level::ERROR,
                 ["hub", "apis"]
-            ));
+            );
 
         foreach ($entry as $key => $value) {
             if (is_int($key) || !$key)
-                Bus::broadcast(new ConfigEvent(
-                    "The \"$key\" index, api id, must be a non-empty string.",
+                $this->broadcastConfigEvent(
+                    "The '$key' index, api id, must be a non-empty string.",
                     Level::ERROR,
                     ["hub", "apis", $key]
-                ));
+                );
 
             // configured api with/out type identifier
             if (is_array($value))
                 (isset($value["api"])) ?
-                    self::interpretApiConfig($key, $value) :
-                    self::interpretAnonymousApiConfig($key, $value);
+                    $this->interpretApiConfig($key, $value) :
+                    $this->interpretAnonymousApiConfig($key, $value);
 
             // default api
             // just class name without config
+            // nothing to interpret
             elseif (is_string($value))
-                self::interpretDefaultApi($key, $value);
+                continue;
 
             // overlay reset
             elseif ($value === null)
                 continue;
 
-            else
-                Bus::broadcast(new ConfigEvent(
-                    "The value, configured or default api, of the \"$key\" " .
-                    "index must be a non-empty array or string.",
-                    Level::ERROR,
-                    ["hub", "apis", $key]
-                ));
-        }
-    }
-
-    /**
-     * Interprets default api.
-     *
-     * @param string $id API id.
-     * @param string $entry Default api class to validate.
-     */
-    private static function interpretDefaultApi(string $id, string $entry): void
-    {
-        if (!Config::hasLazy($entry))
-            Bus::broadcast(new ConfigEvent(
-                "The value, default api identifier, of the \"$id\" index must " .
-                "be a registered loadable class. Remove this invalid entry from " .
-                "the config and execute \"inflate\" task to register custom " .
-                "lazy code.",
+            else $this->broadcastConfigEvent(
+                "The value, configured or default api, of the '$key' " .
+                "index must be a non-empty array or string.",
                 Level::ERROR,
-                ["hub", "apis", $id]
-            ));
-
-        if (!is_subclass_of($entry, Local::class) &&
-            !is_subclass_of($entry, Remote::class))
-            self::throwApiSubclassError(
-                ["hub", "apis", $id],
-                $id
-            );
-
-        $interpreter = self::getInterpreter($entry);
-
-        if (Config::hasLazy($interpreter)) {
-            if (!is_subclass_of($interpreter, Interpreter::class))
-                Bus::broadcast(new ConfigEvent(
-
-                // show auto-generated interpreter class
-                    "The auto-generated \"$interpreter\" namespace " .
-                    "derivation of the \"api\" value \"$entry\", api config interpreter, " .
-                    "must be a string, name of a class that implements the \"" .
-                    Interpreter::class . "\" interface.",
-                    Level::ERROR,
-                    ["hub", "apis", $id, "api"]
-                ));
-
-            $interpreter::interpret(
-                ["hub", "apis", $id],
-                $entry
+                ["hub", "apis", $key]
             );
         }
     }
@@ -168,37 +134,31 @@ class Hub
      * @param string $id API id.
      * @param array $entry Config.
      */
-    private static function interpretApiConfig(string $id, array $entry): void
+    private function interpretApiConfig(string $id, array $entry): void
     {
         $api = $entry["api"];
 
-        if (!Config::hasLazy($api))
-            self::throwUnregisteredApiError(
+        if (!$this->config->hasLazy($api))
+            $this->throwUnregisteredApiError(
                 ["hub", "apis", $id, "api"],
                 $id
             );
 
-        if (!is_subclass_of($api, Local::class) &&
-            !is_subclass_of($api, Remote::class))
-            self::throwApiSubclassError(
-                ["hub", "apis", $id, "api"],
-                $id
-            );
+        $class = $this->getInterpreter($api);
 
-        $interpreter = self::getInterpreter($api);
+        if ($this->config->hasLazy($class)) {
+            $interpreter = $this->box->get($class);
 
-        if (Config::hasLazy($interpreter)) {
             if (!is_subclass_of($interpreter, Interpreter::class))
-                Bus::broadcast(new ConfigEvent(
-
-                    // show auto-generated interpreter class
-                    "The auto-generated \"$interpreter\" namespace " .
-                    "derivation of the \"api\" value \"$api\", api config interpreter, " .
-                    "must be a string, name of a class that implements the \"" .
-                    Interpreter::class . "\" interface.",
+                $this->broadcastConfigEvent(
+                    "The auto-generated '$class' namespace " .
+                    "derivation of the 'api' value '$api', " .
+                    "api config interpreter, must be a string, name of " .
+                    "a class that implements the '" . Interpreter::class .
+                    "' interface.",
                     Level::ERROR,
                     ["hub", "apis", $id, "api"]
-                ));
+                );
 
             $interpreter::interpret(
                 ["hub", "apis", $id, "api"],
@@ -213,24 +173,27 @@ class Hub
      * @param string $id API id.
      * @param array $entry Config.
      */
-    private static function interpretAnonymousApiConfig(string $id, array $entry): void
+    private function interpretAnonymousApiConfig(string $id, array $entry): void
     {
-        $api = Config::get("hub", "apis", $id, "api");
+        $api = $this->config->get("hub", "apis", $id, "api");
 
         if (!$api)
-            self::throwApiSubclassError(
+            $this->throwApiSubclassError(
                 ["hub", "apis", $id],
                 $id
             );
 
         // validated by previous identified hub layer
-        $interpreter = self::getInterpreter($api);
+        $class = $this->getInterpreter($api);
 
-        if (Config::hasLazy($interpreter))
+        if ($this->config->hasLazy($class)) {
+            $interpreter = $this->box->get($class);
+
             $interpreter::interpret(
                 ["hub", "apis", $id],
                 $entry
             );
+        }
     }
 
     /**
@@ -239,7 +202,7 @@ class Hub
      * @param string $api API class name.
      * @return Interpreter::class Interpreter.
      */
-    private static function getInterpreter(string $api): string
+    private function getInterpreter(string $api): string
     {
         return substr($api, 0,
 
@@ -253,16 +216,16 @@ class Hub
      * @param array $breadcrumb Breadcrumb.
      * @param string $id API ID.
      */
-    private static function throwUnregisteredApiError(array $breadcrumb, string $id): void
+    private function throwUnregisteredApiError(array $breadcrumb, string $id): void
     {
-        Bus::broadcast(new ConfigEvent(
-            "The value, default api identifier, of the \"$id\" index must " .
+        $this->broadcastConfigEvent(
+            "The value, default api identifier, of the '$id' index must " .
             "be a registered loadable class. Remove this invalid entry from " .
-            "the config and execute \"inflate\" task to register custom " .
+            "the config and execute 'inflate' task to register custom " .
             "lazy code.",
             Level::ERROR,
             $breadcrumb
-        ));
+        );
     }
 
     /**
@@ -271,15 +234,34 @@ class Hub
      * @param array $breadcrumb Breadcrumb.
      * @param string $id API ID.
      */
-    private static function throwApiSubclassError(array $breadcrumb, string $id): void
+    private function throwApiSubclassError(array $breadcrumb, string $id): void
     {
-        Bus::broadcast(new ConfigEvent(
-            "The value, configured API config, of the \"$id\" " .
-            "index must have the \"api\" index with a string value, name of " .
-            "a class that implements the \"" . Local::class . "\" or \"" .
-            Remote::class . "\" class.",
+        $this->broadcastConfigEvent(
+            "The value, configured API config, of the '$id' " .
+            "index must have the 'api' index with a string value, name of " .
+            "a class that implements the '" . Local::class . "' or '" .
+            Remote::class . "' class.",
             Level::ERROR,
             $breadcrumb
-        ));
+        );
+    }
+
+    /**
+     * Broadcasts config event.
+     *
+     * @param string $message
+     * @param Level $level
+     * @param array $breadcrumb
+     */
+    private function broadcastConfigEvent(string $message, Level $level,
+                                          array $breadcrumb = []): void
+    {
+        $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: $message,
+                level: $level,
+                breadcrumb: $breadcrumb,
+                abstract: []
+            ));
     }
 }

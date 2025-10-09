@@ -47,7 +47,8 @@ class Config implements Event
      * @param string $message Message.
      */
     public function __construct(string $message, Level $level,
-                                array $breadcrumb = [], array $abstract = [])
+                                array $breadcrumb = [],
+                                array $abstract = [])
     {
         $this->message = $message;
         $this->level = $level;

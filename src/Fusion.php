@@ -22,7 +22,6 @@ namespace Valvoid\Fusion;
 use Exception;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Bus\Events\Boot;
 use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Bus\Logic as BusLogic;
 use Valvoid\Fusion\Bus\Proxy as BusProxy;
@@ -38,7 +37,6 @@ use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Errors\Metadata as MetadataError;
 use Valvoid\Fusion\Log\Events\Event as LogEvent;
-use Valvoid\Fusion\Log\Events\Infos\Id;
 use Valvoid\Fusion\Log\Events\Infos\Name;
 use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Log\Logic as LogLogic;
@@ -100,16 +98,13 @@ class Fusion
             DirLogic::class,
             HubLogic::class);
 
-        // init sharable config instance
+        $bus = $box->get(BusLogic::class);
         $config = $box->get(ConfigLogic::class,
             root: $this->root,
             lazy: $this->lazy,
             config: $config);
 
-        $bus = $box->get(BusLogic::class);
-
-        // trigger lazy config build due to self reference
-        $bus->broadcast(new Boot);
+        $config->load();
         $bus->addReceiver(self::class, $this->handleBusEvent(...),
 
             // keep session active if
@@ -203,7 +198,6 @@ class Fusion
                     "Task id \"$id\" does not exist."
                 );
 
-            $log->info(new Id($id));
             $fusion->normalize();
 
             /** @var Task $task */

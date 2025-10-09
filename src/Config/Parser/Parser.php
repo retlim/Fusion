@@ -19,6 +19,8 @@
 
 namespace Valvoid\Fusion\Config\Parser;
 
+use Valvoid\Fusion\Box\Box;
+
 /**
  * Config parser.
  *
@@ -28,17 +30,30 @@ namespace Valvoid\Fusion\Config\Parser;
 class Parser
 {
     /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     */
+    public function __construct(private readonly Box $box) {}
+
+    /**
      * Parses the config.
      *
      * @param array $config Config to parse.
      */
-    public static function parse(array &$config): void
+    public function parse(array &$config): void
     {
         foreach ($config as $key => &$value)
             match($key) {
-                "tasks" => Tasks::parse($value),
-                "log" => Log::parse($value),
-                "hub" => Hub::parse($value),
+                "tasks" => $this->box->get(Tasks::class)
+                    ->parse($value),
+
+                "log" => $this->box->get(Log::class)
+                    ->parse($value),
+
+                "hub" => $this->box->get(Hub::class)
+                    ->parse($value),
+
                 default => null
             };
     }

@@ -19,10 +19,11 @@
 
 namespace Valvoid\Fusion\Config\Interpreter;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Config\Interpreter;
-use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Config\Proxy as ConfigProxy;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Log\Serializers\Files\File;
 use Valvoid\Fusion\Log\Serializers\Streams\Stream;
@@ -36,130 +37,94 @@ use Valvoid\Fusion\Log\Serializers\Streams\Stream;
 class Log
 {
     /**
+     * Constructs the interpreter.
+     *
+     * @param Box $box Dependency injection container.
+     * @param ConfigProxy $config Config.
+     * @param BusProxy $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly ConfigProxy $config,
+        private readonly BusProxy $bus) {}
+
+    /**
      * Interprets the log config.
      *
      * @param mixed $entry Potential config.
      */
-    public static function interpret(mixed $entry): void
+    public function interpret(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new ConfigEvent(
-                "The value of the \"log\" index must be an assoc array.",
+            $this->broadcastConfigEvent(
+                "The value of the 'log' index must be an assoc array.",
                 Level::ERROR,
                 ["log"]
-            ));
+            );
 
         foreach ($entry as $key => $value)
             match($key) {
-                "serializers" => self::interpretSerializers($value),
-                default => Bus::broadcast(new ConfigEvent(
-                    "The unknown \"$key\" index must be " .
-                    "\"serializers\" string.",
+                "serializers" => $this->interpretSerializers($value),
+                default => $this->broadcastConfigEvent(
+                    "The unknown '$key' index must be " .
+                    "'serializers' string.",
                     Level::ERROR,
                     ["log", $key]
-                ))
+                )
             };
     }
 
     /**
-     * Interprets hub serializers.
+     * Interprets log serializers.
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretSerializers(mixed $entry): void
+    private function interpretSerializers(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new ConfigEvent(
-                "The value, serializers group, of the \"serializers\" " .
+            $this->broadcastConfigEvent(
+                "The value, serializers group, of the 'serializers' " .
                 "index must be an assoc array.",
                 Level::ERROR,
                 ["log", "serializers"]
-            ));
+            );
 
         foreach ($entry as $key => $value) {
             if (is_int($key) || !$key)
-                Bus::broadcast(new ConfigEvent(
-                    "The \"$key\" index, serializer id, must be a non-empty string.",
+                $this->broadcastConfigEvent(
+                    "The '$key' index, serializer id, must be a non-empty string.",
                     Level::ERROR,
                     ["log", "serializers", $key]
-                ));
+                );
 
             // configured serializer with/out type identifier
             if (is_array($value))
                 (isset($value["serializer"])) ?
-                    self::interpretSerializerConfig($key, $value) :
-                    self::interpretAnonymousSerializerConfig($key, $value);
+                    $this->interpretSerializerConfig($key, $value) :
+                    $this->interpretAnonymousSerializerConfig($key, $value);
 
             // default serializer
             // just class name without config
             elseif (is_string($value))
-                self::interpretDefaultSerializer($key, $value);
+                continue;
 
             // overlay reset
             elseif ($value === null)
                 continue;
 
-            else
-                Bus::broadcast(new ConfigEvent(
-                    "The value, configured or default serializer, of the \"$key\" " .
-                    "index must be a non-empty array or string.",
-                    Level::ERROR,
-                    ["log", "serializers", $key]
-                ));
-        }
-    }
-
-    /**
-     * Interprets default serializer.
-     *
-     * @param string $id Serializer id.
-     * @param string $entry Default serializer class to validate.
-     */
-    private static function interpretDefaultSerializer(string $id, string $entry): void
-    {
-        if (!Config::hasLazy($entry))
-            Bus::broadcast(new ConfigEvent(
-                "The value, default serializer identifier, of the \"$id\" index must " .
-                "be a registered loadable class. Remove this invalid entry from " .
-                "the config and execute \"inflate\" task to register custom " .
-                "lazy code.",
+            else $this->broadcastConfigEvent(
+                "The value, configured or default serializer, of the '$key' " .
+                "index must be a non-empty array or string.",
                 Level::ERROR,
-                ["log", "serializers", $id]
-            ));
-
-        if (!is_subclass_of($entry, File::class) &&
-            !is_subclass_of($entry, Stream::class))
-            self::throwSerializerSubclassError(
-                ["log", "serializers", $id],
-                $id
-            );
-
-        $interpreter = self::getInterpreter($entry);
-
-        if (Config::hasLazy($interpreter)) {
-            if (!is_subclass_of($interpreter, Interpreter::class))
-                Bus::broadcast(new ConfigEvent(
-
-                    // show auto-generated interpreter class
-                    "The auto-generated \"$interpreter\" namespace " .
-                    "derivation of the \"serializer\" value \"$entry\", serializer config interpreter, " .
-                    "must be a string, name of a class that implements the \"" .
-                    Interpreter::class . "\" interface.",
-                    Level::ERROR,
-                    ["log", "serializers", $id, "serializer"]
-                ));
-
-            $interpreter::interpret(
-                ["log", "serializers", $id],
-                $entry
+                ["log", "serializers", $key]
             );
         }
     }
@@ -170,37 +135,31 @@ class Log
      * @param string $id Serializer id.
      * @param array $entry Config.
      */
-    private static function interpretSerializerConfig(string $id, array $entry): void
+    private function interpretSerializerConfig(string $id, array $entry): void
     {
         $serializer = $entry["serializer"];
 
-        if (!Config::hasLazy($serializer))
-            self::throwUnregisteredSerializerError(
+        if (!$this->config->hasLazy($serializer))
+            $this->throwUnregisteredSerializerError(
                 ["log", "serializers", $id, "serializer"],
                 $id
             );
 
-        if (!is_subclass_of($serializer, File::class) &&
-            !is_subclass_of($serializer, Stream::class))
-            self::throwSerializerSubclassError(
-                ["log", "serializers", $id, "serializer"],
-                $id
-            );
+        $class = $this->getInterpreter($serializer);
 
-        $interpreter = self::getInterpreter($serializer);
+        if ($this->config->hasLazy($class)) {
+            $interpreter = $this->box->get($class);
 
-        if (Config::hasLazy($interpreter)) {
             if (!is_subclass_of($interpreter, Interpreter::class))
-                Bus::broadcast(new ConfigEvent(
-
-                    // show auto-generated interpreter class
-                    "The auto-generated \"$interpreter\" namespace " .
-                    "derivation of the \"serializer\" value \"$serializer\", serializer config interpreter, " .
-                    "must be a string, name of a class that implements the \"" .
-                    Interpreter::class . "\" interface.",
+                $this->broadcastConfigEvent(
+                    "The auto-generated '$class' namespace " .
+                    "derivation of the 'serializer' value '$serializer', " .
+                    "serializer config interpreter, " .
+                    "must be a string, name of a class that implements the '" .
+                    Interpreter::class . "' interface.",
                     Level::ERROR,
                     ["log", "serializers", $id, "serializer"]
-                ));
+                );
 
             $interpreter::interpret(
                 ["log", "serializers", $id, "serializer"],
@@ -215,24 +174,27 @@ class Log
      * @param string $id Serializer id.
      * @param array $entry Config.
      */
-    private static function interpretAnonymousSerializerConfig(string $id, array $entry): void
+    private function interpretAnonymousSerializerConfig(string $id, array $entry): void
     {
-        $serializer = Config::get("log", "serializers", $id, "serializer");
+        $serializer = $this->config->get("log", "serializers", $id, "serializer");
 
         if (!$serializer)
-            self::throwSerializerSubclassError(
+            $this->throwSerializerSubclassError(
                 ["log", "serializers", $id],
                 $id
             );
 
         // validated by previous identified hub layer
-        $interpreter = self::getInterpreter($serializer);
+        $class = $this->getInterpreter($serializer);
 
-        if (Config::hasLazy($interpreter))
+        if ($this->config->hasLazy($class)) {
+            $interpreter = $this->box->get($class);
+
             $interpreter::interpret(
                 ["log", "serializers", $id],
                 $entry
             );
+        }
     }
 
     /**
@@ -241,7 +203,7 @@ class Log
      * @param string $serializer Serializer class name.
      * @return Interpreter::class Interpreter.
      */
-    private static function getInterpreter(string $serializer): string
+    private function getInterpreter(string $serializer): string
     {
         return substr($serializer, 0,
 
@@ -255,16 +217,16 @@ class Log
      * @param array $breadcrumb Breadcrumb.
      * @param string $id Serializer ID.
      */
-    private static function throwUnregisteredSerializerError(array $breadcrumb, string $id): void
+    private function throwUnregisteredSerializerError(array $breadcrumb, string $id): void
     {
-        Bus::broadcast(new ConfigEvent(
-            "The value, default serializer identifier, of the \"$id\" index must " .
+        $this->broadcastConfigEvent(
+            "The value, default serializer identifier, of the '$id' index must " .
             "be a registered loadable class. Remove this invalid entry from " .
-            "the config and execute \"inflate\" task to register custom " .
+            "the config and execute 'inflate' task to register custom " .
             "lazy code.",
             Level::ERROR,
             $breadcrumb
-        ));
+        );
     }
 
     /**
@@ -273,15 +235,34 @@ class Log
      * @param array $breadcrumb Breadcrumb.
      * @param string $id Serializer ID.
      */
-    private static function throwSerializerSubclassError(array $breadcrumb, string $id): void
+    private function throwSerializerSubclassError(array $breadcrumb, string $id): void
     {
-        Bus::broadcast(new ConfigEvent(
-            "The value, configured serializer config, of the \"$id\" " .
-            "index must have the \"serializer\" index with a string value, name of " .
-            "a class that implements the \"" . File::class . "\", or \"" .
-            Stream::class . "\" class.",
+        $this->broadcastConfigEvent(
+            "The value, configured serializer config, of the '$id' " .
+            "index must have the 'serializer' index with a string value, name of " .
+            "a class that implements the '" . File::class . "', or '" .
+            Stream::class . "' class.",
             Level::ERROR,
             $breadcrumb
-        ));
+        );
+    }
+
+    /**
+     * Broadcasts config event.
+     *
+     * @param string $message
+     * @param Level $level
+     * @param array $breadcrumb
+     */
+    private function broadcastConfigEvent(string $message, Level $level,
+                                          array $breadcrumb = []): void
+    {
+        $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: $message,
+                level: $level,
+                breadcrumb: $breadcrumb,
+                abstract: []
+            ));
     }
 }

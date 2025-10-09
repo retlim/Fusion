@@ -19,9 +19,10 @@
 
 namespace Valvoid\Fusion\Config\Parser;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Config\Proxy as ConfigProxy;
 use Valvoid\Fusion\Config\Parser as ConfigParser;
 use Valvoid\Fusion\Log\Events\Level;
 
@@ -34,11 +35,23 @@ use Valvoid\Fusion\Log\Events\Level;
 class Hub
 {
     /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     * @param ConfigProxy $config Config.
+     * @param BusProxy $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly ConfigProxy $config,
+        private readonly BusProxy $bus) {}
+
+    /**
      * Parses the hub config.
      *
      * @param array $config Hub config to parse.
      */
-    public static function parse(array &$config): void
+    public function parse(array &$config): void
     {
         foreach ($config["apis"] as $key => &$value)
             if (is_string($value))
@@ -51,31 +64,31 @@ class Hub
 
                 // identifiable
                 if (isset($value["api"]))
-                    self::parseApi(["hub", "apis", $key], $value);
+                    $this->parseApi(["hub", "apis", $key], $value);
 
                 // identifier in composite layer
                 // custom parser already validated in prev layer
                 // just pass settings
-                elseif ($apiClassName = Config::get("hub", "apis", $key, "api")) {
-                    $parser = substr($apiClassName, 0,
+                elseif ($api = $this->config->get("hub", "apis", $key, "api")) {
+                    $class = substr($api, 0,
 
                             // namespace length
-                            strrpos($apiClassName, '\\')) . "\Config\Parser";
+                            strrpos($api, '\\')) . "\Config\Parser";
 
                     // registered file and
                     // implements interface
-                    if (Config::hasLazy($parser)) {
-                        if (!is_subclass_of($parser, ConfigParser::class))
-                            Bus::broadcast(new ConfigEvent(
+                    if ($this->config->hasLazy($class)) {
+                        $parser = $this->box->get($class);
 
-                                // show auto-generated parser class
-                                "The auto-generated \"$parser\" " .
-                                "derivation of the \"api\" value, api config parser, " .
-                                "must be a string, name of a class that implements the \"" .
-                                ConfigParser::class . "\" interface.",
+                        if (!is_subclass_of($parser, ConfigParser::class))
+                            $this->broadcastConfigEvent(
+                                "The auto-created '$class' " .
+                                "derivation of the 'api' value, api config parser, " .
+                                "must be a string, name of a class that implements the '" .
+                                ConfigParser::class . "' interface.",
                                 Level::ERROR,
                                 ["hub", "apis", $key]
-                            ));
+                            );
 
                         $parser::parse(
                             ["hub", "apis", $key],
@@ -91,29 +104,48 @@ class Hub
      * @param array $breadcrumb Index path inside the config.
      * @param array $config
      */
-    private static function parseApi(array $breadcrumb, array &$config): void
+    private function parseApi(array $breadcrumb, array &$config): void
     {
-        $parser = substr($config["api"], 0,
+        $class = substr($config["api"], 0,
 
                 // namespace length
                 strrpos($config["api"], '\\')) . "\Config\Parser";
 
-        // registered file and
+        // optional registered file and
         // implements interface
-        if (Config::hasLazy($parser)) {
-            if (!is_subclass_of($parser, ConfigParser::class))
-                Bus::broadcast(new ConfigEvent(
+        if ($this->config->hasLazy($class)) {
+            $parser = $this->box->get($class);
 
-                    // show auto-generated parser class
-                    "The auto-generated \"$parser\" " .
-                    "derivation of the \"api\" value, api config parser, " .
-                    "must be a string, name of a class that implements the \"" .
-                    ConfigParser::class . "\" interface.",
+            if (!is_subclass_of($parser, ConfigParser::class))
+                $this->broadcastConfigEvent(
+                    "The auto-created '$class' " .
+                    "derivation of the 'api' value, api config parser, " .
+                    "must be a string, name of a class that implements the '" .
+                    ConfigParser::class . "' interface.",
                     Level::ERROR,
                     [...$breadcrumb, "api"]
-                ));
+                );
 
             $parser::parse($breadcrumb, $config);
         }
+    }
+
+    /**
+     * Broadcasts config event.
+     *
+     * @param string $message
+     * @param Level $level
+     * @param array $breadcrumb
+     */
+    private function broadcastConfigEvent(string $message, Level $level,
+                                          array $breadcrumb = []): void
+    {
+        $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: $message,
+                level: $level,
+                breadcrumb: $breadcrumb,
+                abstract: []
+            ));
     }
 }

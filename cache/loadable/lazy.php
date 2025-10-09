@@ -4,7 +4,6 @@
 return [
 	'Valvoid\Fusion\Box\Box' => '/src/Box/Box.php',
 	'Valvoid\Fusion\Bus\Bus' => '/src/Bus/Bus.php',
-	'Valvoid\Fusion\Bus\Events\Boot' => '/src/Bus/Events/Boot.php',
 	'Valvoid\Fusion\Bus\Events\Cache' => '/src/Bus/Events/Cache.php',
 	'Valvoid\Fusion\Bus\Events\Config' => '/src/Bus/Events/Config.php',
 	'Valvoid\Fusion\Bus\Events\Event' => '/src/Bus/Events/Event.php',
@@ -155,6 +154,7 @@ return [
 	'Valvoid\Fusion\Metadata\Parser\Structure' => '/src/Metadata/Parser/Structure.php',
 	'Valvoid\Fusion\Options\Paths' => '/src/Options/Paths.php',
 	'Valvoid\Fusion\Options\Version' => '/src/Options/Version.php',
+	'Valvoid\Fusion\Settings\Config' => '/src/Settings/Config.php',
 	'Valvoid\Fusion\Tasks\Build\Build' => '/src/Tasks/Build/Build.php',
 	'Valvoid\Fusion\Tasks\Build\Config\Interpreter' => '/src/Tasks/Build/Config/Interpreter.php',
 	'Valvoid\Fusion\Tasks\Build\Config\Normalizer' => '/src/Tasks/Build/Config/Normalizer.php',

@@ -118,4 +118,15 @@ class Dir
     {
         return dirname($path, $levels);
     }
+
+    /**
+     * Gets the current working directory
+     *
+     * @return string|false the current working directory on
+     * success, or false on failure.
+     */
+    public function getCwd(): string|false
+    {
+        return getcwd();
+    }
 }

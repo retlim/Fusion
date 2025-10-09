@@ -19,10 +19,11 @@
 
 namespace Valvoid\Fusion\Config\Normalizer;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Config\Normalizer;
+use Valvoid\Fusion\Config\Proxy as ConfigProxy;
 use Valvoid\Fusion\Log\Events\Level;
 
 /**
@@ -34,60 +35,117 @@ use Valvoid\Fusion\Log\Events\Level;
 class Hub
 {
     /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     * @param ConfigProxy $config Config.
+     * @param BusProxy $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly ConfigProxy $config,
+        private readonly BusProxy $bus) {}
+
+    /**
      * Normalizes the hub config.
      *
      * @param array $config Config.
      */
-    public static function normalize(array &$config): void
+    public function normalize(array &$config): void
     {
-        if (!isset($config["hub"]))
-            Bus::broadcast(new ConfigEvent(
-                "Missing \"hub\" key.",
-                Level::ERROR
-            ));
-
-        foreach ($config["hub"]["apis"] as $id => &$entry) {
-            if (is_string($entry))
-                $entry = [
-                    "api" => $entry
+        foreach ($config["apis"] as $key => &$value)
+            if (is_string($value))
+                $value = [
+                    "api" => $value
                 ];
 
-            // configured api
-            if (is_array($entry))
-                self::normalizeApiConfig($id, $entry);
-        }
+            // configured api or group
+            elseif (is_array($value))
+
+                // identifiable
+                if (isset($value["api"]))
+                    $this->normalizeApi(["hub", "apis", $key], $value);
+
+                // identifier in composite layer
+                // custom normalizer already validated in prev layer
+                // just pass settings
+                elseif ($api = $this->config->get("hub", "apis", $key, "api")) {
+                    $class = substr($api, 0,
+
+                            // namespace length
+                            strrpos($api, '\\')) . "\Config\Normalizer";
+
+                    // registered file and
+                    // implements interface
+                    if ($this->config->hasLazy($class)) {
+                        $normalizer = $this->box->get($class);
+
+                        if (!is_subclass_of($normalizer, Normalizer::class))
+                            $this->broadcastConfigEvent(
+                                "The auto-created '$class' " .
+                                "derivation of the 'api' value, api config normalizer, " .
+                                "must be a string, name of a class that implements the '" .
+                                Normalizer::class . "' interface.",
+                                Level::ERROR,
+                                ["hub", "apis", $key]
+                            );
+
+                        $normalizer::normalize(
+                            ["hub", "apis", $key],
+                            $value
+                        );
+                    }
+                }
     }
 
     /**
      * Normalizes api config.
      *
-     * @param string $id API ID.
-     * @param array $config Config.
+     * @param array $breadcrumb Index path inside the config.
+     * * @param array $config
      */
-    private static function normalizeApiConfig(string $id, array &$config): void
+    private function normalizeApi(array $breadcrumb, array &$config): void
     {
-        $normalizer = substr($config["api"], 0,
+        $class = substr($config["api"], 0,
 
                 // namespace length
                 strrpos($config["api"], '\\')) . "\Config\Normalizer";
 
-        // optional
-        // only registered
-        if (Config::hasLazy($normalizer)) {
-            if (!is_subclass_of($normalizer, Normalizer::class))
-                Bus::broadcast(new ConfigEvent(
-                    "The auto-generated \"$normalizer\" " .
-                    "derivation of the \"api\" value, api config normalizer, " .
-                    "must be a string, name of a class that implements the \"" .
-                    Normalizer::class . "\" interface.",
-                    Level::ERROR,
-                    ["hub", "apis", $id, "hub"]
-                ));
+        // optional registered file and
+        // implements interface
+        if ($this->config->hasLazy($class)) {
+            $normalizer = $this->box->get($class);
 
-            $normalizer::normalize(
-                ["hub", "apis", $id],
-                $config
-            );
+            if (!is_subclass_of($normalizer, Normalizer::class))
+                $this->broadcastConfigEvent(
+                    "The auto-created '$class' " .
+                    "derivation of the 'api' value, api config normalizer, " .
+                    "must be a string, name of a class that implements the '" .
+                    Normalizer::class . "' interface.",
+                    Level::ERROR,
+                    [...$breadcrumb, "api"]
+                );
+
+            $normalizer::normalize($breadcrumb, $config);
         }
+    }
+
+    /**
+     * Broadcasts config event.
+     *
+     * @param string $message
+     * @param Level $level
+     * @param array $breadcrumb
+     */
+    private function broadcastConfigEvent(string $message, Level $level,
+                                          array $breadcrumb = []): void
+    {
+        $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: $message,
+                level: $level,
+                breadcrumb: $breadcrumb,
+                abstract: []
+            ));
     }
 }

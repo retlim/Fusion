@@ -19,8 +19,9 @@
 
 namespace Valvoid\Fusion\Config\Interpreter;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Log\Events\Level;
 
 /**
@@ -32,32 +33,42 @@ use Valvoid\Fusion\Log\Events\Level;
 class Persistence
 {
     /**
+     * Constructs the interpreter.
+     *
+     * @param Box $box Dependency injection container.
+     * @param BusProxy $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly BusProxy $bus) {}
+
+    /**
      * Interprets the persistence config.
      *
      * @param mixed $entry Potential config.
      */
-    public static function interpret(mixed $entry): void
+    public function interpret(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new ConfigEvent(
-                "The value of the \"persistence\" index must be an assoc array.",
+            $this->broadcastConfigEvent(
+                "The value of the 'persistence' index must be an assoc array.",
                 Level::ERROR,
                 ["persistence"]
-            ));
+            );
 
         foreach ($entry as $key => $value)
             match($key) {
-                "overlay" => self::interpretOverlay($value),
-                default => Bus::broadcast(new ConfigEvent(
-                    "The unknown \"$key\" index must be " .
-                    "\"overlay\" string.",
+                "overlay" => $this->interpretOverlay($value),
+                default => $this->broadcastConfigEvent(
+                    "The unknown '$key' index must be " .
+                    "'overlay' string.",
                     Level::ERROR,
                     ["persistence", $key]
-                ))
+                )
             };
     }
 
@@ -66,14 +77,33 @@ class Persistence
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretOverlay(mixed $entry): void
+    private function interpretOverlay(mixed $entry): void
     {
         if (!is_bool($entry))
-            Bus::broadcast(new ConfigEvent(
+            $this->broadcastConfigEvent(
                 "The value, overlay flag, of the index " .
-                "\"overlay\" must be a boolean.",
+                "'overlay' must be a boolean.",
                 Level::ERROR,
                 ["persistence", "overlay"]
+            );
+    }
+
+    /**
+     * Broadcasts config event.
+     *
+     * @param string $message
+     * @param Level $level
+     * @param array $breadcrumb
+     */
+    private function broadcastConfigEvent(string $message, Level $level,
+                                          array $breadcrumb = []): void
+    {
+        $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: $message,
+                level: $level,
+                breadcrumb: $breadcrumb,
+                abstract: []
             ));
     }
 }

@@ -19,11 +19,12 @@
 
 namespace Valvoid\Fusion\Tests\Config\Parser\Hub;
 
+use Throwable;
 use Valvoid\Fusion\Config\Parser\Hub;
-use Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks\ApiMock;
 use Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks\BoxMock;
-use Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks\Config\Parser;
+use Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks\ConfigMock;
+use Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks\ParserMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -33,91 +34,142 @@ use Valvoid\Fusion\Tests\Test;
 class HubTest extends Test
 {
     protected string|array $coverage = Hub::class;
+    private BoxMock $box;
 
     public function __construct()
     {
-        $config = new ConfigMock;
-        $box = new BoxMock;
+        $this->box = new BoxMock;
 
-        $config->get = 0;
-        $config->lazy = [];
-        $config->has = false;
-        $box->get = $config;
-
-        // test parseable api
         $this->testDefaultApiConfig();
         $this->testConfiguredApiConfig();
-
-        $config->has = true;
-
         $this->testConfiguredParsableApiConfig();
 
-        $box::unsetInstance();
+        $this->box::unsetInstance();
     }
 
     public function testDefaultApiConfig(): void
     {
-        $config = [
-            "apis" => [
+        try {
+            $hub = new Hub(
+                box: $this->box,
+                config: new ConfigMock,
+                bus: new BusMock
+            );
 
-                // default api
-                "test" => ApiMock::class
-            ]
-        ];
+            $config["apis"]["test"] = "#";
 
-        Hub::parse($config);
+            $hub->parse($config);
 
-        $assertion = [
-            "apis" => [
+            if ($config !== [
+                "apis" => [
+                    "test" => [
+                        "api" => "#"
+                    ]]])
+                $this->handleFailedTest();
 
-                // configured api
-                "test" => [
-                    "api" => ApiMock::class
-                ]
-            ]
-        ];
-
-        if ($config !== $assertion)
+        } catch (Throwable) {
             $this->handleFailedTest();
+        }
     }
 
     public function testConfiguredApiConfig(): void
     {
-        $config = [
-            "apis" => [
+        try {
+            $configuration = new ConfigMock;
+            $has = [];
+            $configuration->has = function($class) use (&$has) {
+                $has[] = $class;
 
-                // configured api
-                "test" => [
-                    "api" => ApiMock::class,
-                    "whatever"
+                return false;
+            };
+
+            $hub = new Hub(
+                box: $this->box,
+                config: $configuration,
+                bus: new BusMock
+            );
+
+            $config = [
+                "apis" => [
+                    "test" => [
+                        "api" => "#0\\#1\\#2",
+                        "whatever"
+                    ]
                 ]
-            ]
-        ];
+            ];
 
-        Hub::parse($config);
+            $hub->parse($config);
 
-        // no custom parser
-        if (class_exists(Parser::class, false))
+            // has no parser
+            if ($has != ["#0\\#1\\Config\\Parser"] ||
+                $config != [
+                    "apis" => [
+                        "test" => [
+                            "api" => "#0\\#1\\#2",
+                            "whatever"
+                        ]
+                    ]
+                ])
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
             $this->handleFailedTest();
+        }
     }
 
     public function testConfiguredParsableApiConfig(): void
     {
-        $config = [
-            "apis" => [
+        try {
+            $configuration = new ConfigMock;
+            $has =
+            $get = [];
+            $configuration->has = function($class) use (&$has) {
+                $has[] = $class;
 
-                // configured api
-                "test" => [
-                    "api" => ApiMock::class,
-                    "whatever"
+                return true;
+            };
+
+            $this->box->get = function ($class) use (&$get) {
+                $get[] = $class;
+
+                return new ParserMock;
+            };
+
+            $hub = new Hub(
+                box: $this->box,
+                config: $configuration,
+                bus: new BusMock
+            );
+
+            $config = [
+                "apis" => [
+                    "test" => [
+                        "api" => "#0\\#1\\#2",
+                        "whatever"
+                    ]
                 ]
-            ]
-        ];
+            ];
 
-        Hub::parse($config);
+            $hub->parse($config);
 
-        // passed to custom parser
-        if (!class_exists(Parser::class, false))
+            // has parser
+            if ($has != ["#0\\#1\\Config\\Parser"] ||
+                $get != ["#0\\#1\\Config\\Parser"] ||
+                $config != [
+                    "apis" => [
+                        "test" => [
+                            "breadcrumb" => ["hub", "apis", "test"],
+                            "config" => [
+                                "api" => "#0\\#1\\#2",
+                                "whatever"
+                            ]
+                        ]
+                    ]
+                ])
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
             $this->handleFailedTest();
+        }
     }
 }

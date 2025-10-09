@@ -19,8 +19,10 @@
 
 namespace Valvoid\Fusion\Tests\Config;
 
+use Throwable;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Tests\Config\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Config\Mocks\ConfigMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -36,22 +38,44 @@ class ConfigTest extends Test
     {
         $this->box = new BoxMock;
 
-        // static
         $this->testStaticInterface();
+
         $this->box::unsetInstance();
     }
 
     public function testStaticInterface(): void
     {
-        Config::get();
-        Config::getLazy();
-        Config::hasLazy("");
+        try {
+            $calls = [];
+            $config = new ConfigMock;
+            $config->get = function () use (&$calls) {
+                $calls[] = "get";
+                return false;
+            };
 
-        // static functions connected to same non-static functions
-        if ($this->box->config->calls !== [
-            "get",
-            "getLazy",
-            "hasLazy"])
+            $config->lazy = function () use (&$calls) {
+                $calls[] = "lazy";
+                return [];
+            };
+
+            $config->has = function () use (&$calls) {
+                $calls[] = "has";
+                return false;
+            };
+
+            $this->box->get = function () use ($config) {
+                return $config;
+            };
+
+            Config::get();
+            Config::getLazy();
+            Config::hasLazy("");
+
+            if ($calls !== ["get", "lazy", "has"])
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
             $this->handleFailedTest();
+        }
     }
 }

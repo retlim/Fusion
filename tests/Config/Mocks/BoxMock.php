@@ -19,9 +19,8 @@
 
 namespace Valvoid\Fusion\Tests\Config\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Logic;
-use Valvoid\Fusion\Config\Proxy;
 
 /**
  * @copyright Valvoid
@@ -29,32 +28,10 @@ use Valvoid\Fusion\Config\Proxy;
  */
 class BoxMock extends Box
 {
-    public $bus;
-    public $config;
+    public Closure $get;
 
     public function get(string $class, ...$args): object
     {
-        if ($class == Proxy::class)
-            return $this->config ??= new class implements Proxy
-            {
-                public $calls = [];
-
-                public function get(string ...$breadcrumb): mixed
-                {
-                    $this->calls[] = __FUNCTION__;
-                    return 0;
-                }
-                public function getLazy(): array {
-                    $this->calls[] = __FUNCTION__;
-                    return [];
-                }
-                public function hasLazy(string $class): bool
-                {$this->calls[] = __FUNCTION__;
-
-                    return false;
-                }
-            };
-
-        return $this->bus ??= new Logic;
+        return call_user_func($this->get, $class, ...$args);
     }
 }

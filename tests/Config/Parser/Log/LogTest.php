@@ -19,11 +19,12 @@
 
 namespace Valvoid\Fusion\Tests\Config\Parser\Log;
 
+use Throwable;
 use Valvoid\Fusion\Config\Parser\Log;
 use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\BoxMock;
-use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\Config\Parser;
+use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\ConfigMock;
-use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\SerializerMock;
+use Valvoid\Fusion\Tests\Config\Parser\Log\Mocks\ParserMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -33,92 +34,146 @@ use Valvoid\Fusion\Tests\Test;
 class LogTest extends Test
 {
     protected string|array $coverage = Log::class;
+    private BoxMock $box;
 
     public function __construct()
     {
-        $config = new ConfigMock;
-        $box = new BoxMock;
+        $this->box = new BoxMock;
 
-        $config->get = 0;
-        $config->lazy = [];
-        $config->has = false;
-        $box->get = $config;
-
-        // test parseable serializer
         $this->testDefaultSerializerConfig();
         $this->testConfiguredSerializerConfig();
-
-        $config->has = true;
-
         $this->testConfiguredParsableSerializerConfig();
 
-        $box::unsetInstance();
+        $this->box::unsetInstance();
     }
 
     public function testDefaultSerializerConfig(): void
     {
-        $config = [
-            "serializers" => [
+        try {
+            $log = new Log(
+                box: $this->box,
+                config: new ConfigMock,
+                bus: new BusMock
+            );
 
-                // default serializer
-                "test" => SerializerMock::class
-            ]
-        ];
+            $config["serializers"]["test"] = "#";
 
-        Log::parse($config);
+            $log->parse($config);
 
-        $assertion = [
-            "serializers" => [
-
-                // configured serializer
-                "test" => [
-                    "serializer" => SerializerMock::class
+            $assertion = [
+                "serializers" => [
+                    "test" => [
+                        "serializer" => "#"
+                    ]
                 ]
-            ]
-        ];
+            ];
 
-        if ($config !== $assertion)
+            if ($config !== $assertion)
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
             $this->handleFailedTest();
+        }
     }
 
     public function testConfiguredSerializerConfig(): void
     {
-        $config = [
-            "serializers" => [
+        try {
+            $configuration = new ConfigMock;
+            $has = [];
+            $configuration->has = function($class) use (&$has) {
+                $has[] = $class;
 
-                // configured serializer
-                "test" => [
-                    "serializer" => SerializerMock::class,
-                    "whatever"
+                return false;
+            };
+
+            $log = new Log(
+                box: $this->box,
+                config: $configuration,
+                bus: new BusMock
+            );
+
+            $config = [
+                "serializers" => [
+                    "test" => [
+                        "serializer" => "#0\\#1\\#2",
+                        "whatever"
+                    ]
                 ]
-            ]
-        ];
+            ];
 
-        Log::parse($config);
+            $log->parse($config);
 
-        // no custom parser
-        if (class_exists(Parser::class, false))
+            // has no parser
+            if ($has != ["#0\\#1\\Config\\Parser"] ||
+                $config != [
+                    "serializers" => [
+                        "test" => [
+                            "serializer" => "#0\\#1\\#2",
+                            "whatever"
+                        ]
+                    ]
+                ])
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
             $this->handleFailedTest();
+        }
     }
 
     public function testConfiguredParsableSerializerConfig(): void
     {
+        try {
+            $configuration = new ConfigMock;
+            $has =
+            $get = [];
+            $configuration->has = function($class) use (&$has) {
+                $has[] = $class;
 
-        $config = [
-            "serializers" => [
+                return true;
+            };
 
-                // configured serializer
-                "test" => [
-                    "serializer" => SerializerMock::class,
-                    "whatever"
+            $this->box->get = function ($class) use (&$get) {
+                $get[] = $class;
+
+                return new ParserMock;
+            };
+
+            $log = new Log(
+                box: $this->box,
+                config: $configuration,
+                bus: new BusMock
+            );
+
+            $config = [
+                "serializers" => [
+                    "test" => [
+                        "serializer" => "#0\\#1\\#2",
+                        "whatever"
+                    ]
                 ]
-            ]
-        ];
+            ];
 
-        Log::parse($config);
+            $log->parse($config);
 
-        // passed to custom parser
-        if (!class_exists(Parser::class, false))
+            // has parser
+            if ($has != ["#0\\#1\\Config\\Parser"] ||
+                $get != ["#0\\#1\\Config\\Parser"] ||
+                $config != [
+                    "serializers" => [
+                        "test" => [
+                            "breadcrumb" => ["log", "serializers", "test"],
+                            "config" => [
+                                "serializer" => "#0\\#1\\#2",
+                                "whatever"
+                            ]
+                        ]
+                    ]
+                ])
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
             $this->handleFailedTest();
+        }
     }
 }

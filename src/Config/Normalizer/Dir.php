@@ -20,15 +20,16 @@
 namespace Valvoid\Fusion\Config\Normalizer;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Config\Parser\Dir as DirectoryParser;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Level;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Wrappers\System;
 use Valvoid\Fusion\Wrappers\Dir as DirWrapper;
 
 /**
- * Working directory config normalizer.
+ * Directories config normalizer.
  *
  * @copyright Valvoid
  * @license SPDX-License-Identifier: GPL-3.0-or-later
@@ -39,65 +40,72 @@ class Dir
      * Constructs the normalizer.
      *
      * @param Box $box Dependency injection container.
-     * @param DirWrapper $wrapper Wrapper for standard directory operations.
+     * @param DirWrapper $dir Wrapper for standard directory operations.
      * @param System $system Wrapper for standard system operations.
      */
     public function __construct(
         private readonly Box $box,
-        private readonly DirWrapper $wrapper,
+        private readonly DirWrapper $dir,
+        private readonly DirectoryParser $parser,
+        private readonly BusProxy $bus,
         private readonly System $system) {}
 
     /**
      * Normalizes the working directory config.
      *
      * @param array $config Config to normalize.
+     * @param string $identifier
+     * @throws Error
      */
-    public function normalize(array &$config): void
+    public function normalize(array &$config, string $identifier): void
     {
         $config["dir"]["creatable"] ??= true;
         $config["dir"]["clearable"] ??= false;
 
-        // automatic detection
-        if(!isset($config["dir"]["path"])) {
-            $cwd = getcwd();
+        if (!isset($config["dir"]["path"])) {
+            $cwd = $this->dir->getCwd();
 
-            // some unix variants
-            if (!$cwd)
-                Bus::broadcast(new ConfigEvent(
-                    "Can't set the default value for the \"path\" " .
-                    "key. Looks like not all parent directories have readable " .
-                    "or search mode set.",
-                    Level::ERROR,
-                    ["dir", "path"]
-                ));
+            if ($cwd === false)
+                $this->bus->broadcast(
+                    $this->box->get(ConfigEvent::class,
+                        message: "Can't set the default value for the 'path' " .
+                        "key. Looks like not all parent directories have readable " .
+                        "or search mode set.",
+                        level: Level::ERROR,
+                        breadcrumb: ["dir", "path"],
+                        abstract: []
+                    ));
 
-            $config["dir"]["path"] = DirectoryParser::getNonNestedPath($cwd) ??
-
-                // no parent
-                // take as it is
+            $config["dir"]["path"] = $this->parser->getRootPath($cwd) ??
                 $cwd;
         }
 
         $config["dir"]["path"] = str_replace('\\', '/',
             $config["dir"]["path"]);
 
-        if (PHP_OS_FAMILY == 'Windows') {
-            $localAppData = $this->system->getEnvVariable('LOCALAPPDATA')
-                ?: ($this->system->getEnvVariable('USERPROFILE') . '/AppData/Local');
+        if ($this->system->getOsFamily() == 'Windows') {
+            $localAppData = $this->system->getEnvVariable('LOCALAPPDATA') ?:
+                $this->system->getEnvVariable('USERPROFILE') . '/AppData/Local';
 
-            $config["cache"]["path"] = "$localAppData/Valvoid/Fusion/cache";
-            $config["config"]["path"] = "$localAppData/Valvoid/Fusion/config";
-            $config["state"]["path"] = "$localAppData/Valvoid/Fusion/state";
+            $identifier = ucwords($identifier, '/');
+            $config["cache"]["path"] = "$localAppData/$identifier/cache";
+            $config["config"]["path"] = "$localAppData/$identifier/config";
+            $config["state"]["path"] = "$localAppData/$identifier/state";
 
         } else {
             $home = $this->system->getEnvVariable('HOME');
-            $cache = $this->system->getEnvVariable('XDG_CACHE_HOME') ?: "$home/.cache";
-            $conf  = $this->system->getEnvVariable('XDG_CONFIG_HOME') ?: "$home/.config";
-            $state = $this->system->getEnvVariable('XDG_STATE_HOME') ?: "$home/.local/state";
+            $cache = $this->system->getEnvVariable('XDG_CACHE_HOME') ?:
+                "$home/.cache";
 
-            $config["cache"]["path"] = "$cache/valvoid/fusion";
-            $config["config"]["path"] = "$conf/valvoid/fusion";
-            $config["state"]["path"] = "$state/valvoid/fusion";
+            $configuration = $this->system->getEnvVariable('XDG_CONFIG_HOME') ?:
+                "$home/.config";
+
+            $state = $this->system->getEnvVariable('XDG_STATE_HOME') ?:
+                "$home/.local/state";
+
+            $config["cache"]["path"] = "$cache/$identifier";
+            $config["config"]["path"] = "$configuration/$identifier";
+            $config["state"]["path"] = "$state/$identifier";
         }
     }
 }

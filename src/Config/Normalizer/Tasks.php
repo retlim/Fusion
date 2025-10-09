@@ -19,10 +19,11 @@
 
 namespace Valvoid\Fusion\Config\Normalizer;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Config\Normalizer;
+use Valvoid\Fusion\Config\Proxy as ConfigProxy;
 use Valvoid\Fusion\Log\Events\Level;
 
 /**
@@ -34,33 +35,123 @@ use Valvoid\Fusion\Log\Events\Level;
 class Tasks
 {
     /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     * @param ConfigProxy $config Config.
+     * @param BusProxy $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly ConfigProxy $config,
+        private readonly BusProxy $bus) {}
+
+    /**
      * Normalizes the tasks config.
      *
      * @param array $config Config.
      */
-    public static function normalize(array &$config): void
+    public function normalize(array &$config): void
     {
-        if (!isset($config["tasks"]))
-            Bus::broadcast(new ConfigEvent(
-                "Missing \"tasks\" key.",
-                Level::ERROR
-            ));
+        foreach ($config as $key => &$value)
+            if (is_string($value))
+                $value = [
+                    "task" => $value
+                ];
 
-        // normalize tasks
-        foreach ($config["tasks"] as $key => &$entry)
-            if (is_array($entry))
+            // configured task or group
+            elseif (is_array($value))
 
-                // configured task
-                if (isset($entry["task"]))
-                    self::normalizeTask(["tasks", $key], $entry);
+                // identifiable
+                if (isset($value["task"]))
+                    $this->normalizeTask(["tasks", $key], $value);
 
-                // group
-                else
-                    foreach ($entry as $taskId => &$task)
+                // identifier in composite layer
+                // custom normalizer already validated in prev layer
+                // just pass settings
+                elseif ($task = $this->config->get("tasks", $key, "task")) {
+                    $class = substr($task, 0,
 
-                        // configured task
-                        if (isset($task["task"]))
-                            self::normalizeTask(["tasks", $key, $taskId], $task);
+                            // namespace length
+                            strrpos($task, '\\')) . "\Config\Normalizer";
+
+                    // registered file and
+                    // implements interface
+                    if ($this->config->hasLazy($class)) {
+                        $normalizer = $this->box->get($class);
+
+                        if (!is_subclass_of($normalizer, Normalizer::class))
+                            $this->broadcastConfigEvent(
+                                "The auto-generated '$class' " .
+                                "derivation of the 'task' value, task config normalizer, " .
+                                "must be a string, name of a class that implements the '" .
+                                Normalizer::class . "' interface.",
+                                Level::ERROR,
+                                ["tasks", $key]
+                            );
+
+                        $normalizer::normalize(
+                            ["tasks", $key],
+                            $value
+                        );
+                    }
+
+                // task group
+                } else $this->normalizerGroup($key, $value);
+    }
+
+    /**
+     * Normalizes task group.
+     *
+     * @param string $groupId Group id.
+     * @param array $config Settings.
+     */
+    private function normalizerGroup(string $groupId, array &$config): void
+    {
+        foreach ($config as $taskId => &$task)
+
+            // configured task
+            if (is_array($task)) {
+                $breadcrumb = ["tasks", $groupId, $taskId];
+
+                // identifiable
+                if (isset($task["task"])) {
+                    $this->normalizeTask($breadcrumb, $task);
+
+                    // identifier in composite layer
+                } else {
+                    $task["task"] = $this->config->get(...[...$breadcrumb, "task"]);
+
+                    // custom normalizer already validated in prev layer
+                    // just pass settings
+                    $class = substr($task["task"], 0,
+
+                            // namespace length
+                            strrpos($task["task"], '\\')) . "\Config\Normalizer";
+
+                    // registered file and
+                    // implements interface
+                    if ($this->config->hasLazy($class)) {
+                        $normalizer = $this->box->get($class);
+
+                        if (!is_subclass_of($normalizer, Normalizer::class))
+                            $this->broadcastConfigEvent(
+                                "The auto-generated '$class' " .
+                                "derivation of the 'task' value, task config normalizer, " .
+                                "must be a string, name of a class that implements the '" .
+                                Normalizer::class . "' interface.",
+                                Level::ERROR,
+                                ["tasks", $groupId, $taskId]
+                            );
+
+                        $normalizer::normalize($breadcrumb, $task);
+                    }
+                }
+
+            } elseif(is_string($task))
+                $task = [
+                    "task" => $task
+                ];
     }
 
     /**
@@ -69,27 +160,48 @@ class Tasks
      * @param array $breadcrumb Breadcrumb.
      * @param array $config Config.
      */
-    public static function normalizeTask(array $breadcrumb, array &$config): void
+    private function normalizeTask(array $breadcrumb, array &$config): void
     {
-        $normalizer = substr($config["task"], 0,
+        $class = substr($config["task"], 0,
 
                 // namespace length
                 strrpos($config["task"], '\\')) . "\Config\Normalizer";
 
-        // optional
-        // only registered
-        if (Config::hasLazy($normalizer)) {
+        // registered file and
+        // implements interface
+        if ($this->config->hasLazy($class)) {
+            $normalizer = $this->box->get($class);
+
             if (!is_subclass_of($normalizer, Normalizer::class))
-                Bus::broadcast(new ConfigEvent(
-                    "The auto-generated \"$normalizer\" " .
-                    "derivation of the \"task\" value, task config normalizer, " .
-                    "must be a string, name of a class that implements the \"" .
-                    Normalizer::class . "\" interface.",
+                $this->broadcastConfigEvent(
+                    "The auto-generated '$class' " .
+                    "derivation of the 'task' value, task config normalizer, " .
+                    "must be a string, name of a class that implements the '" .
+                    Normalizer::class . "' interface.",
                     Level::ERROR,
                     [...$breadcrumb, "task"]
-                ));
+                );
 
             $normalizer::normalize($breadcrumb, $config);
         }
+    }
+
+    /**
+     * Broadcasts config event.
+     *
+     * @param string $message
+     * @param Level $level
+     * @param array $breadcrumb
+     */
+    private function broadcastConfigEvent(string $message, Level $level,
+                                          array $breadcrumb = []): void
+    {
+        $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: $message,
+                level: $level,
+                breadcrumb: $breadcrumb,
+                abstract: []
+            ));
     }
 }

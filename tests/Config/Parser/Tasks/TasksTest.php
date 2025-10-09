@@ -19,12 +19,12 @@
 
 namespace Valvoid\Fusion\Tests\Config\Parser\Tasks;
 
+use Throwable;
 use Valvoid\Fusion\Config\Parser\Tasks;
-use Valvoid\Fusion\Tasks\Inflate\Inflate;
 use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\BoxMock;
-use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\Config\Parser;
+use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\ConfigMock;
-use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\TaskMock;
+use Valvoid\Fusion\Tests\Config\Parser\Tasks\Mocks\ParserMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -34,82 +34,279 @@ use Valvoid\Fusion\Tests\Test;
 class TasksTest extends Test
 {
     protected string|array $coverage = Tasks::class;
+    private BoxMock $box;
 
     public function __construct()
     {
-        $config = new ConfigMock;
-        $box = new BoxMock;
+        $this->box = new BoxMock;
 
-        $config->get = 0;
-        $config->lazy = [];
-        $config->has = false;
-        $box->get = $config;
-
-        // test parseable task
         $this->testDefaultTaskConfig();
+        $this->testGroupedDefaultTaskConfig();
         $this->testConfiguredTaskConfig();
-
-        $config->has = true;
-
+        $this->testGroupedConfiguredTaskConfig();
         $this->testConfiguredParsableTaskConfig();
-        $box::unsetInstance();
+        $this->testGroupedConfiguredParsableTaskConfig();
+
+        $this->box::unsetInstance();
+    }
+
+    public function testGroupedDefaultTaskConfig(): void
+    {
+        try {
+            $configuration = new ConfigMock;
+            $get = [];
+            $configuration->get = function(...$breadcrumb) use (&$get) {
+                $get = [...$breadcrumb];
+
+                return false;
+            };
+            $tasks = new Tasks(
+                box: $this->box,
+                config: $configuration,
+                bus: new BusMock
+            );
+
+            $config["g"]["test"] = "#";
+
+            $tasks->parse($config);
+
+            if ($get != ["tasks", "g", "task"] ||
+                $config !== [
+                    "g" => [
+                        "test" => [
+                            "task" => "#"
+                        ]]])
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
+            $this->handleFailedTest();
+        }
     }
 
     public function testDefaultTaskConfig(): void
     {
-        $config = [
+        try {
+            $tasks = new Tasks(
+                box: $this->box,
+                config: new ConfigMock,
+                bus: new BusMock
+            );
 
-            // default task
-            "test" => Inflate::class
-        ];
+            $config["test"] = "#";
 
-        Tasks::parse($config);
+            $tasks->parse($config);
 
-        $assertion = [
+            if ($config !== [
+                    "test" => [
+                        "task" => "#"
+                    ]])
+                $this->handleFailedTest();
 
-            // configured task
-            "test" => [
-                "task" => Inflate::class
-            ]
-        ];
-
-        if ($config != $assertion)
+        } catch (Throwable) {
             $this->handleFailedTest();
+        }
     }
 
     public function testConfiguredTaskConfig(): void
     {
-        $config = [
+        try {
+            $configuration = new ConfigMock;
+            $has = [];
+            $configuration->has = function($class) use (&$has) {
+                $has[] = $class;
 
-            // configured task
-            "test" => [
-                "task" => TaskMock::class,
-                "whatever"
-            ]
-        ];
+                return false;
+            };
 
-        Tasks::parse($config);
+            $tasks = new Tasks(
+                box: $this->box,
+                config: $configuration,
+                bus: new BusMock
+            );
 
-        // no custom parser
-        if (Parser::$config !== [])
+            $config = [
+                "test" => [
+                    "task" => "#0\\#1\\#2",
+                    "whatever"
+                ]
+            ];
+
+            $tasks->parse($config);
+
+            // has no parser
+            if ($has != ["#0\\#1\\Config\\Parser"] ||
+                $config != [
+                    "test" => [
+                        "task" => "#0\\#1\\#2",
+                        "whatever"
+                    ]
+                ])
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
             $this->handleFailedTest();
+        }
+    }
+
+    public function testGroupedConfiguredTaskConfig(): void
+    {
+        try {
+            $configuration = new ConfigMock;
+            $has =
+            $get = [];
+            $configuration->has = function($class) use (&$has) {
+                $has[] = $class;
+
+                return false;
+            };
+
+            $configuration->get = function(...$class) use (&$get) {
+                $get = $class;
+
+                return false;
+            };
+
+            $tasks = new Tasks(
+                box: $this->box,
+                config: $configuration,
+                bus: new BusMock
+            );
+
+            $config["g"] = [
+                "test" => [
+                    "task" => "#0\\#1\\#2",
+                    "whatever"
+                ]
+            ];
+
+            $tasks->parse($config);
+
+            // has no parser
+            if ($has != ["#0\\#1\\Config\\Parser"] ||
+                $get != ["tasks", "g", "task"] ||
+                $config != [
+                    "g" => ["test" => [
+                        "task" => "#0\\#1\\#2",
+                        "whatever"
+                    ]]
+                ])
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
+            $this->handleFailedTest();
+        }
+    }
+
+    public function testGroupedConfiguredParsableTaskConfig(): void
+    {
+        try {
+            $configuration = new ConfigMock;
+            $has =
+            $get =
+            $boxGet = [];
+            $configuration->has = function($class) use (&$has) {
+                $has[] = $class;
+
+                return true;
+            };
+
+            $configuration->get = function(...$breadcrumb) use (&$get) {
+                $get = [...$breadcrumb];
+
+                return false;
+            };
+            $this->box->get = function ($class) use (&$boxGet) {
+                $boxGet[] = $class;
+
+                return new ParserMock;
+            };
+
+            $tasks = new Tasks(
+                box: $this->box,
+                config: $configuration,
+                bus: new BusMock
+            );
+
+            $config["g"] = [
+                "test" => [
+                    "task" => "#0\\#1\\#2",
+                    "whatever"
+                ]
+            ];
+
+            $tasks->parse($config);
+
+            // has parser
+            if ($has != ["#0\\#1\\Config\\Parser"] ||
+                $get != ["tasks", "g", "task"] ||
+                $boxGet != ["#0\\#1\\Config\\Parser"] ||
+                $config != [
+                    "g" => [
+                        "test" => [
+                            "breadcrumb" => ["tasks", "g", "test"],
+                            "config" => [
+                                "task" => "#0\\#1\\#2",
+                                "whatever"
+                            ]
+                        ]
+                    ]
+                ])
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
+            $this->handleFailedTest();
+        }
     }
 
     public function testConfiguredParsableTaskConfig(): void
     {
-        $config = [
+        try {
+            $configuration = new ConfigMock;
+            $has =
+            $get = [];
+            $configuration->has = function($class) use (&$has) {
+                $has[] = $class;
 
-            // configured task
-            "test" => [
-                "task" => TaskMock::class,
-                "whatever"
-            ]
-        ];
+                return true;
+            };
 
-        Tasks::parse($config);
+            $this->box->get = function ($class) use (&$get) {
+                $get[] = $class;
 
-        // passed to custom parser
-        if (Parser::$config !== $config["test"])
+                return new ParserMock;
+            };
+
+            $tasks = new Tasks(
+                box: $this->box,
+                config: $configuration,
+                bus: new BusMock
+            );
+
+            $config = [
+                "test" => [
+                    "task" => "#0\\#1\\#2",
+                    "whatever"
+                ]
+            ];
+
+            $tasks->parse($config);
+
+            // has parser
+            if ($has != ["#0\\#1\\Config\\Parser"] ||
+                $get != ["#0\\#1\\Config\\Parser"] ||
+                $config != [
+                    "test" => [
+                        "breadcrumb" => ["tasks", "test"],
+                        "config" => [
+                            "task" => "#0\\#1\\#2",
+                            "whatever"
+                        ]
+                    ]
+                ])
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
             $this->handleFailedTest();
+        }
     }
 }

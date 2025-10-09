@@ -19,10 +19,11 @@
 
 namespace Valvoid\Fusion\Config\Parser;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Config\Parser as ConfigParser;
+use Valvoid\Fusion\Config\Proxy as ConfigProxy;
 use Valvoid\Fusion\Log\Events\Level;
 
 /**
@@ -34,11 +35,23 @@ use Valvoid\Fusion\Log\Events\Level;
 class Log
 {
     /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     * @param ConfigProxy $config Config.
+     * @param BusProxy $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly ConfigProxy $config,
+        private readonly BusProxy $bus) {}
+
+    /**
      * Parses the log config.
      *
      * @param array $config Log config to parse.
      */
-    public static function parse(array &$config): void
+    public function parse(array &$config): void
     {
         foreach ($config["serializers"] as $key => &$value)
             if (is_string($value))
@@ -51,31 +64,31 @@ class Log
 
                 // identifiable
                 if (isset($value["serializer"]))
-                    self::parseApi(["log", "serializers", $key], $value);
+                    $this->parseSerializer(["log", "serializers", $key], $value);
 
                 // identifier in composite layer
                 // custom parser already validated in prev layer
                 // just pass settings
-                elseif ($serializerClassName = Config::get("log", "serializers", $key, "serializer")) {
-                    $parser = substr($serializerClassName, 0,
+                elseif ($serializer = $this->config->get("log", "serializers", $key, "serializer")) {
+                    $class = substr($serializer, 0,
 
                             // namespace length
-                            strrpos($serializerClassName, '\\')) . "\Config\Parser";
+                            strrpos($serializer, '\\')) . "\Config\Parser";
 
                     // registered file and
                     // implements interface
-                    if (Config::hasLazy($parser)) {
-                        if (!is_subclass_of($parser, ConfigParser::class))
-                            Bus::broadcast(new ConfigEvent(
+                    if ($this->config->hasLazy($class)) {
+                        $parser = $this->box->get($class);
 
-                                // show auto-generated parser class
-                                "The auto-generated \"$parser\" " .
-                                "derivation of the \"serializer\" value, serializer config parser, " .
-                                "must be a string, name of a class that implements the \"" .
-                                ConfigParser::class . "\" interface.",
+                        if (!is_subclass_of($parser, ConfigParser::class))
+                            $this->broadcastConfigEvent(
+                                "The auto-generated '$class' " .
+                                "derivation of the 'serializer' value, serializer config parser, " .
+                                "must be a string, name of a class that implements the '" .
+                                ConfigParser::class . "' interface.",
                                 Level::ERROR,
                                 ["log", "serializers", $key]
-                            ));
+                            );
 
                         $parser::parse(
                             ["log", "serializers", $key],
@@ -91,29 +104,49 @@ class Log
      * @param array $breadcrumb Index path inside the config.
      * @param array $config
      */
-    private static function parseApi(array $breadcrumb, array &$config): void
+    private function parseSerializer(array $breadcrumb, array &$config): void
     {
-        $parser = substr($config["serializer"], 0,
+        $class = substr($config["serializer"], 0,
 
                 // namespace length
                 strrpos($config["serializer"], '\\')) . "\Config\Parser";
 
         // registered file and
         // implements interface
-        if (Config::hasLazy($parser)) {
-            if (!is_subclass_of($parser, ConfigParser::class))
-                Bus::broadcast(new ConfigEvent(
+        if ($this->config->hasLazy($class)) {
+            $parser = $this->box->get($class);
 
-                    // show auto-generated parser class
-                    "The auto-generated \"$parser\" " .
-                    "derivation of the \"serializer\" value, serializer config parser, " .
-                    "must be a string, name of a class that implements the \"" .
-                    ConfigParser::class . "\" interface.",
+            if (!is_subclass_of($parser, ConfigParser::class))
+                $this->broadcastConfigEvent(
+                    "The auto-generated '$class' " .
+                    "derivation of the 'serializer' value, serializer config parser, " .
+                    "must be a string, name of a class that implements the '" .
+                    ConfigParser::class . "' interface.",
                     Level::ERROR,
                     [...$breadcrumb, "serializer"]
-                ));
+                );
 
             $parser::parse($breadcrumb, $config);
         }
+    }
+
+
+    /**
+     * Broadcasts config event.
+     *
+     * @param string $message
+     * @param Level $level
+     * @param array $breadcrumb
+     */
+    private function broadcastConfigEvent(string $message, Level $level,
+                                          array $breadcrumb = []): void
+    {
+        $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: $message,
+                level: $level,
+                breadcrumb: $breadcrumb,
+                abstract: []
+            ));
     }
 }

@@ -19,6 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Config\Parser\Log\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Config\Proxy;
 
 /**
@@ -27,22 +28,22 @@ use Valvoid\Fusion\Config\Proxy;
  */
 class ConfigMock implements Proxy
 {
-    public mixed $get;
-    public array $lazy;
-    public bool $has;
+    public Closure $get;
+    public Closure $lazy;
+    public Closure $has;
 
     public function get(string ...$breadcrumb): mixed
     {
-        return $this->get;
+        return call_user_func($this->get, ...$breadcrumb);
     }
 
     public function getLazy(): array
     {
-        return $this->lazy;
+        return call_user_func($this->lazy);
     }
 
     public function hasLazy(string $class): bool
     {
-        return $this->has;
+        return call_user_func($this->has, $class);
     }
 }

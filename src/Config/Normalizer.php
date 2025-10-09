@@ -27,9 +27,6 @@ namespace Valvoid\Fusion\Config;
  */
 abstract class Normalizer
 {
-    /** Constructs the normalizer. */
-    protected function __construct() {}
-
     /**
      * Normalizes the config.
      *

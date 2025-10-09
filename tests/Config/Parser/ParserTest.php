@@ -19,10 +19,14 @@
 
 namespace Valvoid\Fusion\Tests\Config\Parser;
 
+use Throwable;
+use Valvoid\Fusion\Config\Parser\Hub;
+use Valvoid\Fusion\Config\Parser\Log;
 use Valvoid\Fusion\Config\Parser\Parser;
-use Valvoid\Fusion\Hub\APIs\Remote\Valvoid\Valvoid;
-use Valvoid\Fusion\Log\Serializers\Streams\Terminal\Terminal;
-use Valvoid\Fusion\Tasks\Inflate\Inflate;
+use Valvoid\Fusion\Tests\Config\Parser\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Config\Parser\Mocks\HubParserMock;
+use Valvoid\Fusion\Tests\Config\Parser\Mocks\LogParserMock;
+use Valvoid\Fusion\Tests\Config\Parser\Mocks\TasksParserMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -32,67 +36,63 @@ use Valvoid\Fusion\Tests\Test;
 class ParserTest extends Test
 {
     protected string|array $coverage = Parser::class;
+    private BoxMock $box;
 
     public function __construct()
     {
+        $this->box = new BoxMock;
+
         $this->testReference();
+
+        $this->box::unsetInstance();
     }
 
     public function testReference(): void
     {
-        $config = [
-            "tasks" => [
+        try {
+            $hub =  new HubParserMock;
+            $hub->parse = function (&$config) {
+                $config = 0;
+            };
 
-                // default task
-                "test" => Inflate::class
-            ],
-            "hub" => [
-                "apis" => [
+            $log = new LogParserMock;
+            $log->parse = function (&$config) {
+                $config = 1;
+            };
 
-                    // default api
-                    "test" => Valvoid::class
-                ]
-            ],
-            "log" => [
-                "serializers" => [
+            $tasks = new TasksParserMock;
+            $tasks->parse = function (&$config) {
+                $config = 2;
+            };
 
-                    // default serializer
-                    "test" => Terminal::class
-                ]
-            ]
-        ];
+            $this->box->get = function ($class) use ($hub, $log, $tasks) {
+                if ($class == Hub::class)
+                    return $hub;
 
-        Parser::parse($config);
+                if ($class == Log::class)
+                    return $log;
 
-        $assertion = [
-            "tasks" => [
+                return $tasks;
+            };
 
-                // configured task
-                "test" => [
-                    "task" => Inflate::class
-                ]
-            ],
-            "hub" => [
-                "apis" => [
+            $parser = new Parser($this->box);
+            $config = [
+                "tasks" => [],
+                "hub" => [],
+                "log" => []
+            ];
 
-                    // configured api
-                    "test" => [
-                        "api" => Valvoid::class
-                    ]
-                ]
-            ],
-            "log" => [
-                "serializers" => [
+            $parser->parse($config);
 
-                    // configured serializer
-                    "test" => [
-                        "serializer" => Terminal::class
-                    ]
-                ]
-            ]
-        ];
+            if ($config != [
+                    "tasks" => 2,
+                    "hub" => 0,
+                    "log" => 1
 
-        if ($config !== $assertion)
+                ]) $this->handleFailedTest();
+
+        } catch (Throwable) {
             $this->handleFailedTest();
+        }
     }
 }

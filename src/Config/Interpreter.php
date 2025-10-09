@@ -27,9 +27,6 @@ namespace Valvoid\Fusion\Config;
  */
 abstract class Interpreter
 {
-    /** Constructs the interpreter. */
-    protected function __construct() {}
-
     /**
      * Interprets the config.
      *

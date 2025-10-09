@@ -20,11 +20,12 @@
 namespace Valvoid\Fusion\Tests\Config\Interpreter;
 
 use Exception;
-use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
+use Throwable;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Config\Interpreter\Interpreter;
-use Valvoid\Fusion\Tests\Config\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Config\Interpreter\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Config\Interpreter\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Config\Interpreter\Mocks\ConfigEventMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -34,84 +35,112 @@ use Valvoid\Fusion\Tests\Test;
 class InterpreterTest extends Test
 {
     protected string|array $coverage = Interpreter::class;
-
-    /** @var ?ConfigEvent last event */
-    private ?ConfigEvent $event = null;
-
-    /** @var bool  */
-    private bool $throwException = false;
+    private BoxMock $box;
 
     public function __construct()
     {
-        $boxMock = new BoxMock;
+        $this->box = new BoxMock;
 
         $this->testReset();
         $this->testInvalidType();
         $this->testInvalidKey();
 
-        $boxMock::unsetInstance();
+        $this->box::unsetInstance();
     }
 
     public function testReset(): void
     {
-        $this->event = null;
+        try {
+            $bus = new BusMock;
+            $interpreter = new Interpreter(
+                box: $this->box,
+                bus: $bus
+            );
 
-        Bus::addReceiver(self::class, $this->handleBusEvent(...), ConfigEvent::class);
-        Interpreter::interpret(null);
+            $interpreter->interpret(null);
 
-        // assert nothing
-        if ($this->event !== null)
+        } catch (Throwable) {
             $this->handleFailedTest();
-
-        Bus::removeReceiver(self::class);
+        }
     }
 
     public function testInvalidType(): void
     {
-        $this->event = null;
-        $this->throwException = true;
-
-        Bus::addReceiver(self::class, $this->handleBusEvent(...), ConfigEvent::class);
-
         try {
-            Interpreter::interpret(3455); // must be an array
+            $bus = new BusMock;
+            $interpreter = new Interpreter(
+                box: $this->box,
+                bus: $bus
+            );
 
-            $this->result = false;
+            $broadcast =
+            $event = [];
+            $this->box->get = function ($class, ...$args) use (&$event) {
+                $mock = new ConfigEventMock(...$args);
+                $event[] = $mock;
 
-        } catch (Exception) {
-            if ($this->event === null || $this->event->getLevel() !== Level::ERROR)
+                return $mock;
+            };
+
+            try {
+                $bus->broadcast = function ($event) use (&$broadcast) {
+                    $broadcast[] = $event;
+
+                    throw new Exception;
+                };
+
+                // must be an array
+                $interpreter->interpret(3455);
+
+            } catch (Exception) {}
+
+            if (sizeof($event) != 1 ||
+                $broadcast !== $event ||
+                $event[0]->level !== Level::ERROR)
                 $this->handleFailedTest();
+
+        } catch (Throwable) {
+            $this->handleFailedTest();
         }
-
-        $this->throwException = false;
-
-        Bus::removeReceiver(self::class);
     }
 
     public function testInvalidKey(): void
     {
-        $this->event = null;
+        try {
+            $bus = new BusMock;
+            $interpreter = new Interpreter(
+                box: $this->box,
+                bus: $bus
+            );
 
-        Bus::addReceiver(self::class, $this->handleBusEvent(...), ConfigEvent::class);
-        Interpreter::interpret(["key" => true]);
+            $broadcast =
+            $event = [];
+            $this->box->get = function ($class, ...$args) use (&$event) {
+                $mock = new ConfigEventMock(...$args);
+                $event[] = $mock;
 
-        if ($this->event === null || $this->event->getLevel() !== Level::ERROR)
+                return $mock;
+            };
+
+            try {
+                $bus->broadcast = function ($event) use (&$broadcast) {
+                    $broadcast[] = $event;
+
+                    throw new Exception;
+                };
+
+                // unknown key
+                $interpreter->interpret(["key" => true]);
+
+            } catch (Exception) {}
+
+            if (sizeof($event) != 1 ||
+                $broadcast !== $event ||
+                $event[0]->level !== Level::ERROR)
+                $this->handleFailedTest();
+
+        } catch (Throwable) {
             $this->handleFailedTest();
-
-        Bus::removeReceiver(self::class);
-    }
-
-    /**
-     * Handles bus event.
-     *
-     * @param ConfigEvent $event Root event.
-     * @throws Exception
-     */
-    private function handleBusEvent(ConfigEvent $event): void
-    {
-        $this->event = $event;
-
-        if ($this->throwException)
-            throw new Exception;
+        }
     }
 }

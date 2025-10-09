@@ -27,9 +27,6 @@ namespace Valvoid\Fusion\Config;
  */
 abstract class Parser
 {
-    /** Constructs the parser. */
-    protected function __construct() {}
-
     /**
      * Parses the config.
      *
