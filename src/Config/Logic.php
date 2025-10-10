@@ -58,11 +58,17 @@ class Logic implements Proxy
     private string $identifier;
 
     /**
+     * @var array Lazy code registry.
+     * @deprecated Will be removed in version 2.0.0
+     */
+    private array $lazy = [];
+
+    /**
      * Constructs the config.
      *
      * @param Box $box Dependency injection container.
      * @param string $root Package manager root directory.
-     * @param array $lazy Lazy code registry.
+     * @param array $prefixes Lazy code registry.
      * @param array $config Runtime config layer.
      * @param Dir $dir Wrapper for standard directory operations.
      * @param File $file Wrapper for standard file operations.
@@ -72,7 +78,7 @@ class Logic implements Proxy
     public function __construct(
         private readonly Box $box,
         private readonly string $root,
-        private readonly array $lazy,
+        private readonly array $prefixes,
         private readonly Dir $dir,
         private readonly File $file,
         private readonly DirectoryParser $dirParser,
@@ -121,16 +127,22 @@ class Logic implements Proxy
         // default variation
         // do not extract
         } else $this->identifier = "valvoid/fusion";
+
+        $lazy = "$this->root/cache/loadable/lazy.php";
+
+        if ($this->file->exists($lazy))
+            $this->lazy = $this->file->require($lazy);
     }
 
     /**
      * Loads config.
      *
+     * @param bool $overlay Load persisted layer indicator.
      * @throws ConfigError Invalid config exception.
      * @throws Error Invalid meta exception.
      * @throws Exception
      */
-    public function load(): void
+    public function load(bool $overlay): void
     {
         $config = $this->configs["runtime"];
 
@@ -152,7 +164,7 @@ class Logic implements Proxy
 
         $this->loadDefaultLayer();
 
-        if ($config["persistence"]["overlay"] ?? true)
+        if ($overlay)
             $this->loadPersistenceLayer($config["config"]["path"]);
 
         $this->layer = "runtime";

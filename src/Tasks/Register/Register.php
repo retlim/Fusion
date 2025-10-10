@@ -89,8 +89,7 @@ class Register extends Task
      */
     private function registerNewState(): void
     {
-        $this->log->info("register loadable, recyclable, 
-            and movable packages");
+        $this->log->info("register loadable, recyclable, and movable packages");
 
         $packages = $this->directory->getPackagesDir();
 

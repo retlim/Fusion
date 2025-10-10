@@ -117,7 +117,7 @@ class LogicTest extends Test
             $config = new Logic(
                 box: $this->box,
                 root: "/#", // root
-                lazy: [],
+                prefixes: [],
                 dir: $dir,
                 file: $file,
                 dirParser: $dirParser,
@@ -155,11 +155,11 @@ class LogicTest extends Test
                 if ($class == Normalizer::class) return $normalizer;
             };
 
-            $config->load();
+            $config->load(true);
 
             if ($id != ["valvoid/fusion"] ||
                 $path != ["/#"] ||
-                $exists != ["/#c/config.json"] ||
+                $exists != ["/#/cache/loadable/lazy.php", "/#c/config.json"] ||
                 $require != ["/#/cache/extensions.php"] ||
                 $include != ["/#/config/f0.php"] ||
                 $interpret != [
@@ -257,7 +257,7 @@ class LogicTest extends Test
             $config = new Logic(
                 box: $this->box,
                 root: "/#", // root
-                lazy: [],
+                prefixes: [],
                 dir: $dir,
                 file: $file,
                 dirParser: $dirParser,
@@ -295,11 +295,11 @@ class LogicTest extends Test
                 if ($class == Normalizer::class) return $normalizer;
             };
 
-            $config->load();
+            $config->load(true);
 
             if ($id != ["valvoid/fusion"] ||
                 $path != ["/#"] ||
-                $exists != ["/#c/config.json"] ||
+                $exists != ["/#/cache/loadable/lazy.php", "/#c/config.json"] ||
                 $require != ["/#/cache/extensions.php"] ||
                 $include != [
                     "/#/config/f0.php",
@@ -390,7 +390,7 @@ class LogicTest extends Test
             $config = new Logic(
                 box: $this->box,
                 root: "/#", // root
-                lazy: [],
+                prefixes: [],
                 dir: $dir,
                 file: $file,
                 dirParser: $dirParser,
@@ -428,11 +428,11 @@ class LogicTest extends Test
                 if ($class == Normalizer::class) return $normalizer;
             };
 
-            $config->load();
+            $config->load(true);
 
             if ($id != ["i0/i0"] ||
                 $path != ["/#"] ||
-                $exists != ["/#c/config.json"] ||
+                $exists != ["/#/cache/loadable/lazy.php", "/#c/config.json"] ||
                 $require != ["/#/cache/extensions.php"] ||
                 $include != ["/#/config/f0.php"] ||
                 $interpret != [
@@ -513,7 +513,7 @@ class LogicTest extends Test
             $config = new Logic(
                 box: $this->box,
                 root: "/#", // root
-                lazy: [],
+                prefixes: [],
                 dir: $dir,
                 file: $file,
                 dirParser: $dirParser,
@@ -551,7 +551,7 @@ class LogicTest extends Test
                 if ($class == Normalizer::class) return $normalizer;
             };
 
-            $config->load();
+            $config->load(true);
 
             if ($id != ["valvoid/fusion"] ||
                 $path != ["/#"] ||
@@ -629,7 +629,7 @@ class LogicTest extends Test
             $config = new Logic(
                 box: $this->box,
                 root: "/#", // root
-                lazy: [],
+                prefixes: [],
                 dir: $dir,
                 file: $file,
                 dirParser: $dirParser,
@@ -667,7 +667,7 @@ class LogicTest extends Test
                 if ($class == Normalizer::class) return $normalizer;
             };
 
-            $config->load();
+            $config->load(false);
 
             if ($id != ["valvoid/fusion"] ||
                 $path != ["/#"] ||

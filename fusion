@@ -128,13 +128,16 @@ try {
             "No config yet.");
 
     } else {
-        Fusion::init($arguments);
+        $fusion = (new Box)->get(Fusion::class,
 
-        // tasks are complex so
-        // internally Fusion uses own callback
+            // runtime config
+            config: $arguments);
+
+        // Fusion uses own callback
+        // tasks are complex and may result in code shifts
         spl_autoload_unregister(loadLazyCode(...));
 
-        if (Fusion::manage($command) === false) {
+        if ($fusion->execute($command) === false) {
             echo "\n\n";
             exit(1);
         }

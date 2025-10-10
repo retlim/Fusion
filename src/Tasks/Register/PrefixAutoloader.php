@@ -83,7 +83,7 @@ class PrefixAutoloader
             if (str_starts_with($loadable, $prefix)) {
                 $suffix = substr($loadable, strlen($prefix));
                 $suffix = str_replace('\\', '/', $suffix);
-                $file = $this->root . "$path/$suffix.php";
+                $file = $this->root . "$path$suffix.php";
 
                 if (is_file($file)) {
                     require $file;

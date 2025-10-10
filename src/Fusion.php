@@ -42,6 +42,8 @@ use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Log\Logic as LogLogic;
 use Valvoid\Fusion\Log\Proxy as LogProxy;
 use Valvoid\Fusion\Tasks\Task;
+use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Package manager for PHP-based projects.
@@ -51,36 +53,45 @@ use Valvoid\Fusion\Tasks\Task;
  */
 class Fusion
 {
-    /** @var ?Fusion Runtime instance. */
+    /**
+     * @var ?Fusion Runtime instance.
+     * @deprecated Will be removed in version 2.0.0.
+     */
     private static ?Fusion $instance = null;
 
     /** @var string Source root directory. */
     private string $root;
 
-    /** @var bool Lock indicator. */
+    /**
+     * @var bool Lock indicator.
+     * @deprecated Will be removed in version 2.0.0.
+     */
     private bool $busy = false;
 
-    /** @var array Lazy code registry. */
-    private array $lazy;
+    /** @var array Namespace prefixes to path. */
+    private array $prefixes;
 
     /**
      * Constructs the package manager.
      *
      * @param Box $box Dependency injection container.
+     * @param File $file Wrapper for standard file operations.
+     * @param Dir $dir Wrapper for standard directory operations.
      * @param array $config Runtime config layer.
      * @throws ConfigError Invalid config exception.
-     * @throws MetadataError Invalid metadata exception.
      * @throws InternalError Internal error.
      * @throws Exception Internal error.
      */
-    private function __construct(
+    public function __construct(
         private readonly Box $box,
+        private readonly File $file,
+        Dir $dir,
         array $config = [])
     {
-        $this->root = dirname(__DIR__);
-        $this->lazy = require "$this->root/cache/loadable/lazy.php";
+        spl_autoload_register($this->loadLazyCode(...),
 
-        spl_autoload_register($this->loadLazyLoadable(...));
+            // high priority
+            prepend: true);
 
         // set up proxies
         $box->map(BusLogic::class, BusProxy::class);
@@ -98,13 +109,27 @@ class Fusion
             DirLogic::class,
             HubLogic::class);
 
+        $this->root = $dir->getDirname(__DIR__);
+        $prefixes = "$this->root/cache/prefixes.php";
+        $overlay = $config["persistence"]["overlay"] ??
+            true;
+
+        if ($overlay && $file->is($prefixes))
+            $this->prefixes = $file->require($prefixes);
+
+        // fallback, raw
+        // to fix broken state for example
+        else $this->prefixes = [
+            __NAMESPACE__ => "/src"
+        ];
+
         $bus = $box->get(BusLogic::class);
         $config = $box->get(ConfigLogic::class,
             root: $this->root,
-            lazy: $this->lazy,
+            prefixes: $this->prefixes,
             config: $config);
 
-        $config->load();
+        $config->load($overlay);
         $bus->addReceiver(self::class, $this->handleBusEvent(...),
 
             // keep session active if
@@ -116,24 +141,11 @@ class Fusion
     }
 
     /**
-     * Initializes the package manager instance.
-     *
-     * @param array $config Runtime config layer.
-     * @return bool True for success. False for has destroyable instance.
-     * @throws ConfigError Invalid config exception.
-     * @throws MetadataError Invalid metadata exception.
-     * @throws InternalError Internal error.
+     * Destroys the package manager.
      */
-    public static function init(array $config = []): bool
+    public function __destruct()
     {
-        if (self::$instance !== null)
-            return false;
-
-        require_once __DIR__ . "/Box/Box.php";
-
-        self::$instance = new self(new Box, $config);
-
-        return true;
+        spl_autoload_unregister($this->loadLazyCode(...));
     }
 
     /**
@@ -141,13 +153,131 @@ class Fusion
      *
      * @param string $loadable Loadable.
      */
-    private function loadLazyLoadable(string $loadable): void
+    private function loadLazyCode(string $loadable): bool
     {
-        // registered
-        // hide unregistered warning
-        // show custom error
-        if (@$file = $this->lazy[$loadable])
-            require $this->root . $file;
+        foreach ($this->prefixes as $prefix => $path)
+            if (str_starts_with($loadable, $prefix)) {
+                $suffix = substr($loadable, strlen($prefix));
+                $suffix = str_replace('\\', '/', $suffix);
+                $file = $this->root . "$path$suffix.php";
+
+                if ($this->file->is($file)) {
+                    require $file;
+
+                    return true;
+                }
+            }
+
+        return false;
+    }
+
+    /**
+     * Executes a task or task group and manages any resulting
+     * project changes.
+     *
+     * @param string $id The ID of the task or task group to execute.
+     * @return bool True on success, false on failure.
+     * @throws Exception
+     */
+    public function execute(string $id): bool
+    {
+        $log = $this->box->get(LogLogic::class);
+
+        try {
+            $entry = $this->box->get(ConfigLogic::class)
+                ->get("tasks", $id) ??
+                    throw new InternalError(
+                        "Task id '$id' does not exist."
+                    );
+
+            // drop previous state ballast
+            $this->normalize();
+
+            /** @var Task $task */
+            if (isset($entry["task"])) {
+                $task = $this->box->get($entry["task"],
+                    config: $entry);
+
+                if (is_subclass_of($task, Interceptor::class)) {
+                    $log->addInterceptor($task);
+                    $task->execute();
+                    $log->removeInterceptor();
+
+                } else $task->execute();
+
+            } else {
+                foreach ($entry as $taskId => $task) {
+                    $log->info($this->box->get(Name::class,
+                        name: $taskId));
+
+                    $task = $this->box->get($task["task"],
+                        config: $task);
+
+                    if (is_subclass_of($task, Interceptor::class)) {
+                        $log->addInterceptor($task);
+                        $task->execute();
+                        $log->removeInterceptor();
+
+                    } else $task->execute();
+                }
+            }
+
+        } catch (LogEvent $error) {
+            $log->error($error);
+        }
+
+        return !isset($error);
+    }
+
+    /**
+     * Normalizes working directory.
+     *
+     * @throws InternalError Internal error.
+     * @throws Exception
+     */
+    private function normalize(): void
+    {
+        $dir = $this->box->get(DirLogic::class);
+
+        $dir->delete($dir->getStateDir());
+        $dir->delete($dir->getTaskDir());
+        $dir->delete($dir->getPackagesDir());
+        $dir->delete($dir->getOtherDir());
+    }
+
+    /**
+     * Handles bus event.
+     *
+     * @param Root $event Root event.
+     */
+    private function handleBusEvent(Root $event): void
+    {
+        $this->root = $event->getDir();
+    }
+
+    /**
+     * Initializes the package manager instance.
+     *
+     * @param array $config Runtime config layer.
+     * @return bool True for success. False for has destroyable instance.
+     * @throws ConfigError Invalid config exception.
+     * @throws MetadataError Invalid metadata exception.
+     * @throws InternalError Internal error.
+     * @deprecated Will be removed in version 2.0.0.
+     * Use {@see __construct} instead.
+     */
+    public static function init(array $config = []): bool
+    {
+        if (self::$instance !== null)
+            return false;
+
+        require_once __DIR__ . "/Box/Box.php";
+        require_once __DIR__ . "/Wrappers/File.php";
+        require_once __DIR__ . "/Wrappers/Dir.php";
+
+        self::$instance = new self(new Box, new File, new Dir, $config);
+
+        return true;
     }
 
     /**
@@ -155,6 +285,7 @@ class Fusion
      *
      * @return bool True for success.
      * @throws InternalError Internal error.
+     * @deprecated Will be removed in version 2.0.0.
      */
     public static function destroy(): bool
     {
@@ -181,6 +312,8 @@ class Fusion
      * @param string $id Callable task or group ID.
      * @throws Exception Destroyed object exception.
      * @return bool True for success.
+     * @deprecated Will be removed in version 2.0.0.
+     * Use {@see execute} instead.
      */
     public static function manage(string $id): bool
     {
@@ -238,31 +371,5 @@ class Fusion
         $fusion->busy = false;
 
         return !isset($error);
-    }
-
-    /**
-     * Normalizes working directory.
-     *
-     * @throws InternalError Internal error.
-     * @throws Exception
-     */
-    protected function normalize(): void
-    {
-        $dir = $this->box->get(DirLogic::class);
-
-        $dir->delete($dir->getStateDir());
-        $dir->delete($dir->getTaskDir());
-        $dir->delete($dir->getPackagesDir());
-        $dir->delete($dir->getOtherDir());
-    }
-
-    /**
-     * Handles bus event.
-     *
-     * @param Root $event Root event.
-     */
-    private function handleBusEvent(Root $event): void
-    {
-        $this->root = $event->getDir();
     }
 }
