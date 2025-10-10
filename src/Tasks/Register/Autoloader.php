@@ -18,10 +18,12 @@
  */
 
 /**
- * Autoloader to access lazy and ASAP package code.
+ * Autoloader for accessing lazy and ASAP package code.
  *
  * @copyright Valvoid
  * @license SPDX-License-Identifier: GPL-3.0-or-later
+ * @deprecated This legacy autoloader will be removed in version 2.0.0.
+ * Use "PrefixAutoloader.php" instead.
  */
 class Autoloader
 {

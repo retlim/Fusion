@@ -22,7 +22,6 @@ namespace Valvoid\Fusion\Tasks\Register;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Proxy as DirProxy;
 use Valvoid\Fusion\Group\Group as GroupProxy;
-use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Proxy as LogProxy;
@@ -39,6 +38,21 @@ use Valvoid\Fusion\Wrappers\File;
  */
 class Register extends Task
 {
+    /** @var array Namespace prefixes to path. */
+    private array $prefixes = [];
+
+    /** @var array ASAP script files. */
+    private array $asap = [];
+
+    /** @var array Individual package state dirs. */
+    private array $states = [];
+
+    /**
+     * @var array On demand code.
+     * @deprecated will be remove in version 2.0.0
+     */
+    private array $lazy = [];
+
     /**
      * Constructs the task.
      *
@@ -70,109 +84,168 @@ class Register extends Task
             $this->registerCurrentState();
     }
 
-    /** Register external new state. */
+    /**
+     * Register external new state.
+     */
     private function registerNewState(): void
     {
-        $this->log->info("register loadable, recyclable, and movable packages");
+        $this->log->info("register loadable, recyclable, 
+            and movable packages");
 
-        $packagesDir = $this->directory->getPackagesDir();
-        $lazy = $asap = [];
+        $packages = $this->directory->getPackagesDir();
 
-        foreach ($this->group->getExternalMetas() as $id => $meta)
-            if ($meta->getCategory() == ExternalMetaCategory::DOWNLOADABLE) {
+        foreach ($this->group->getExternalMetas() as $id => $metadata)
+            if ($metadata->getCategory() == ExternalMetaCategory::DOWNLOADABLE) {
                 $this->log->info(
                     $this->box->get(Content::class,
-                        content: $meta->getContent()));
+                        content: $metadata->getContent()));
 
-                $this->appendInflated($lazy, $asap,
+                $state = "$packages/$id" . $metadata->getStructureCache();
+                $this->states[$id] = $state;
 
-                    // absolute loadable direction
-                    // internal state
-                    "$packagesDir/$id" . $meta->getStructureCache() . "/loadable",
-
-                    // relative path
-                    $meta->getDir()
+                $this->collectInflatedCode(
+                    "$state/loadable",
+                    $metadata->getDir()
                 );
             }
 
-        foreach ($this->group->getInternalMetas() as $id => $meta)
-            if ($meta->getCategory() != InternalMetaCategory::OBSOLETE) {
+        foreach ($this->group->getInternalMetas() as $id => $metadata)
+            if ($metadata->getCategory() != InternalMetaCategory::OBSOLETE) {
                 $this->log->info(
                     $this->box->get(Content::class,
-                        content: $meta->getContent()));
+                        content: $metadata->getContent()));
 
-                $this->appendInflated($lazy, $asap,
+                $state = "$packages/$id" . $metadata->getStructureCache();
+                $this->states[$id] = $state;
 
-                    // absolute loadable direction
-                    // internal state
-                    "$packagesDir/$id" . $meta->getStructureCache() . "/loadable",
-
-                    // relative path
-                    $meta->getDir()
+                $this->collectInflatedCode(
+                    "$state/loadable",
+                    $metadata->getDir()
                 );
             }
 
-        $rootMeta = $this->group->getExternalRootMetadata() ??
+        $rootMetadata = $this->group->getExternalRootMetadata() ??
             $this->group->getInternalRootMetadata();
 
-        $path = $rootMeta->getStructureCache();
+        $path = $rootMetadata->getStructureCache();
 
-        $this->writeAutoloader($this->directory->getPackagesDir() . "/" .
-            $rootMeta->getId() . $path, $path, $asap, $lazy);
+        $this->writeAutoloader(
+            "$packages/" . $rootMetadata->getId() . $path,
+            $path
+        );
+
+        $this->writePrefixAutoloader(
+            "$packages/" . $rootMetadata->getId() . $path,
+            $path
+        );
+
+        $this->writePrefixes();
     }
 
-    /** Register internal state. */
+    /**
+     * Register internal state.
+     */
     private function registerCurrentState(): void
     {
         $this->log->info("register internal packages");
 
-        $lazy = $asap = [];
-
-        foreach ($this->group->getInternalMetas() as $meta) {
-            if ($meta->getCategory() == InternalMetaCategory::OBSOLETE)
+        foreach ($this->group->getInternalMetas() as $id => $metadata) {
+            if ($metadata->getCategory() == InternalMetaCategory::OBSOLETE)
                 continue;
 
             $this->log->info(
                 $this->box->get(Content::class,
-                    content: $meta->getContent()));
+                    content: $metadata->getContent()));
 
-            $this->appendInflated($lazy, $asap,
+            $state = $metadata->getSource() . $metadata->getStructureCache();
+            $this->states[$id] = $state;
 
-                // absolute loadable direction
-                // internal state
-                $meta->getSource() . $meta->getStructureCache() . "/loadable",
-
-                // relative path
-                $meta->getDir()
+            $this->collectInflatedCode(
+                "$state/loadable",
+                $metadata->getDir()
             );
         }
 
         $this->writeAutoloader($this->directory->getCacheDir(),
-
-            // cache path
-            $this->group->getInternalRootMetadata()->getStructureCache(),
-            $asap, $lazy
+            $this->group->getInternalRootMetadata()->getStructureCache()
         );
+
+        $this->writePrefixAutoloader(
+            $this->directory->getCacheDir(),
+            $this->group->getInternalRootMetadata()->getStructureCache()
+        );
+
+        $this->writePrefixes();
     }
 
     /**
-     * Requires inflated code.
-     *
-     * @param array $lazy Lazy.
-     * @param array $asap ASAP.
-     * @param string $dir Dir.
-     * @param string $path Path.
+     * Writes prefix to each package.
+     * @throws InternalError
      */
-    private function appendInflated(array  &$lazy, array &$asap, string $dir,
-                                    string $path): void
+    private function writePrefixes(): void
+    {
+        $content = "";
+
+        // parse to readable code
+        foreach ($this->prefixes as $prefix => $path)
+            $content .= "\n\t'$prefix' => '$path',";
+
+        foreach ($this->states as $dir)
+            if (false === $this->file->put(
+                "$dir/prefixes.php",
+                "<?php\n" .
+                "// Auto-generated by Fusion package manager.\n" .
+                "// Do not modify.\n" .
+                "return [$content\n];"))
+                throw new InternalError(
+                    "Cant write '$dir/prefixes.php'."
+                );
+    }
+
+    /**
+     * Collects injectable autoloader code.
+     *
+     * @param string $dir Inflated code.
+     * @param string $path Relative injection path.
+     */
+    private function collectInflatedCode(string $dir, string $path): void
     {
         $file = "$dir/lazy.php";
 
         if ($this->file->exists($file)) {
             $map = $this->file->require($file);
 
-            foreach ($map as $loadable => $file)
-                $lazy[$loadable] = $path . $file;
+            foreach ($map as $loadable => $file) {
+                $this->lazy[$loadable] = $path . $file;
+
+                // leading slash
+                // .php extension
+                $file = substr($file, 1);
+                $file = substr($file, 0, -4);
+                $file = explode('/', $file);
+                $file = array_reverse($file);
+
+                $loadable = explode("\\", $loadable);
+                $loadable = array_reverse($loadable);
+
+                foreach ($loadable as $i => $segment) {
+                    if (!isset($file[$i]) || $segment != $file[$i])
+                        break;
+
+                    unset($loadable[$i]);
+                    unset($file[$i]);
+                }
+
+                $loadable = array_reverse($loadable);
+                $loadable = implode('\\', $loadable);
+                $file = array_reverse($file);
+                $file = implode('/', $file);
+
+                // prevent trailing slash
+                $this->prefixes[$loadable] = ($file != "") ?
+                    "$path/$file" :
+                    $path;
+            }
         }
 
         $file = "$dir/asap.php";
@@ -181,28 +254,90 @@ class Register extends Task
             $list = $this->file->require($file);
 
             foreach ($list as $file)
-                $asap[] = $path . $file;
+                $this->asap[] = $path . $file;
         }
     }
 
+    /**
+     * Writes ASAP and prefixed autoloader to internal or external
+     * state cache directory.
+     *
+     * @param string $dir Directory.
+     * @param string $path Path.
+     * @throws InternalError
+     */
+    private function writePrefixAutoloader(string $dir, string $path): void
+    {
+        $this->directory->createDir($dir);
+
+        // sort key list
+        // longer prefix first
+        krsort($this->prefixes, SORT_STRING);
+
+        $depth = substr_count($path, '/');
+        $autoloader = $this->file->get(__DIR__ . "/PrefixAutoloader.php");
+
+        if ($autoloader === false)
+            throw new InternalError(
+                "Cant read the snapshot file \"" .
+                __DIR__ . "/PrefixAutoloader.php\"."
+            );
+
+        $autoloader = str_replace(
+            ", 2)",
+            ", $depth)",
+            $autoloader
+        );
+
+        if ($this->asap) {
+            $content = "";
+
+            foreach ($this->asap as $file)
+                $content .= "\n\t\t'$file',";
+
+            $autoloader = str_replace(
+                "\$asap = []",
+                "\$asap = [$content\n\t]",
+                $autoloader
+            );
+        }
+
+        if ($this->prefixes) {
+            $content = "";
+
+            foreach ($this->prefixes as $loadable => $file)
+                $content .= "\n\t\t'$loadable' => '$file',";
+
+            $autoloader = str_replace(
+                "\$prefixes = []",
+                "\$prefixes = [$content\n\t]",
+                $autoloader
+            );
+        }
+
+        if (!$this->file->put(
+            "$dir/PrefixAutoloader.php",
+            $autoloader))
+            throw new InternalError(
+                "Cant write '$dir/PrefixAutoloader.php'."
+            );
+    }
 
     /**
      * Writes ASAP and lazy loadable autoloader to internal or external
      * state cache directory.
      *
+     * @deprecated Will be removed in version 2.0.0.
      * @param string $dir Directory.
      * @param string $path Path.
-     * @param array $asap ASAP.
-     * @param array $lazy Path.
-     * @throws Error
+     * @throws InternalError
      */
-    private function writeAutoloader(string $dir, string $path, array $asap,
-                                     array $lazy): void
+    private function writeAutoloader(string $dir, string $path): void
     {
         $this->directory->createDir($dir);
 
         // sort key list
-        ksort($lazy, SORT_STRING);
+        ksort($this->lazy, SORT_STRING);
 
         $depth = substr_count($path, '/');
         $autoloader = $this->file->get(__DIR__ . "/Autoloader.php");
@@ -219,10 +354,10 @@ class Register extends Task
             $autoloader
         );
 
-        if ($asap) {
+        if ($this->asap) {
             $content = "";
 
-            foreach ($asap as $file)
+            foreach ($this->asap as $file)
                 $content .= "\n\t\t'$file',";
 
             $autoloader = str_replace(
@@ -232,10 +367,10 @@ class Register extends Task
             );
         }
 
-        if ($lazy) {
+        if ($this->lazy) {
             $content = "";
 
-            foreach ($lazy as $loadable => $file)
+            foreach ($this->lazy as $loadable => $file)
                 $content .= "\n\t\t'$loadable' => '$file',";
 
             $autoloader = str_replace(
@@ -246,7 +381,7 @@ class Register extends Task
         }
 
         if (!$this->file->put("$dir/Autoloader.php", $autoloader))
-            throw new Error(
+            throw new InternalError(
                 "Can't write to the file \"$dir/Autoloader.php\"."
             );
     }
