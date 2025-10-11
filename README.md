@@ -53,10 +53,9 @@ for lazy and ASAP (as soon as possible) loading.
 - The lazy file contains OOP (Object-Oriented Programming) code for autoloading on demand.
 - The ASAP file contains preloadable procedural code.
 
-These files are stored in a [custom cache directory](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#cache)
+These files are stored in a [custom state directory](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#state-directory-indicator)
 relative to the package root and can be used individually within your package or
 combined into a common autoloader for the root package.
-
 
 ### Flexible Package References
 
@@ -76,13 +75,13 @@ to ensure efficient decision-making.
 
 Fusion builds new versions efficiently by recycling existing packages. To 
 instruct the package manager that your package includes a mutable directory built by a 
-callback and should be handled individually as new content, set the [state](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#states) 
+callback and should be handled individually as new content, set the [mutable](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#mutable-directory-indicator) 
 indicator in your metadata.
 
 To allow other packages to extend yours at a special directory using the default 
-built-in, out-of-the-box behavior, set the [extension](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#extensions) 
+built-in, out-of-the-box behavior, set the [extension](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#extension-directory-indicator) 
 indicator in your metadata. Fusion will also generate an extensions file for your 
-package, containing the parent package IDs and the order in which they extend it, 
+package, containing the parent package dirs and the order in which they extend it, 
 in case your package needs to know this.
 
 ### Interface-Based Customization
@@ -113,8 +112,8 @@ See the contributing file if these criteria apply to you.
 
 ## License
 
-Fusion. A package manager for PHP-based projects.  
-Copyright Valvoid
+Fusion - PHP Package Manager  
+Copyright © Valvoid
 
 This program is free software: you can redistribute it and/or modify it under the 
 terms of the GNU General Public License as published by the Free Software Foundation, 
