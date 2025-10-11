@@ -22,6 +22,6 @@
 return [
     "structure" => [
         "valvoid.com/valvoid/fusion" => null,
-        "/cache/loadable/tests" => "Valvoid\\Fusion\\Tests"
+        "/state/loadable/tests" => "Valvoid\\Fusion\\Tests"
     ]
 ];

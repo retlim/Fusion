@@ -591,6 +591,9 @@ class ShiftTest extends Test
                     ],
                     "states" => [
                         "/st0"
+                    ],
+                    "mutables" => [
+                        "/mt0"
                     ]
                 ]
             ]);
@@ -683,6 +686,7 @@ class ShiftTest extends Test
                     $dir == "/root/c/log" ||
                     $dir == "/tmp/state/ex0" ||
                     $dir == "/tmp/state/st0" ||
+                    $dir == "/tmp/state/mt0" ||
                     $dir == "/tmp/state/di1/d0" ||
                     $dir == "/tmp/state/c";
             };
@@ -722,6 +726,7 @@ class ShiftTest extends Test
                     "/root/c/f1",
                     "/root/ex0",
                     "/root/st0",
+                    "/root/mt0",
                     "/si2/f5",
                     "/si2",
                     "/si3/f6",
@@ -733,6 +738,7 @@ class ShiftTest extends Test
                 $rename != [
                     "/tmp/state/ex0->/root/ex0",
                     "/tmp/state/st0->/root/st0",
+                    "/tmp/state/mt0->/root/mt0",
                     "/tmp/state/di1/d0->/root/di1/d0",
                     "/tmp/state/di1/f7->/root/di1/f7"] ||
                 $filenames != [
@@ -754,6 +760,7 @@ class ShiftTest extends Test
                     "/root/c/f1",
                     "/tmp/state/ex0",
                     "/tmp/state/st0",
+                    "/tmp/state/mt0",
                     "/si2/f5",
                     "/si3/f6",
                     "/tmp/state/di1/d0",
@@ -1008,7 +1015,8 @@ class ShiftTest extends Test
                 "structure" => [
                     "cache" => "/c",
                     "extensions" => [],
-                    "states" => []
+                    "states" => [],
+                    "mutables" => [],
                 ]
             ]);
             $group->internalMetas["i0"]->update = function () use (&$onUpdate) {

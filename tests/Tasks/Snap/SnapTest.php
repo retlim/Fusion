@@ -108,7 +108,7 @@ class SnapTest extends Test
             $put = [];
 
             $directory->cache = function () {
-                return "/cache";
+                return "/state";
             };
 
             $directory->create = function (string $dir) use (&$create) {
@@ -126,9 +126,9 @@ class SnapTest extends Test
 
             $snap->execute();
 
-            if ($create != ["/cache"] ||
+            if ($create != ["/state"] ||
                 $put != [[
-                    "file" => "/cache/snapshot.json",
+                    "file" => "/state/snapshot.json",
                     "data" => "{\n" .
                         "    \"i1\": \"3.2.1:offset\",\n" .
                         "    \"i2\": \"1.2.3\"\n" .
@@ -170,7 +170,7 @@ class SnapTest extends Test
                 "id" => "i0",
                 "source" => ["reference" => ""],
                 "structure" => [
-                    "cache" => "/cache"
+                    "cache" => "/state"
                 ],
                 "dependencies" => [
                     "production" => ["i1", "i2"]
@@ -212,9 +212,9 @@ class SnapTest extends Test
 
             $snap->execute();
 
-            if ($create != ["/tmp/packages/i0/cache"] ||
+            if ($create != ["/tmp/packages/i0/state"] ||
                 $put != [[
-                    "file" => "/tmp/packages/i0/cache/snapshot.json",
+                    "file" => "/tmp/packages/i0/state/snapshot.json",
                     "data" => "{\n" .
                         "    \"i1\": \"3.2.1:offset\",\n" .
                         "    \"i2\": \"1.2.3\"\n" .
@@ -252,7 +252,7 @@ class SnapTest extends Test
                 "id" => "i0",
                 "source" => ["reference" => ""],
                 "structure" => [
-                    "cache" => "/cache"
+                    "cache" => "/state"
                 ],
                 "dependencies" => [
                     "production" => ["i1"],
@@ -301,15 +301,15 @@ class SnapTest extends Test
 
             $snap->execute();
 
-            if ($create != ["/tmp/packages/i0/cache"] ||
-                $delete != ["/tmp/packages/i0/cache/snapshot.local.json"] ||
+            if ($create != ["/tmp/packages/i0/state"] ||
+                $delete != ["/tmp/packages/i0/state/snapshot.local.json"] ||
                 $put != [[
-                    "file" => "/tmp/packages/i0/cache/snapshot.json",
+                    "file" => "/tmp/packages/i0/state/snapshot.json",
                     "data" => "{\n" .
                         "    \"i1\": \"3.2.1:offset\"\n" .
                         "}"],
                     [
-                        "file" => "/tmp/packages/i0/cache/snapshot.dev.json",
+                        "file" => "/tmp/packages/i0/state/snapshot.dev.json",
                         "data" => "{\n" .
                             "    \"i2\": \"1.2.3\"\n" .
                             "}"]])

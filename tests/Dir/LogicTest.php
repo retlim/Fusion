@@ -309,7 +309,7 @@ class LogicTest extends Test
         call_user_func($this->bus->callback, new Cache($newCache));
 
         if ($this->logic->getCacheDir() != $newCache ||
-            $oldCache != "/#/cache")
+            $oldCache != "/#/state")
             $this->handleFailedTest();
     }
 
@@ -396,7 +396,7 @@ class LogicTest extends Test
                 "cache" => ["path" =>"/#c"]]);
 
         if ($this->logic->getRootDir() != "/#" ||
-            $this->logic->getCacheDir() != "/#/cache")
+            $this->logic->getCacheDir() != "/#/state")
             $this->handleFailedTest();
     }
 
@@ -460,7 +460,7 @@ class LogicTest extends Test
                 "cache" => ["path" =>"/#c"]]);
 
         if ($this->logic->getRootDir() != "/#" ||
-            $this->logic->getCacheDir() != "/#/cache" ||
+            $this->logic->getCacheDir() != "/#/state" ||
             $dirs != ["/#", "/#/f0", "/#/f1"] ||
             $filenames != ["/#", "/#/f0"] ||
             $deletes != ["/#/f0"] ||
@@ -510,7 +510,7 @@ class LogicTest extends Test
                 "cache" => ["path" =>"/#c"]]);
 
         if ($this->logic->getRootDir() != "/#" ||
-            $this->logic->getCacheDir() != "/#/cache")
+            $this->logic->getCacheDir() != "/#/state")
             $this->handleFailedTest();
     }
 

@@ -19,7 +19,7 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Normalizer;
 
-use Valvoid\Fusion\Metadata\Normalizer\Loadable;
+use Valvoid\Fusion\Metadata\Normalizer\Mutable;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -27,9 +27,9 @@ use Valvoid\Fusion\Tests\Test;
  * @copyright Valvoid
  * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
-class LoadableTest extends Test
+class MutableTest extends Test
 {
-    protected string|array $coverage = Loadable::class;
+    protected string|array $coverage = Mutable::class;
 
     public function __construct()
     {
@@ -40,13 +40,9 @@ class LoadableTest extends Test
     {
         $paths = [];
 
-        Loadable::normalize([
-            ["namespace1" => "/state/loadable/path1"],
-            ["namespace2" => "/state/loadable/path2"]
-        ],
-            "/state", $paths);
+        Mutable::normalize(["path1", "path2"], $paths);
 
-        if ($paths !== ["namespace1" => "/path1", "namespace2" => "/path2"])
+        if ($paths !== ["path1", "path2"])
             $this->handleFailedTest();
     }
 }

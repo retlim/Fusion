@@ -222,7 +222,7 @@ class ReplicateTest extends Test
 
             $group->internalMetas["i0"] = new InternalMetadataMock([
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "/state",
                     "sources" => [
                         // actually source like adapter/id/pattern
                         "/deps" => ["i1", "i2", "i3"]

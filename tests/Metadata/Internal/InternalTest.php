@@ -58,6 +58,7 @@ class InternalTest extends Test
             "namespaces" => ["namespaces"],
             "sources" => ["sources"],
             "states" => ["states"],
+            "mutables" => ["mutables"],
         ],
         "lifecycle" => [
             "copy" => "/copy.php",
@@ -91,6 +92,7 @@ class InternalTest extends Test
         $this->testStructureNamespaces();
         $this->testStructureExtensions();
         $this->testStructureStates();
+        $this->testStructureMutables();
         $this->testEnvironment();
         $this->testContent();
         $this->testLayers();
@@ -153,6 +155,13 @@ class InternalTest extends Test
     {
         if ($this->metadata->getStructureStates() !==
             $this->content["structure"]["states"])
+            $this->handleFailedTest();
+    }
+
+    public function testStructureMutables(): void
+    {
+        if ($this->metadata->getStructureMutables() !==
+            $this->content["structure"]["mutables"])
             $this->handleFailedTest();
     }
 

@@ -20,9 +20,9 @@
 use Valvoid\Fusion\Tests\Test;
 
 $root = dirname(__DIR__);
-$lazy = require "$root/cache/loadable/lazy.php";
+$lazy = require "$root/state/loadable/lazy.php";
 $classnames = array_keys($lazy);
-$lazy += require "$root/cache/loadable/tests/lazy.php";
+$lazy += require "$root/state/loadable/tests/lazy.php";
 $result = 0;
 $coverageClassnames = [];
 

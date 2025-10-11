@@ -110,7 +110,7 @@ class Fusion
             HubLogic::class);
 
         $this->root = $dir->getDirname(__DIR__);
-        $prefixes = "$this->root/cache/prefixes.php";
+        $prefixes = "$this->root/state/prefixes.php";
         $overlay = $config["persistence"]["overlay"] ??
             true;
 
@@ -205,21 +205,19 @@ class Fusion
 
                 } else $task->execute();
 
-            } else {
-                foreach ($entry as $taskId => $task) {
-                    $log->info($this->box->get(Name::class,
-                        name: $taskId));
+            } else foreach ($entry as $taskId => $task) {
+                $log->info($this->box->get(Name::class,
+                    name: $taskId));
 
-                    $task = $this->box->get($task["task"],
-                        config: $task);
+                $task = $this->box->get($task["task"],
+                    config: $task);
 
-                    if (is_subclass_of($task, Interceptor::class)) {
-                        $log->addInterceptor($task);
-                        $task->execute();
-                        $log->removeInterceptor();
+                if (is_subclass_of($task, Interceptor::class)) {
+                    $log->addInterceptor($task);
+                    $task->execute();
+                    $log->removeInterceptor();
 
-                    } else $task->execute();
-                }
+                } else $task->execute();
             }
 
         } catch (LogEvent $error) {

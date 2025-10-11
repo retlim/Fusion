@@ -331,6 +331,18 @@ class Shift extends Task
                     }
                 }
 
+                // refresh mutables
+                foreach ($metadata->getStructureMutables() as $mutable) {
+                    $to = $metadata->getSource() . $mutable;
+                    $from = "$stateDir$dir$mutable";
+
+                    // mutable is optional
+                    if ($this->dir->is($from)) {
+                        $this->directory->delete($to);
+                        $this->directory->rename($from, $to);
+                    }
+                }
+
                 // rebuilt cache, state, ...
                 $metadata->onUpdate();
                 $this->log->info(

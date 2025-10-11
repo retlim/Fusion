@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "structure": {
         "valvoid.com/valvoid": "fusion/1.0.0",
-        "/cache": "cache",
+        "/state": "state",
         "/extensions": {
             "/config": "extension",
             "/src": "extension"

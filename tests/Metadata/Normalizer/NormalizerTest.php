@@ -65,7 +65,8 @@ class NormalizerTest extends Test
                     "extensions" => [],
                     "mappings" => [],
                     "namespaces" => [],
-                    "states" => []
+                    "states" => [],
+                    "mutables" => []
                 ],
                 "environment" => [
                     "php" => [

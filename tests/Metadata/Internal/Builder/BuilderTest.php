@@ -132,7 +132,8 @@ class BuilderTest extends Test
                     "extensions" => [],
                     "mappings" => [],
                     "namespaces" => [],
-                    "states" => []
+                    "states" => [],
+                    "mutables" => []
                 ],
                 "dir" => "/dir/path",
                 "source" => "/src",

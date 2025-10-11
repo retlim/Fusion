@@ -98,7 +98,8 @@ class BuilderTest extends Test
                     "extensions" => [],
                     "mappings" => [],
                     "namespaces" => [],
-                    "states" => []
+                    "states" => [],
+                    "mutables" => []
                 ],
                 "source" => [
                     "api" => "api",

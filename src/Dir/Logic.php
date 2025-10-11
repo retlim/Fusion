@@ -128,8 +128,8 @@ class Logic implements Proxy
             // just add placeholder (default path)
             $this->copy(__DIR__ . "/placeholder.json", $file);
 
-            // default placeholder cache
-            $this->state = "$this->root/cache";
+            // default placeholder
+            $this->state = "$this->root/state";
 
             return;
         }
@@ -150,9 +150,21 @@ class Logic implements Proxy
                 json_last_error_msg()
             );
 
-        $path = array_key_exists("structure", $metadata) ?
-            $this->getCachePath($metadata["structure"]) :
-            null;
+        $path = null;
+
+        if (isset($metadata["structure"]) &&
+            is_array($metadata["structure"])) {
+            $state = $this->getStatePath($metadata["structure"]);
+            $cache = $this->getCachePath($metadata["structure"]);
+
+            // state without cache = new meta
+            // else old with cache
+            if ($cache === null && is_string($state))
+                $path = $state;
+
+            elseif ($state === null && is_string($cache))
+                $path = $cache;
+        }
 
         if ($path === null)
             throw new Error(
@@ -184,7 +196,7 @@ class Logic implements Proxy
             "$this->root/fusion.json");
 
         // default placeholder
-        $this->state = "$this->root/cache";
+        $this->state = "$this->root/state";
     }
 
     /**
@@ -212,7 +224,7 @@ class Logic implements Proxy
             "$this->root/fusion.json");
 
         // default placeholder
-        $this->state = "$this->root/cache";
+        $this->state = "$this->root/state";
     }
 
     /**
@@ -221,6 +233,32 @@ class Logic implements Proxy
      * @param array $struct Package structure.
      * @param string $breadcrumb Internal path prefix.
      * @return string|null Cache path, or null if not found.
+     */
+    protected function getStatePath(array $struct, string $breadcrumb = ""): ?string
+    {
+        // assoc or seq key due to loadable inside cache folder
+        foreach ($struct as $key => $value)
+            if ($value == "state")
+                return is_string($key) ?
+                    $breadcrumb . $key :
+                    $breadcrumb;
+
+            elseif (is_array($value))
+                if ($dir = $this->getStatePath($value, is_string($key) ?
+                    $breadcrumb . $key :
+                    $breadcrumb))
+                    return $dir;
+
+        return null;
+    }
+
+    /**
+     * Returns the cache path defined in the given structure.
+     *
+     * @param array $struct Package structure.
+     * @param string $breadcrumb Internal path prefix.
+     * @return string|null Cache path, or null if not found.
+     * @deprecated
      */
     protected function getCachePath(array $struct, string $breadcrumb = ""): ?string
     {

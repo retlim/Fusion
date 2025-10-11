@@ -2,7 +2,7 @@
 *.md diff=markdown
 *.php diff=php
 
-/cache/loadable/tests export-ignore
+/state/loadable/tests export-ignore
 /tests export-ignore
 CHANGELOG.md export-ignore
 CONTRIBUTING.md export-ignore

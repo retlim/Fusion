@@ -78,7 +78,7 @@ class CopyTest extends Test
                 InternalCategory::RECYCLABLE, [
                 "source" => "/s0",
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "/state",
                     "extensions" => [],
                     "sources" => [
                         "/deps" => ""
@@ -90,7 +90,7 @@ class CopyTest extends Test
                 InternalCategory::MOVABLE, [
                 "source" => "/s0/deps/i1",
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "/state",
                     "sources" => [],
                     "extensions" => []
                 ]
@@ -256,7 +256,7 @@ class CopyTest extends Test
                 "version" => "0",
                 "source" => "/s0",
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "/state",
                     "extensions" => ["/e"],
                     "sources" => [
                         "/deps" => ["/i1", "/i2"]
@@ -267,7 +267,7 @@ class CopyTest extends Test
                 InternalCategory::RECYCLABLE, [
                 "source" => "/s0/deps/i1",
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "/state",
                     "extensions" => [],
                     "sources" => []
                 ]
@@ -407,7 +407,7 @@ class CopyTest extends Test
                 InternalCategory::MOVABLE, [
                 "source" => "/s0/deps/i1",
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "/state",
                     "sources" => [],
                     "extensions" => [
                         "/e"
@@ -419,7 +419,7 @@ class CopyTest extends Test
                 InternalCategory::RECYCLABLE, [
                 "source" => "/s0/deps/i2",
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "/state",
                     "sources" => [],
                     "extensions" => []
                 ]

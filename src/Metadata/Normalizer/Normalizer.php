@@ -61,9 +61,10 @@ class Normalizer
 
         Structure::normalize($meta, "all");
 
-        if (!$meta["structure"]["cache"])
+        if (!$meta["structure"]["cache"] &&
+            !$meta["structure"]["state"])
             Bus::broadcast(new MetadataEvent(
-                "Structure must have a nested cache directory.",
+                "Structure must have a nested state directory.",
                 Level::ERROR,
                 ["structure"]
             ));

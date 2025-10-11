@@ -132,6 +132,16 @@ abstract class Metadata
     }
 
     /**
+     * Returns structure mutables category sub meta.
+     *
+     * @return string[] Structure extension.
+     */
+    public function getStructureMutables(): array
+    {
+        return $this->content["structure"]["mutables"];
+    }
+
+    /**
      * Returns structure states category sub meta.
      *
      * @return string[] Structure states.

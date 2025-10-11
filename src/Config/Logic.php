@@ -128,7 +128,7 @@ class Logic implements Proxy
         // do not extract
         } else $this->identifier = "valvoid/fusion";
 
-        $lazy = "$this->root/cache/loadable/lazy.php";
+        $lazy = "$this->root/state/loadable/lazy.php";
 
         if ($this->file->exists($lazy))
             $this->lazy = $this->file->require($lazy);
@@ -276,7 +276,7 @@ class Logic implements Proxy
      */
     private function loadPersistenceLayer(string $path): void
     {
-        $file = "$this->root/cache/extensions.php";
+        $file = "$this->root/state/extensions.php";
         $extensions = $this->file->require($file);
 
         if ($extensions === false)

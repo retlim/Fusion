@@ -103,7 +103,7 @@ class LogicTest extends Test
             $file->require = function ($file) use (&$require) {
                 $require[] = $file;
 
-                if ($file == "/#/cache/extensions.php")
+                if ($file == "/#/state/extensions.php")
                     return ["/extensions/config" => []];
             };
 
@@ -159,8 +159,8 @@ class LogicTest extends Test
 
             if ($id != ["valvoid/fusion"] ||
                 $path != ["/#"] ||
-                $exists != ["/#/cache/loadable/lazy.php", "/#c/config.json"] ||
-                $require != ["/#/cache/extensions.php"] ||
+                $exists != ["/#/state/loadable/lazy.php", "/#c/config.json"] ||
+                $require != ["/#/state/extensions.php"] ||
                 $include != ["/#/config/f0.php"] ||
                 $interpret != [
                     ["f0"], // default
@@ -238,7 +238,7 @@ class LogicTest extends Test
             $file->require = function ($file) use (&$require) {
                 $require[] = $file;
 
-                if ($file == "/#/cache/extensions.php")
+                if ($file == "/#/state/extensions.php")
                     return ["/extensions/config" => [
                         1 => "ex0", // legacy injection
                         4 => "/ex1", // mapping
@@ -299,8 +299,8 @@ class LogicTest extends Test
 
             if ($id != ["valvoid/fusion"] ||
                 $path != ["/#"] ||
-                $exists != ["/#/cache/loadable/lazy.php", "/#c/config.json"] ||
-                $require != ["/#/cache/extensions.php"] ||
+                $exists != ["/#/state/loadable/lazy.php", "/#c/config.json"] ||
+                $require != ["/#/state/extensions.php"] ||
                 $include != [
                     "/#/config/f0.php",
                     "/#/extensions/config/ex0/f1.php",
@@ -371,7 +371,7 @@ class LogicTest extends Test
             $file->require = function ($file) use (&$require) {
                 $require[] = $file;
 
-                if ($file == "/#/cache/extensions.php")
+                if ($file == "/#/state/extensions.php")
                     return ["/extensions/config" => []];
             };
 
@@ -432,8 +432,8 @@ class LogicTest extends Test
 
             if ($id != ["i0/i0"] ||
                 $path != ["/#"] ||
-                $exists != ["/#/cache/loadable/lazy.php", "/#c/config.json"] ||
-                $require != ["/#/cache/extensions.php"] ||
+                $exists != ["/#/state/loadable/lazy.php", "/#c/config.json"] ||
+                $require != ["/#/state/extensions.php"] ||
                 $include != ["/#/config/f0.php"] ||
                 $interpret != [
                     ["f0"], // default
@@ -495,7 +495,7 @@ class LogicTest extends Test
             $file->require = function ($file) use (&$require) {
                 $require[] = $file;
 
-                if ($file == "/#/cache/extensions.php")
+                if ($file == "/#/state/extensions.php")
                     return ["/extensions/config" => []];
             };
 
@@ -555,7 +555,7 @@ class LogicTest extends Test
 
             if ($id != ["valvoid/fusion"] ||
                 $path != ["/#"] ||
-                $require != ["/#/cache/extensions.php"] ||
+                $require != ["/#/state/extensions.php"] ||
                 $include != ["/#/config/f0.php"] ||
                 $interpret != [
                     ["f0"], // default

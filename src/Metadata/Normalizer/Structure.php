@@ -49,6 +49,9 @@ class Structure
     /** @var string[] State category. */
     private array $state = [];
 
+    /** @var string[] Mutable category. */
+    private array $mutable = [];
+
     /** @var string Current layer identifier. */
     private string $layer;
 
@@ -81,8 +84,14 @@ class Structure
             "extensions" => [],
             "mappings" => [],
             "namespaces" => [],
-            "states" => []
+            "states" => [],
+            "mutables" => []
         ];
+
+        // state without cache = new meta
+        // else old with cache
+        if ($structure->cache === [] && sizeof($structure->state) == 1)
+            $structure->cache[] = array_shift($structure->state);
 
         if ($structure->cache)
             Cache::normalize(
@@ -109,6 +118,12 @@ class Structure
             State::normalize(
                 $structure->state,
                 $meta["structure"]["states"]
+            );
+
+        if ($structure->mutable)
+            State::normalize(
+                $structure->mutable,
+                $meta["structure"]["mutables"]
             );
 
         if ($structure->loadable)
@@ -165,6 +180,12 @@ class Structure
             // state dir
             } elseif ($value == "state" && !$source)
                 $this->state[] = ($key[0] ?? null) === '/' ?
+                    $path . $key :
+                    $path;
+
+            // mutable dir
+            elseif ($value == "mutable" && !$source)
+                $this->mutable[] = ($key[0] ?? null) === '/' ?
                     $path . $key :
                     $path;
 

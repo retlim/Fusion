@@ -145,6 +145,7 @@ return [
 	'Valvoid\Fusion\Metadata\Normalizer\Cache' => '/src/Metadata/Normalizer/Cache.php',
 	'Valvoid\Fusion\Metadata\Normalizer\Extension' => '/src/Metadata/Normalizer/Extension.php',
 	'Valvoid\Fusion\Metadata\Normalizer\Loadable' => '/src/Metadata/Normalizer/Loadable.php',
+	'Valvoid\Fusion\Metadata\Normalizer\Mutable' => '/src/Metadata/Normalizer/Mutable.php',
 	'Valvoid\Fusion\Metadata\Normalizer\Normalizer' => '/src/Metadata/Normalizer/Normalizer.php',
 	'Valvoid\Fusion\Metadata\Normalizer\Source' => '/src/Metadata/Normalizer/Source.php',
 	'Valvoid\Fusion\Metadata\Normalizer\State' => '/src/Metadata/Normalizer/State.php',

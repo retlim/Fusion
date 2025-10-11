@@ -60,7 +60,8 @@ class StructureTest extends Test
                 "/path1" => [
                     "source1",
                     "source2",
-                ]
+                ],
+                "/p7" => "mutable"
             ],
             "environment" => []
         ];
@@ -93,6 +94,9 @@ class StructureTest extends Test
                     ],
                     "states" => [
                         "/path4"
+                    ],
+                    "mutables" => [
+                        "/p7"
                     ]
                 ],
                 "environment" => []
