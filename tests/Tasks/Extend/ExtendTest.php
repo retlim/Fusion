@@ -50,6 +50,7 @@ class ExtendTest extends Test
 
         $this->testCurrentStateRefresh();
         $this->testNewState();
+        $this->testNewStateWithRecycledRoot();
 
         $this->box::unsetInstance();
     }
@@ -82,7 +83,11 @@ class ExtendTest extends Test
                 "structure" => [
                     "cache" => "/state",
                     "mappings" => [
-                        "/###" => ":i1/i1/ex"
+                        "/###" => ":i1/i1/ex0",
+
+                        // map 1:1
+                        "/##" => ":i1/i1/ex1",
+                        "/#" => ":i1/i1/ex1"
                     ],
                     "extensions" => [],
                     "sources" => [
@@ -100,7 +105,8 @@ class ExtendTest extends Test
                     "cache" => "/state",
                     "mappings" => [],
                     "extensions" => [
-                        "/ex"
+                        "/ex0",
+                        "/ex1"
                     ],
                     "sources" => []
                 ]
@@ -123,11 +129,11 @@ class ExtendTest extends Test
 
             // checks custom ext dirs inside dep
             $dirWrapper->is = function (string $dir) {
-                return $dir == "/s0/deps/s1/ex" ||
-                    $dir == "/s0/deps/s1/ex/i0" ||
-                    $dir == "/s0/deps/s1/ex/i1" ||
-                    $dir == "/s0/deps/s1/ex/i1/i1" ||
-                    $dir == "/s0/deps/s1/ex/i2";
+                return $dir == "/s0/deps/s1/ex0" ||
+                    $dir == "/s0/deps/s1/ex0/i0" ||
+                    $dir == "/s0/deps/s1/ex0/i1" ||
+                    $dir == "/s0/deps/s1/ex0/i1/i1" ||
+                    $dir == "/s0/deps/s1/ex0/i2";
             };
 
             // filter custom extensions
@@ -135,10 +141,10 @@ class ExtendTest extends Test
             $dirWrapper->filenames = function (string $dir) use (&$filenames) {
                 $filenames[] = $dir;
 
-                if ($dir == "/s0/deps/s1/ex")
+                if ($dir == "/s0/deps/s1/ex0")
                     return ["i0", "i1", "i2"];
 
-                if ($dir == "/s0/deps/s1/ex/i1")
+                if ($dir == "/s0/deps/s1/ex0/i1")
                     return ["i1"];
 
                 return [];
@@ -162,11 +168,11 @@ class ExtendTest extends Test
                 $this->handleFailedTest();
 
             // delete obsolete extension
-            if ($delete != ["/s0/deps/s1/ex/i2"])
+            if ($delete != ["/s0/deps/s1/ex0/i2"])
                 $this->handleFailedTest();
 
             // implication
-            if ($filenames != ["/s0/deps/s1/ex", "/s0/deps/s1/ex/i1"])
+            if ($filenames != ["/s0/deps/s1/ex0", "/s0/deps/s1/ex0/i1"])
                 $this->handleFailedTest();
 
             if ($put != [[
@@ -184,9 +190,12 @@ class ExtendTest extends Test
                         "return [" .
 
                         // test order
-                        "\n\t\"/ex\" => [" .
-                        "\n\t\t0 => \"i1/i1\"," .
-                        "\n\t\t1 => \"/d0/###\"," .
+                        "\n\t\"/ex0\" => [" .
+                        "\n\t\t0 => \"i1/i1\"," . // injection
+                        "\n\t\t1 => \"/d0/###\"," . // mapping
+                        "\n\t]," .
+                        "\n\t\"/ex1\" => [" .
+                        "\n\t\t1 => \"/d0/#\"," . // mapping
                         "\n\t]," .
                         "\n];"
 
@@ -250,6 +259,247 @@ class ExtendTest extends Test
 
             $group->externalMetas["i0"] = new ExternalMetadataMock(
                 ExternalCategory::DOWNLOADABLE, [
+                "id" => "i0",
+                "dir" => "", // relative to root dir
+                "structure" => [
+                    "cache" => "/state",
+                    "mappings" => [
+                        "/###i0" => ":i1/ex"
+                    ],
+                    "extensions" => [],
+                    "sources" => [
+                        "/deps" => [
+                            "i1",
+                            "i2"
+                        ]
+                    ]
+                ]
+            ]);
+
+            $group->externalMetas["i1"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT, [
+                "id" => "i1",
+                "dir" => "/deps/i1",
+                "structure" => [
+                    "cache" => "/state",
+                    "mappings" => [],
+                    "sources" => [],
+                    "extensions" => [
+                        "/ex"
+                    ]
+                ]
+            ]);
+
+            $group->externalMetas["i2"] = new ExternalMetadataMock(
+                ExternalCategory::DOWNLOADABLE, [
+                "id" => "i2",
+                "dir" => "/deps/i2",
+                "structure" => [
+                    "cache" => "/state",
+                    "mappings" => [
+                        "/###i2" => ":i1/ex"
+                    ],
+                    "extensions" => [],
+                    "sources" => [
+                        "/deps" => ["i1"]
+                    ]
+                ]
+            ]);
+
+            $create =
+            $put =
+            $filenames =
+            $rename =
+            $clear =
+            $delete = [];
+
+            // cached individual packages
+            $directory->packages = function () {
+                return "/p";
+            };
+
+            // deps dirs
+            // i0, i1, i2 cache dirs must exist
+            $directory->create = function (string $dir) use (&$create) {
+                $create[] = $dir;
+            };
+
+            $dirWrapper->is = function (string $dir) {
+
+                // downloaded with deps
+                return $dir == "/p/i0/deps/i1/ex/i0" ||
+                    $dir == "/p/i2/deps/i1/ex/i2" ||
+
+                    // renamed into individual package
+                    $dir == "/p/i1/ex" ||
+                    $dir == "/p/i1/ex/i0" ||
+                    $dir == "/p/i1/ex/i2";
+            };
+
+            $directory->clear = function (string $dir, string $path) use (&$clear) {
+                $clear[] = [
+                    "dir" => $dir,
+                    "path" => $path
+                ];
+            };
+
+            $directory->rename = function (string $from, string $to) use (&$rename) {
+                $rename[] = [
+                    "from" => $from,
+                    "to" => $to
+                ];
+            };
+
+            // prepare to dirs
+            $directory->delete = function (string $file) use (&$delete) {
+                $delete[] = $file;
+            };
+
+            // filter custom extensions
+            // inside dependency package
+            $dirWrapper->filenames = function (string $dir) use (&$filenames) {
+                $filenames[] = $dir;
+
+                if ($dir == "/p/i1/ex")
+                    return ["i0", "i2"];
+
+                return [];
+            };
+
+            // extensions.php
+            $fileWrapper->put = function (string $file, string $content) use (&$put) {
+                $put[] = [
+                    "file" => $file,
+                    "content" => $content
+                ];
+
+                // pass
+                return 1;
+            };
+
+            $task->execute();
+
+            if ($create != ["/p/i1/ex/i0", "/p/i1/ex/i2",
+                    "/p/i0/state", "/p/i1/state", "/p/i2/state"])
+                $this->handleFailedTest();
+
+            if ($delete != ["/p/i1/ex/i0", "/p/i1/ex/i2"])
+                $this->handleFailedTest();
+
+            if ($rename != [[
+                    "from" => "/p/i0/deps/i1/ex/i0",
+                    "to" => "/p/i1/ex/i0"
+                ],[
+                    "from" => "/p/i2/deps/i1/ex/i2",
+                    "to" => "/p/i1/ex/i2"
+                ]]) $this->handleFailedTest();
+
+            if ($clear != [[
+                    "dir" => "/p/i0/deps",
+                    "path" => "/i1/ex/i0"
+                ],[
+                    "dir" => "/p/i2/deps",
+                    "path" => "/i1/ex/i2"
+                ]]) $this->handleFailedTest();
+
+            // implication
+            if ($filenames != ["/p/i1/ex"])
+                $this->handleFailedTest();
+
+            if ($put != [[
+                    "file" => "/p/i0/state/extensions.php",
+                    "content" => "<?php\n" .
+                        "// Auto-generated by Fusion package manager. \n" .
+                        "// Do not modify.\n" .
+                        "return [" .
+                        "\n];"
+                ], [
+                    "file" => "/p/i1/state/extensions.php",
+                    "content" => "<?php\n" .
+                        "// Auto-generated by Fusion package manager. \n" .
+                        "// Do not modify.\n" .
+                        "return [" .
+
+                        // test order
+                        "\n\t\"/ex\" => [" .
+                        "\n\t\t2 => \"/deps/i2/###i2\"," .
+                        "\n\t\t3 => \"/###i0\"," .
+                        "\n\t\t4 => \"/###i0\"," .
+                        "\n\t]," .
+                        "\n];"
+
+                ],[
+                    "file" => "/p/i2/state/extensions.php",
+                    "content" => "<?php\n" .
+                        "// Auto-generated by Fusion package manager. \n" .
+                        "// Do not modify.\n" .
+                        "return [" .
+                        "\n];"
+                ]]) $this->handleFailedTest();
+
+        } catch (Exception) {
+            $this->handleFailedTest();
+        }
+    }
+
+    public function testNewStateWithRecycledRoot(): void
+    {
+        try {
+            $group = new GroupMock;
+            $directory = new DirectoryMock;
+            $dirWrapper = new DirMock;
+            $fileWrapper = new FileMock;
+            $task = new Extend(
+                $this->box,
+                $group,
+                $this->log,
+                $directory,
+                $fileWrapper,
+                $dirWrapper,
+                []);
+
+            $group->internalMetas = [
+                "i0" => new InternalMetadataMock(
+                    InternalCategory::RECYCLABLE, [
+                    "id" => "i0",
+                    "dir" => "", // relative to root dir
+                    "structure" => [
+                        "cache" => "/state",
+                        "mappings" => [
+                            "/###i0" => ":i1/ex"
+                        ],
+                        "extensions" => [],
+                        "sources" => [
+                            "/deps" => [
+                                "i1",
+                                "i2"
+                            ]
+                        ]
+                    ]
+                ])
+            ];
+
+            $group->hasDownloadable = true;
+            $group->internalRoot = $group->internalMetas["i0"];
+            $group->implication = [
+                "i0" => [
+                    "implication" => [
+                        "i1" => [
+                            "implication" => []
+                        ],
+                        "i2" => [
+                            "implication" => [
+                                "i1" => [
+                                    "implication" => []
+                                ]
+                            ]
+                        ],
+                    ]
+                ]
+            ];
+
+            $group->externalMetas["i0"] = new ExternalMetadataMock(
+                ExternalCategory::REDUNDANT, [
                 "id" => "i0",
                 "dir" => "", // relative to root dir
                 "structure" => [
