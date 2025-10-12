@@ -150,21 +150,12 @@ class Logic implements Proxy
                 json_last_error_msg()
             );
 
-        $path = null;
-
         if (isset($metadata["structure"]) &&
             is_array($metadata["structure"])) {
-            $state = $this->getStatePath($metadata["structure"]);
-            $cache = $this->getCachePath($metadata["structure"]);
+            $path = $this->getStatePath($metadata["structure"]) ??
+                $this->getCachePath($metadata["structure"]);
 
-            // state without cache = new meta
-            // else old with cache
-            if ($cache === null && is_string($state))
-                $path = $state;
-
-            elseif ($state === null && is_string($cache))
-                $path = $cache;
-        }
+        } else $path = null;
 
         if ($path === null)
             throw new Error(
@@ -238,7 +229,7 @@ class Logic implements Proxy
     {
         // assoc or seq key due to loadable inside cache folder
         foreach ($struct as $key => $value)
-            if ($value == "state")
+            if ($value == "stateful")
                 return is_string($key) ?
                     $breadcrumb . $key :
                     $breadcrumb;

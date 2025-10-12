@@ -46,7 +46,7 @@ class NormalizerTest extends Test
             "dir" => "",
             "description" => "",
             "structure" => [
-                "/cache" => "cache"
+                "/state" => "stateful"
             ],
             "environment" => []
         ];
@@ -60,7 +60,8 @@ class NormalizerTest extends Test
                 "dir" => "",
                 "description" => "",
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "",
+                    "stateful" => "/state",
                     "sources" => [],
                     "extensions" => [],
                     "mappings" => [],

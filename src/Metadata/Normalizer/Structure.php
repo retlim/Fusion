@@ -34,6 +34,9 @@ class Structure
     /** @var string[] Cache category. */
     private array $cache = [];
 
+    /** @var string[] Stateful category. */
+    private array $stateful = [];
+
     /** @var array<string, string[]> Source category. */
     private array $source = [];
 
@@ -80,6 +83,7 @@ class Structure
         // replace
         $meta["structure"] = [
             "cache" => "",
+            "stateful" => "",
             "sources" => [],
             "extensions" => [],
             "mappings" => [],
@@ -88,15 +92,16 @@ class Structure
             "mutables" => []
         ];
 
-        // state without cache = new meta
-        // else old with cache
-        if ($structure->cache === [] && sizeof($structure->state) == 1)
-            $structure->cache[] = array_shift($structure->state);
-
         if ($structure->cache)
             Cache::normalize(
                 $structure->cache,
                 $meta["structure"]["cache"]
+            );
+
+        if ($structure->stateful)
+            Stateful::normalize(
+                $structure->stateful,
+                $meta["structure"]["stateful"]
             );
 
         if ($structure->source)
@@ -126,12 +131,28 @@ class Structure
                 $meta["structure"]["mutables"]
             );
 
-        if ($structure->loadable)
-            Loadable::normalize(
-                $structure->loadable,
-                $cache ?? $meta["structure"]["cache"],
-                $meta["structure"]["namespaces"]
-            );
+        if ($structure->loadable) {
+            if ($cache)
+                Loadable::normalize(
+                    $structure->loadable,
+                    $cache,
+                    $meta["structure"]["namespaces"]
+                );
+
+            elseif ($meta["structure"]["stateful"])
+                Loadable::normalize(
+                    $structure->loadable,
+                    $meta["structure"]["stateful"],
+                    $meta["structure"]["namespaces"]
+                );
+
+            elseif ($meta["structure"]["cache"])
+                Loadable::normalize(
+                    $structure->loadable,
+                    $meta["structure"]["cache"],
+                    $meta["structure"]["namespaces"]
+                );
+        }
     }
 
     /**
@@ -176,6 +197,23 @@ class Structure
                     ));
 
                 $this->cache[] = $entry;
+
+            // stateful dir
+            } elseif ($value == "stateful" && !$source) {
+                $entry = ($key[0] ?? null) === '/' ?
+                    $path . $key :
+                    $path;
+
+                if ($this->layer == "development" || $this->layer == "local")
+                    Bus::broadcast(new MetadataEvent(
+                        "The \"stateful\" indicator is static and belongs to " .
+                        "the \"fusion.json\" file.",
+                        Level::ERROR,
+                        ["structure"],
+                        [$entry]
+                    ));
+
+                $this->stateful[] = $entry;
 
             // state dir
             } elseif ($value == "state" && !$source)

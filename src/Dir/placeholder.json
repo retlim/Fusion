@@ -4,7 +4,7 @@
     "id": "valvoid/placeholder",
     "version": "1.0.0",
     "structure": {
-        "/state": "state"
+        "/state": "stateful"
     },
     "environment": {
         "php": {

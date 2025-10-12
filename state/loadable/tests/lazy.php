@@ -255,6 +255,7 @@ return [
 	'Valvoid\Fusion\Tests\Metadata\Normalizer\NormalizerTest' => '/tests/Metadata/Normalizer/NormalizerTest.php',
 	'Valvoid\Fusion\Tests\Metadata\Normalizer\SourceTest' => '/tests/Metadata/Normalizer/SourceTest.php',
 	'Valvoid\Fusion\Tests\Metadata\Normalizer\StateTest' => '/tests/Metadata/Normalizer/StateTest.php',
+	'Valvoid\Fusion\Tests\Metadata\Normalizer\StatefulTest' => '/tests/Metadata/Normalizer/StatefulTest.php',
 	'Valvoid\Fusion\Tests\Metadata\Normalizer\StructureTest' => '/tests/Metadata/Normalizer/StructureTest.php',
 	'Valvoid\Fusion\Tests\Metadata\Parser\EnvironmentTest' => '/tests/Metadata/Parser/EnvironmentTest.php',
 	'Valvoid\Fusion\Tests\Metadata\Parser\ParserTest' => '/tests/Metadata/Parser/ParserTest.php',

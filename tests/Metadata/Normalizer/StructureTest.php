@@ -46,8 +46,8 @@ class StructureTest extends Test
             "description" => "",
             "structure" => [
                 "recursive",
-                "/cache" => [
-                    "cache",
+                "/state" => [
+                    "stateful",
                     "/loadable/path3" => "namespace\\any"
                 ],
                 "/path2" => "extension",
@@ -75,7 +75,8 @@ class StructureTest extends Test
                 "dir" => "",
                 "description" => "",
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "",
+                    "stateful" => "/state",
                     "sources" => [
                         "" => ["recursive"],
                         "/path1" => [

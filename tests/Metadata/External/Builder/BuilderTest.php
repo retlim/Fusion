@@ -65,7 +65,7 @@ class BuilderTest extends Test
                 "version" => "2.3.4",
                 "environment" => ["environment"],
                 "structure" => [
-                    "/cache" => "cache"
+                    "/state" => "stateful"
                 ]
             ];
 
@@ -93,7 +93,8 @@ class BuilderTest extends Test
                     ]
                 ],
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "",
+                    "stateful" => "/state",
                     "sources" => [],
                     "extensions" => [],
                     "mappings" => [],

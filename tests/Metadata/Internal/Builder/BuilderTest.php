@@ -94,7 +94,7 @@ class BuilderTest extends Test
                 "version" => "1.0.0",
                 "environment" => ["environment"],
                 "structure" => [
-                    "/cache" => "cache"
+                    "/state" => "stateful"
                 ]
             ];
 
@@ -122,7 +122,8 @@ class BuilderTest extends Test
                     ]
                 ],
                 "structure" => [
-                    "cache" => "/cache",
+                    "cache" => "",
+                    "stateful" => "/state",
                     "sources" => [
                         "/dependencies" => [
                             "api/path1/1.2.3",

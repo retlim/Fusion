@@ -104,7 +104,7 @@ class LogicTest extends Test
                 $require[] = $file;
 
                 if ($file == "/#/state/extensions.php")
-                    return ["/extensions/config" => []];
+                    return ["/config" => [], "/extensions/config" => []];
             };
 
             // user-wide persistence
@@ -239,7 +239,8 @@ class LogicTest extends Test
                 $require[] = $file;
 
                 if ($file == "/#/state/extensions.php")
-                    return ["/extensions/config" => [
+                    return ["/config" => [],
+                        "/extensions/config" => [
                         1 => "ex0", // legacy injection
                         4 => "/ex1", // mapping
                         // may multiple entries
@@ -372,7 +373,7 @@ class LogicTest extends Test
                 $require[] = $file;
 
                 if ($file == "/#/state/extensions.php")
-                    return ["/extensions/config" => []];
+                    return ["/config" => [], "/extensions/config" => []];
             };
 
             $file->get = function ($file) {
@@ -496,7 +497,7 @@ class LogicTest extends Test
                 $require[] = $file;
 
                 if ($file == "/#/state/extensions.php")
-                    return ["/extensions/config" => []];
+                    return ["/config" => [], "/extensions/config" => []];
             };
 
             // user-wide persistence

@@ -149,6 +149,7 @@ return [
 	'Valvoid\Fusion\Metadata\Normalizer\Normalizer' => '/src/Metadata/Normalizer/Normalizer.php',
 	'Valvoid\Fusion\Metadata\Normalizer\Source' => '/src/Metadata/Normalizer/Source.php',
 	'Valvoid\Fusion\Metadata\Normalizer\State' => '/src/Metadata/Normalizer/State.php',
+	'Valvoid\Fusion\Metadata\Normalizer\Stateful' => '/src/Metadata/Normalizer/Stateful.php',
 	'Valvoid\Fusion\Metadata\Normalizer\Structure' => '/src/Metadata/Normalizer/Structure.php',
 	'Valvoid\Fusion\Metadata\Parser\Environment' => '/src/Metadata/Parser/Environment.php',
 	'Valvoid\Fusion\Metadata\Parser\Parser' => '/src/Metadata/Parser/Parser.php',
