@@ -175,6 +175,18 @@ class Inflate extends Task
 
         $this->directory->delete("$cache/loadable");
 
+        if ($this->file->is("$cache/lazy.php") &&
+            $this->file->unlink("$cache/lazy.php") === false)
+            throw new Error(
+                "Cant delete '$cache/lazy.php'"
+            );
+
+        if ($this->file->is("$cache/asap.php") &&
+            $this->file->unlink("$cache/asap.php") === false)
+            throw new Error(
+                "Cant delete '$cache/asap.php'"
+            );
+
         $this->writeLazy($this->lazy, $cache);
         $this->writeAsap($this->asap, $cache);
     }

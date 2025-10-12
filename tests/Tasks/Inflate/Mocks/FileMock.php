@@ -30,6 +30,8 @@ class FileMock extends File
 {
     public Closure $put;
     public Closure $get;
+    public Closure $is;
+    public Closure $unlink;
     public function put(string $file, mixed $data): int|false
     {
         return call_user_func($this->put, $file, $data);
@@ -38,5 +40,15 @@ class FileMock extends File
     public function get(string $file): string|false
     {
         return call_user_func($this->get, $file);
+    }
+
+    public function unlink(string $file): bool
+    {
+        return call_user_func($this->unlink, $file);
+    }
+
+    public function is(string $file): bool
+    {
+        return call_user_func($this->is, $file);
     }
 }

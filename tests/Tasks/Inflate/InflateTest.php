@@ -106,8 +106,10 @@ class InflateTest extends Test
 
             $filenames =
             $isDir =
+            $isFile =
             $get =
             $create =
+            $unlink =
             $delete = [];
 
             $dir->filenames = function (string $dir) use (&$filenames) {
@@ -151,6 +153,16 @@ class InflateTest extends Test
                 return 1;
             };
 
+            $file->unlink = function (string $file) use (&$unlink) {
+                $unlink[] = $file;
+                return true;
+            };
+
+            $file->is = function (string $file) use (&$isFile) {
+                $isFile[] = $file;
+                return true;
+            };
+
             $file->get = function (string $file) use (&$get) {
                 $get[] = $file;
 
@@ -185,7 +197,21 @@ class InflateTest extends Test
 
             $inflate->execute();
 
-            if ($get != [
+            if ($isFile != [
+                    "/s0/c0/lazy.php",
+                    "/s0/c0/asap.php",
+                    "/s1/c1/lazy.php",
+                    "/s1/c1/asap.php",
+                    "/s2/c2/lazy.php",
+                    "/s2/c2/asap.php"] ||
+                $unlink != [
+                    "/s0/c0/lazy.php",
+                    "/s0/c0/asap.php",
+                    "/s1/c1/lazy.php",
+                    "/s1/c1/asap.php",
+                    "/s2/c2/lazy.php",
+                    "/s2/c2/asap.php"] ||
+                $get != [
                     "/s0/d0/f1.php",
                     "/s0/f0.php",
                     "/s1/f3.php",
@@ -341,8 +367,10 @@ class InflateTest extends Test
 
             $filenames =
             $isDir =
+            $isFile =
             $get =
             $create =
+            $unlink =
             $delete = [];
             $directory->packages = function () {return "/#";};
             $directory->delete = function (string $dir) use (&$delete) {
@@ -405,10 +433,31 @@ class InflateTest extends Test
 
                 return 1;
             };
-
+            $file->is = function (string $file) use (&$isFile) {
+                $isFile[] = $file;
+                return true;
+            };
+            $file->unlink = function (string $file) use (&$unlink) {
+                $unlink[] = $file;
+                return true;
+            };
             $inflate->execute();
 
-            if ($get != [
+            if ($isFile != [
+                    "/#/i0/state/lazy.php",
+                    "/#/i0/state/asap.php",
+                    "/#/i1/state/lazy.php",
+                    "/#/i1/state/asap.php",
+                    "/#/i2/state/lazy.php",
+                    "/#/i2/state/asap.php"] ||
+                $unlink != [
+                    "/#/i0/state/lazy.php",
+                    "/#/i0/state/asap.php",
+                    "/#/i1/state/lazy.php",
+                    "/#/i1/state/asap.php",
+                    "/#/i2/state/lazy.php",
+                    "/#/i2/state/asap.php"] ||
+                $get != [
                     "/#/i0/f0.php",
                     "/#/i1/f2.php",
                     "/#/i2/f3.php"] ||
