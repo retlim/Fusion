@@ -1,6 +1,7 @@
 * text=auto eol=lf
 *.md diff=markdown
 *.php diff=php
+*.neon linguist-language=neon
 
 /state/loadable/tests export-ignore
 /tests export-ignore
