@@ -393,6 +393,12 @@ class Shift extends Task
     {
         $meta = $this->internalMetas["valvoid/fusion"];
         $to = $this->directory->getOtherDir() . "/valvoid/fusion";
+
+        // todo copy all by top
+        //  $this->root
+        //  copy only php files? and lock executed file
+        #$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        #var_dump(end($trace));
         $from = $meta->getSource();
 
         // recursive root
@@ -403,7 +409,7 @@ class Shift extends Task
             // normalize executed file "fusion" deletion
             // keep file open and replace content
             if ($meta->getCategory() == InternalMetaCategory::RECYCLABLE)
-                $this->executedFiles[] = "$from/fusion";
+                $this->executedFiles[] = "$from/fusion"; // todo get trace
 
             elseif (isset($this->externalMetas["valvoid/fusion"])) {
                 $externalMeta = $this->externalMetas["valvoid/fusion"];
@@ -413,7 +419,7 @@ class Shift extends Task
                 // replace content
                 if ($externalMeta->getCategory() == ExternalMetaCategory::DOWNLOADABLE &&
                     $meta->getDir() == $externalMeta->getDir())
-                    $this->executedFiles[] = "$from/fusion";
+                    $this->executedFiles[] = "$from/fusion";  // todo get trace
             }
 
             // lock unimportant dirs
@@ -444,7 +450,7 @@ class Shift extends Task
             if ($externalMeta->getCategory() == ExternalMetaCategory::DOWNLOADABLE &&
                 $meta->getDir() == $externalMeta->getDir()) {
                 $this->lockedDirs[] = $from;
-                $this->executedFiles[] = "$from/fusion";
+                $this->executedFiles[] = "$from/fusion";  // todo get trace
             }
         }
 
