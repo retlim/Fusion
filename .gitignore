@@ -1,7 +1,4 @@
 /.idea
-
-# keep loadble for init
 /state/*
 !/state/loadable
-/extensions
 /fusion.local.php
