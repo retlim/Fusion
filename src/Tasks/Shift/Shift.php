@@ -394,7 +394,6 @@ class Shift extends Task
      */
     private function persistCurrentCode(): void
     {
-        $meta = $this->internalMetas["valvoid/fusion"];
         $to = $this->directory->getOtherDir() . "/valvoid/fusion";
 
         // workaround for windows executed files bug
@@ -409,10 +408,8 @@ class Shift extends Task
                 );
         }
 
-        $from = $meta->getSource();
-
         $this->directory->createDir($to);
-        $this->copyDir($from, $to);
+        $this->copyDir($this->root, $to);
 
         // notify new fusion code root
         $this->bus->broadcast(

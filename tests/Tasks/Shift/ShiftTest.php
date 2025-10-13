@@ -1065,13 +1065,14 @@ class ShiftTest extends Test
 
             $bus->addReceiver(self::class, function (Root $root) use (&$newRoot) {
                 $newRoot[] = $root->getDir();
+
             }, Root::class);
-            $directory->root = function () {return "/#";};
-            $directory->cache = function () {return "/#/c";};
-            $directory->task = function () {return "/tmp/task";};
-            $directory->state = function () {return "/tmp/state";};
-            $directory->other = function () {return "/tmp/other";};
-            $directory->packages = function () {return "/tmp/packages";};
+            $directory->root = fn () => "/#";
+            $directory->cache = fn () => "/#/c";
+            $directory->task = fn () => "/tmp/task";
+            $directory->state = fn () => "/tmp/state";
+            $directory->other = fn () => "/tmp/other";
+            $directory->packages = fn () => "/tmp/packages";
             $dir->filenames = function (string $dir) use (&$filenames) {
                 $filenames[] = $dir;
 
@@ -1079,9 +1080,18 @@ class ShiftTest extends Test
                 if ($dir === "/tmp/state/c")
                     return ["f1"];
 
+                if ($dir === "/#")
+                    return ["c", "deps"];
+
                 // internal cache
                 if ($dir === "/#/c")
                     return ["f2"];
+
+                if ($dir === "/#/deps")
+                    return ["valvoid"];
+
+                if ($dir === "/#/deps/valvoid")
+                    return ["fusion"];
 
                 if ($dir == "/#/deps/valvoid/fusion")
                     return ["d0", "f3", "fusion"];
@@ -1110,7 +1120,6 @@ class ShiftTest extends Test
 
             $file->is = function (string $file) use (&$isFile) {
                 $isFile[] = $file;
-
                 return $file == "/#/c/f2" ||
                     $file == "/#/deps/valvoid/fusion/fusion" ||
                     $file == "/#/deps/valvoid/fusion/f3" ||
@@ -1169,13 +1178,18 @@ class ShiftTest extends Test
                 $onInstall != ["valvoid/fusion"] ||
                 $create != [
                     "/tmp/other/valvoid/fusion",
-                    "/tmp/other/valvoid/fusion/d0",
+                    "/tmp/other/valvoid/fusion/c",
+                    "/tmp/other/valvoid/fusion/deps",
+                    "/tmp/other/valvoid/fusion/deps/valvoid",
+                    "/tmp/other/valvoid/fusion/deps/valvoid/fusion",
+                    "/tmp/other/valvoid/fusion/deps/valvoid/fusion/d0",
                     "/#/deps/valvoid/fusion/d1"] ||
                 $copy != [
                     "/tmp/state/c/f1->/#/c/f1",
-                    "/#/deps/valvoid/fusion/d0/f4->/tmp/other/valvoid/fusion/d0/f4",
-                    "/#/deps/valvoid/fusion/f3->/tmp/other/valvoid/fusion/f3",
-                    "/#/deps/valvoid/fusion/fusion->/tmp/other/valvoid/fusion/fusion"] ||
+                    "/#/c/f2->/tmp/other/valvoid/fusion/c/f2",
+                    "/#/deps/valvoid/fusion/d0/f4->/tmp/other/valvoid/fusion/deps/valvoid/fusion/d0/f4",
+                    "/#/deps/valvoid/fusion/f3->/tmp/other/valvoid/fusion/deps/valvoid/fusion/f3",
+                    "/#/deps/valvoid/fusion/fusion->/tmp/other/valvoid/fusion/deps/valvoid/fusion/fusion"] ||
                 $delete != [
                     "/#/c/f2",
                     "/#/deps/valvoid/fusion/d0",
@@ -1194,6 +1208,10 @@ class ShiftTest extends Test
                 $filenames != [
                     "/#/c",
                     "/tmp/state/c",
+                    "/#",
+                    "/#/c",
+                    "/#/deps",
+                    "/#/deps/valvoid",
                     "/#/deps/valvoid/fusion",
                     "/#/deps/valvoid/fusion/d0",
                     "/#/deps/valvoid/fusion",
@@ -1201,6 +1219,11 @@ class ShiftTest extends Test
                     "/tmp/state/deps/valvoid/fusion/d1"] ||
                 $isFile != [
                     "/tmp/state/c/f1",
+                    "/#/c",
+                    "/#/c/f2",
+                    "/#/deps",
+                    "/#/deps/valvoid",
+                    "/#/deps/valvoid/fusion",
                     "/#/deps/valvoid/fusion/d0",
                     "/#/deps/valvoid/fusion/d0/f4",
                     "/#/deps/valvoid/fusion/f3",
