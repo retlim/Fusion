@@ -50,4 +50,15 @@ class System
     {
         return PHP_OS_FAMILY;
     }
+
+    /**
+     * Returns a backtrace.
+     *
+     * @param int $options
+     * @return array an array of associative arrays.
+     */
+    public function getBacktrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array
+    {
+        return debug_backtrace($options);
+    }
 }

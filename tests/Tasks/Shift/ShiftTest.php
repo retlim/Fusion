@@ -33,6 +33,7 @@ use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\GroupMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\InternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\SystemMock;
 use Valvoid\Fusion\Tests\Test;
 
 /**
@@ -76,6 +77,7 @@ class ShiftTest extends Test
             $directory = new DirectoryMock;
             $file = new FileMock;
             $dir = new DirMock;
+            $system = new SystemMock;
             $task = new Shift(
                 box: $this->box,
                 bus: $bus,
@@ -84,6 +86,7 @@ class ShiftTest extends Test
                 directory: $directory,
                 file: $file,
                 dir: $dir,
+                system: $system,
                 config: []
             );
 
@@ -145,6 +148,7 @@ class ShiftTest extends Test
             $directory = new DirectoryMock;
             $file = new FileMock;
             $dir = new DirMock;
+            $system = new SystemMock;
             $task = new Shift(
                 box: $this->box,
                 bus: $bus,
@@ -153,6 +157,7 @@ class ShiftTest extends Test
                 directory: $directory,
                 file: $file,
                 dir: $dir,
+                system: $system,
                 config: []
             );
 
@@ -278,6 +283,7 @@ class ShiftTest extends Test
             $directory = new DirectoryMock;
             $file = new FileMock;
             $dir = new DirMock;
+            $system = new SystemMock;
             $task = new Shift(
                 box: $this->box,
                 bus: $bus,
@@ -286,6 +292,7 @@ class ShiftTest extends Test
                 directory: $directory,
                 file: $file,
                 dir: $dir,
+                system: $system,
                 config: []
             );
 
@@ -418,6 +425,7 @@ class ShiftTest extends Test
             $directory = new DirectoryMock;
             $file = new FileMock;
             $dir = new DirMock;
+            $system = new SystemMock;
             $task = new Shift(
                 box: $this->box,
                 bus: $bus,
@@ -426,6 +434,7 @@ class ShiftTest extends Test
                 directory: $directory,
                 file: $file,
                 dir: $dir,
+                system: $system,
                 config: []
             );
 
@@ -556,6 +565,7 @@ class ShiftTest extends Test
             $directory = new DirectoryMock;
             $file = new FileMock;
             $dir = new DirMock;
+            $system = new SystemMock;
             $task = new Shift(
                 box: $this->box,
                 bus: $bus,
@@ -564,6 +574,7 @@ class ShiftTest extends Test
                 directory: $directory,
                 file: $file,
                 dir: $dir,
+                system: $system,
                 config: []
             );
 
@@ -781,6 +792,7 @@ class ShiftTest extends Test
             $directory = new DirectoryMock;
             $file = new FileMock;
             $dir = new DirMock;
+            $system = new SystemMock;
             $task = new Shift(
                 box: $this->box,
                 bus: $bus,
@@ -789,6 +801,7 @@ class ShiftTest extends Test
                 directory: $directory,
                 file: $file,
                 dir: $dir,
+                system: $system,
                 config: []
             );
 
@@ -806,10 +819,9 @@ class ShiftTest extends Test
             $copy =
             $isDir = [];
             $group->hasDownloadable = true;
-            $root = dirname(__DIR__, 3);
             $group->internalMetas["valvoid/fusion"] = new InternalMetadataMock(
                 InternalCategory::OBSOLETE, [
-                "source" => $root,
+                "source" => "/#",
                 "dir" => "",
                 "structure" => [
                     "cache" => "/c",
@@ -817,6 +829,11 @@ class ShiftTest extends Test
                 ]
             ]);
 
+            $system->getOsFamily = fn () => 'Windows';
+            $system->backtrace = fn () => [["file" => "/#/fusion"]];
+            $dir->dirname = function ($file) {
+                return "/#/d0/d1";
+            };
             $group->internalMetas["valvoid/fusion"]->delete = function () use (&$onDelete) {
                 $onDelete[] = "i0";
             };
@@ -838,47 +855,47 @@ class ShiftTest extends Test
             $bus->addReceiver(self::class, function (Root $root) use (&$newRoot) {
                 $newRoot[] = $root->getDir();
             }, Root::class);
-            $directory->root = function () use ($root) {return $root;};
-            $directory->cache = function () use ($root) {return "$root/c";};
+            $directory->root = function () {return "/#";};
+            $directory->cache = function () {return "/#/c";};
             $directory->task = function () {return "/tmp/task";};
             $directory->state = function () {return "/tmp/state";};
             $directory->other = function () {return "/tmp/other";};
             $directory->packages = function () {return "/tmp/packages";};
-            $dir->filenames = function (string $dir) use (&$filenames, $root) {
+            $dir->filenames = function (string $dir) use (&$filenames) {
                 $filenames[] = $dir;
 
                 // internal root
-                if ($dir === "$root")
+                if ($dir === "/#")
                     return ["c", "d0", "f0", "fusion"];
 
                 // external root
                 if ($dir === "/tmp/state")
                     return ["c", "f1", "fusion"];
 
-                if ($dir === "$root/c")
+                if ($dir === "/#/c")
                     return ["f2"];
 
-                if ($dir == "$root/d0")
+                if ($dir == "/#/d0")
                     return ["f3"];
 
                 return [];
             };
 
-            $dir->is = function (string $dir) use (&$isDir, $root) {
+            $dir->is = function (string $dir) use (&$isDir) {
                 $isDir[] = $dir;
 
-                return $dir == "$root/c" ||
-                    $dir == "$root/d0" ||
+                return $dir == "/#/c" ||
+                    $dir == "/#/d0" ||
                     $dir == "/tmp/state/c";
             };
 
-            $file->is = function (string $file) use (&$isFile, $root) {
+            $file->is = function (string $file) use (&$isFile) {
                 $isFile[] = $file;
 
-                return $file == "$root/c/f2" ||
-                    $file == "$root/fusion" ||
-                    $file == "$root/f0" ||
-                    $file == "$root/d0/f3";
+                return $file == "/#/c/f2" ||
+                    $file == "/#/fusion" ||
+                    $file == "/#/f0" ||
+                    $file == "/#/d0/f3";
             };
 
             $directory->delete = function (string $file) use (&$delete) {
@@ -897,9 +914,9 @@ class ShiftTest extends Test
                 $copy[] = "$from->$to";
             };
 
-            $file->exists = function (string $file) use (&$exists, $root) {
+            $file->exists = function (string $file) use (&$exists) {
                 $exists[] = $file;
-                return $file == "$root/c";
+                return $file == "/#/c";
             };
 
             $file->put = function (string $file, mixed $data) use (&$put) {
@@ -923,45 +940,45 @@ class ShiftTest extends Test
                     "/tmp/other/valvoid/fusion/c",
                     "/tmp/other/valvoid/fusion/d0"] ||
                 $copy != [
-                    "$root/c/f2->/tmp/other/valvoid/fusion/c/f2",
-                    "$root/d0/f3->/tmp/other/valvoid/fusion/d0/f3",
-                    "$root/f0->/tmp/other/valvoid/fusion/f0",
-                    "$root/fusion->/tmp/other/valvoid/fusion/fusion"] ||
+                    "/#/c/f2->/tmp/other/valvoid/fusion/c/f2",
+                    "/#/d0/f3->/tmp/other/valvoid/fusion/d0/f3",
+                    "/#/f0->/tmp/other/valvoid/fusion/f0",
+                    "/#/fusion->/tmp/other/valvoid/fusion/fusion"] ||
                 $delete != [
-                    "$root/c/f2",
-                    "$root/d0/f3",
-                    "$root/d0",
-                    "$root/f0"] ||
-                $rename != ["/tmp/state/f1->$root/f1"] ||
-                $exists != ["$root/c"] ||
+                    "/#/c/f2",
+                    "/#/d0/f3",
+                    "/#/d0",
+                    "/#/f0"] ||
+                $rename != ["/tmp/state/f1->/#/f1"] ||
+                $exists != ["/#/c"] ||
                 $get != ["/tmp/state/fusion"] ||
                 $put != [
-                    "$root/fusion()",
-                    "$root/fusion(###)"] ||
+                    "/#/fusion()",
+                    "/#/fusion(###)"] ||
                 $filenames != [
-                    "$root",
-                    "$root/c",
-                    "$root/d0",
-                    "$root",
-                    "$root/c",
-                    "$root/d0",
+                    "/#",
+                    "/#/c",
+                    "/#/d0",
+                    "/#",
+                    "/#/c",
+                    "/#/d0",
                     "/tmp/state",
                     "/tmp/state/c"] ||
                 $isFile != [
-                    "$root/c",
-                    "$root/c/f2",
-                    "$root/d0",
-                    "$root/d0/f3",
-                    "$root/f0",
-                    "$root/fusion"] ||
+                    "/#/c",
+                    "/#/c/f2",
+                    "/#/d0",
+                    "/#/d0/f3",
+                    "/#/f0",
+                    "/#/fusion"] ||
                 $isDir != [
-                    "$root/c",
-                    "$root/c/f2",
-                    "$root/d0",
-                    "$root/d0/f3",
-                    "$root/f0",
-                    "$root/fusion",
-                    "$root/c",
+                    "/#/c",
+                    "/#/c/f2",
+                    "/#/d0",
+                    "/#/d0/f3",
+                    "/#/f0",
+                    "/#/fusion",
+                    "/#/c",
                     "/tmp/state/c",
                     "/tmp/state/f1",
                     "/tmp/state/fusion"
@@ -981,6 +998,7 @@ class ShiftTest extends Test
             $directory = new DirectoryMock;
             $file = new FileMock;
             $dir = new DirMock;
+            $system = new SystemMock;
             $task = new Shift(
                 box: $this->box,
                 bus: $bus,
@@ -989,6 +1007,7 @@ class ShiftTest extends Test
                 directory: $directory,
                 file: $file,
                 dir: $dir,
+                system: $system,
                 config: []
             );
 
@@ -1007,10 +1026,9 @@ class ShiftTest extends Test
             $copy =
             $isDir = [];
             $group->hasDownloadable = true;
-            $root = dirname(__DIR__, 3);
             $group->internalMetas["i0"] = new InternalMetadataMock(
                 InternalCategory::RECYCLABLE, [
-                "source" => $root,
+                "source" => "/#",
                 "dir" => "",
                 "structure" => [
                     "cache" => "/c",
@@ -1019,12 +1037,15 @@ class ShiftTest extends Test
                     "mutables" => [],
                 ]
             ]);
+            $dir->dirname = function ($file) {
+                return "/#/d0/d1";
+            };
             $group->internalMetas["i0"]->update = function () use (&$onUpdate) {
                 $onUpdate[] = "i0";
             };
             $group->internalMetas["valvoid/fusion"] = new InternalMetadataMock(
                 InternalCategory::OBSOLETE, [
-                "source" => "$root/deps/valvoid/fusion",
+                "source" => "/#/deps/valvoid/fusion",
                 "dir" => "/deps/valvoid/fusion"
             ]);
 
@@ -1045,13 +1066,13 @@ class ShiftTest extends Test
             $bus->addReceiver(self::class, function (Root $root) use (&$newRoot) {
                 $newRoot[] = $root->getDir();
             }, Root::class);
-            $directory->root = function () use ($root) {return $root;};
-            $directory->cache = function () use ($root) {return "$root/c";};
+            $directory->root = function () {return "/#";};
+            $directory->cache = function () {return "/#/c";};
             $directory->task = function () {return "/tmp/task";};
             $directory->state = function () {return "/tmp/state";};
             $directory->other = function () {return "/tmp/other";};
             $directory->packages = function () {return "/tmp/packages";};
-            $dir->filenames = function (string $dir) use (&$filenames, $root) {
+            $dir->filenames = function (string $dir) use (&$filenames) {
                 $filenames[] = $dir;
 
                 // external cache
@@ -1059,13 +1080,13 @@ class ShiftTest extends Test
                     return ["f1"];
 
                 // internal cache
-                if ($dir === "$root/c")
+                if ($dir === "/#/c")
                     return ["f2"];
 
-                if ($dir == "$root/deps/valvoid/fusion")
+                if ($dir == "/#/deps/valvoid/fusion")
                     return ["d0", "f3", "fusion"];
 
-                if ($dir == "$root/deps/valvoid/fusion/d0")
+                if ($dir == "/#/deps/valvoid/fusion/d0")
                     return ["f4"];
 
                 if ($dir == "/tmp/state/deps/valvoid/fusion")
@@ -1077,23 +1098,23 @@ class ShiftTest extends Test
                 return [];
             };
 
-            $dir->is = function (string $dir) use (&$isDir, $root) {
+            $dir->is = function (string $dir) use (&$isDir) {
                 $isDir[] = $dir;
-                return $dir == "$root/c" ||
-                    $dir == "$root/deps/valovid/fusion" ||
-                    $dir == "$root/deps/valovid/fusion/d0" ||
+                return $dir == "/#/c" ||
+                    $dir == "/#/deps/valovid/fusion" ||
+                    $dir == "/#/deps/valovid/fusion/d0" ||
                     $dir == "/tmp/state/deps/valvoid/fusion" ||
                     $dir == "/tmp/state/deps/valvoid/fusion/d1" ||
                     $dir == "/tmp/state/c";
             };
 
-            $file->is = function (string $file) use (&$isFile, $root) {
+            $file->is = function (string $file) use (&$isFile) {
                 $isFile[] = $file;
 
-                return $file == "$root/c/f2" ||
-                    $file == "$root/deps/valvoid/fusion/fusion" ||
-                    $file == "$root/deps/valvoid/fusion/f3" ||
-                    $file == "$root/deps/valvoid/fusion/d0/f4" ||
+                return $file == "/#/c/f2" ||
+                    $file == "/#/deps/valvoid/fusion/fusion" ||
+                    $file == "/#/deps/valvoid/fusion/f3" ||
+                    $file == "/#/deps/valvoid/fusion/d0/f4" ||
                     $file == "/tmp/state/c/f1";
             };
 
@@ -1113,10 +1134,10 @@ class ShiftTest extends Test
                 $copy[] = "$from->$to";
             };
 
-            $file->exists = function (string $file) use (&$exists, $root) {
+            $file->exists = function (string $file) use (&$exists) {
                 $exists[] = $file;
-                return $file == "$root/c" ||
-                    $file == "$root/deps/valvoid/fusion";
+                return $file == "/#/c" ||
+                    $file == "/#/deps/valvoid/fusion";
             };
 
             $file->put = function (string $file, mixed $data) use (&$put) {
@@ -1124,6 +1145,8 @@ class ShiftTest extends Test
                 return 1;
             };
 
+            $system->getOsFamily = fn () => 'Windows';
+            $system->backtrace = fn () => [["file" => "/#/deps/valvoid/fusion/fusion"]];
             $file->get = function (string $file) use (&$get) {
                 $get[] = $file;
                 return "###";
@@ -1147,46 +1170,48 @@ class ShiftTest extends Test
                 $create != [
                     "/tmp/other/valvoid/fusion",
                     "/tmp/other/valvoid/fusion/d0",
-                    "$root/deps/valvoid/fusion/d1"] ||
+                    "/#/deps/valvoid/fusion/d1"] ||
                 $copy != [
-                    "/tmp/state/c/f1->$root/c/f1",
-                    "$root/deps/valvoid/fusion/d0/f4->/tmp/other/valvoid/fusion/d0/f4",
-                    "$root/deps/valvoid/fusion/f3->/tmp/other/valvoid/fusion/f3",
-                    "$root/deps/valvoid/fusion/fusion->/tmp/other/valvoid/fusion/fusion"] ||
+                    "/tmp/state/c/f1->/#/c/f1",
+                    "/#/deps/valvoid/fusion/d0/f4->/tmp/other/valvoid/fusion/d0/f4",
+                    "/#/deps/valvoid/fusion/f3->/tmp/other/valvoid/fusion/f3",
+                    "/#/deps/valvoid/fusion/fusion->/tmp/other/valvoid/fusion/fusion"] ||
                 $delete != [
-                    "$root/c/f2",
-                    "$root/deps/valvoid/fusion/d0",
-                    "$root/deps/valvoid/fusion/f3"] ||
+                    "/#/c/f2",
+                    "/#/deps/valvoid/fusion/d0",
+                    "/#/deps/valvoid/fusion/f3"] ||
                 $rename != [
-                    "/tmp/state/deps/valvoid/fusion/d1->$root/deps/valvoid/fusion/d1",
-                    "/tmp/state/deps/valvoid/fusion/f5->$root/deps/valvoid/fusion/f5"] ||
+                    "/tmp/state/deps/valvoid/fusion/d1/f6->/#/deps/valvoid/fusion/d1/f6",
+                    "/tmp/state/deps/valvoid/fusion/f5->/#/deps/valvoid/fusion/f5"] ||
                 $exists != [
-                    "$root/c",
-                    "$root/deps/valvoid/fusion",
-                    "$root/deps/valvoid/fusion/d1"] ||
+                    "/#/c",
+                    "/#/deps/valvoid/fusion",
+                    "/#/deps/valvoid/fusion/d1"] ||
                 $get != ["/tmp/state/deps/valvoid/fusion/fusion"] ||
                 $put != [
-                    "$root/deps/valvoid/fusion/fusion()",
-                    "$root/deps/valvoid/fusion/fusion(###)"] ||
+                    "/#/deps/valvoid/fusion/fusion()",
+                    "/#/deps/valvoid/fusion/fusion(###)"] ||
                 $filenames != [
-                    "$root/c",
+                    "/#/c",
                     "/tmp/state/c",
-                    "$root/deps/valvoid/fusion",
-                    "$root/deps/valvoid/fusion/d0",
-                    "$root/deps/valvoid/fusion",
-                    "/tmp/state/deps/valvoid/fusion"] ||
+                    "/#/deps/valvoid/fusion",
+                    "/#/deps/valvoid/fusion/d0",
+                    "/#/deps/valvoid/fusion",
+                    "/tmp/state/deps/valvoid/fusion",
+                    "/tmp/state/deps/valvoid/fusion/d1"] ||
                 $isFile != [
                     "/tmp/state/c/f1",
-                    "$root/deps/valvoid/fusion/d0",
-                    "$root/deps/valvoid/fusion/d0/f4",
-                    "$root/deps/valvoid/fusion/f3",
-                    "$root/deps/valvoid/fusion/fusion"] ||
+                    "/#/deps/valvoid/fusion/d0",
+                    "/#/deps/valvoid/fusion/d0/f4",
+                    "/#/deps/valvoid/fusion/f3",
+                    "/#/deps/valvoid/fusion/fusion"] ||
                 $isDir != [
-                    "$root/c/f2",
-                    "$root/deps/valvoid/fusion/d0",
-                    "$root/deps/valvoid/fusion/f3",
-                    "$root/deps/valvoid/fusion/fusion",
+                    "/#/c/f2",
+                    "/#/deps/valvoid/fusion/d0",
+                    "/#/deps/valvoid/fusion/f3",
+                    "/#/deps/valvoid/fusion/fusion",
                     "/tmp/state/deps/valvoid/fusion/d1",
+                    "/tmp/state/deps/valvoid/fusion/d1/f6",
                     "/tmp/state/deps/valvoid/fusion/f5",
                     "/tmp/state/deps/valvoid/fusion/fusion"])
                 $this->handleFailedTest();

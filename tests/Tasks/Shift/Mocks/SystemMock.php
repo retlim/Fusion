@@ -20,34 +20,24 @@
 namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Wrappers\Dir;
+use Valvoid\Fusion\Wrappers\System;
 
 /**
  * @copyright Valvoid
  * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
-class DirMock extends Dir
+class SystemMock extends System
 {
-    public Closure $filenames;
-    public Closure $is;
-    public Closure $rename;
-    public Closure $dirname;
+    public Closure $getOsFamily;
+    public Closure $backtrace;
 
-    public function getFilenames(string $dir, int $order = SCANDIR_SORT_ASCENDING): array|false
+    public function getOsFamily(): string
     {
-        return call_user_func($this->filenames, $dir, $order);
-    }
-    public function getDirname(string $path, int $levels = 1): string
-    {
-        return call_user_func($this->dirname, $path, $levels);
-    }
-    public function is(string $dir): bool
-    {
-        return call_user_func($this->is, $dir);
+        return call_user_func($this->getOsFamily);
     }
 
-    public function rename(string $from, string $to): bool
+    public function getBacktrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array
     {
-        return call_user_func($this->rename, $from, $to);
+        return call_user_func($this->backtrace);
     }
 }

@@ -36,6 +36,7 @@ use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 use Valvoid\Fusion\Tasks\Task;
 use Valvoid\Fusion\Wrappers\Dir;
 use Valvoid\Fusion\Wrappers\File;
+use Valvoid\Fusion\Wrappers\System;
 
 /**
  * Shift task to switch states.
@@ -63,8 +64,8 @@ class Shift extends Task
     /** @var string[] Cache and nested source dirs. */
     private array $lockedDirs = [];
 
-    /** @var string[] Normalized file deletions. */
-    private array $executedFiles = [];
+    /** @var string Normalized executed file deletion. */
+    private string $executedFile = "#";
 
     /**
      * Constructs the task.
@@ -86,6 +87,7 @@ class Shift extends Task
         private readonly DirProxy $directory,
         private readonly File $file,
         private readonly Dir $dir,
+        private readonly System $system,
         array $config)
     {
         parent::__construct($config);
@@ -141,13 +143,14 @@ class Shift extends Task
         $hasInternalFusion = isset($this->internalMetas["valvoid/fusion"]) &&
 
             // normalize dir
-            str_starts_with(str_replace('\\', '/', __DIR__),
+            str_starts_with(str_replace('\\', '/',
+                    $this->dir->getDirname(__FILE__)),
                 $this->root);
 
         // keep current package manager code alive
         // if inside working directory
         if ($hasInternalFusion)
-            $this->persistCurrentCode(true);
+            $this->persistCurrentCode();
 
         $internalCachePath = $this->group->getInternalRootMetadata()->getStructureCache();
         $externalCachePath = $this->externalRootMeta->getStructureCache();
@@ -267,9 +270,10 @@ class Shift extends Task
             if ($id == "valvoid/fusion" &&
 
                 // normalize dir
-                str_starts_with(str_replace('\\', '/', __DIR__),
+                str_starts_with(str_replace('\\', '/',
+                        $this->dir->getDirname(__FILE__)),
                     $this->root))
-                $this->persistCurrentCode(false);
+                $this->persistCurrentCode();
 
             // recycle
             // override only cache
@@ -386,76 +390,28 @@ class Shift extends Task
     /**
      * Shifts current package manager code to the /other dir.
      *
-     * @param bool $recursive
      * @throws Error
      */
-    private function persistCurrentCode(bool $recursive): void
+    private function persistCurrentCode(): void
     {
         $meta = $this->internalMetas["valvoid/fusion"];
         $to = $this->directory->getOtherDir() . "/valvoid/fusion";
 
-        // todo copy all by top
-        //  $this->root
-        //  copy only php files? and lock executed file
-        #$trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-        #var_dump(end($trace));
-        $from = $meta->getSource();
-
-        // recursive root
-        // lock state and packages
-        if ($recursive) {
-
-            // same directory
-            // normalize executed file "fusion" deletion
-            // keep file open and replace content
-            if ($meta->getCategory() == InternalMetaCategory::RECYCLABLE)
-                $this->executedFiles[] = "$from/fusion"; // todo get trace
-
-            elseif (isset($this->externalMetas["valvoid/fusion"])) {
-                $externalMeta = $this->externalMetas["valvoid/fusion"];
-
-                // different version in same nested directory
-                // keep executed file and
-                // replace content
-                if ($externalMeta->getCategory() == ExternalMetaCategory::DOWNLOADABLE &&
-                    $meta->getDir() == $externalMeta->getDir())
-                    $this->executedFiles[] = "$from/fusion";  // todo get trace
-            }
-
-            // lock unimportant dirs
-            // cache directory
-            $this->lockedDirs = [
-                $this->state,
-                $this->directory->getPackagesDir(),
-                $this->directory->getTaskDir(),
-                $this->directory->getOtherDir()
-            ];
-
-            // nested source wrapper directories
-            // actually only if top
-            // nested has no sources inside
-            foreach ($meta->getStructureSources() as $dir => $source)
-                if ($dir)
-                    $this->lockedDirs[] = $from . $dir;
-
-        // not recycle -> generated files only
-        // not movable -> new directory
-        // downloadable
-        } elseif (isset($this->externalMetas["valvoid/fusion"])) {
-            $externalMeta = $this->externalMetas["valvoid/fusion"];
-
-            // different version in same nested directory
-            // keep executed file and
-            // replace content
-            if ($externalMeta->getCategory() == ExternalMetaCategory::DOWNLOADABLE &&
-                $meta->getDir() == $externalMeta->getDir()) {
-                $this->lockedDirs[] = $from;
-                $this->executedFiles[] = "$from/fusion";  // todo get trace
-            }
+        // workaround for windows executed files bug
+        // https://github.com/php/php-src/issues/7910
+        // replace only file content since PHP holds/blocks file pointer
+        if ($this->system->getOsFamily() == 'Windows') {
+            $trace = $this->system->getBacktrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+            $this->executedFile = end($trace)["file"] ??
+                throw new Error(
+                    "Cant get executed file from backtrace " .
+                    "to work around the windows bug."
+                );
         }
 
-        $this->directory->createDir($to);
+        $from = $meta->getSource();
 
+        $this->directory->createDir($to);
         $this->copyDir($from, $to);
 
         // notify new fusion code root
@@ -489,13 +445,17 @@ class Shift extends Task
                     if ($this->file->exists($target))
                         $this->shiftDirectory($source, $target);
 
-                    else {
+                    // dir of executed file?
+                    elseif (str_starts_with($this->executedFile, $to)) {
+                        $this->directory->createDir($target);
+                        $this->shiftDirectory($source, $target);
+
+                    } else {
                         $this->directory->createDir($target);
                         $this->directory->rename($source, $target);
                     }
 
-                else
-                    $this->shiftFile($source, $target);
+                else $this->shiftFile($source, $target);
             }
     }
 
@@ -510,7 +470,7 @@ class Shift extends Task
     {
         // normalized
         // keep executed file and replace content
-        if (in_array($to, $this->executedFiles)) {
+        if ($this->executedFile == $to) {
             $content = $this->file->get($from);
 
             if ($content === false)
@@ -523,8 +483,7 @@ class Shift extends Task
                     "Can't write to executed file \"$to\"."
                 );
 
-        } else
-            $this->directory->rename($from, $to);
+        } else $this->directory->rename($from, $to);
     }
 
     /**
@@ -585,7 +544,7 @@ class Shift extends Task
 
                 // normalized executed file deletion
                 // replace content
-                } elseif (in_array($file, $this->executedFiles)) {
+                } elseif ($this->executedFile == $file) {
                     if ($this->file->put($file, "") === false)
                         throw new Error(
                             "Can't clear executed file '$file'."
@@ -595,7 +554,8 @@ class Shift extends Task
             }
 
         foreach ($this->lockedDirs as $lockedDir)
-            if (str_starts_with($lockedDir, $dir))
+            if (str_starts_with($lockedDir, $dir) ||
+                str_starts_with($this->executedFile, $dir))
                 return;
 
         $this->directory->delete($dir);
