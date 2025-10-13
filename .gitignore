@@ -1,4 +1,3 @@
 /.idea
-/state/*
-!/state/loadable
+/state
 /fusion.local.php
