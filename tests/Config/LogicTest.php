@@ -113,6 +113,10 @@ class LogicTest extends Test
                 return false;
             };
 
+            $file->is = function ($file) use (&$exists) {
+                return $file == "/#/state/extensions.php";
+            };
+
             $bus->add = function () {};
             $config = new Logic(
                 box: $this->box,
@@ -273,6 +277,9 @@ class LogicTest extends Test
                 $interpret[] = $entry;
             };
 
+            $file->is = function ($file) use (&$exists) {
+                return $file == "/#/state/extensions.php";
+            };
             $parser = new ParserMock;
             $parser->parse = function (&$config) use (&$parse) {
                 $parse[] = $config;
@@ -381,6 +388,9 @@ class LogicTest extends Test
                     return "{\"id\": \"i0/i0\"}";
             };
 
+            $file->is = function ($file) use (&$exists) {
+                return $file == "/#/state/extensions.php";
+            };
             // user-wide persistence
             $file->exists = function ($file) use (&$exists) {
                 $exists[] = $file;
@@ -529,6 +539,9 @@ class LogicTest extends Test
                 $interpret[] = $entry;
             };
 
+            $file->is = function ($file) use (&$exists) {
+                return $file == "/#/state/extensions.php";
+            };
             $parser = new ParserMock;
             $parser->parse = function (&$config) use (&$parse) {
                 $parse[] = $config;

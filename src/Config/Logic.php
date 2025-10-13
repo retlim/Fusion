@@ -277,7 +277,9 @@ class Logic implements Proxy
     private function loadPersistenceLayer(string $path): void
     {
         $file = "$this->root/state/extensions.php";
-        $extensions = $this->file->require($file);
+        $extensions = $this->file->is($file) ?
+            $this->file->require($file) :
+            ["/extensions/config" => []];
 
         if ($extensions === false)
             throw new Error(
@@ -367,6 +369,7 @@ class Logic implements Proxy
      * Returns lazy code registry.
      *
      * @return array Lazy.
+     * @deprecated Will be removed in version 2.0.0
      */
     public function getLazy(): array
     {
