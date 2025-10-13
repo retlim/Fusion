@@ -381,7 +381,7 @@ class Logic implements Proxy
      */
     public function hasLazy(string $class): bool
     {
-        return isset($this->lazy[$class]);
+        return class_exists($class, true);
     }
 
     /**

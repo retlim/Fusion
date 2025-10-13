@@ -31,7 +31,7 @@ register code:
   stage: register
   image: valvoid/fusion:latest
   script:
-    - fusion register
+    - php fusion register persistence.overlay=false
 
 test units:
   stage: test
