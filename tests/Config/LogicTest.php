@@ -29,7 +29,6 @@ use Valvoid\Fusion\Tests\Config\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Config\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Config\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Config\Mocks\DirNormalizerMock;
-use Valvoid\Fusion\Tests\Config\Mocks\DirParserMock;
 use Valvoid\Fusion\Tests\Config\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Config\Mocks\InterpreterMock;
 use Valvoid\Fusion\Tests\Config\Mocks\NormalizerMock;
@@ -64,7 +63,6 @@ class LogicTest extends Test
             $dir = new DirMock;
             $file = new FileMock;
             $bus = new BusMock;
-            $dirParser = new DirParserMock;
             $id =
             $include =
             $require =
@@ -72,13 +70,7 @@ class LogicTest extends Test
             $parse =
             $overlay =
             $normalize =
-            $exists =
-            $path = [];
-            $dirParser->root = function ($root) use (&$path) {
-                $path[] = $root;
-                // same as Fusion root - own default identifier
-                return "/#";
-            };
+            $exists = [];
 
             $dirNormalizer = new DirNormalizerMock;
             $dirNormalizer->normalize = function (&$config, $identifier) use (&$id) {
@@ -124,7 +116,7 @@ class LogicTest extends Test
                 prefixes: [],
                 dir: $dir,
                 file: $file,
-                dirParser: $dirParser,
+                path: "/#", // same as Fusion root - own default identifier
                 config: [], // no runtime
                 bus: $bus
             );
@@ -162,7 +154,6 @@ class LogicTest extends Test
             $config->load(true);
 
             if ($id != ["valvoid/fusion"] ||
-                $path != ["/#"] ||
                 $exists != ["/#/state/loadable/lazy.php", "/#c/config.json"] ||
                 $require != ["/#/state/extensions.php"] ||
                 $include != ["/#/config/f0.php"] ||
@@ -188,7 +179,6 @@ class LogicTest extends Test
             $dir = new DirMock;
             $file = new FileMock;
             $bus = new BusMock;
-            $dirParser = new DirParserMock;
             $id =
             $include =
             $require =
@@ -196,13 +186,7 @@ class LogicTest extends Test
             $parse =
             $overlay =
             $normalize =
-            $exists =
-            $path = [];
-            $dirParser->root = function ($root) use (&$path) {
-                $path[] = $root;
-                // same as Fusion root - own default identifier
-                return "/#";
-            };
+            $exists = [];
 
             $dirNormalizer = new DirNormalizerMock;
             $dirNormalizer->normalize = function (&$config, $identifier) use (&$id) {
@@ -265,7 +249,7 @@ class LogicTest extends Test
                 prefixes: [],
                 dir: $dir,
                 file: $file,
-                dirParser: $dirParser,
+                path: "/#", // same as Fusion root - own default identifier
                 config: [], // no runtime
                 bus: $bus
             );
@@ -306,7 +290,6 @@ class LogicTest extends Test
             $config->load(true);
 
             if ($id != ["valvoid/fusion"] ||
-                $path != ["/#"] ||
                 $exists != ["/#/state/loadable/lazy.php", "/#c/config.json"] ||
                 $require != ["/#/state/extensions.php"] ||
                 $include != [
@@ -339,7 +322,6 @@ class LogicTest extends Test
             $dir = new DirMock;
             $file = new FileMock;
             $bus = new BusMock;
-            $dirParser = new DirParserMock;
             $id =
             $include =
             $require =
@@ -347,14 +329,7 @@ class LogicTest extends Test
             $parse =
             $overlay =
             $normalize =
-            $exists =
-            $path = [];
-            $dirParser->root = function ($root) use (&$path) {
-                $path[] = $root;
-                // diff from Fusion root -
-                // custom identifier
-                return "/##";
-            };
+            $exists = [];
 
             $dirNormalizer = new DirNormalizerMock;
             $dirNormalizer->normalize = function (&$config, $identifier) use (&$id) {
@@ -404,7 +379,9 @@ class LogicTest extends Test
                 prefixes: [],
                 dir: $dir,
                 file: $file,
-                dirParser: $dirParser,
+                // diff from Fusion root -
+                // custom identifier
+                path: "/##",
                 config: [], // no runtime
                 bus: $bus
             );
@@ -442,7 +419,6 @@ class LogicTest extends Test
             $config->load(true);
 
             if ($id != ["i0/i0"] ||
-                $path != ["/#"] ||
                 $exists != ["/#/state/loadable/lazy.php", "/#c/config.json"] ||
                 $require != ["/#/state/extensions.php"] ||
                 $include != ["/#/config/f0.php"] ||
@@ -468,20 +444,13 @@ class LogicTest extends Test
             $dir = new DirMock;
             $file = new FileMock;
             $bus = new BusMock;
-            $dirParser = new DirParserMock;
             $id =
             $include =
             $require =
             $interpret =
             $parse =
             $overlay =
-            $normalize =
-            $path = [];
-            $dirParser->root = function ($root) use (&$path) {
-                $path[] = $root;
-                // same as Fusion root - own default identifier
-                return "/#";
-            };
+            $normalize = [];
 
             $dirNormalizer = new DirNormalizerMock;
             $dirNormalizer->normalize = function (&$config, $identifier) use (&$id) {
@@ -527,7 +496,7 @@ class LogicTest extends Test
                 prefixes: [],
                 dir: $dir,
                 file: $file,
-                dirParser: $dirParser,
+                path: "/#", // same as Fusion root - own default identifier
                 config: [], // no runtime
                 bus: $bus
             );
@@ -568,7 +537,6 @@ class LogicTest extends Test
             $config->load(true);
 
             if ($id != ["valvoid/fusion"] ||
-                $path != ["/#"] ||
                 $require != ["/#/state/extensions.php"] ||
                 $include != ["/#/config/f0.php"] ||
                 $interpret != [
@@ -595,19 +563,12 @@ class LogicTest extends Test
             $dir = new DirMock;
             $file = new FileMock;
             $bus = new BusMock;
-            $dirParser = new DirParserMock;
             $id =
             $include =
             $interpret =
             $parse =
             $overlay =
-            $normalize =
-            $path = [];
-            $dirParser->root = function ($root) use (&$path) {
-                $path[] = $root;
-                // same as Fusion root - own default identifier
-                return "/#";
-            };
+            $normalize = [];
 
             $dirNormalizer = new DirNormalizerMock;
             $dirNormalizer->normalize = function (&$config, $identifier) use (&$id) {
@@ -646,7 +607,7 @@ class LogicTest extends Test
                 prefixes: [],
                 dir: $dir,
                 file: $file,
-                dirParser: $dirParser,
+                path: "/#", // same as Fusion root - own default identifier
                 config: ["persistence" => ["overlay" => false]],
                 bus: $bus
             );
@@ -684,7 +645,6 @@ class LogicTest extends Test
             $config->load(false);
 
             if ($id != ["valvoid/fusion"] ||
-                $path != ["/#"] ||
                 $include != ["/#/config/f0.php"] ||
                 $interpret != [
                     ["f0"], // default

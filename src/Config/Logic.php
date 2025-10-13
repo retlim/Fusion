@@ -67,7 +67,8 @@ class Logic implements Proxy
      * Constructs the config.
      *
      * @param Box $box Dependency injection container.
-     * @param string $root Package manager root directory.
+     * @param string $root Legacy package manager root directory.
+     * @param string $path New package manager root directory.
      * @param array $prefixes Lazy code registry.
      * @param array $config Runtime config layer.
      * @param Dir $dir Wrapper for standard directory operations.
@@ -81,7 +82,7 @@ class Logic implements Proxy
         private readonly array $prefixes,
         private readonly Dir $dir,
         private readonly File $file,
-        private readonly DirectoryParser $dirParser,
+        string $path,
         array $config,
         BusProxy $bus)
     {
@@ -90,10 +91,7 @@ class Logic implements Proxy
             // parser, interpreter, normalizer
             ConfigEvent::class);
 
-        // support Fusion variations
-        // environment may has nested, custom, and default
-        // separate files per root package identifier
-        $path = $this->dirParser->getRootPath($this->root);
+        $lazy = "$this->root/state/loadable/lazy.php";
         $this->configs = [
             "runtime" => $config,
             "persistence" => [],
@@ -128,8 +126,6 @@ class Logic implements Proxy
         // do not extract
         } else $this->identifier = "valvoid/fusion";
 
-        $lazy = "$this->root/state/loadable/lazy.php";
-
         if ($this->file->exists($lazy))
             $this->lazy = $this->file->require($lazy);
     }
@@ -154,7 +150,8 @@ class Logic implements Proxy
                 ->interpret($config);
 
             if (isset($config["dir"]["path"]))
-                $this->dirParser->parse($config);
+                $this->box->get(DirectoryParser::class)
+                    ->parse($config);
         }
 
         // individually before all other entries

@@ -60,10 +60,11 @@ class FusionTest extends Test
             $map = [];
             $file = new FileMock;
             $file->is = function ($file) use (&$is) {
-                if ($file == "/#/state/prefixes.php")
+                if ($file == "/#/state/prefixes.php" ||
+                    $file == "/#/fusion.json")
                     $is[] = $file;
 
-                return false;
+                return $file == "/#/fusion.json";
             };
             $dir = new DirMock;
             $dir->dirname = fn () => "/#";
@@ -94,7 +95,9 @@ class FusionTest extends Test
                 dir: $dir,
                 config: []);
 
-            if ($is != ["/#/state/prefixes.php"] ||
+            if ($is != [
+                    "/#/fusion.json",
+                    "/#/state/prefixes.php"] ||
                 $load != [true] ||
                 $map != [[
                         "class" => "Valvoid\Fusion\Bus\Logic",
@@ -131,7 +134,8 @@ class FusionTest extends Test
             $map = [];
             $file = new FileMock;
             $file->is = function ($file) use (&$is) {
-                if ($file == "/#/state/prefixes.php") {
+                if ($file == "/#/state/prefixes.php" ||
+                    $file == "/#/fusion.json") {
                     $is[] = $file;
 
                     return true;
@@ -175,7 +179,9 @@ class FusionTest extends Test
                 dir: $dir,
                 config: []);
 
-            if ($is != ["/#/state/prefixes.php"] ||
+            if ($is != [
+                    "/#/fusion.json",
+                    "/#/state/prefixes.php"] ||
                 $require != ["/#/state/prefixes.php"] ||
                 $load != [true] ||
                 $map != [[
@@ -214,10 +220,11 @@ class FusionTest extends Test
             $map = [];
             $file = new FileMock;
             $file->is = function ($file) use (&$is) {
-                if ($file == "/#/state/prefixes.php")
+                if ($file == "/#/state/prefixes.php" ||
+                    $file == "/#/fusion.json")
                     $is[] = $file;
 
-                return false;
+                return $file == "/#/fusion.json";
             };
             $dir = new DirMock;
             $dir->dirname = fn () => "/#";
@@ -296,7 +303,9 @@ class FusionTest extends Test
                     break;
                 }
 
-            if ($is != ["/#/state/prefixes.php"] ||
+            if ($is != [
+                    "/#/fusion.json",
+                    "/#/state/prefixes.php"] ||
                 sizeof($tasks) != 2 ||
                 $cGet != [[/*dir*/], ["tasks", "test"]] || // group
                 $delete != ["/#s", "/#t", "/#p", "/#o"] ||
@@ -337,10 +346,11 @@ class FusionTest extends Test
             $map = [];
             $file = new FileMock;
             $file->is = function ($file) use (&$is) {
-                if ($file == "/#/state/prefixes.php")
+                if ($file == "/#/state/prefixes.php" ||
+                    $file == "/#/fusion.json")
                     $is[] = $file;
 
-                return false;
+                return $file == "/#/fusion.json";
             };
             $dir = new DirMock;
             $dir->dirname = fn () => "/#";
@@ -416,7 +426,9 @@ class FusionTest extends Test
                     break;
                 }
 
-            if ($is != ["/#/state/prefixes.php"] ||
+            if ($is != [
+                    "/#/fusion.json",
+                    "/#/state/prefixes.php"] ||
                 sizeof($tasks) != 1 ||
                 $cGet != [[/*dir*/], ["tasks", "test"]] || // group
                 $delete != ["/#s", "/#t", "/#p", "/#o"] ||

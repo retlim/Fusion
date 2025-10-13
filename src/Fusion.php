@@ -59,7 +59,7 @@ class Fusion
      */
     private static ?Fusion $instance = null;
 
-    /** @var string Source root directory. */
+    /** @var string Variation, nested, and raw root directory. */
     private string $root;
 
     /**
@@ -85,7 +85,7 @@ class Fusion
     public function __construct(
         private readonly Box $box,
         private readonly File $file,
-        Dir $dir,
+        private readonly Dir $dir,
         array $config = [])
     {
         spl_autoload_register($this->loadLazyCode(...),
@@ -109,23 +109,25 @@ class Fusion
             DirLogic::class,
             HubLogic::class);
 
-        $this->root = $dir->getDirname(__DIR__);
-        $prefixes = "$this->root/state/prefixes.php";
+        $root = $dir->getDirname(__DIR__);
+        $this->root = $this->getRoot($root);
+        $prefixes = "$root/state/prefixes.php";
         $overlay = $config["persistence"]["overlay"] ??
             true;
 
         if ($overlay && $file->is($prefixes))
             $this->prefixes = $file->require($prefixes);
 
-        // fallback, raw
+        // fallback, raw prefix
         // to fix broken state for example
         else $this->prefixes = [
-            __NAMESPACE__ => "/src"
+            __NAMESPACE__ => substr($root, strlen($this->root)) . "/src"
         ];
 
         $bus = $box->get(BusLogic::class);
         $config = $box->get(ConfigLogic::class,
-            root: $this->root,
+            root: $root,
+            path: $this->root,
             prefixes: $this->prefixes,
             config: $config);
 
@@ -251,6 +253,37 @@ class Fusion
     private function handleBusEvent(Root $event): void
     {
         $this->root = $event->getDir();
+    }
+
+    /**
+     * Returns non-nested root.
+     *
+     * @param string $path Directory to start.
+     * @return string Root.
+     * @throws InternalError
+     */
+    private function getRoot(string $path): string
+    {
+        $match = null;
+
+        while ($path) {
+            if ($this->file->is("$path/fusion.json"))
+                $match = $path;
+
+            $parent = $this->dir->getDirname($path);
+
+            if ($path == $parent)
+                break;
+
+            $path = $parent;
+        }
+
+        if ($match === null)
+            throw new InternalError(
+                "Cant get root path."
+            );
+
+        return $match;
     }
 
     /**
