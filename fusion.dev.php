@@ -17,11 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// reset self-update in dev
-// categorize test
 return [
     "structure" => [
-        "valvoid.com/valvoid/fusion" => null,
-        "/state/loadable/tests" => "Valvoid\\Fusion\\Tests"
+
+        // reset self-dependency
+        "valvoid.com/valvoid/fusion" => null
     ]
 ];

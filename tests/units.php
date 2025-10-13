@@ -20,9 +20,16 @@
 use Valvoid\Fusion\Tests\Test;
 
 $root = dirname(__DIR__);
-$lazy = require "$root/state/loadable/lazy.php";
-$classnames = array_keys($lazy);
-$lazy += require "$root/state/loadable/tests/lazy.php";
+$lazy = require "$root/state/lazy.php";
+$classnames = [];
+
+foreach ($lazy as $class => $path) {
+    if (str_starts_with($class, "Valvoid\Fusion\Test"))
+        continue;
+
+    $classnames[] = $class;
+}
+
 $result = 0;
 $coverageClassnames = [];
 
