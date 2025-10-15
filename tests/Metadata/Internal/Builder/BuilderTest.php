@@ -131,6 +131,7 @@ class BuilderTest extends Test
                         ]
                     ],
                     "extensions" => [],
+                    "extendables" => [],
                     "mappings" => [],
                     "namespaces" => [],
                     "states" => [],

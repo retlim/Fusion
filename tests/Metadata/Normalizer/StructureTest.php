@@ -61,7 +61,8 @@ class StructureTest extends Test
                     "source1",
                     "source2",
                 ],
-                "/p7" => "mutable"
+                "/p7" => "mutable",
+                "/p8" => "extendable",
             ],
             "environment" => []
         ];
@@ -86,6 +87,9 @@ class StructureTest extends Test
                     ],
                     "extensions" => [
                         "/path2"
+                    ],
+                    "extendables" => [
+                        "/p8"
                     ],
                     "mappings" => [
                         "/p5/p6" => ":package/id/sub/dir",

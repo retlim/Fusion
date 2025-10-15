@@ -130,10 +130,21 @@ abstract class Metadata
      * Returns structure extensions category sub meta.
      *
      * @return string[] Structure extension.
+     * @deprecated Will be removed in version 2.0.0
      */
     public function getStructureExtensions(): array
     {
         return $this->content["structure"]["extensions"];
+    }
+
+    /**
+     * Returns extendable paths.
+     *
+     * @return string[] Extendable paths.
+     */
+    public function getExtendablePaths(): array
+    {
+        return $this->content["structure"]["extendables"];
     }
 
     /**

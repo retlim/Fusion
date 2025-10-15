@@ -34,6 +34,7 @@ class GroupMock implements Group
     public array $externalMetas;
     public bool $hasDownloadable;
     public InternalMeta $internalRoot;
+    public ?ExternalMeta $externalRoot = null;
 
     public function setImplication(array $implication): void{}
 
@@ -50,7 +51,7 @@ class GroupMock implements Group
     public function setInternalMetas(array $metas): void {}
 
     public function getExternalRootMetadata(): ?ExternalMeta {
-        return null;
+        return $this->externalRoot;
     }
     public function getInternalRootMetadata(): InternalMeta
     {

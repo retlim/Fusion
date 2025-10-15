@@ -132,7 +132,8 @@ class Extend extends Task
                 $this->structures[$id] = [
                     "dir" => "$this->packagesDir/$id",
                     "state" => $metadata->getStructureCache(),
-                    "extensions" => $metadata->getStructureExtensions()
+                    "extensions" => $metadata->getStructureExtensions(),
+                    "extendables" => $metadata->getExtendablePaths()
                 ];
 
                 $this->spread($metadata, $id);
@@ -159,7 +160,8 @@ class Extend extends Task
                 $this->structures[$id] = [
                     "dir" => "$this->packagesDir/$id",
                     "state" => $metadata->getStructureCache(),
-                    "extensions" => $metadata->getStructureExtensions()
+                    "extensions" => $metadata->getStructureExtensions(),
+                    "extendables" => $metadata->getExtendablePaths()
                 ];
 
                 $this->spread($metadata, $id);
@@ -183,7 +185,8 @@ class Extend extends Task
                     $this->structures[$id] = [
                         "dir" => $metadata->getSource(),
                         "extensions" => $metadata->getStructureExtensions(),
-                        "state" => $metadata->getStructureCache()
+                        "state" => $metadata->getStructureCache(),
+                        "extendables" => $metadata->getExtendablePaths()
                     ];
                 }
         }
@@ -195,6 +198,22 @@ class Extend extends Task
             $dir = $structure["dir"];
             $content = "";
 
+            // mapping indicator
+            foreach ($structure["extendables"] as $extendable) {
+                $content .= "\n\t\"$extendable\" => [";
+                $dirs = $mappings[":$id_$extendable"] ??
+                    [];
+
+                // loop by implication index to keep order
+                foreach ($this->indexes as $index => $id)
+                    foreach ($dirs as $identifier => $directory)
+                        if ($identifier == $id)
+                            $content .= "\n\t\t$index => \"$directory\",";
+
+                $content .= "\n\t],";
+            }
+
+            // deprecated legacy injection
             foreach ($structure["extensions"] as $extension) {
                 $content .= "\n\t\"$extension\" => [";
                 $dirs = $mappings[":$id_$extension"] ??
@@ -217,8 +236,9 @@ class Extend extends Task
                             $content .= "\n\t\t$index => \"$id\",";
 
                 // mapping
-                } else foreach ($dirs as $identifier => $directory)
-                    foreach ($this->indexes as $index => $id)
+                //  loop by implication index to keep order
+                } else foreach ($this->indexes as $index => $id)
+                    foreach ($dirs as $identifier => $directory)
                         if ($identifier == $id)
                             $content .= "\n\t\t$index => \"$directory\",";
 

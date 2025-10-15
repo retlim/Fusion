@@ -85,11 +85,14 @@ class ExtendTest extends Test
                     "mappings" => [
                         "/###" => ":i1/i1/ex0",
 
-                        // map 1:1
-                        "/##" => ":i1/i1/ex1",
+                        // 1:1 mapping
+                        "/##" => ":i1/i1/ex00",
+                        "/####" => ":i1/i1/ex00",
+
                         "/#" => ":i1/i1/ex1"
                     ],
                     "extensions" => [],
+                    "extendables" => [],
                     "sources" => [
                         "/deps" => []
                     ]
@@ -104,6 +107,9 @@ class ExtendTest extends Test
                 "structure" => [
                     "cache" => "/state",
                     "mappings" => [],
+                    "extendables" => [
+                        "/ex00",
+                    ],
                     "extensions" => [
                         "/ex0",
                         "/ex1"
@@ -190,8 +196,11 @@ class ExtendTest extends Test
                         "return [" .
 
                         // test order
+                        "\n\t\"/ex00\" => [" .
+                        "\n\t\t1 => \"/d0/####\"," . // 1:1 mapping
+                        "\n\t]," .
                         "\n\t\"/ex0\" => [" .
-                        "\n\t\t0 => \"i1/i1\"," . // injection
+                        "\n\t\t0 => \"i1/i1\"," . // same injection and
                         "\n\t\t1 => \"/d0/###\"," . // mapping
                         "\n\t]," .
                         "\n\t\"/ex1\" => [" .
@@ -231,6 +240,7 @@ class ExtendTest extends Test
                         "cache" => "/state",
                         "mappings" => [],
                         "extensions" => [],
+                        "extendables" => [],
                         "sources" => [
                             "/deps" => []
                         ]
@@ -264,9 +274,11 @@ class ExtendTest extends Test
                 "structure" => [
                     "cache" => "/state",
                     "mappings" => [
-                        "/###i0" => ":i1/ex"
+                        "/###i0" => ":i1/ex",
+                        "/###i00" => ":i1/ex0"
                     ],
                     "extensions" => [],
+                    "extendables" => [],
                     "sources" => [
                         "/deps" => [
                             "i1",
@@ -276,6 +288,7 @@ class ExtendTest extends Test
                 ]
             ]);
 
+            $group->externalRoot = $group->externalMetas["i0"];
             $group->externalMetas["i1"] = new ExternalMetadataMock(
                 ExternalCategory::REDUNDANT, [
                 "id" => "i1",
@@ -284,6 +297,9 @@ class ExtendTest extends Test
                     "cache" => "/state",
                     "mappings" => [],
                     "sources" => [],
+                    "extendables" => [
+                        "/ex0"
+                    ],
                     "extensions" => [
                         "/ex"
                     ]
@@ -297,9 +313,11 @@ class ExtendTest extends Test
                 "structure" => [
                     "cache" => "/state",
                     "mappings" => [
-                        "/###i2" => ":i1/ex"
+                        "/###i2" => ":i1/ex",
+                        "/###i22" => ":i1/ex0"
                     ],
                     "extensions" => [],
+                    "extendables" => [],
                     "sources" => [
                         "/deps" => ["i1"]
                     ]
@@ -421,10 +439,15 @@ class ExtendTest extends Test
                         "return [" .
 
                         // test order
+                        // mapping
+                        "\n\t\"/ex0\" => [" .
+                        "\n\t\t2 => \"/deps/i2/###i22\"," .
+                        "\n\t\t3 => \"/###i00\"," .
+                        "\n\t]," .
+                        // deprecated inject + mapping
                         "\n\t\"/ex\" => [" .
                         "\n\t\t2 => \"/deps/i2/###i2\"," .
                         "\n\t\t3 => \"/###i0\"," .
-                        "\n\t\t4 => \"/###i0\"," .
                         "\n\t]," .
                         "\n];"
 
@@ -466,8 +489,10 @@ class ExtendTest extends Test
                     "structure" => [
                         "cache" => "/state",
                         "mappings" => [
-                            "/###i0" => ":i1/ex"
+                            "/###i0" => ":i1/ex",
+                            "/###i00" => ":i1/ex0"
                         ],
+                        "extendables" => [],
                         "extensions" => [],
                         "sources" => [
                             "/deps" => [
@@ -505,8 +530,10 @@ class ExtendTest extends Test
                 "structure" => [
                     "cache" => "/state",
                     "mappings" => [
-                        "/###i0" => ":i1/ex"
+                        "/###i0" => ":i1/ex",
+                        "/###i00" => ":i1/ex0"
                     ],
+                    "extendables" => [],
                     "extensions" => [],
                     "sources" => [
                         "/deps" => [
@@ -517,6 +544,7 @@ class ExtendTest extends Test
                 ]
             ]);
 
+            $group->externalRoot = $group->externalMetas["i0"];
             $group->externalMetas["i1"] = new ExternalMetadataMock(
                 ExternalCategory::REDUNDANT, [
                 "id" => "i1",
@@ -525,6 +553,9 @@ class ExtendTest extends Test
                     "cache" => "/state",
                     "mappings" => [],
                     "sources" => [],
+                    "extendables" => [
+                        "/ex0"
+                    ],
                     "extensions" => [
                         "/ex"
                     ]
@@ -538,9 +569,11 @@ class ExtendTest extends Test
                 "structure" => [
                     "cache" => "/state",
                     "mappings" => [
-                        "/###i2" => ":i1/ex"
+                        "/###i2" => ":i1/ex",
+                        "/###i22" => ":i1/ex0"
                     ],
                     "extensions" => [],
+                    "extendables" => [],
                     "sources" => [
                         "/deps" => ["i1"]
                     ]
@@ -662,10 +695,13 @@ class ExtendTest extends Test
                         "return [" .
 
                         // test order
+                        "\n\t\"/ex0\" => [" .
+                        "\n\t\t2 => \"/deps/i2/###i22\"," .
+                        "\n\t\t3 => \"/###i00\"," .
+                        "\n\t]," .
                         "\n\t\"/ex\" => [" .
                         "\n\t\t2 => \"/deps/i2/###i2\"," .
                         "\n\t\t3 => \"/###i0\"," .
-                        "\n\t\t4 => \"/###i0\"," .
                         "\n\t]," .
                         "\n];"
 

@@ -46,6 +46,9 @@ class Structure
     /** @var string[] Extension category. */
     private array $extension = [];
 
+    /** @var string[] Extension category. */
+    private array $extendable = [];
+
     /** @var array<string, string[]> Loadable category. */
     private array $loadable = [];
 
@@ -86,6 +89,7 @@ class Structure
             "stateful" => "",
             "sources" => [],
             "extensions" => [],
+            "extendables" => [],
             "mappings" => [],
             "namespaces" => [],
             "states" => [],
@@ -118,6 +122,9 @@ class Structure
                 $structure->extension,
                 $meta["structure"]["extensions"]
             );
+
+        if ($structure->extendable)
+            $meta["structure"]["extendables"] = $structure->extendable;
 
         if ($structure->state)
             State::normalize(
@@ -224,6 +231,12 @@ class Structure
             // mutable dir
             elseif ($value == "mutable" && !$source)
                 $this->mutable[] = ($key[0] ?? null) === '/' ?
+                    $path . $key :
+                    $path;
+
+            // extendable dir
+            elseif ($value == "extendable" && !$source)
+                $this->extendable[] = ($key[0] ?? null) === '/' ?
                     $path . $key :
                     $path;
 

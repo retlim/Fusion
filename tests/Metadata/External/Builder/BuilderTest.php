@@ -97,6 +97,7 @@ class BuilderTest extends Test
                     "stateful" => "/state",
                     "sources" => [],
                     "extensions" => [],
+                    "extendables" => [],
                     "mappings" => [],
                     "namespaces" => [],
                     "states" => [],
