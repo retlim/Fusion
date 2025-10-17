@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Log\Events\Infos;
@@ -23,9 +25,6 @@ use Valvoid\Fusion\Log\Events\Event;
 
 /**
  * Parsed metadata content info.
- *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Content implements Event
 {

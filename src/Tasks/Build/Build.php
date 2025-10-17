@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tasks\Build;
@@ -46,9 +48,6 @@ use Valvoid\Fusion\Wrappers\Extension;
 
 /**
  * Build task to get external package metas.
- *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Build extends Task implements Interceptor
 {

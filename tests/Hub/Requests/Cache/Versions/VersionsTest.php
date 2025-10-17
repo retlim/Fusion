@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Hub\Requests\Cache\Versions;
@@ -29,10 +31,6 @@ use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Hub\Responses\Cache\Versions as VersionsResponse;
 use Valvoid\Fusion\Log\Events\Errors\Request;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class VersionsTest extends Test
 {
     protected string|array $coverage = Versions::class;

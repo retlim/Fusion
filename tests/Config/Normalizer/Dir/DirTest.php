@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Config\Normalizer\Dir;
@@ -28,10 +30,6 @@ use Valvoid\Fusion\Tests\Config\Normalizer\Dir\Mocks\SystemMock;
 use Valvoid\Fusion\Tests\Config\Parser\Dir\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Test;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class DirTest extends Test
 {
     protected string|array $coverage = Dir::class;

@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Metadata\Internal;
@@ -27,11 +29,6 @@ use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\GroupMock;
 use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
-/**
- *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class InternalTest extends Test
 {
     /** @var string|array  */

@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Hub;
@@ -40,12 +42,6 @@ use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\CurlMulti;
 use Valvoid\Fusion\Wrappers\CurlShare;
 
-/**
- * Hub test.
- *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class HubTest extends Test
 {
     protected string|array $coverage = [

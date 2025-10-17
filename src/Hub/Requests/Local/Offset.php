@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Hub\Requests\Local;
@@ -26,9 +28,6 @@ use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
 
 /**
  * Local offset synchronization request.
- *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Offset extends Local
 {

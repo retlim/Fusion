@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Tasks\Shift;
@@ -36,10 +38,6 @@ use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Tasks\Shift\Mocks\SystemMock;
 use Valvoid\Fusion\Tests\Test;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class ShiftTest extends Test
 {
     protected string|array $coverage = Shift::class;

@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Config\Normalizer\Tasks;
@@ -27,10 +29,6 @@ use Valvoid\Fusion\Tests\Config\Normalizer\Tasks\Mocks\ConfigMock;
 use Valvoid\Fusion\Tests\Config\Normalizer\Tasks\Mocks\NormalizerMock;
 use Valvoid\Fusion\Tests\Test;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class TasksTest extends Test
 {
     protected string|array $coverage = Tasks::class;

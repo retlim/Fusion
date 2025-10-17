@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Util\Reference;
@@ -22,11 +24,6 @@ namespace Valvoid\Fusion\Tests\Util\Reference;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Util\Reference\Normalizer;
 
-/**
- *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class NormalizerTest extends Test
 {
     protected string|array $coverage = Normalizer::class;

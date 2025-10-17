@@ -15,16 +15,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Hub\APIs\Local\Git\Mocks;
 
 use Valvoid\Fusion\Wrappers\Program;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class GitMock extends Program
 {
     public function execute(string $command, array &$output, int &$result_code): string|false

@@ -15,16 +15,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Hub\Mocks;
 
 use Valvoid\Fusion\Config\Proxy;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class ConfigMock implements Proxy
 {
     public function get(string ...$breadcrumb): mixed

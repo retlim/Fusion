@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Config\Normalizer\Log\Mocks;
@@ -22,10 +24,6 @@ namespace Valvoid\Fusion\Tests\Config\Normalizer\Log\Mocks;
 use Closure;
 use Valvoid\Fusion\Box\Box;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class BoxMock extends Box
 {
     public Closure $get;

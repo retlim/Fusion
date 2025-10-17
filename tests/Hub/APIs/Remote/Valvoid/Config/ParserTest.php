@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Hub\APIs\Remote\Valvoid\Config;
@@ -22,10 +24,6 @@ namespace Valvoid\Fusion\Tests\Hub\APIs\Remote\Valvoid\Config;
 use Valvoid\Fusion\Hub\APIs\Remote\Valvoid\Config\Parser;
 use Valvoid\Fusion\Tests\Test;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class ParserTest extends Test
 {
     /** @var string|array Code coverage. */

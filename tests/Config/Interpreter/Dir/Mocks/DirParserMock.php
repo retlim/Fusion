@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Config\Interpreter\Dir\Mocks;
@@ -23,10 +25,6 @@ use Closure;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Config\Parser\Dir;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class DirParserMock extends Dir
 {
     public Closure $path;

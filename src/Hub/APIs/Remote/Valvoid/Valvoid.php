@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Hub\APIs\Remote\Valvoid;
@@ -25,9 +27,6 @@ use Valvoid\Fusion\Hub\Responses\Remote\References;
 
 /**
  * Valvoid API.
- *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Valvoid extends Remote
 {

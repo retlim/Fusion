@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Hub\APIs\Local\Dir;
@@ -29,10 +31,6 @@ use Valvoid\Fusion\Hub\Responses\Local\File as FileResponse;
 use Valvoid\Fusion\Hub\Responses\Local\References as ReferencesResponse;
 use Valvoid\Fusion\Hub\Responses\Local\Archive as ArchiveResponse;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class DirTest extends Test
 {
     protected Dir $api;

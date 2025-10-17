@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Hub\Requests\Local\Offset;
@@ -28,10 +30,6 @@ use Valvoid\Fusion\Tests\Hub\Requests\Local\Offset\Mocks\CacheMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Local\Offset\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Test;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class OffsetTest extends Test
 {
     protected string|array $coverage = Offset::class;

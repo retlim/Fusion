@@ -15,13 +15,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /**
  * Autoloader for accessing lazy and ASAP package code.
  *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
  * @deprecated This legacy autoloader will be removed in version 2.0.0.
  * Use "PrefixAutoloader.php" instead.
  */

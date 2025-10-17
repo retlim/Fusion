@@ -15,16 +15,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Config\Normalizer\Log\Mocks;
 
 use Valvoid\Fusion\Config\Normalizer;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class NormalizerMock extends Normalizer
 {
     public static function normalize(array $breadcrumb, array &$config): void

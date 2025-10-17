@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests;
@@ -31,10 +33,6 @@ use Valvoid\Fusion\Tests\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Mocks\TaskMock;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class FusionTest extends Test
 {
     protected string|array $coverage = Fusion::class;

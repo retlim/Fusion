@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tasks\Copy;
@@ -34,9 +36,6 @@ use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Copy task to cache non-obsolete internal packages.
- *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Copy extends Task
 {

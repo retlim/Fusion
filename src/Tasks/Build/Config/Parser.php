@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tasks\Build\Config;
@@ -24,9 +26,6 @@ use Valvoid\Fusion\Util\Version\Parser as VersionParser;
 
 /**
  * Build task config parser.
- *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Parser extends ConfigParser
 {

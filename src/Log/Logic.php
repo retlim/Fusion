@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Log;
@@ -30,9 +32,6 @@ use Valvoid\Fusion\Log\Serializers\Streams\Stream;
 
 /**
  * Default event log implementation.
- *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
  */
 class Logic implements Proxy
 {

@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Hub\APIs\Local\Git\Mocks;
@@ -24,10 +26,6 @@ use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Mocks\PharDataMock;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class BoxMock extends Box
 {
     public GitMock $program;

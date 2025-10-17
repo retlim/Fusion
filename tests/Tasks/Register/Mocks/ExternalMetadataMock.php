@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Tasks\Register\Mocks;
@@ -22,10 +24,6 @@ namespace Valvoid\Fusion\Tests\Tasks\Register\Mocks;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Metadata\External\Category;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class ExternalMetadataMock extends External
 {
     public function __construct(

@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Tasks\Stack\Mocks;
@@ -23,10 +25,6 @@ use Closure;
 use Valvoid\Fusion\Metadata\Internal\Internal;
 use Valvoid\Fusion\Metadata\Internal\Category;
 
-/**
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class InternalMetadataMock extends Internal
 {
     public Closure $copy;

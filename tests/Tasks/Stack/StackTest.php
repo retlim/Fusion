@@ -15,6 +15,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 namespace Valvoid\Fusion\Tests\Tasks\Stack;
@@ -32,12 +34,6 @@ use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\InternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Stack\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
 
-/**
- * Stack test.
- *
- * @copyright Valvoid
- * @license SPDX-License-Identifier: GPL-3.0-or-later
- */
 class StackTest extends Test
 {
     protected string|array $coverage = [
