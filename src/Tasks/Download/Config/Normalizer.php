@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Fusion - PHP Package Manager
  * Copyright © Valvoid
  *
