@@ -34,62 +34,36 @@ use Valvoid\Fusion\Tasks\Stack\Stack;
 
 return [
     "tasks" => [
-
-        // update/upgrade
         "build" => [
-
-            // potential latest state
             "image" => Image::class,
             "build" => Build::class,
             "categorize" => Categorize::class,
-
-            // separated packages
-            // flat ID cache directory structure
             "download" => Download::class,
             "copy" => Copy::class,
             "extend" => Extend::class,
             "inflate" => Inflate::class,
             "register" => Register::class,
             "snap" => Snap::class,
-
-            // cached latest state
             "stack" => Stack::class,
-
-            // latest state
             "shift" => Shift::class,
         ],
-
-        // clone
         "replicate" => [
-
-            // potential locked state
             "image" => Image::class,
             "replicate" => Replicate::class,
             "categorize" => Categorize::class,
-
-            // separated packages
-            // flat ID cache directory structure
             "download" => Download::class,
             "copy" => Copy::class,
             "extend" => Extend::class,
             "inflate" => Inflate::class,
             "register" => Register::class,
             "snap" => Snap::class,
-
-            // cached locked state
             "stack" => Stack::class,
-
-            // locked state
             "shift" => Shift::class,
         ],
-
-        // normalize
         "inflate" => [
             "image" => Image::class,
             "inflate" => Inflate::class
         ],
-
-        // connect
         "register" => [
             "image" => Image::class,
             "inflate" => Inflate::class,
