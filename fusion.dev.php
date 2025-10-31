@@ -21,8 +21,6 @@
 
 return [
     "structure" => [
-
-        // reset self-dependency
         "valvoid.com/valvoid/fusion" => null
     ]
 ];
