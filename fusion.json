@@ -2,7 +2,7 @@
     "name": "Fusion",
     "description": "A package manager for PHP-based projects.",
     "id": "valvoid/fusion",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "structure": {
         "valvoid.com/valvoid": "fusion/1.0.0",
         "/state": "cache",
