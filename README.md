@@ -53,7 +53,7 @@ for lazy and ASAP (as soon as possible) loading.
 - The lazy file contains OOP (Object-Oriented Programming) code for autoloading on demand.
 - The ASAP file contains preloadable procedural code.
 
-These files are stored in a [custom state directory](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#state-directory-indicator)
+These files are stored in a [custom state directory](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#stateful-directory-indicator)
 relative to the package root and can be used individually within your package or
 combined into a common autoloader for the root package.
 
@@ -61,7 +61,7 @@ combined into a common autoloader for the root package.
 
 Fusion offers full support for [semantic versioning](https://semver.org), as well
 as commit, branch, and tag offsets, which can be extended by intuitive, well-known
-logic for [complex references](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#reference),
+logic for [complex references](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#trailing-reference-segment),
 similar to the syntax used in code:
 
 - Logical `&&` and `||` operators.
@@ -79,7 +79,7 @@ callback and should be handled individually as new content, set the [mutable](ht
 indicator in your metadata.
 
 To allow other packages to extend yours at a special directory using the default 
-built-in, out-of-the-box behavior, set the [extension](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#extension-directory-indicator) 
+built-in, out-of-the-box behavior, set the [extendable](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#extendable-directory-indicator) 
 indicator in your metadata. Fusion will also generate an extensions file for your 
 package, containing the parent package dirs and the order in which they extend it, 
 in case your package needs to know this.
