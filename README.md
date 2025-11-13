@@ -1,7 +1,7 @@
 # About Fusion
 
 Fusion is a PHP package manager that manages dependencies, loadable source 
-code, extensions, and state for PHP projects.
+code, extensions, and state of PHP projects.
 
 ## Documentation
 
@@ -41,19 +41,11 @@ in your metadata at the key stages:
 - After the package is recycled, downloaded, installed, or updated.
 - Before the package is migrated or deleted.
 
-### Auto-Generated Code Registries
+### Loadable Code
 
-When [package identifier](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/primitive#id)
-segments, defined in your metadata and separated by `/`, match or prefix [code namespace](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/code)
-segments, separated by `\`, Fusion automatically registers your code in two files
-for lazy and ASAP (as soon as possible) loading.
-
-- The lazy file contains OOP (Object-Oriented Programming) code for autoloading on demand.
-- The ASAP file contains preloadable procedural code.
-
-These files are stored in a [custom state directory](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#stateful-directory-indicator)
-relative to the package root and can be used individually within your package or
-combined into a common autoloader for the root package.
+All object-oriented and procedural code is automatically indexed into granular 
+files for custom loading. The same files also form the basis of a pre-built 
+autoloader, providing default out-of-the-box loading.
 
 ### Flexible Package References
 
