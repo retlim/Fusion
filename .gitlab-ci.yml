@@ -24,7 +24,7 @@ analyze code:
 
 build development package:
   stage: test
-  image: valvoid/fusion:1.0
+  image: valvoid/fusion:1
   script:
     - fusion build
   artifacts:
@@ -62,7 +62,7 @@ test integrations:
 
 build standalone package:
   stage: deploy
-  image: valvoid/fusion:1.0
+  image: valvoid/fusion:1
   variables:
     GIT_STRATEGY: empty
   rules:
