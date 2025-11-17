@@ -3,6 +3,12 @@
 Fusion is a PHP package manager that manages dependencies, loadable source 
 code, extensions, and state of PHP projects.
 
+> [!IMPORTANT]
+> This is a mirror repository and is not actively developed here. 
+> Please do not open pull requests or issues on GitHub. For active 
+> development, contributions, and discussions, visit [the official GitLab 
+> repository](https://gitlab.com/valvoid/fusion/code).
+
 ## Documentation
 
 The separated [documentation repository](https://gitlab.com/valvoid/fusion/docs)
