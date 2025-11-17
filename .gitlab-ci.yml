@@ -65,6 +65,7 @@ build standalone package:
   image: valvoid/fusion:1
   variables:
     GIT_STRATEGY: empty
+    XDG_STATE_HOME: $CI_BUILDS_DIR/.state
   rules:
     - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX
   dependencies: []
