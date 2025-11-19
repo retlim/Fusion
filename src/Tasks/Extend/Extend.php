@@ -122,8 +122,13 @@ class Extend extends Task
                     $mappings[$mapping][$id] = $metadata->getDir() .
                         $dir;
 
+                $separators = substr_count($this->directory->getRootDir() .
+                    $metadata->getDir() .
+                    $metadata->getStructureCache(), '/');
+
                 $this->structures[$id] = [
                     "dir" => "$this->packagesDir/$id",
+                    "separators" => $separators,
                     "state" => $metadata->getStructureCache(),
                     "extensions" => $metadata->getStructureExtensions(),
                     "extendables" => $metadata->getExtendablePaths()
@@ -145,8 +150,13 @@ class Extend extends Task
                     $mappings[$mapping][$id] = $metadata->getDir() .
                         $dir;
 
+                $separators = substr_count($this->directory->getRootDir() .
+                    $metadata->getDir() .
+                    $metadata->getStructureCache(), '/');
+
                 $this->structures[$id] = [
                     "dir" => "$this->packagesDir/$id",
+                    "separators" => $separators,
                     "state" => $metadata->getStructureCache(),
                     "extensions" => $metadata->getStructureExtensions(),
                     "extendables" => $metadata->getExtendablePaths()
@@ -169,8 +179,12 @@ class Extend extends Task
                         $mappings[$mapping][$id] = $metadata->getDir() .
                             $dir;
 
+                    $separators = substr_count($metadata->getSource() .
+                        $metadata->getStructureCache(), '/');
+
                     $this->structures[$id] = [
                         "dir" => $metadata->getSource(),
+                        "separators" => $separators,
                         "extensions" => $metadata->getStructureExtensions(),
                         "state" => $metadata->getStructureCache(),
                         "extendables" => $metadata->getExtendablePaths()
@@ -186,8 +200,7 @@ class Extend extends Task
             $filter = $this->filters[$id_];
             $dir = $structure["dir"];
             $state = $dir . $structure["state"];
-            $stateSeparators = substr_count($state, '/');
-            $dynamicRoot = "dirname(__DIR__, " . $stateSeparators - $rootSeparators . ")";
+            $dynamicRoot = "dirname(__DIR__, " . $structure["separators"] - $rootSeparators . ")";
             $content = "";
 
             // mapping indicator
