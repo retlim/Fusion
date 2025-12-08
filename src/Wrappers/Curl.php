@@ -38,12 +38,6 @@ class Curl
         $this->handle = curl_init();
     }
 
-    /** Destructs the wrapper. */
-    public function __destruct()
-    {
-        curl_close($this->handle);
-    }
-
     /**
      * Sets an option for a cURL transfer.
      *
