@@ -37,12 +37,6 @@ class CurlShare
         $this->handle = curl_share_init();
     }
 
-    /** Destructs the wrapper. */
-    public function __destruct()
-    {
-        curl_share_close($this->handle);
-    }
-
     /**
      * Sets an option for a cURL share handle.
      *
