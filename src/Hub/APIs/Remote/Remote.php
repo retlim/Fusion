@@ -185,7 +185,7 @@ abstract class Remote
      */
     private function assignTokens(array $path, array $tokens, array &$selection): void
     {
-        $pathPrefix = array_shift($path);
+        $pathPrefix = array_shift($path) ?? "";
 
         // assign prefixed nested tokens
         // sub tier
