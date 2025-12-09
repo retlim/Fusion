@@ -28,9 +28,6 @@ class DirectoryMock implements Proxy
 {
     public Closure $packages;
     public Closure $create;
-    public Closure $delete;
-    public Closure $rename;
-    public Closure $clear;
 
     public function getPackagesDir(): string
     {
@@ -42,20 +39,9 @@ class DirectoryMock implements Proxy
         call_user_func($this->create, $dir, $permissions);
     }
 
-    public function delete(string $file): void
-    {
-        call_user_func($this->delete, $file);
-    }
-
-    public function rename(string $from, string $to): void
-    {
-        call_user_func($this->rename, $from, $to);
-    }
-    public function clear(string $dir, string $path): void
-    {
-        call_user_func($this->clear, $dir, $path);
-    }
-
+    public function delete(string $file): void {}
+    public function rename(string $from, string $to): void {}
+    public function clear(string $dir, string $path): void {}
     public function copy(string $from, string $to): void {}
     public function getTaskDir(): string {return "";}
     public function getStateDir(): string {return "";}

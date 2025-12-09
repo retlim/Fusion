@@ -26,7 +26,6 @@ use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
 use Valvoid\Fusion\Tasks\Extend\Extend;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\DirectoryMock;
-use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\ExternalMetadataMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Tasks\Extend\Mocks\GroupMock;
@@ -58,7 +57,6 @@ class ExtendTest extends Test
         try {
             $group = new GroupMock;
             $directory = new DirectoryMock;
-            $dirWrapper = new DirMock;
             $fileWrapper = new FileMock;
             $task = new Extend(
                 $this->box,
@@ -66,7 +64,6 @@ class ExtendTest extends Test
                 $this->log,
                 $directory,
                 $fileWrapper,
-                $dirWrapper,
                 []);
 
             $group->implication = ["i1/i1" => [
@@ -81,15 +78,10 @@ class ExtendTest extends Test
                 "structure" => [
                     "cache" => "/state",
                     "mappings" => [
-                        "/###" => ":i1/i1/ex0",
-
                         // 1:1 mapping
                         "/##" => ":i1/i1/ex00",
-                        "/####" => ":i1/i1/ex00",
-
-                        "/#" => ":i1/i1/ex1"
+                        "/####" => ":i1/i1/ex00"
                     ],
-                    "extensions" => [],
                     "extendables" => [],
                     "sources" => [
                         "/deps" => []
@@ -108,50 +100,16 @@ class ExtendTest extends Test
                     "extendables" => [
                         "/ex00",
                     ],
-                    "extensions" => [
-                        "/ex0",
-                        "/ex1"
-                    ],
                     "sources" => []
                 ]
             ]);
 
             $create =
-            $put =
-            $filenames =
-            $delete = [];
+            $put = [];
 
             // i0, i1 cache dirs must exist
             $directory->create = function (string $dir) use (&$create) {
                 $create[] = $dir;
-            };
-
-            // i1 has obsolete i2 extension
-            $directory->delete = function (string $file) use (&$delete) {
-                $delete[] = $file;
-            };
-
-            // checks custom ext dirs inside dep
-            $dirWrapper->is = function (string $dir) {
-                return $dir == "/s0/deps/s1/ex0" ||
-                    $dir == "/s0/deps/s1/ex0/i0" ||
-                    $dir == "/s0/deps/s1/ex0/i1" ||
-                    $dir == "/s0/deps/s1/ex0/i1/i1" ||
-                    $dir == "/s0/deps/s1/ex0/i2";
-            };
-
-            // filter custom extensions
-            // inside dependency package
-            $dirWrapper->filenames = function (string $dir) use (&$filenames) {
-                $filenames[] = $dir;
-
-                if ($dir == "/s0/deps/s1/ex0")
-                    return ["i0", "i1", "i2"];
-
-                if ($dir == "/s0/deps/s1/ex0/i1")
-                    return ["i1"];
-
-                return [];
             };
 
             // extensions.php
@@ -171,14 +129,6 @@ class ExtendTest extends Test
             if ($create != ["/s0/state", "/s0/deps/s1/state"])
                 $this->handleFailedTest();
 
-            // delete obsolete extension
-            if ($delete != ["/s0/deps/s1/ex0/i2"])
-                $this->handleFailedTest();
-
-            // implication
-            if ($filenames != ["/s0/deps/s1/ex0", "/s0/deps/s1/ex0/i1"])
-                $this->handleFailedTest();
-
             if ($put != [[
                     "file" => "/s0/state/extensions.php",
                     "content" => "<?php return [\n];"
@@ -189,13 +139,6 @@ class ExtendTest extends Test
                         // test order
                         "\n\t\"/ex00\" => [" .
                         "\n\t\t1 => dirname(__DIR__, 4) . \"/d0/####\"," . // 1:1 mapping
-                        "\n\t]," .
-                        "\n\t\"/ex0\" => [" .
-                        "\n\t\t0 => \"i1/i1\"," . // same injection and
-                        "\n\t\t1 => dirname(__DIR__, 4) . \"/d0/###\"," . // mapping
-                        "\n\t]," .
-                        "\n\t\"/ex1\" => [" .
-                        "\n\t\t1 => dirname(__DIR__, 4) . \"/d0/#\"," . // mapping
                         "\n\t]," .
                         "\n];"
 
@@ -211,7 +154,6 @@ class ExtendTest extends Test
         try {
             $group = new GroupMock;
             $directory = new DirectoryMock;
-            $dirWrapper = new DirMock;
             $fileWrapper = new FileMock;
             $task = new Extend(
                 $this->box,
@@ -219,7 +161,6 @@ class ExtendTest extends Test
                 $this->log,
                 $directory,
                 $fileWrapper,
-                $dirWrapper,
                 []);
 
             $group->internalMetas = [
@@ -230,7 +171,6 @@ class ExtendTest extends Test
                     "structure" => [
                         "cache" => "/state",
                         "mappings" => [],
-                        "extensions" => [],
                         "extendables" => [],
                         "sources" => [
                             "/deps" => []
@@ -268,7 +208,6 @@ class ExtendTest extends Test
                         "/###i0" => ":i1/ex",
                         "/###i00" => ":i1/ex0"
                     ],
-                    "extensions" => [],
                     "extendables" => [],
                     "sources" => [
                         "/deps" => [
@@ -290,9 +229,6 @@ class ExtendTest extends Test
                     "sources" => [],
                     "extendables" => [
                         "/ex0"
-                    ],
-                    "extensions" => [
-                        "/ex"
                     ]
                 ]
             ]);
@@ -307,7 +243,6 @@ class ExtendTest extends Test
                         "/###i2" => ":i1/ex",
                         "/###i22" => ":i1/ex0"
                     ],
-                    "extensions" => [],
                     "extendables" => [],
                     "sources" => [
                         "/deps" => ["i1"]
@@ -316,11 +251,7 @@ class ExtendTest extends Test
             ]);
 
             $create =
-            $put =
-            $filenames =
-            $rename =
-            $clear =
-            $delete = [];
+            $put = [];
 
             // cached individual packages
             $directory->packages = function () {
@@ -331,48 +262,6 @@ class ExtendTest extends Test
             // i0, i1, i2 cache dirs must exist
             $directory->create = function (string $dir) use (&$create) {
                 $create[] = $dir;
-            };
-
-            $dirWrapper->is = function (string $dir) {
-
-                // downloaded with deps
-                return $dir == "/p/i0/deps/i1/ex/i0" ||
-                    $dir == "/p/i2/deps/i1/ex/i2" ||
-
-                    // renamed into individual package
-                    $dir == "/p/i1/ex" ||
-                    $dir == "/p/i1/ex/i0" ||
-                    $dir == "/p/i1/ex/i2";
-            };
-
-            $directory->clear = function (string $dir, string $path) use (&$clear) {
-                $clear[] = [
-                    "dir" => $dir,
-                    "path" => $path
-                ];
-            };
-
-            $directory->rename = function (string $from, string $to) use (&$rename) {
-                $rename[] = [
-                    "from" => $from,
-                    "to" => $to
-                ];
-            };
-
-            // prepare to dirs
-            $directory->delete = function (string $file) use (&$delete) {
-                $delete[] = $file;
-            };
-
-            // filter custom extensions
-            // inside dependency package
-            $dirWrapper->filenames = function (string $dir) use (&$filenames) {
-                $filenames[] = $dir;
-
-                if ($dir == "/p/i1/ex")
-                    return ["i0", "i2"];
-
-                return [];
             };
 
             // extensions.php
@@ -388,31 +277,7 @@ class ExtendTest extends Test
 
             $task->execute();
 
-            if ($create != ["/p/i1/ex/i0", "/p/i1/ex/i2",
-                    "/p/i0/state", "/p/i1/state", "/p/i2/state"])
-                $this->handleFailedTest();
-
-            if ($delete != ["/p/i1/ex/i0", "/p/i1/ex/i2"])
-                $this->handleFailedTest();
-
-            if ($rename != [[
-                    "from" => "/p/i0/deps/i1/ex/i0",
-                    "to" => "/p/i1/ex/i0"
-                ],[
-                    "from" => "/p/i2/deps/i1/ex/i2",
-                    "to" => "/p/i1/ex/i2"
-                ]]) $this->handleFailedTest();
-
-            if ($clear != [[
-                    "dir" => "/p/i0/deps",
-                    "path" => "/i1/ex/i0"
-                ],[
-                    "dir" => "/p/i2/deps",
-                    "path" => "/i1/ex/i2"
-                ]]) $this->handleFailedTest();
-
-            // implication
-            if ($filenames != ["/p/i1/ex"])
+            if ($create != ["/p/i0/state", "/p/i1/state", "/p/i2/state"])
                 $this->handleFailedTest();
 
             if ($put != [[
@@ -427,11 +292,6 @@ class ExtendTest extends Test
                         "\n\t\"/ex0\" => [" .
                         "\n\t\t2 => dirname(__DIR__, 3) . \"/deps/i2/###i22\"," .
                         "\n\t\t3 => dirname(__DIR__, 3) . \"/###i00\"," .
-                        "\n\t]," .
-                        // deprecated inject + mapping
-                        "\n\t\"/ex\" => [" .
-                        "\n\t\t2 => dirname(__DIR__, 3) . \"/deps/i2/###i2\"," .
-                        "\n\t\t3 => dirname(__DIR__, 3) . \"/###i0\"," .
                         "\n\t]," .
                         "\n];"
 
@@ -450,7 +310,6 @@ class ExtendTest extends Test
         try {
             $group = new GroupMock;
             $directory = new DirectoryMock;
-            $dirWrapper = new DirMock;
             $fileWrapper = new FileMock;
             $task = new Extend(
                 $this->box,
@@ -458,7 +317,6 @@ class ExtendTest extends Test
                 $this->log,
                 $directory,
                 $fileWrapper,
-                $dirWrapper,
                 []);
 
             $group->internalMetas = [
@@ -473,7 +331,6 @@ class ExtendTest extends Test
                             "/###i00" => ":i1/ex0"
                         ],
                         "extendables" => [],
-                        "extensions" => [],
                         "sources" => [
                             "/deps" => [
                                 "i1",
@@ -514,7 +371,6 @@ class ExtendTest extends Test
                         "/###i00" => ":i1/ex0"
                     ],
                     "extendables" => [],
-                    "extensions" => [],
                     "sources" => [
                         "/deps" => [
                             "i1",
@@ -536,9 +392,6 @@ class ExtendTest extends Test
                     "extendables" => [
                         "/ex0"
                     ],
-                    "extensions" => [
-                        "/ex"
-                    ]
                 ]
             ]);
 
@@ -552,7 +405,6 @@ class ExtendTest extends Test
                         "/###i2" => ":i1/ex",
                         "/###i22" => ":i1/ex0"
                     ],
-                    "extensions" => [],
                     "extendables" => [],
                     "sources" => [
                         "/deps" => ["i1"]
@@ -561,11 +413,7 @@ class ExtendTest extends Test
             ]);
 
             $create =
-            $put =
-            $filenames =
-            $rename =
-            $clear =
-            $delete = [];
+            $put = [];
 
             // cached individual packages
             $directory->packages = function () {
@@ -576,48 +424,6 @@ class ExtendTest extends Test
             // i0, i1, i2 cache dirs must exist
             $directory->create = function (string $dir) use (&$create) {
                 $create[] = $dir;
-            };
-
-            $dirWrapper->is = function (string $dir) {
-
-                // downloaded with deps
-                return $dir == "/p/i0/deps/i1/ex/i0" ||
-                    $dir == "/p/i2/deps/i1/ex/i2" ||
-
-                    // renamed into individual package
-                    $dir == "/p/i1/ex" ||
-                    $dir == "/p/i1/ex/i0" ||
-                    $dir == "/p/i1/ex/i2";
-            };
-
-            $directory->clear = function (string $dir, string $path) use (&$clear) {
-                $clear[] = [
-                    "dir" => $dir,
-                    "path" => $path
-                ];
-            };
-
-            $directory->rename = function (string $from, string $to) use (&$rename) {
-                $rename[] = [
-                    "from" => $from,
-                    "to" => $to
-                ];
-            };
-
-            // prepare to dirs
-            $directory->delete = function (string $file) use (&$delete) {
-                $delete[] = $file;
-            };
-
-            // filter custom extensions
-            // inside dependency package
-            $dirWrapper->filenames = function (string $dir) use (&$filenames) {
-                $filenames[] = $dir;
-
-                if ($dir == "/p/i1/ex")
-                    return ["i0", "i2"];
-
-                return [];
             };
 
             // extensions.php
@@ -633,31 +439,7 @@ class ExtendTest extends Test
 
             $task->execute();
 
-            if ($create != ["/p/i1/ex/i0", "/p/i1/ex/i2",
-                    "/p/i0/state", "/p/i1/state", "/p/i2/state"])
-                $this->handleFailedTest();
-
-            if ($delete != ["/p/i1/ex/i0", "/p/i1/ex/i2"])
-                $this->handleFailedTest();
-
-            if ($rename != [[
-                    "from" => "/p/i0/deps/i1/ex/i0",
-                    "to" => "/p/i1/ex/i0"
-                ],[
-                    "from" => "/p/i2/deps/i1/ex/i2",
-                    "to" => "/p/i1/ex/i2"
-                ]]) $this->handleFailedTest();
-
-            if ($clear != [[
-                    "dir" => "/p/i0/deps",
-                    "path" => "/i1/ex/i0"
-                ],[
-                    "dir" => "/p/i2/deps",
-                    "path" => "/i1/ex/i2"
-                ]]) $this->handleFailedTest();
-
-            // implication
-            if ($filenames != ["/p/i1/ex"])
+            if ($create != ["/p/i0/state", "/p/i1/state", "/p/i2/state"])
                 $this->handleFailedTest();
 
             if ($put != [[
@@ -671,10 +453,6 @@ class ExtendTest extends Test
                         "\n\t\"/ex0\" => [" .
                         "\n\t\t2 => dirname(__DIR__, 3) . \"/deps/i2/###i22\"," .
                         "\n\t\t3 => dirname(__DIR__, 3) . \"/###i00\"," .
-                        "\n\t]," .
-                        "\n\t\"/ex\" => [" .
-                        "\n\t\t2 => dirname(__DIR__, 3) . \"/deps/i2/###i2\"," .
-                        "\n\t\t3 => dirname(__DIR__, 3) . \"/###i0\"," .
                         "\n\t]," .
                         "\n];"
 
