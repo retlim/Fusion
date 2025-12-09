@@ -275,7 +275,7 @@ class Logic implements Proxy
         $file = "$this->root/state/extensions.php";
         $extensions = $this->file->is($file) ?
             $this->file->require($file) :
-            ["/extensions/config" => []];
+            ["/config" => []];
 
         if ($extensions === false)
             throw new Error(
@@ -285,23 +285,10 @@ class Logic implements Proxy
         // flat implication
         // may contain duplicate values
         // take first
-        $extensions = array_unique($extensions["/extensions/config"]);
+        $extensions = array_unique($extensions["/config"]);
         $system = "$path/config.json";
 
-        foreach ($extensions as $extension) {
-            $dir = $extension;
-
-            // mapped directory or
-            // deprecated legacy identifier
-            if (!$this->dir->is($dir)) {
-                $dir = "$this->root/extensions/config/$extension";
-
-                if (!$this->dir->is($dir))
-                    throw new Error(
-                        "Cant read config extension '$dir'."
-                    );
-            }
-
+        foreach ($extensions as $dir) {
             $this->configs["persistence"][$dir] = [];
 
             $this->loadConfigs(

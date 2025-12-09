@@ -227,10 +227,7 @@ class LogicTest extends Test
                 if ($file == "/#/state/extensions.php")
                     return ["/config" => [],
                         "/extensions/config" => [
-                        1 => "ex0", // legacy injection
                         4 => "/ex1", // mapping
-                        // may multiple entries
-                        5 => "ex0", // legacy injection
                     ]];
             };
 
@@ -291,19 +288,13 @@ class LogicTest extends Test
                 $exists != ["/#/state/loadable/lazy.php", "/#c/config.json"] ||
                 $require != ["/#/state/extensions.php"] ||
                 $include != [
-                    "/#/config/f0.php",
-                    "/#/extensions/config/ex0/f1.php",
-                    "/ex1/f2.php"] ||
+                    "/#/config/f0.php"] ||
                 $interpret != [
                     ["f0"], // default
-                    ["f1"], // injection
-                    ["f2"], // mapping
                     ["config" => ["path" => "/#c"]]] || // runtime
-                $parse != [["f0"],["f1"],["f2"], ["config" => ["path" => "/#c"]]] ||
+                $parse != [["f0"], ["config" => ["path" => "/#c"]]] ||
                 $overlay != [
                     ["config" => ["common"], "layer" => ["f0"]],
-                    ["config" => ["common"], "layer" => ["f1"]],
-                    ["config" => ["common"], "layer" => ["f2"]],
                     ["config" => ["common"], "layer" => [
                         "config" => ["path" => "/#c"]]]] ||
                 $normalize != [["common"]])
