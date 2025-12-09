@@ -28,8 +28,6 @@ class DirectoryMock implements Proxy
 {
     public Closure $cache;
     public Closure $packages;
-    public Closure $create;
-    public Closure $delete;
 
     public function getCacheDir(): string
     {
@@ -41,16 +39,8 @@ class DirectoryMock implements Proxy
         return call_user_func($this->packages);
     }
 
-    public function createDir(string $dir, int $permissions = 0755): void
-    {
-        call_user_func($this->create, $dir, $permissions);
-    }
-
-    public function delete(string $file): void
-    {
-        call_user_func($this->delete, $file);
-    }
-
+    public function createDir(string $dir, int $permissions = 0755): void {}
+    public function delete(string $file): void {}
     public function rename(string $from, string $to): void {}
     public function clear(string $dir, string $path): void {}
     public function copy(string $from, string $to): void {}

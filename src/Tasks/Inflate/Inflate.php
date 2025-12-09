@@ -39,9 +39,6 @@ use Valvoid\Fusion\Wrappers\File;
  */
 class Inflate extends Task
 {
-    /** @var array Current meta loadable. */
-    private array $loadable;
-
     /** @var array Current meta exploded ID. */
     private array $idParts;
 
@@ -105,7 +102,6 @@ class Inflate extends Task
                 // dynamic root
                 // take current
                 $dir = "$packagesDir/$id";
-                $this->loadable = $meta->getStructureNamespaces();
                 $this->idParts = explode('/', $id);
                 $cache = $dir . $meta->getStructureCache();
 
@@ -121,7 +117,6 @@ class Inflate extends Task
                 // dynamic root
                 // take current
                 $dir = "$packagesDir/$id";
-                $this->loadable = $meta->getStructureNamespaces();
                 $this->idParts = explode('/', $id);
                 $cache = $dir . $meta->getStructureCache();
 
@@ -149,7 +144,6 @@ class Inflate extends Task
             // static state root
             // take absolute source dir as it is
             $dir = $meta->getSource();
-            $this->loadable = $meta->getStructureNamespaces();
             $this->idParts = explode('/', $id);
             $cache = $dir . $meta->getStructureCache();
 
@@ -172,8 +166,6 @@ class Inflate extends Task
 
         $this->extractLoadableFiles($dir, "", $cache);
 
-        $this->directory->delete("$cache/loadable");
-
         if ($this->file->is("$cache/lazy.php") &&
             $this->file->unlink("$cache/lazy.php") === false)
             throw new Error(
@@ -186,8 +178,11 @@ class Inflate extends Task
                 "Cant delete '$cache/asap.php'"
             );
 
-        $this->writeLazy($this->lazy, $cache);
-        $this->writeAsap($this->asap, $cache);
+        if ($this->lazy != [])
+            $this->writeLazy($this->lazy, $cache);
+
+        if ($this->asap != [])
+            $this->writeAsap($this->asap, $cache);
     }
 
     /**
@@ -243,8 +238,6 @@ class Inflate extends Task
         $size = sizeof($tokens);
         $namespace = "";
         $brace = $asap = false;
-        $root = null;
-        $rootSize = 0;
         $lazy = [];
 
         for ($i = 0; $i < $size; ++$i)
@@ -275,47 +268,6 @@ class Inflate extends Task
                         foreach ($this->idParts as $o => $part)
                             if (isset($space[$o]) && strcasecmp($space[$o], $part) !== 0)
                                 return;
-
-                        $space = [];
-
-                        foreach ($this->loadable as $namespacePrefix => $path)
-                            if (str_starts_with($tokens[$i]->text, $namespacePrefix)) {
-                                $space = explode('/', substr($path, 1));
-
-                                break;
-                            }
-
-                        $spaceSize = sizeof($space);
-
-                        // init
-                        if ($root == null) {
-                            $rootSize = $spaceSize;
-                            $root = $space;
-
-                        } else
-
-                            // depth
-                            if ($rootSize > $spaceSize) {
-                                $rootSize = $spaceSize;
-                                $root = $space;
-
-                            // alphabetical
-                            } elseif ($rootSize == $spaceSize)
-                                foreach ($root as $o => $item) {
-                                    $comparison = strcasecmp($item, $space[$o]);
-
-                                    // equal = 0 = continue
-                                    // item > then new = replace
-                                    if ($comparison > 0) {
-                                        $rootSize = $spaceSize;
-                                        $root = $space;
-
-                                        break;
-
-                                        // keep old root
-                                    } elseif ($comparison < 0)
-                                        break;
-                                }
 
                         $namespace = $tokens[$i]->text;
 
@@ -383,23 +335,11 @@ class Inflate extends Task
                     return;
             }
 
-        if ($root !== null) {
-            if ($root) {
-                $root = "/" . implode('/', $root);
+        if ($lazy)
+            $this->lazy = array_merge($this->lazy, $lazy);
 
-            } else
-                $root = "";
-
-            if ($asap)
-                (isset($this->asap[$root])) ?
-                    $this->asap[$root][] = $file :
-                    $this->asap[$root] = [$file];
-
-            else
-                (isset($this->lazy[$root])) ?
-                    $this->lazy[$root] = array_merge($this->lazy[$root], $lazy) :
-                    $this->lazy[$root] = $lazy;
-        }
+        elseif ($asap)
+            $this->asap[] = $file;
     }
 
     /**
@@ -439,42 +379,21 @@ class Inflate extends Task
      */
     private function writeAsap(array $asap, string $dir): void
     {
-        foreach ($asap as $root => $files) {
-            $content = "";
+        $content = "";
 
-            foreach ($files as $file)
-                $content .= "\n\t'$file',";
+        foreach ($asap as $file)
+            $content .= "\n\t'$file',";
 
-            $directory = "$dir/loadable$root";
+        if (!$this->file->put(
+            "$dir/asap.php",
+            "<?php\n" .
+            "// Auto-generated by Fusion package manager.\n" .
+            "// Do not modify.\n" .
+            "return [$content\n];"
 
-            $this->directory->createDir($directory);
-
-            if (!$this->file->put(
-                "$directory/asap.php",
-                "<?php\n" .
-                "// Auto-generated by Fusion package manager.\n".
-                "// Do not modify.\n" .
-                "return [$content\n];"
-
-            )) throw new Error(
-                    "Can't write to the file '$directory/asap.php'."
-                );
-
-            // loadable sub dir is obsolete
-            // write to state dir instead lazy.php
-            if ($root == "") {
-                if (!$this->file->put(
-                    "$dir/asap.php",
-                    "<?php\n" .
-                    "// Auto-generated by Fusion package manager.\n" .
-                    "// Do not modify.\n" .
-                    "return [$content\n];"
-
-                )) throw new Error(
-                    "Can't write to the file '$dir/asap.php'."
-                );
-            }
-        }
+        )) throw new Error(
+            "Can't write to the file '$dir/asap.php'."
+        );
     }
 
     /**
@@ -486,41 +405,20 @@ class Inflate extends Task
      */
     private function writeLazy(array $lazy, string $dir): void
     {
-        foreach ($lazy as $root => $map) {
-            $content = "";
+        $content = "";
 
-            foreach ($map as $loadable => $file)
-                $content .= "\n\t'$loadable' => '$file',";
+        foreach ($lazy as $loadable => $file)
+            $content .= "\n\t'$loadable' => '$file',";
 
-            $directory = "$dir/loadable$root";
+        if (!$this->file->put(
+            "$dir/lazy.php",
+            "<?php\n" .
+            "// Auto-generated by Fusion package manager.\n" .
+            "// Do not modify.\n" .
+            "return [$content\n];"
 
-            $this->directory->createDir($directory);
-
-            if (!$this->file->put(
-                "$directory/lazy.php",
-                "<?php\n" .
-                "// Auto-generated by Fusion package manager.\n" .
-                "// Do not modify.\n" .
-                "return [$content\n];"
-
-            )) throw new Error(
-                    "Can't write to the file '$directory/lazy.php'."
-                );
-
-            // loadable sub dir is obsolete
-            // write to state dir instead lazy.php
-            if ($root == "") {
-                if (!$this->file->put(
-                    "$dir/lazy.php",
-                    "<?php\n" .
-                    "// Auto-generated by Fusion package manager.\n" .
-                    "// Do not modify.\n" .
-                    "return [$content\n];"
-
-                )) throw new Error(
-                    "Can't write to the file '$dir/lazy.php'."
-                );
-            }
-        }
+        )) throw new Error(
+            "Can't write to the file '$dir/lazy.php'."
+        );
     }
 }

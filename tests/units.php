@@ -22,7 +22,7 @@
 use Valvoid\Fusion\Tests\Test;
 
 $root = dirname(__DIR__);
-$lazy = require "$root/state/loadable/lazy.php";
+$lazy = require "$root/state/lazy.php";
 $classnames = [];
 
 foreach ($lazy as $class => $path) {
