@@ -47,12 +47,6 @@ class Register extends Task
     private array $states = [];
 
     /**
-     * @var array On demand code.
-     * @deprecated will be remove in version 2.0.0
-     */
-    private array $lazy = [];
-
-    /**
      * Constructs the task.
      *
      * @param Box $box Dependency injection container.
@@ -101,10 +95,7 @@ class Register extends Task
                 $state = "$packages/$id" . $metadata->getStructureCache();
                 $this->states[$id] = $state;
 
-                $this->collectInflatedCode(
-                    "$state/loadable",
-                    $metadata->getDir()
-                );
+                $this->collectInflatedCode($state, $metadata->getDir());
             }
 
         foreach ($this->group->getInternalMetas() as $id => $metadata)
@@ -116,21 +107,13 @@ class Register extends Task
                 $state = "$packages/$id" . $metadata->getStructureCache();
                 $this->states[$id] = $state;
 
-                $this->collectInflatedCode(
-                    "$state/loadable",
-                    $metadata->getDir()
-                );
+                $this->collectInflatedCode($state, $metadata->getDir());
             }
 
         $rootMetadata = $this->group->getExternalRootMetadata() ??
             $this->group->getInternalRootMetadata();
 
         $path = $rootMetadata->getStructureCache();
-
-        $this->writeAutoloader(
-            "$packages/" . $rootMetadata->getId() . $path,
-            $path
-        );
 
         $this->writePrefixAutoloader(
             "$packages/" . $rootMetadata->getId() . $path,
@@ -158,15 +141,8 @@ class Register extends Task
             $state = $metadata->getSource() . $metadata->getStructureCache();
             $this->states[$id] = $state;
 
-            $this->collectInflatedCode(
-                "$state/loadable",
-                $metadata->getDir()
-            );
+            $this->collectInflatedCode($state, $metadata->getDir());
         }
-
-        $this->writeAutoloader($this->directory->getCacheDir(),
-            $this->group->getInternalRootMetadata()->getStructureCache()
-        );
 
         $this->writePrefixAutoloader(
             $this->directory->getCacheDir(),
@@ -214,7 +190,6 @@ class Register extends Task
             $map = $this->file->require($file);
 
             foreach ($map as $loadable => $file) {
-                $this->lazy[$loadable] = $path . $file;
 
                 // leading slash
                 // .php extension
@@ -318,69 +293,6 @@ class Register extends Task
             $autoloader))
             throw new InternalError(
                 "Cant write '$dir/PrefixAutoloader.php'."
-            );
-    }
-
-    /**
-     * Writes ASAP and lazy loadable autoloader to internal or external
-     * state cache directory.
-     *
-     * @deprecated Will be removed in version 2.0.0.
-     * @param string $dir Directory.
-     * @param string $path Path.
-     * @throws InternalError
-     */
-    private function writeAutoloader(string $dir, string $path): void
-    {
-        $this->directory->createDir($dir);
-
-        // sort key list
-        ksort($this->lazy, SORT_STRING);
-
-        $depth = substr_count($path, '/');
-        $autoloader = $this->file->get(__DIR__ . "/Autoloader.php");
-
-        if ($autoloader === false)
-            throw new InternalError(
-                "Can't read the snapshot file \"" .
-                __DIR__ . "/Autoloader.php\"."
-            );
-
-        $autoloader = str_replace(
-            ", 2)",
-            ", $depth)",
-            $autoloader
-        );
-
-        if ($this->asap) {
-            $content = "";
-
-            foreach ($this->asap as $file)
-                $content .= "\n\t\t'$file',";
-
-            $autoloader = str_replace(
-                "ASAP = []",
-                "ASAP = [$content\n\t]",
-                $autoloader
-            );
-        }
-
-        if ($this->lazy) {
-            $content = "";
-
-            foreach ($this->lazy as $loadable => $file)
-                $content .= "\n\t\t'$loadable' => '$file',";
-
-            $autoloader = str_replace(
-                "LAZY = []",
-                "LAZY = [$content\n\t]",
-                $autoloader
-            );
-        }
-
-        if (!$this->file->put("$dir/Autoloader.php", $autoloader))
-            throw new InternalError(
-                "Can't write to the file \"$dir/Autoloader.php\"."
             );
     }
 }

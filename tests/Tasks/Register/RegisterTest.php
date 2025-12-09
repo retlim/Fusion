@@ -131,22 +131,22 @@ class RegisterTest extends Test
 
             $file->require = function (string $file) use (&$require) {
                 $require[] = $file;
-                if ($file == "/s0/c0/loadable/lazy.php")
+                if ($file == "/s0/c0/lazy.php")
                     return ["I0" => "/d0/f0.php"];
 
-                if ($file == "/s0/c0/loadable/asap.php")
+                if ($file == "/s0/c0/asap.php")
                     return ["/f1.php"];
 
-                if ($file == "/s1/c1/loadable/lazy.php")
+                if ($file == "/s1/c1/lazy.php")
                     return ["I1" => "/d1/f2.php"];
 
-                if ($file == "/s1/c1/loadable/asap.php")
+                if ($file == "/s1/c1/asap.php")
                     return ["/f3.php"];
 
-                if ($file == "/s2/c2/loadable/lazy.php")
+                if ($file == "/s2/c2/lazy.php")
                     return ["I2" => "/d2/f4.php"];
 
-                if ($file == "/s2/c2/loadable/asap.php")
+                if ($file == "/s2/c2/asap.php")
                     return ["/f5.php"];
 
                 return [];
@@ -155,37 +155,24 @@ class RegisterTest extends Test
             $register->execute();
 
             if ($require != [
-                    "/s0/c0/loadable/lazy.php",
-                    "/s0/c0/loadable/asap.php",
-                    "/s1/c1/loadable/lazy.php",
-                    "/s1/c1/loadable/asap.php",
-                    "/s2/c2/loadable/lazy.php",
-                    "/s2/c2/loadable/asap.php"] ||
+                    "/s0/c0/lazy.php",
+                    "/s0/c0/asap.php",
+                    "/s1/c1/lazy.php",
+                    "/s1/c1/asap.php",
+                    "/s2/c2/lazy.php",
+                    "/s2/c2/asap.php"] ||
                 $exists != [
-                    "/s0/c0/loadable/lazy.php",
-                    "/s0/c0/loadable/asap.php",
-                    "/s1/c1/loadable/lazy.php",
-                    "/s1/c1/loadable/asap.php",
-                    "/s2/c2/loadable/lazy.php",
-                    "/s2/c2/loadable/asap.php"] ||
-                $create != ["/#", "/#"] ||
+                    "/s0/c0/lazy.php",
+                    "/s0/c0/asap.php",
+                    "/s1/c1/lazy.php",
+                    "/s1/c1/asap.php",
+                    "/s2/c2/lazy.php",
+                    "/s2/c2/asap.php"] ||
+                $create != ["/#"] ||
                 $get != [
-                    dirname(__DIR__, 3) .
-                    "/src/Tasks/Register/Autoloader.php",
                     dirname(__DIR__, 3) .
                     "/src/Tasks/Register/PrefixAutoloader.php"] ||
                 $put != [[
-                    "file" => "/#/Autoloader.php",
-                    "data" => "ASAP = [" .
-                        "\n\t\t'/f1.php'," .
-		                "\n\t\t'/deps/i1/f3.php'," .
-		                "\n\t\t'/deps/i2/f5.php'," .
-                    "\n\t];LAZY = [" .
-                        "\n\t\t'I0' => '/d0/f0.php'," .
-                        "\n\t\t'I1' => '/deps/i1/d1/f2.php'," .
-                        "\n\t\t'I2' => '/deps/i2/d2/f4.php'," .
-	                "\n\t]"
-                ],[
                     "file" => "/#/PrefixAutoloader.php",
                     "data" => "\$asap = [" .
                         "\n\t\t'/f1.php'," .
@@ -320,22 +307,22 @@ class RegisterTest extends Test
             $file->require = function (string $file) use (&$require) {
                 $require[] = $file;
 
-                if ($file == "/#/i0/c0/loadable/lazy.php")
+                if ($file == "/#/i0/c0/lazy.php")
                     return ["I0" => "/d0/f0.php"];
 
-                if ($file == "/#/i0/c0/loadable/asap.php")
+                if ($file == "/#/i0/c0/asap.php")
                     return ["/f1.php"];
 
-                if ($file == "/#/i1/c1/loadable/lazy.php")
+                if ($file == "/#/i1/c1/lazy.php")
                     return ["I1" => "/d1/f2.php"];
 
-                if ($file == "/#/i1/c1/loadable/asap.php")
+                if ($file == "/#/i1/c1/asap.php")
                     return ["/f3.php"];
 
-                if ($file == "/#/i2/c2/loadable/lazy.php")
+                if ($file == "/#/i2/c2/lazy.php")
                     return ["I2" => "/d2/f4.php"];
 
-                if ($file == "/#/i2/c2/loadable/asap.php")
+                if ($file == "/#/i2/c2/asap.php")
                     return ["/f5.php"];
 
                 return [];
@@ -344,37 +331,24 @@ class RegisterTest extends Test
             $register->execute();
 
             if ($require != [
-                    "/#/i0/c0/loadable/lazy.php",
-                    "/#/i0/c0/loadable/asap.php",
-                    "/#/i1/c1/loadable/lazy.php",
-                    "/#/i1/c1/loadable/asap.php",
-                    "/#/i2/c2/loadable/lazy.php",
-                    "/#/i2/c2/loadable/asap.php"] ||
+                    "/#/i0/c0/lazy.php",
+                    "/#/i0/c0/asap.php",
+                    "/#/i1/c1/lazy.php",
+                    "/#/i1/c1/asap.php",
+                    "/#/i2/c2/lazy.php",
+                    "/#/i2/c2/asap.php"] ||
                 $exists != [
-                    "/#/i0/c0/loadable/lazy.php",
-                    "/#/i0/c0/loadable/asap.php",
-                    "/#/i1/c1/loadable/lazy.php",
-                    "/#/i1/c1/loadable/asap.php",
-                    "/#/i2/c2/loadable/lazy.php",
-                    "/#/i2/c2/loadable/asap.php"] ||
-                $create != ["/#/i0/c0", "/#/i0/c0"] ||
+                    "/#/i0/c0/lazy.php",
+                    "/#/i0/c0/asap.php",
+                    "/#/i1/c1/lazy.php",
+                    "/#/i1/c1/asap.php",
+                    "/#/i2/c2/lazy.php",
+                    "/#/i2/c2/asap.php"] ||
+                $create != ["/#/i0/c0"] ||
                 $get != [
-                    dirname(__DIR__, 3) .
-                    "/src/Tasks/Register/Autoloader.php",
                     dirname(__DIR__, 3) .
                     "/src/Tasks/Register/PrefixAutoloader.php"] ||
                 $put != [[
-                    "file" => "/#/i0/c0/Autoloader.php",
-                    "data" => "ASAP = [" .
-                        "\n\t\t'/f1.php'," .
-                        "\n\t\t'/deps/i1/f3.php'," .
-                        "\n\t\t'/deps/i2/f5.php'," .
-                        "\n\t];LAZY = [" .
-                        "\n\t\t'I0' => '/d0/f0.php'," .
-                        "\n\t\t'I1' => '/deps/i1/d1/f2.php'," .
-                        "\n\t\t'I2' => '/deps/i2/d2/f4.php'," .
-                        "\n\t]"
-                ],[
                     "file" => "/#/i0/c0/PrefixAutoloader.php",
                     "data" => "\$asap = [" .
                         "\n\t\t'/f1.php'," .
