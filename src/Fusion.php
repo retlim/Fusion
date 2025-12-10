@@ -149,7 +149,7 @@ class Fusion
                 $file = $this->root . "$path$suffix.php";
 
                 if ($this->file->is($file)) {
-                    require_once $file;
+                    require $file;
                     break;
                 }
             }

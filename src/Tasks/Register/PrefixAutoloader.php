@@ -40,7 +40,7 @@ class PrefixAutoloader
 
         // load as soon as possible code
         foreach ($this->asap as $file)
-            require $this->root . $file;
+            require_once $this->root . $file;
     }
 
     /** Destroys the autoloader. */
@@ -85,7 +85,7 @@ class PrefixAutoloader
                 $file = $this->root . "$path$suffix.php";
 
                 if (is_file($file)) {
-                    require_once $file;
+                    require $file;
                     break;
                 }
             }
