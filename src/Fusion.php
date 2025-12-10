@@ -140,7 +140,7 @@ class Fusion
      *
      * @param string $loadable Loadable.
      */
-    private function loadLazyCode(string $loadable): bool
+    private function loadLazyCode(string $loadable): void
     {
         foreach ($this->prefixes as $prefix => $path)
             if (str_starts_with($loadable, $prefix)) {
@@ -149,13 +149,10 @@ class Fusion
                 $file = $this->root . "$path$suffix.php";
 
                 if ($this->file->is($file)) {
-                    require $file;
-
-                    return true;
+                    require_once $file;
+                    break;
                 }
             }
-
-        return false;
     }
 
     /**

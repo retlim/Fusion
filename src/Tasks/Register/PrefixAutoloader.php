@@ -76,7 +76,7 @@ class PrefixAutoloader
      *
      * @param string $loadable Identifier.
      */
-    private function loadLazyCode(string $loadable): bool
+    private function loadLazyCode(string $loadable): void
     {
         foreach ($this->prefixes as $prefix => $path)
             if (str_starts_with($loadable, $prefix)) {
@@ -85,13 +85,10 @@ class PrefixAutoloader
                 $file = $this->root . "$path$suffix.php";
 
                 if (is_file($file)) {
-                    require $file;
-
-                    return true;
+                    require_once $file;
+                    break;
                 }
             }
-
-        return false;
     }
 
     /**
