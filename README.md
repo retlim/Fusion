@@ -29,15 +29,10 @@ metadata, and shared metadata overrides production metadata. Fusion also generat
 a snapshot file for each metadata file, capturing replicable versions of its 
 dependencies.
 
-### Lifecycle Callbacks
+### Lifecycle Hooks
 
-Each time Fusion builds a new version, it looks for adaptive packages that need 
-to be notified about the change. To make your package this type, add [lifecycle 
-callbacks](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/lifecycle) 
-in your metadata at the key stages:
-
-- After the package is recycled, downloaded, installed, or updated.
-- Before the package is migrated or deleted.
+Each package can provide custom scripts that run after recycling, downloading, 
+installing, or updating, and before migrating or deleting the package.
 
 ### Loadable Code
 
