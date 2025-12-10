@@ -110,7 +110,7 @@ class RegisterTest extends Test
                 $get[] = $file;
 
                 if ($file == dirname(__DIR__, 3) .
-                    "/src/Tasks/Register/PrefixAutoloader.php")
+                    "/src/Tasks/Register/Autoloader.php")
                     return "\$asap = [];\$prefixes = []";
 
                 return "ASAP = [];LAZY = []";
@@ -171,9 +171,9 @@ class RegisterTest extends Test
                 $create != ["/#"] ||
                 $get != [
                     dirname(__DIR__, 3) .
-                    "/src/Tasks/Register/PrefixAutoloader.php"] ||
+                    "/src/Tasks/Register/Autoloader.php"] ||
                 $put != [[
-                    "file" => "/#/PrefixAutoloader.php",
+                    "file" => "/#/Autoloader.php",
                     "data" => "\$asap = [" .
                         "\n\t\t'/f1.php'," .
                         "\n\t\t'/deps/i1/f3.php'," .
@@ -284,7 +284,7 @@ class RegisterTest extends Test
                 $get[] = $file;
 
                 if ($file == dirname(__DIR__, 3) .
-                    "/src/Tasks/Register/PrefixAutoloader.php")
+                    "/src/Tasks/Register/Autoloader.php")
                     return "\$asap = [];\$prefixes = []";
 
                 return "ASAP = [];LAZY = []";
@@ -347,9 +347,9 @@ class RegisterTest extends Test
                 $create != ["/#/i0/c0"] ||
                 $get != [
                     dirname(__DIR__, 3) .
-                    "/src/Tasks/Register/PrefixAutoloader.php"] ||
+                    "/src/Tasks/Register/Autoloader.php"] ||
                 $put != [[
-                    "file" => "/#/i0/c0/PrefixAutoloader.php",
+                    "file" => "/#/i0/c0/Autoloader.php",
                     "data" => "\$asap = [" .
                         "\n\t\t'/f1.php'," .
                         "\n\t\t'/deps/i1/f3.php'," .
