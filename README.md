@@ -11,11 +11,9 @@ following key features:
 
 ### Everything Is a Modular Package
 
-To keep things simple and easy to use, Fusion handles everything, including your 
-project, its dependencies, and even the package manager itself, as a modular 
-package that can be standalone, a nested dependency of another, or both at the 
-same time. This is possible since each package has its own [custom directory structure](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure),
-which you can define in the metadata file as you like.
+The root project, its dependencies, and even Fusion itself are modular packages that 
+can be used as standalone software, as dependencies in other projects, or both at the 
+same time.
 
 ### Scoped Metadata and Snapshot Files
 
