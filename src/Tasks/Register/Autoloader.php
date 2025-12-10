@@ -20,9 +20,9 @@
  */
 
 /**
- * Autoloader for prefix-based lazy code and ASAP script files.
+ * Autoloader for prefixed lazy code and ASAP script files.
  */
-class PrefixAutoloader
+class Autoloader
 {
     /** @var array<string, string> Namespace prefix to path map. */
     private array $prefixes = [];

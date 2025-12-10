@@ -115,7 +115,7 @@ class Register extends Task
 
         $path = $rootMetadata->getStructureCache();
 
-        $this->writePrefixAutoloader(
+        $this->writeAutoloader(
             "$packages/" . $rootMetadata->getId() . $path,
             $path
         );
@@ -144,7 +144,7 @@ class Register extends Task
             $this->collectInflatedCode($state, $metadata->getDir());
         }
 
-        $this->writePrefixAutoloader(
+        $this->writeAutoloader(
             $this->directory->getCacheDir(),
             $this->group->getInternalRootMetadata()->getStructureCache()
         );
@@ -239,7 +239,7 @@ class Register extends Task
      * @param string $path Path.
      * @throws InternalError
      */
-    private function writePrefixAutoloader(string $dir, string $path): void
+    private function writeAutoloader(string $dir, string $path): void
     {
         $this->directory->createDir($dir);
 
@@ -248,12 +248,12 @@ class Register extends Task
         krsort($this->prefixes, SORT_STRING);
 
         $depth = substr_count($path, '/');
-        $autoloader = $this->file->get(__DIR__ . "/PrefixAutoloader.php");
+        $autoloader = $this->file->get(__DIR__ . "/Autoloader.php");
 
         if ($autoloader === false)
             throw new InternalError(
                 "Cant read the snapshot file \"" .
-                __DIR__ . "/PrefixAutoloader.php\"."
+                __DIR__ . "/Autoloader.php\"."
             );
 
         $autoloader = str_replace(
@@ -289,10 +289,10 @@ class Register extends Task
         }
 
         if (!$this->file->put(
-            "$dir/PrefixAutoloader.php",
+            "$dir/Autoloader.php",
             $autoloader))
             throw new InternalError(
-                "Cant write '$dir/PrefixAutoloader.php'."
+                "Cant write '$dir/Autoloader.php'."
             );
     }
 }
