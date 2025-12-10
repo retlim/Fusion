@@ -31,8 +31,8 @@ dependencies.
 
 ### Lifecycle Hooks
 
-Each package can provide custom scripts that run after recycling, downloading, 
-installing, or updating, and before migrating or deleting the package.
+Packages can define custom scripts in their metadata that run after recycling, 
+downloading, installing, or updating, and before migrating or deleting the package.
 
 ### Loadable Code
 
