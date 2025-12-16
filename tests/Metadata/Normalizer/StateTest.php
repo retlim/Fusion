@@ -36,16 +36,5 @@ class StateTest extends Test
         #$this->testPaths();
     }
 
-    public function testPaths(): void
-    {
-        $paths = [];
 
-        State::normalize(["path1", "path2"], $paths);
-
-        if ($paths !== ["path1", "path2"]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-    }
 }

@@ -36,16 +36,5 @@ class CacheTest extends Test
         #$this->testPath();
     }
 
-    public function testPath(): void
-    {
-        $path = "";
 
-        Cache::normalize(["path"], $path);
-
-        if ($path !== "path") {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
-    }
 }

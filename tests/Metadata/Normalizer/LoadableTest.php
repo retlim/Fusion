@@ -36,17 +36,4 @@ class LoadableTest extends Test
         #$this->testPaths();
     }
 
-    public function testPaths(): void
-    {
-        $paths = [];
-
-        Loadable::normalize([
-            ["namespace1" => "/state/loadable/path1"],
-            ["namespace2" => "/state/loadable/path2"]
-        ],
-            "/state", $paths);
-
-        if ($paths !== ["namespace1" => "/path1", "namespace2" => "/path2"])
-            $this->handleFailedTest();
-    }
 }
