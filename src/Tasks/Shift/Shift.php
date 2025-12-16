@@ -322,6 +322,7 @@ class Shift extends Task
                     }
                 }
 
+                // deprecated is now mutable
                 // refresh states
                 foreach ($metadata->getStructureStates() as $state) {
                     $to = $metadata->getSource() . $state;

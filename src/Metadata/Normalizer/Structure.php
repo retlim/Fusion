@@ -31,9 +31,6 @@ use Valvoid\Fusion\Log\Events\Level;
  */
 class Structure
 {
-    /** @var string[] Cache category. */
-    private array $cache = [];
-
     /** @var string[] Stateful category. */
     private array $stateful = [];
 
@@ -44,16 +41,7 @@ class Structure
     private array $mappings = [];
 
     /** @var string[] Extension category. */
-    private array $extension = [];
-
-    /** @var string[] Extension category. */
     private array $extendable = [];
-
-    /** @var array<string, string[]> Loadable category. */
-    private array $loadable = [];
-
-    /** @var string[] State category. */
-    private array $state = [];
 
     /** @var string[] Mutable category. */
     private array $mutable = [];
@@ -81,24 +69,12 @@ class Structure
 
         // replace
         $meta["structure"] = [
-            "cache" => "", // @deprecated - remove in 2.0.0
             "stateful" => "",
             "sources" => [],
-            "extensions" => [], // @deprecated - remove in 2.0.0
             "extendables" => [],
             "mappings" => [],
-            "namespaces" => [], // @deprecated - remove in 2.0.0
-            "states" => [], // @deprecated - remove in 2.0.0
             "mutables" => []
         ];
-
-        // @deprecated - remove in 2.0.0
-        if ($this->cache)
-            $this->box->get(Cache::class)
-                ->normalize(
-                    $this->cache,
-                    $meta["structure"]["cache"]
-                );
 
         if ($this->stateful)
             $this->box->get(Stateful::class)
@@ -117,24 +93,8 @@ class Structure
         if ($this->mappings)
             $meta["structure"]["mappings"] = $this->mappings;
 
-        // @deprecated - remove in 2.0.0
-        if ($this->extension)
-            $this->box->get(Extension::class)
-                ->normalize(
-                    $this->extension,
-                    $meta["structure"]["extensions"]
-                );
-
         if ($this->extendable)
             $meta["structure"]["extendables"] = $this->extendable;
-
-        // @deprecated - remove in 2.0.0
-        if ($this->state)
-            $this->box->get(State::class)
-                ->normalize(
-                    $this->state,
-                    $meta["structure"]["states"]
-                );
 
         if ($this->mutable)
             $this->box->get(Mutable::class)
@@ -142,33 +102,6 @@ class Structure
                     $this->mutable,
                     $meta["structure"]["mutables"]
                 );
-
-        // @deprecated - remove in 2.0.0
-        if ($this->loadable) {
-            if ($cache)
-                $this->box->get(Loadable::class)
-                    ->normalize(
-                        $this->loadable,
-                        $cache,
-                        $meta["structure"]["namespaces"]
-                    );
-
-            elseif ($meta["structure"]["stateful"])
-                $this->box->get(Loadable::class)
-                    ->normalize(
-                        $this->loadable,
-                        $meta["structure"]["stateful"],
-                        $meta["structure"]["namespaces"]
-                    );
-
-            elseif ($meta["structure"]["cache"])
-                $this->box->get(Loadable::class)
-                    ->normalize(
-                        $this->loadable,
-                        $meta["structure"]["cache"],
-                        $meta["structure"]["namespaces"]
-                    );
-        }
     }
 
     /**
@@ -195,29 +128,8 @@ class Structure
                 else
                     $this->extractStructure($value, $path, $source);
 
-            // @deprecated - remove in 2.0.0
-            // cache dir
-            // check also source due to branch name "cache"
-            // cache dir has no source prefix
-            elseif ($value == "cache" && !$source) {
-                $entry = ($key[0] ?? null) === '/' ?
-                    $path . $key :
-                    $path;
-
-                if ($this->layer == "development" || $this->layer == "local")
-                    $this->bus->broadcast(
-                        $this->box->get(MetadataEvent::class,
-                            message: "The 'cache' indicator is static and belongs to " .
-                            "the 'fusion.json' file.",
-                            level: Level::ERROR,
-                            breadcrumb: ["structure"],
-                            abstract: [$entry]
-                        ));
-
-                $this->cache[] = $entry;
-
             // stateful dir
-            } elseif ($value == "stateful" && !$source) {
+            elseif ($value == "stateful" && !$source) {
                 $entry = ($key[0] ?? null) === '/' ?
                     $path . $key :
                     $path;
@@ -234,14 +146,8 @@ class Structure
 
                 $this->stateful[] = $entry;
 
-            // state dir
-            } elseif ($value == "state" && !$source)
-                $this->state[] = ($key[0] ?? null) === '/' ?
-                    $path . $key :
-                    $path;
-
             // mutable dir
-            elseif ($value == "mutable" && !$source)
+            } elseif ($value == "mutable" && !$source)
                 $this->mutable[] = ($key[0] ?? null) === '/' ?
                     $path . $key :
                     $path;
@@ -252,28 +158,11 @@ class Structure
                     $path . $key :
                     $path;
 
-            // extension dir
-            elseif ($value == "extension" && !$source)
-                $this->extension[] = ($key[0] ?? null) === '/' ?
-                    $path . $key :
-                    $path;
-
             // mapped extension
             elseif (str_starts_with($value, ':') && !$source)
                 (($key[0] ?? null) === '/') ?
                     $this->mappings[$path . $key] = $value :
                     $this->mappings[$path] = $value;
-
-            // loadable
-            // nested cache dir structure
-            elseif (str_contains($value, '\\') && !$source)
-                $this->loadable[] = [
-
-                    // namespace => path
-                    $value => ($key[0] ?? null) === '/' ?
-                        $path . $key :
-                        $path
-                ];
 
             // assoc source reference
             // tag, branch, commit, etc.

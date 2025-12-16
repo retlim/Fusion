@@ -74,8 +74,7 @@ class Normalizer
             layer: "all")
                 ->normalize($meta);
 
-        if (!$meta["structure"]["cache"] &&
-            !$meta["structure"]["stateful"])
+        if (!$meta["structure"]["stateful"])
             $this->bus->broadcast(
                 $this->box->get(MetadataEvent::class,
                     message: "Structure must have a nested state directory.",

@@ -109,6 +109,7 @@ abstract class Metadata
      * Returns structure namespaces.
      *
      * @return array<string, string> Structure loadable.
+     * @deprecated
      */
     public function getStructureNamespaces(): array
     {
@@ -170,6 +171,7 @@ abstract class Metadata
      * Returns structure states category sub meta.
      *
      * @return string[] Structure states.
+     * @deprecated Will be removed in version 2.0.0
      */
     public function getStructureStates(): array
     {

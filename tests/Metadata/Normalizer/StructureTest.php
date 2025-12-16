@@ -96,7 +96,6 @@ class StructureTest extends Test
                 "dir" => "",
                 "description" => "",
                 "structure" => [
-                    "cache" => "",
                     "stateful" => "/state",
                     "sources" => [
                         "" => ["recursive"],
@@ -105,20 +104,11 @@ class StructureTest extends Test
                             "source2",
                         ]
                     ],
-                    "extensions" => [
-                        #"/path2" @deprecated
-                    ],
                     "extendables" => [
                         "/p8"
                     ],
                     "mappings" => [
                         "/p5/p6" => ":package/id/sub/dir",
-                    ],
-                    "namespaces" => [
-                        #"namespace\\any" => "/path3" @deprecated
-                    ],
-                    "states" => [
-                       # "/path4" @deprecated
                     ],
                     "mutables" => [
                         "/p7"
