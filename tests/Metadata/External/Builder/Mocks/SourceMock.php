@@ -22,14 +22,23 @@
 namespace Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Metadata\External\Parser\Source;
 
-class BoxMock extends Box
+class SourceMock extends Source
 {
-    public Closure $get;
+    public Closure $getId;
+    public Closure $getSource;
+    public array $args;
 
-    public function get(string $class, ...$args): object
+    public function __construct() {}
+
+    public function getId(): string
     {
-        return call_user_func($this->get, $class, ...$args);
+        return call_user_func($this->getId);
+    }
+
+    public function getSource(): array
+    {
+        return call_user_func($this->getSource);
     }
 }

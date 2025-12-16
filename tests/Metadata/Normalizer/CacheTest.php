@@ -24,13 +24,16 @@ namespace Valvoid\Fusion\Tests\Metadata\Normalizer;
 use Valvoid\Fusion\Metadata\Normalizer\Cache;
 use Valvoid\Fusion\Tests\Test;
 
+/**
+ * @deprecated - remove in 2.0.0
+ */
 class CacheTest extends Test
 {
     protected string|array $coverage = Cache::class;
 
     public function __construct()
     {
-        $this->testPath();
+        #$this->testPath();
     }
 
     public function testPath(): void

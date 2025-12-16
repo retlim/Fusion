@@ -21,15 +21,27 @@
 
 namespace Valvoid\Fusion\Metadata\Normalizer;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 
 /**
  * External meta loadable normalizer.
+ * @deprecated - remove in 2.0.0
  */
 class Loadable
 {
+    /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
     /**
      * Normalizes loadable.
      *
@@ -37,7 +49,7 @@ class Loadable
      * @param string $cache
      * @param array $result
      */
-    public static function normalize(array $loadable, string $cache, array &$result): void
+    public function normalize(array $loadable, string $cache, array &$result): void
     {
         if (!$loadable)
             return;
@@ -50,11 +62,12 @@ class Loadable
 
                 // redundant
                 if (array_key_exists($namespace, $result))
-                    Bus::broadcast(new MetadataEvent(
-                        "Redundant loadable identifier. Namespace already taken.",
-                        Level::NOTICE,
-                        ["structure"],
-                        [$path, $namespace]
+                    $this->bus->broadcast(
+                        $this->box->get(MetadataEvent::class,
+                        message:"Redundant loadable identifier. Namespace already taken.",
+                        level:Level::NOTICE,
+                        breadcrumb:["structure"],
+                        abstract:[$path, $namespace]
                     ));
 
                 else
@@ -67,21 +80,23 @@ class Loadable
                         // empty = cache
                         ($path) ?
                             $result[$namespace] = $path :
-                            Bus::broadcast(new MetadataEvent(
-                                "Redundant loadable identifier. " .
+                            $this->bus->broadcast(
+                                $this->box->get(MetadataEvent::class,
+                                message:"Redundant loadable identifier. " .
                                 "Cache folder is default.",
-                                Level::NOTICE,
-                                ["structure"],
-                                [$path, $namespace]
+                                level:Level::NOTICE,
+                                breadcrumb:["structure"],
+                                abstract:[$path, $namespace]
                             ));
 
                     } else
-                        Bus::broadcast(new MetadataEvent(
-                            "External loadable path. Loadable identifier must " .
+                        $this->bus->broadcast(
+                            $this->box->get(MetadataEvent::class,
+                            message:"External loadable path. Loadable identifier must " .
                             "be inside \"$dir\" cache folder.",
-                            Level::ERROR,
-                            ["structure"],
-                            [$path, $namespace]
+                            level:Level::ERROR,
+                            breadcrumb:["structure"],
+                            abstract:[$path, $namespace]
                         ));
             }
     }

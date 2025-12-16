@@ -21,7 +21,8 @@
 
 namespace Valvoid\Fusion\Metadata\Interpreter;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 
@@ -31,33 +32,44 @@ use Valvoid\Fusion\Log\Events\Level;
 class Environment
 {
     /**
+     * Constructs the interpreter.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
+    /**
      * Interprets the environment entry.
      *
      * @param mixed $entry Potential lifecycle entry.
      */
-    public static function interpret(mixed $entry): void
+    public function interpret(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new MetadataEvent(
-                "The value, package environment, of the \"environment\" " .
-                "index must be an assoc array.",
-                Level::ERROR,
-                ["environment"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value, package environment, of the 'environment' " .
+                    "index must be an assoc array.",
+                    level: Level::ERROR,
+                    breadcrumb: ["environment"]
+                ));
 
         foreach ($entry as $key => $value)
             match($key) {
-                "php" => self::interpretPhp($value),
-                default => Bus::broadcast(new MetadataEvent(
-                    "The unknown \"$key\" index must be " .
-                    "\"php\" string.",
-                    Level::ERROR,
-                    ["environment", $key]
-                ))
+                "php" => $this->interpretPhp($value),
+                default => $this->bus->broadcast(
+                    $this->box->get(MetadataEvent::class,
+                        message: "The unknown '$key' index must be 'php' string.",
+                        level: Level::ERROR,
+                        breadcrumb: ["environment", $key]
+                    ))
             };
     }
 
@@ -66,29 +78,31 @@ class Environment
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretPhp(mixed $entry): void
+    private function interpretPhp(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new MetadataEvent(
-                "The value of the \"php\" index must be an assoc array.",
-                Level::ERROR,
-                ["environment", "php"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value of the 'php' index must be an assoc array.",
+                    level: Level::ERROR,
+                    breadcrumb: ["environment", "php"]
+                ));
 
         foreach ($entry as $key => $value)
             match($key) {
-                "version" => self::interpretVersion($value),
-                "modules" => self::interpretModules($value),
-                default => Bus::broadcast(new MetadataEvent(
-                    "The unknown \"$key\" index must be " .
-                    "\"version\" or \"modules\" string.",
-                    Level::ERROR,
-                    ["environment", $key]
-                ))
+                "version" => $this->interpretVersion($value),
+                "modules" => $this->interpretModules($value),
+                default => $this->bus->broadcast(
+                    $this->box->get(MetadataEvent::class,
+                        message: "The unknown '$key' index must be " .
+                        "'version' or 'modules' string.",
+                        level: Level::ERROR,
+                        breadcrumb: ["environment", $key]
+                    ))
             };
     }
 
@@ -97,18 +111,19 @@ class Environment
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretVersion(mixed $entry): void
+    private function interpretVersion(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_string($entry))
-            Bus::broadcast(new MetadataEvent(
-                "The value of the \"version\" index must be a string.",
-                Level::ERROR,
-                ["environment", "php", "version"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value of the 'version' index must be a string.",
+                    level: Level::ERROR,
+                    breadcrumb: ["environment", "php", "version"]
+                ));
     }
 
     /**
@@ -117,7 +132,7 @@ class Environment
      * @param string $entry Entry.
      * @return bool Indicator.
      */
-    public static function isSemanticVersionCorePattern(string $entry): bool
+    public function isSemanticVersionCorePattern(string $entry): bool
     {
         return preg_match(
             "/^(>?|>=?|<?|<=?|==?|!=?)" .
@@ -131,26 +146,28 @@ class Environment
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretModules(mixed $entry): void
+    private function interpretModules(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new MetadataEvent(
-                "The value of the \"modules\" index must be an assoc array.",
-                Level::ERROR,
-                ["environment", "php", "modules"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value of the 'modules' index must be an assoc array.",
+                    level: Level::ERROR,
+                    breadcrumb: ["environment", "php", "modules"]
+                ));
 
         foreach ($entry as $module)
             if (!is_string($module) || !$module)
-                Bus::broadcast(new MetadataEvent(
-                    "The value of the \"modules\" index must be a seq " .
-                    "string array.",
-                    Level::ERROR,
-                    ["environment", "php", "modules"]
-                ));
+                $this->bus->broadcast(
+                    $this->box->get(MetadataEvent::class,
+                        message: "The value of the 'modules' index must be a seq " .
+                        "string array.",
+                        level: Level::ERROR,
+                        breadcrumb: ["environment", "php", "modules"]
+                    ));
     }
 }

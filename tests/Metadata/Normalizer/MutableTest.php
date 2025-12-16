@@ -21,23 +21,36 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Normalizer;
 
+use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Metadata\Normalizer\Mutable;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Test;
 
 class MutableTest extends Test
 {
     protected string|array $coverage = Mutable::class;
-
+    private BoxMock $box;
+    private BusMock $bus;
     public function __construct()
     {
+        $this->box = new BoxMock;
+        $this->bus = new BusMock;
+        $this->box->get = function (string $class, ...$args) {
+            if ($class == "Valvoid\Fusion\Bus\Events\Metadata")
+                return new MetadataEvent(...$args);
+        };
+
         $this->testPaths();
+        $this->box->unsetInstance();
     }
 
     public function testPaths(): void
     {
         $paths = [];
 
-        Mutable::normalize(["path1", "path2"], $paths);
+        (new Mutable($this->box, $this->bus))
+            ->normalize(["path1", "path2"], $paths);
 
         if ($paths !== ["path1", "path2"])
             $this->handleFailedTest();

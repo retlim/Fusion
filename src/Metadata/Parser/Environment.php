@@ -21,7 +21,8 @@
 
 namespace Valvoid\Fusion\Metadata\Parser;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Metadata\Interpreter\Environment as EnvironmentInterpreter;
@@ -32,15 +33,25 @@ use Valvoid\Fusion\Metadata\Interpreter\Environment as EnvironmentInterpreter;
 class Environment
 {
     /**
+     * Constructs the parser.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
+    /**
      * Parses environment entry.
      *
      * @param array $environment
      */
-    public static function parse(array &$environment): void
+    public function parse(array &$environment): void
     {
         foreach ($environment as $key => &$value)
             match($key) {
-                "php" => self::parsePhp($value),
+                "php" => $this->parsePhp($value),
                 default => null
             };
     }
@@ -50,11 +61,11 @@ class Environment
      *
      * @param array $php
      */
-    private static function parsePhp(array &$php): void
+    private function parsePhp(array &$php): void
     {
         foreach ($php as $key => &$value)
             match($key) {
-                "version" => self::parsePhpVersion($value),
+                "version" => $this->parsePhpVersion($value),
                 default => null
             };
     }
@@ -64,12 +75,12 @@ class Environment
      *
      * @param string $version
      */
-    private static function parsePhpVersion(string &$version): void
+    private function parsePhpVersion(string &$version): void
     {
         $inline = $version;
         $version = [];
 
-        self::inflateReference($inline, $version);
+        $this->inflateReference($inline, $version);
     }
 
     /**
@@ -78,7 +89,7 @@ class Environment
      * @param array $inflated Inflated condition.
      * @param int $i Inline char pointer.
      */
-    private static function inflateReference(string $inline, array &$inflated, int &$i = 0): void
+    private function inflateReference(string $inline, array &$inflated, int &$i = 0): void
     {
         $reference = "";
 
@@ -88,12 +99,12 @@ class Environment
                     $reference = trim($reference);
 
                     if ($reference)
-                        $inflated[] = self::getReference($reference);
+                        $inflated[] = $this->getReference($reference);
 
                     $nested = [];
 
                     ++$i;
-                    self::inflateReference($inline, $nested,$i);
+                    $this->inflateReference($inline, $nested,$i);
 
                     // nested condition
                     $inflated[] = $nested;
@@ -114,7 +125,7 @@ class Environment
                         $reference = trim($reference);
 
                         if ($reference)
-                            $inflated[] = self::getReference($reference);
+                            $inflated[] = $this->getReference($reference);
 
                         $inflated[] = $inline[$i] . $inline[$i];
                         $reference = "";
@@ -130,7 +141,7 @@ class Environment
         $reference = trim($reference);
 
         if ($reference)
-            $inflated[] = self::getReference($reference);
+            $inflated[] = $this->getReference($reference);
     }
 
     /**
@@ -139,16 +150,17 @@ class Environment
      * @param string $reference Inline reference.
      * @return array Reference.
      */
-    private static function getReference(string $reference): array
+    private function getReference(string $reference): array
     {
-
-        if (!EnvironmentInterpreter::isSemanticVersionCorePattern($reference))
-            Bus::broadcast(new MetadataEvent(
-                "The value of the \"version\" index must be a " .
-                "core (major.minor.patch) semantic version pattern logic.",
-                Level::ERROR,
-                ["environment", "php", "version"]
-            ));
+        if (!$this->box->get(EnvironmentInterpreter::class)
+                ->isSemanticVersionCorePattern($reference))
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value of the 'version' index must be a " .
+                    "core (major.minor.patch) semantic version pattern logic.",
+                    level: Level::ERROR,
+                    breadcrumb: ["environment", "php", "version"]
+                ));
 
         if (!is_numeric($reference[0])) {
             $sign = $reference[0];

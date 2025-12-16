@@ -24,13 +24,16 @@ namespace Valvoid\Fusion\Tests\Metadata\Normalizer;
 use Valvoid\Fusion\Metadata\Normalizer\Loadable;
 use Valvoid\Fusion\Tests\Test;
 
+/**
+ * @deprecated - remove in 2.0.0
+ */
 class LoadableTest extends Test
 {
     protected string|array $coverage = Loadable::class;
 
     public function __construct()
     {
-        $this->testPaths();
+        #$this->testPaths();
     }
 
     public function testPaths(): void

@@ -22,14 +22,16 @@
 namespace Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Metadata\Parser\Parser;
 
-class BoxMock extends Box
+class ParserMock extends Parser
 {
-    public Closure $get;
+    public Closure $parse;
 
-    public function get(string $class, ...$args): object
+    public function __construct() {}
+
+    public function parse(array &$meta): void
     {
-        return call_user_func($this->get, $class, ...$args);
+        call_user_func($this->parse, $meta);
     }
 }

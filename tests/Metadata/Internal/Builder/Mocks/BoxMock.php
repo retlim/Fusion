@@ -21,16 +21,15 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Internal\Builder\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Box\Box;
 
 class BoxMock extends Box
 {
-    public $bus;
+    public Closure $get;
 
     public function get(string $class, ...$args): object
     {
-        return match($class) {
-            "Valvoid\Fusion\Bus\Proxy" => $this->bus
-        };
+        return call_user_func($this->get, $class, ...$args);
     }
 }

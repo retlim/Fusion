@@ -21,7 +21,8 @@
 
 namespace Valvoid\Fusion\Metadata\Normalizer;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 
@@ -31,32 +32,44 @@ use Valvoid\Fusion\Log\Events\Level;
 class Stateful
 {
     /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
+    /**
      * Normalizes cache.
      *
      * @param array $category
      * @param string $stateful
      */
-    public static function normalize(array $category, string &$stateful): void
+    public function normalize(array $category, string &$stateful): void
     {
         if (!$category)
-            Bus::broadcast(new MetadataEvent(
-                "Missing stateful directory indicator. Structure must have " .
-                "unique stateful directory indicator.",
-                Level::ERROR,
-                ["structure"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "Missing stateful directory indicator. Structure must have " .
+                    "unique stateful directory indicator.",
+                    level: Level::ERROR,
+                    breadcrumb: ["structure"]
+                ));
 
         $path = $category[0];
 
         // nested folder
         if (!$path)
-            Bus::broadcast(new MetadataEvent(
-                "No stateful directory. " .
-                "stateful directory indicator must be at a nested directory.",
-                Level::ERROR,
-                ["structure"],
-                [$path, "stateful"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "No stateful directory. " .
+                    "stateful directory indicator must be at a nested directory.",
+                    level: Level::ERROR,
+                    breadcrumb: ["structure"],
+                    abstract: [$path, "stateful"]
+                ));
 
         $stateful = $path;
     }

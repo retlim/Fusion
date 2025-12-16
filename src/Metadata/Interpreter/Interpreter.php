@@ -21,7 +21,8 @@
 
 namespace Valvoid\Fusion\Metadata\Interpreter;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 
@@ -31,34 +32,51 @@ use Valvoid\Fusion\Log\Events\Level;
 class Interpreter
 {
     /**
+     * Constructs the interpreter.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
+    /**
      * Interprets meta.
      *
      * @param mixed $entry Entry.
      */
-    public static function interpret(string $layer, mixed $entry): void
+    public function interpret(string $layer, mixed $entry): void
     {
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new MetadataEvent(
+            $this->bus->broadcast(new MetadataEvent(
                 "Meta must be an assoc array.",
                 Level::ERROR
             ));
 
         foreach ($entry as $key => $value)
             match($key) {
-                "name" => self::interpretName($value),
-                "description" => self::interpretDescription($value),
-                "lifecycle" => Lifecycle::interpret($value),
-                "version" => self::interpretVersion($value),
-                "structure" => Structure::interpret($value),
-                "environment" => Environment::interpret($value),
-                "id" => self::interpretId($layer, $value),
-                default => Bus::broadcast(new MetadataEvent(
-                    "The metadata contains an unknown key \"$key\". " .
-                    "If it is a valid optional key, updating the package " .
-                    "manager may add support for it.",
-                    Level::NOTICE,
-                    [$key]
-                ))
+                "name" => $this->interpretName($value),
+                "description" => $this->interpretDescription($value),
+                "lifecycle" => $this->box->get(Lifecycle::class)
+                    ->interpret($value),
+
+                "version" => $this->interpretVersion($value),
+                "structure" => $this->box->get(Structure::class)
+                    ->interpret($value),
+
+                "environment" => $this->box->get(Environment::class)
+                    ->interpret($value),
+
+                "id" => $this->interpretId($layer, $value),
+                default => $this->bus->broadcast(
+                    $this->box->get(MetadataEvent::class,
+                        message: "The metadata contains an unknown key '$key'. " .
+                        "If it is a valid optional key, updating the package " .
+                        "manager may add support for it.",
+                        level: Level::NOTICE,
+                        breadcrumb: [$key]
+                    ))
             };
     }
 
@@ -67,18 +85,19 @@ class Interpreter
      *
      * @param mixed $entry Name.
      */
-    private static function interpretName(mixed $entry): void
+    private function interpretName(mixed $entry): void
     {
         if ($entry === null)
             return;
 
         if (!is_string($entry) || !$entry)
-            Bus::broadcast(new MetadataEvent(
-                "The value of the \"name\" index must " .
-                "be a non-empty string.",
-                Level::ERROR,
-                ["name"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value of the 'name' index must " .
+                    "be a non-empty string.",
+                    level: Level::ERROR,
+                    breadcrumb: ["name"]
+                ));
     }
 
     /**
@@ -86,18 +105,19 @@ class Interpreter
      *
      * @param mixed $entry
      */
-    private static function interpretDescription(mixed $entry): void
+    private function interpretDescription(mixed $entry): void
     {
         if ($entry === null)
             return;
 
         if (!is_string($entry) || !$entry)
-            Bus::broadcast(new MetadataEvent(
-                "The value of the \"description\" index must " .
-                "be a non-empty string.",
-                Level::ERROR,
-                ["description"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value of the 'description' index must " .
+                    "be a non-empty string.",
+                    level: Level::ERROR,
+                    breadcrumb: ["description"]
+                ));
     }
 
     /**
@@ -106,31 +126,33 @@ class Interpreter
      * @param string $layer Layer.
      * @param mixed $entry ID.
      */
-    private static function interpretId(string $layer, mixed $entry): void
+    private function interpretId(string $layer, mixed $entry): void
     {
         if ($layer != "production")
-            Bus::broadcast(new MetadataEvent(
-                "The \"id\" index is static and belongs to " .
-                "the \"fusion.json\" file.",
-                Level::ERROR,
-                ["id"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The 'id' index is static and belongs to " .
+                    "the 'fusion.json' file.",
+                    level: Level::ERROR,
+                    breadcrumb: ["id"]
+                ));
 
         if ($entry === null)
             return;
 
         if (!preg_match("/^[a-z_][a-z0-9_]{0,20}(\/[a-z_][a-z0-9_]{0,20}){0,4}$/", $entry))
-            Bus::broadcast(new MetadataEvent(
-                "The value of the \"id\" index must fit following " .
-                "criteria: Each segment starts with lowercase alphabetic " .
-                "character or underscore. Each segment may consists of lowercase " .
-                "alphabetic characters, underscore or digits. Each segment must " .
-                "be between 1 and 20 characters long. The optional namespace prefix " .
-                "can include up to 4 group names. Segments are separated by a " .
-                "forward slash.",
-                Level::ERROR,
-                ["id"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value of the 'id' index must fit following " .
+                    "criteria: Each segment starts with lowercase alphabetic " .
+                    "character or underscore. Each segment may consists of lowercase " .
+                    "alphabetic characters, underscore or digits. Each segment must " .
+                    "be between 1 and 20 characters long. The optional namespace prefix " .
+                    "can include up to 4 group names. Segments are separated by a " .
+                    "forward slash.",
+                    level: Level::ERROR,
+                    breadcrumb: ["id"]
+                ));
     }
 
     /**
@@ -138,7 +160,7 @@ class Interpreter
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretVersion(mixed $entry): void
+    private function interpretVersion(mixed $entry): void
     {
         if ($entry === null)
             return;
@@ -146,11 +168,12 @@ class Interpreter
         if (!preg_match('/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)' .
             '(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-]' .
             '[0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/', $entry))
-            Bus::broadcast(new MetadataEvent(
-                "The value, package version, of the \"version\" index " .
-                "must be a semantic version string.",
-                Level::ERROR,
-                ["version"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value, package version, of the 'version' index " .
+                    "must be a semantic version string.",
+                    level: Level::ERROR,
+                    breadcrumb: ["version"]
+                ));
     }
 }

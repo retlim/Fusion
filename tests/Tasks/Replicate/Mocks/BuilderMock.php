@@ -29,7 +29,7 @@ class BuilderMock extends Builder {
 
     private string $dir;
     private string $source;
-    private array $layers;
+    protected array $layers;
     private string $version;
     public Closure $metadata;
 

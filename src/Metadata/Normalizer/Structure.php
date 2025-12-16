@@ -21,7 +21,8 @@
 
 namespace Valvoid\Fusion\Metadata\Normalizer;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 
@@ -57,107 +58,116 @@ class Structure
     /** @var string[] Mutable category. */
     private array $mutable = [];
 
-    /** @var string Current layer identifier. */
-    private string $layer;
-
     /**
      * Constructs the normalizer.
      *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
      * @param string $layer Current layer identifier.
      */
-    private function __construct(string $layer)
-    {
-        $this->layer = $layer;
-    }
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus,
+        private readonly string $layer) {}
 
     /**
      * Normalizes structure.
      *
      * @param array $meta Meta.
-     * @param string $layer Current layer identifier.
      */
-    public static function normalize(array &$meta, string $layer, ?string $cache = null): void
+    public function normalize(array &$meta, ?string $cache = null): void
     {
-        $structure = new self($layer);
-
-        $structure->extractStructure($meta["structure"], "", "");
+        $this->extractStructure($meta["structure"], "", "");
 
         // replace
         $meta["structure"] = [
-            "cache" => "",
+            "cache" => "", // @deprecated - remove in 2.0.0
             "stateful" => "",
             "sources" => [],
-            "extensions" => [],
+            "extensions" => [], // @deprecated - remove in 2.0.0
             "extendables" => [],
             "mappings" => [],
-            "namespaces" => [],
-            "states" => [],
+            "namespaces" => [], // @deprecated - remove in 2.0.0
+            "states" => [], // @deprecated - remove in 2.0.0
             "mutables" => []
         ];
 
-        if ($structure->cache)
-            Cache::normalize(
-                $structure->cache,
-                $meta["structure"]["cache"]
-            );
-
-        if ($structure->stateful)
-            Stateful::normalize(
-                $structure->stateful,
-                $meta["structure"]["stateful"]
-            );
-
-        if ($structure->source)
-            Source::normalize(
-                $structure->source,
-                $meta["structure"]["sources"]
-            );
-
-        if ($structure->mappings)
-            $meta["structure"]["mappings"] = $structure->mappings;
-
-        if ($structure->extension)
-            Extension::normalize(
-                $structure->extension,
-                $meta["structure"]["extensions"]
-            );
-
-        if ($structure->extendable)
-            $meta["structure"]["extendables"] = $structure->extendable;
-
-        if ($structure->state)
-            State::normalize(
-                $structure->state,
-                $meta["structure"]["states"]
-            );
-
-        if ($structure->mutable)
-            State::normalize(
-                $structure->mutable,
-                $meta["structure"]["mutables"]
-            );
-
-        if ($structure->loadable) {
-            if ($cache)
-                Loadable::normalize(
-                    $structure->loadable,
-                    $cache,
-                    $meta["structure"]["namespaces"]
+        // @deprecated - remove in 2.0.0
+        if ($this->cache)
+            $this->box->get(Cache::class)
+                ->normalize(
+                    $this->cache,
+                    $meta["structure"]["cache"]
                 );
+
+        if ($this->stateful)
+            $this->box->get(Stateful::class)
+                ->normalize(
+                    $this->stateful,
+                    $meta["structure"]["stateful"]
+                );
+
+        if ($this->source)
+            $this->box->get(Source::class)
+                ->normalize(
+                    $this->source,
+                    $meta["structure"]["sources"]
+                );
+
+        if ($this->mappings)
+            $meta["structure"]["mappings"] = $this->mappings;
+
+        // @deprecated - remove in 2.0.0
+        if ($this->extension)
+            $this->box->get(Extension::class)
+                ->normalize(
+                    $this->extension,
+                    $meta["structure"]["extensions"]
+                );
+
+        if ($this->extendable)
+            $meta["structure"]["extendables"] = $this->extendable;
+
+        // @deprecated - remove in 2.0.0
+        if ($this->state)
+            $this->box->get(State::class)
+                ->normalize(
+                    $this->state,
+                    $meta["structure"]["states"]
+                );
+
+        if ($this->mutable)
+            $this->box->get(Mutable::class)
+                ->normalize(
+                    $this->mutable,
+                    $meta["structure"]["mutables"]
+                );
+
+        // @deprecated - remove in 2.0.0
+        if ($this->loadable) {
+            if ($cache)
+                $this->box->get(Loadable::class)
+                    ->normalize(
+                        $this->loadable,
+                        $cache,
+                        $meta["structure"]["namespaces"]
+                    );
 
             elseif ($meta["structure"]["stateful"])
-                Loadable::normalize(
-                    $structure->loadable,
-                    $meta["structure"]["stateful"],
-                    $meta["structure"]["namespaces"]
-                );
+                $this->box->get(Loadable::class)
+                    ->normalize(
+                        $this->loadable,
+                        $meta["structure"]["stateful"],
+                        $meta["structure"]["namespaces"]
+                    );
 
             elseif ($meta["structure"]["cache"])
-                Loadable::normalize(
-                    $structure->loadable,
-                    $meta["structure"]["cache"],
-                    $meta["structure"]["namespaces"]
-                );
+                $this->box->get(Loadable::class)
+                    ->normalize(
+                        $this->loadable,
+                        $meta["structure"]["cache"],
+                        $meta["structure"]["namespaces"]
+                    );
         }
     }
 
@@ -177,14 +187,15 @@ class Structure
                     // has directory identifier
                     // pass dir or source breadcrumb
                     ($key[0] === '/') ?
-                        self::extractStructure($value, $path . $key, $source) :
-                        self::extractStructure($value, $path, "$source/$key");
+                        $this->extractStructure($value, $path . $key, $source) :
+                        $this->extractStructure($value, $path, "$source/$key");
 
                 // numeric seq
                 // pass just value
                 else
-                    self::extractStructure($value, $path, $source);
+                    $this->extractStructure($value, $path, $source);
 
+            // @deprecated - remove in 2.0.0
             // cache dir
             // check also source due to branch name "cache"
             // cache dir has no source prefix
@@ -194,13 +205,14 @@ class Structure
                     $path;
 
                 if ($this->layer == "development" || $this->layer == "local")
-                    Bus::broadcast(new MetadataEvent(
-                        "The \"cache\" indicator is static and belongs to " .
-                        "the \"fusion.json\" file.",
-                        Level::ERROR,
-                        ["structure"],
-                        [$entry]
-                    ));
+                    $this->bus->broadcast(
+                        $this->box->get(MetadataEvent::class,
+                            message: "The 'cache' indicator is static and belongs to " .
+                            "the 'fusion.json' file.",
+                            level: Level::ERROR,
+                            breadcrumb: ["structure"],
+                            abstract: [$entry]
+                        ));
 
                 $this->cache[] = $entry;
 
@@ -211,13 +223,14 @@ class Structure
                     $path;
 
                 if ($this->layer == "development" || $this->layer == "local")
-                    Bus::broadcast(new MetadataEvent(
-                        "The \"stateful\" indicator is static and belongs to " .
-                        "the \"fusion.json\" file.",
-                        Level::ERROR,
-                        ["structure"],
-                        [$entry]
-                    ));
+                    $this->bus->broadcast(
+                        $this->box->get(MetadataEvent::class,
+                            message: "The 'stateful' indicator is static and belongs to " .
+                            "the 'fusion.json' file.",
+                            level: Level::ERROR,
+                            breadcrumb: ["structure"],
+                            abstract: [$entry]
+                        ));
 
                 $this->stateful[] = $entry;
 

@@ -31,11 +31,11 @@ class Structure
      *
      * @param array $entry
      */
-    public static function parse(array &$entry): void
+    public function parse(array &$entry): void
     {
         $structure = [];
 
-        self::parseStructure($entry,$structure);
+        $this->parseStructure($entry,$structure);
 
         $entry = $structure;
     }
@@ -46,7 +46,7 @@ class Structure
      * @param array $entry Raw structure.
      * @param array $structure Inflated structure.
      */
-    private static function parseStructure(array $entry, array &$structure): void
+    private function parseStructure(array $entry, array &$structure): void
     {
         foreach ($entry as $key => $value)
 
@@ -81,7 +81,7 @@ class Structure
                             $structure[$key]
                         ];
 
-                    self::parseStructure($value, $structure[$key]);
+                    $this->parseStructure($value, $structure[$key]);
 
                 // prefixed source suffix
                 // directory cant be value
@@ -100,7 +100,7 @@ class Structure
 
                         $value = [$valueParts[0] => $valueParts[1]];
 
-                        self::parseStructure($value, $structure[$key]);
+                        $this->parseStructure($value, $structure[$key]);
 
                     } else
                         $structure[$key][] = $value;
@@ -110,7 +110,7 @@ class Structure
 
             // seq
             } elseif (is_array($value))
-                self::parseStructure($value, $structure);
+                $this->parseStructure($value, $structure);
 
             // prefixed source suffix
             // directory cant be value
@@ -127,7 +127,7 @@ class Structure
                 if (isset($valueParts[1])) {
                     $value = [$valueParts[0] => $valueParts[1]];
 
-                    self::parseStructure($value, $structure);
+                    $this->parseStructure($value, $structure);
 
                 } else
                     $structure[] = $value;

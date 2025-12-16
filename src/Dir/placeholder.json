@@ -1,6 +1,6 @@
 {
     "name": "Placeholder",
-    "description": "A placeholder package for an empty working directory.",
+    "description": "Placeholder package for empty directory.",
     "id": "valvoid/placeholder",
     "version": "1.0.0",
     "structure": {
@@ -8,7 +8,7 @@
     },
     "environment": {
         "php": {
-            "version": "8.1.0"
+            "version": "8.2.0"
         }
     }
 }

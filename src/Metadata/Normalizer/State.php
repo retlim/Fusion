@@ -21,22 +21,34 @@
 
 namespace Valvoid\Fusion\Metadata\Normalizer;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 
 /**
  * External meta state normalizer.
+ * @deprecated - remove in 2.0.0
  */
 class State
 {
+    /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
     /**
      * Normalizes state.
      *
      * @param array $state
      * @param array $result
      */
-    public static function normalize(array $state, array &$result): void
+    public function normalize(array $state, array &$result): void
     {
         foreach ($state as $path) {
 
@@ -44,20 +56,22 @@ class State
             foreach ($result as $i => $p)
                 if (str_starts_with($p, $path)) {
                     unset($result[$i]);
-                    Bus::broadcast(new MetadataEvent(
-                        "Redundant, nested identifier.",
-                        Level::NOTICE,
-                        ["structure"],
-                        [$path, "state"]
-                    ));
+                    $this->bus->broadcast(
+                        $this->box->get(MetadataEvent::class,
+                            message:"Redundant, nested identifier.",
+                            level:Level::NOTICE,
+                            breadcrumb: ["structure"],
+                            abstract: [$path, "state"]
+                        ));
 
                 } elseif (str_starts_with($path, $p)) {
-                    Bus::broadcast(new MetadataEvent(
-                        "Redundant, nested identifier.",
-                        Level::NOTICE,
-                        ["structure"],
-                        [$path, "state"]
-                    ));
+                    $this->bus->broadcast(
+                        $this->box->get(MetadataEvent::class,
+                            message:"Redundant, nested identifier.",
+                            level:Level::NOTICE,
+                            breadcrumb: ["structure"],
+                            abstract: [$path, "state"]
+                        ));
 
                     continue 2;
                 }

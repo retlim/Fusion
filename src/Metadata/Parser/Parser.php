@@ -21,22 +21,35 @@
 
 namespace Valvoid\Fusion\Metadata\Parser;
 
+use Valvoid\Fusion\Box\Box;
+
 /**
- * External meta parser.
+ * Metadata parser.
  */
 class Parser
 {
+    /**
+     * Constructs the parser.
+     *
+     * @param Box $box Dependency injection container.
+     */
+    public function __construct(private readonly Box $box) {}
+
     /**
      * Parses meta.
      *
      * @param array $meta Meta.
      */
-    public static function parse(array &$meta): void
+    public function parse(array &$meta): void
     {
         foreach ($meta as $key => &$value)
             match($key) {
-                "structure" => Structure::parse($value),
-                "environment" => Environment::parse($value),
+                "structure" => $this->box->get(Structure::class)
+                    ->parse($value),
+
+                "environment" => $this->box->get(Environment::class)
+                    ->parse($value),
+
                 default => null
             };
     }

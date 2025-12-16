@@ -22,14 +22,14 @@
 namespace Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Metadata\External\Normalizer\Reference;
 
-class BoxMock extends Box
+class ReferenceMock extends Reference
 {
-    public Closure $get;
+    public Closure $getNormalizedReference;
 
-    public function get(string $class, ...$args): object
+    public function getNormalizedReference(string $reference): array
     {
-        return call_user_func($this->get, $class, ...$args);
+        return call_user_func($this->getNormalizedReference, $reference);
     }
 }

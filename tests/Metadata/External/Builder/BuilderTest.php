@@ -25,20 +25,164 @@ use Throwable;
 use Valvoid\Fusion\Metadata\External\Builder;
 use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\ExternalMock;
+use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\NormalizerMock;
+use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\InterpreterMock;
+use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\ParserMock;
+use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\ReferenceMock;
+use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\SourceMock;
+use Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks\StructureMock;
 use Valvoid\Fusion\Tests\Test;
 
 class BuilderTest extends Test
 {
-    /** @var string|array  */
     protected string|array $coverage = Builder::class;
-    protected BoxMock $container;
-    protected Builder $builder;
+
+    private BoxMock $box;
+    private Builder $builder;
+    private BusMock $bus;
+    private SourceMock $source;
+    private ReferenceMock $reference;
+    private NormalizerMock $normalizer;
+    private InterpreterMock $interpreter;
+    private ParserMock $parser;
+    private StructureMock $structure;
+    private ExternalMock $external;
 
     public function __construct()
     {
-        $this->container = new BoxMock;
-        $this->container->bus = new BusMock;
-        $this->builder = new Builder("/dir", "api/path/1.0.0");
+        $this->box = new BoxMock;
+        $this->bus = new BusMock;
+        $this->source = new SourceMock;
+        $this->reference = new ReferenceMock;
+        $this->interpreter = new InterpreterMock;
+        $this->normalizer = new NormalizerMock;
+        $this->parser = new ParserMock;
+        $this->structure = new StructureMock;
+        $this->external = new ExternalMock;
+
+        $this->box->get = function (string $class, ...$args) {
+            if ($class == "Valvoid\Fusion\Metadata\External\Parser\Source") {
+                $this->source->args = $args;
+                return $this->source;
+            }
+
+            if ($class == "Valvoid\Fusion\Metadata\Normalizer\Structure") {
+                $this->structure->args = $args;
+                return $this->structure;
+            }
+
+            if ($class == "Valvoid\Fusion\Metadata\External\External") {
+                $this->external->args = $args;
+                return $this->external;
+            }
+
+            if ($class == "Valvoid\Fusion\Metadata\External\Normalizer\Reference")
+                return $this->reference;
+
+            if ($class == "Valvoid\Fusion\Metadata\Interpreter\Interpreter")
+                return $this->interpreter;
+
+            if ($class == "Valvoid\Fusion\Metadata\Normalizer\Normalizer")
+                return $this->normalizer;
+
+            if ($class == "Valvoid\Fusion\Metadata\Parser\Parser")
+                return $this->parser;
+        };
+
+        $this->interpreter->interpret = function (string $layer, mixed $entry) {};
+        $this->normalizer->normalize = function (array &$meta) {
+            $meta["structure"] = [
+                "cache" => "",  // legacy - rename to state
+                "stateful" => "",
+                "sources" => [],
+                "extendables" => [],
+                "mappings" => [],
+                "states" => [],
+                "mutables" => []
+            ];
+        };
+
+        $this->parser->parse = function (array $meta) {};
+        $this->external->getContent = function () {
+            return [
+                "id" => "path",
+                "version" => "2.3.4",
+                "environment" => [
+                    "environment",
+                    "php" => [
+                        "modules" => []
+                    ]
+                ],
+                "structure" => [
+                    "cache" => "",
+                    "stateful" => "/state",
+                    "sources" => [],
+                    "extendables" => [],
+                    "mappings" => [],
+                    "states" => [],
+                    "mutables" => []
+                ],
+                "source" => [
+                    "api" => "api",
+                    "path" => "/path",
+                    "prefix" => "",
+                    "reference" => "2.3.4"
+                ],
+                "dir" => "/dir/path",
+                "dependencies" => [
+                    "production" => []
+                ]
+            ];
+        };
+
+        $this->normalizer->overlay = function (array $meta) {};
+        $this->structure->normalize = function (array &$meta, ?string $cache = null) {
+            $meta["structure"] = [
+                "cache" => "",  // legacy - rename to state
+                "stateful" => "",
+                "sources" => [],
+                "extendables" => [],
+                "mappings" => [],
+                "states" => [],
+                "mutables" => []
+            ];
+        };
+
+        $this->source->getId = function () {
+            if ($this->source->args == ["source" => "api/path/2.3.4"])
+                return "path";
+        };
+
+        $this->source->getSource = function () {
+            if ($this->source->args == ["source" => "api/path/2.3.4"])
+                return [
+                    "api" => "api",
+                    "path" => "/path",
+                    "prefix" => "",
+                    "reference" => [[
+                        "build" => "",
+                        "release" => "",
+                        "major" => "2",
+                        "minor" => "3",
+                        "patch" => "4",
+                        "sign" => ""
+                    ]]
+                ];
+        };
+
+        $this->reference->getNormalizedReference = function (string $reference)
+        {
+            if ($reference == "2.3.4")
+                return ["reference" => $reference];
+
+            return ["reference" => "###"];
+        };
+
+        $this->builder = new Builder(
+            $this->box,
+            $this->bus,
+            "/dir", "api/path/2.3.4");
 
         $this->testId();
         $this->testRawDir();
@@ -51,7 +195,7 @@ class BuilderTest extends Test
         $this->testProductionLayer();
         $this->testMetadata();
 
-        $this->container::unsetInstance();
+        $this->box::unsetInstance();
     }
 
     public function testProductionLayer(): void
@@ -93,10 +237,8 @@ class BuilderTest extends Test
                     "cache" => "",
                     "stateful" => "/state",
                     "sources" => [],
-                    "extensions" => [],
                     "extendables" => [],
                     "mappings" => [],
-                    "namespaces" => [],
                     "states" => [],
                     "mutables" => []
                 ],
@@ -139,9 +281,9 @@ class BuilderTest extends Test
             "reference" => [[
                 "build" => "",
                 "release" => "",
-                "major" => "1",
-                "minor" => "0",
-                "patch" => "0",
+                "major" => "2",
+                "minor" => "3",
+                "patch" => "4",
                 "sign" => ""
             ]]
         ];

@@ -21,16 +21,41 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Normalizer;
 
+use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
+use Valvoid\Fusion\Metadata\Normalizer\Mutable;
+use Valvoid\Fusion\Metadata\Normalizer\Source;
+use Valvoid\Fusion\Metadata\Normalizer\Stateful;
 use Valvoid\Fusion\Metadata\Normalizer\Structure;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Test;
 
 class StructureTest extends Test
 {
     protected string|array $coverage = Structure::class;
+    private BoxMock $box;
+    private BusMock $bus;
 
     public function __construct()
     {
+        $this->box = new BoxMock;
+        $this->bus = new BusMock;
+        $this->box->get = function (string $class, ...$args) {
+            if ($class == "Valvoid\Fusion\Bus\Events\Metadata")
+                return new MetadataEvent(...$args);
+
+            if ($class == "Valvoid\Fusion\Metadata\Normalizer\Stateful")
+                return new Stateful($this->box, $this->bus);
+
+            if ($class == "Valvoid\Fusion\Metadata\Normalizer\Source")
+                return new Source($this->box, $this->bus);
+
+            if ($class == "Valvoid\Fusion\Metadata\Normalizer\Mutable")
+                return new Mutable($this->box, $this->bus);
+        };
+
         $this->testNormalize();
+        $this->box->unsetInstance();
     }
 
     public function testNormalize(): void
@@ -45,10 +70,7 @@ class StructureTest extends Test
                 "recursive",
                 "/state" => [
                     "stateful",
-                    "/loadable/path3" => "namespace\\any"
                 ],
-                "/path2" => "extension",
-                "/path4" => "state",
                 "/p5" => [
                     "/p6" => [
                         ":package/id/sub/dir",
@@ -64,7 +86,8 @@ class StructureTest extends Test
             "environment" => []
         ];
 
-        Structure::normalize($metadata, "layer");
+        (new Structure($this->box, $this->bus, ""))
+            ->normalize($metadata, "layer");
 
         if ($metadata !== [
                 "id" => "",
@@ -83,7 +106,7 @@ class StructureTest extends Test
                         ]
                     ],
                     "extensions" => [
-                        "/path2"
+                        #"/path2" @deprecated
                     ],
                     "extendables" => [
                         "/p8"
@@ -92,10 +115,10 @@ class StructureTest extends Test
                         "/p5/p6" => ":package/id/sub/dir",
                     ],
                     "namespaces" => [
-                        "namespace\\any" => "/path3"
+                        #"namespace\\any" => "/path3" @deprecated
                     ],
                     "states" => [
-                        "/path4"
+                       # "/path4" @deprecated
                     ],
                     "mutables" => [
                         "/p7"

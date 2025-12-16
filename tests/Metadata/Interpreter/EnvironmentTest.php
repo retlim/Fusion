@@ -22,94 +22,84 @@
 namespace Valvoid\Fusion\Tests\Metadata\Interpreter;
 
 use Exception;
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Bus\Events\Event;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Metadata\Interpreter\Environment;
 use Valvoid\Fusion\Tests\Metadata\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Test;
 
 class EnvironmentTest extends Test
 {
     protected string|array $coverage = Environment::class;
-
-    /** @var ?MetadataEvent last event */
-    private ?MetadataEvent $event = null;
-
-    /** @var bool  */
-    private bool $throwException = false;
+    private BoxMock $box;
+    private BusMock $bus;
 
     public function __construct()
     {
-        $containerMock = new BoxMock;
+        $this->box = new BoxMock;
+        $this->bus = new BusMock;
+        $this->box->get = function (string $class, ...$args) {
+            if ($class == "Valvoid\Fusion\Bus\Events\Metadata")
+                return new MetadataEvent(...$args);
+        };
 
         $this->testReset();
         $this->testInvalidType();
         $this->testInvalidKey();
 
-        $containerMock::unsetInstance();
+        $this->box->unsetInstance();
     }
 
     public function testReset(): void
     {
-        $this->event = null;
+        $this->bus->broadcast = function (Event $e) use (&$event) {
+            $event = $e;
+        };
 
-        Bus::addReceiver(self::class, $this->handleBusEvent(...), MetadataEvent::class);
-        Environment::interpret(null);
+        (new Environment($this->box, $this->bus))
+            ->interpret(null);
 
-        // assert nothing
-        if ($this->event !== null)
+        if ($event !== null)
             $this->handleFailedTest();
-
-        Bus::removeReceiver(self::class);
     }
 
     public function testInvalidType(): void
     {
-        $this->event = null;
-        $this->throwException = true;
-
-        Bus::addReceiver(self::class, $this->handleBusEvent(...), MetadataEvent::class);
-
         try {
-            Environment::interpret(623); // must be an array
+            $this->bus->broadcast = function (Event $e) use (&$event) {
+                $event = $e;
+                throw new Exception;
+            };
 
-            $this->result = false;
+            (new Environment($this->box, $this->bus))
+                ->interpret(623); // must be an array
+
+            $this->handleFailedTest();
 
         } catch (Exception) {
-            if ($this->event === null || $this->event->getLevel() !== Level::ERROR)
+            if ($event === null || $event->getLevel() !== Level::ERROR)
                 $this->handleFailedTest();
         }
-
-        $this->throwException = false;
-
-        Bus::removeReceiver(self::class);
     }
 
     public function testInvalidKey(): void
     {
-        $this->event = null;
+        try {
+            $this->bus->broadcast = function (Event $e) use (&$event) {
+                $event = $e;
+                throw new Exception;
+            };
 
-        Bus::addReceiver(self::class, $this->handleBusEvent(...), MetadataEvent::class);
-        Environment::interpret(["key" => true]);
+            (new Environment($this->box, $this->bus))
+                ->interpret(["key" => true]);
 
-        if ($this->event === null || $this->event->getLevel() !== Level::ERROR)
             $this->handleFailedTest();
 
-        Bus::removeReceiver(self::class);
-    }
-
-    /**
-     * Handles bus event.
-     *
-     * @param MetadataEvent $event Root event.
-     * @throws Exception
-     */
-    private function handleBusEvent(MetadataEvent $event): void
-    {
-        $this->event = $event;
-
-        if ($this->throwException)
-            throw new Exception;
+        } catch (Exception) {
+            if ($event === null || $event->getLevel() !== Level::ERROR)
+                $this->handleFailedTest();
+        }
     }
 }

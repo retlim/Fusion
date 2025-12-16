@@ -21,44 +21,58 @@
 
 namespace Valvoid\Fusion\Metadata\Normalizer;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 
 /**
  * External meta cache normalizer.
+ * @deprecated - remove in 2.0.0
  */
 class Cache
 {
+    /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
     /**
      * Normalizes cache.
      *
      * @param array $category
      * @param string $cache
      */
-    public static function normalize(array $category, string &$cache): void
+    public function normalize(array $category, string &$cache): void
     {
         // require structure info
         // cache folder
         if (!$category)
-            Bus::broadcast(new MetadataEvent(
-                "Missing cache folder identifier. Structure must have " .
-                "unique cache folder identifier.",
-                Level::ERROR,
-                ["structure"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "Missing cache folder identifier. Structure must have " .
+                    "unique cache folder identifier.",
+                    level: Level::ERROR,
+                    breadcrumb: ["structure"]
+                ));
 
         $path = $category[0];
 
         // nested folder
         if (!$path)
-            Bus::broadcast(new MetadataEvent(
-                "No cache directory. " .
-                "Cache folder identifier must be at a nested directory.",
-                Level::ERROR,
-                ["structure"],
-                [$path, "cache"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "No cache directory. " .
+                    "Cache folder identifier must be at a nested directory.",
+                    level: Level::ERROR,
+                    breadcrumb: ["structure"],
+                    abstract: [$path, "cache"]
+                ));
 
         $cache = $path;
     }

@@ -21,14 +21,15 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Logic;
 
 class BoxMock extends Box
 {
-    public $bus;
+    public Closure $get;
+
     public function get(string $class, ...$args): object
     {
-        return $this->bus ??= new Logic();
+        return call_user_func($this->get, $class, ...$args);
     }
 }

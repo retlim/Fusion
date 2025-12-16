@@ -19,17 +19,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks;
+namespace Valvoid\Fusion\Tests\Metadata\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Events\Event;
+use Valvoid\Fusion\Bus\Proxy as BusProxy;
 
-class BoxMock extends Box
+class BusMock implements BusProxy
 {
-    public Closure $get;
+    public Closure $broadcast;
 
-    public function get(string $class, ...$args): object
+    public function broadcast(Event $event): void
     {
-        return call_user_func($this->get, $class, ...$args);
+        call_user_func($this->broadcast, $event);
     }
+
+    public function addReceiver(string $id, Closure $callback, string ...$events): void {}
+    public function removeReceiver(string $id, string ...$events): void {}
 }

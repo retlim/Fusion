@@ -21,17 +21,66 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Normalizer;
 
+use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Metadata\Normalizer\Normalizer;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BusMock;
+use Valvoid\Fusion\Tests\Metadata\Mocks\StructureMock;
 use Valvoid\Fusion\Tests\Test;
 
 class NormalizerTest extends Test
 {
     protected string|array $coverage = Normalizer::class;
 
+    private BoxMock $box;
+    private BusMock $bus;
+    private StructureMock $structure;
+
     public function __construct()
     {
+        $this->box = new BoxMock;
+        $this->bus = new BusMock;
+        $this->structure = new StructureMock;
+        $this->box->get = function (string $class, ...$args) {
+            if ($class == "Valvoid\Fusion\Bus\Events\Metadata")
+                return new MetadataEvent(...$args);
+
+            if ($class == "Valvoid\Fusion\Metadata\Normalizer\Structure") {
+                $this->structure->args = $args;
+                return $this->structure;
+            }
+        };
+
+        $this->structure->normalize = function (array &$meta, ?string $cache = null) {
+            $meta = [
+                "id" => "",
+                "version" => "",
+                "name" => "",
+                "dir" => "",
+                "description" => "",
+                "structure" => [
+                    "cache" => "",
+                    "stateful" => "/state",
+                    "sources" => [],
+                    "extensions" => [],
+                    "extendables" => [],
+                    "mappings" => [],
+                    "namespaces" => [],
+                    "states" => [],
+                    "mutables" => []
+                ],
+                "environment" => [
+                    "php" => [
+                        "modules" => []
+                    ]
+                ]
+            ];
+        };
+
         $this->testNormalize();
         $this->testOverlay();
+
+        $this->box->unsetInstance();
     }
 
     public function testNormalize(): void
@@ -48,7 +97,8 @@ class NormalizerTest extends Test
             "environment" => []
         ];
 
-        Normalizer::normalize($metadata);
+        (new Normalizer($this->box, $this->bus))
+            ->normalize($metadata);
 
         if ($metadata !== [
                 "id" => "",
@@ -82,7 +132,8 @@ class NormalizerTest extends Test
             "whatever"
         ];
 
-        Normalizer::overlay($content, ["key1" => null, "key2" => "value2"]);
+        (new Normalizer($this->box, $this->bus))
+            ->overlay($content, ["key1" => null, "key2" => "value2"]);
 
         if ($content !== [
                 "key1" => null,

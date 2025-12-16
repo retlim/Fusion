@@ -21,25 +21,44 @@
 
 namespace Valvoid\Fusion\Metadata\Internal;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
+use Valvoid\Fusion\Log\Events\Errors\Metadata as MetadataError;
 use Valvoid\Fusion\Log\Events\Level;
-use Valvoid\Fusion\Metadata\Builder as MetadataBuilder;
+use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Metadata\Interpreter\Interpreter;
+use Valvoid\Fusion\Metadata\Normalizer\Normalizer;
+use Valvoid\Fusion\Metadata\Normalizer\Structure;
+use Valvoid\Fusion\Metadata\Parser\Parser;
 
 /**
  * Internal metadata builder.
  */
 class Builder
 {
-    use MetadataBuilder;
+    /** @var array Merged data. */
+    private array $content = [];
+
+    /** @var string Current layer. */
+    private string $layer = "object";
+
+    /** @var array Layers. */
+    private array $layers;
 
     /**
      * Constructs the builder.
      *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
      * @param string $dir Recursive or nested directory (to).
      * @param string $source Internal inline source (from).
      */
-    public function __construct(string $dir, string $source)
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus,
+        string $dir,
+        string $source)
     {
         // reverse overlay order
         // object - required
@@ -123,7 +142,7 @@ class Builder
         $this->content["dependencies"]["production"] =
             $this->layers["production"]["content"]["parsed"]["dependencies"];
 
-        Bus::addReceiver(self::class, $this->handleBusEvent(...),
+        $this->bus->addReceiver(self::class, $this->handleBusEvent(...),
             MetadataEvent::class);
 
         // optional dev
@@ -138,12 +157,13 @@ class Builder
             );
 
             if ($intersection)
-                Bus::broadcast(new MetadataEvent(
-                    "Nested source intersection: " .
-                    implode(', ', $intersection),
-                    Level::ERROR,
-                    ["structure"]
-                ));
+                $this->bus->broadcast(
+                    $this->box->get(MetadataEvent::class,
+                        message: "Nested source intersection: " .
+                        implode(', ', $intersection),
+                        level: Level::ERROR,
+                        breadcrumb: ["structure"]
+                    ));
 
         } else
             $this->content["dependencies"]["development"] = null;
@@ -160,12 +180,13 @@ class Builder
             );
 
             if ($intersection)
-                Bus::broadcast(new MetadataEvent(
-                    "Nested source intersection: " .
-                    implode(', ', $intersection),
-                    Level::ERROR,
-                    ["structure"]
-                ));
+                $this->bus->broadcast(
+                    $this->box->get(MetadataEvent::class,
+                        message: "Nested source intersection: " .
+                        implode(', ', $intersection),
+                        level: Level::ERROR,
+                        breadcrumb: ["structure"]
+                    ));
 
             if ($this->content["dependencies"]["development"]) {
                 $intersection = array_intersect(
@@ -174,22 +195,242 @@ class Builder
                 );
 
                 if ($intersection)
-                    Bus::broadcast(new MetadataEvent(
-                        "Nested source intersection: " .
-                        implode(', ', $intersection),
-                        Level::ERROR,
-                        ["structure"]
-                    ));
+                    $this->bus->broadcast(
+                        $this->box->get(MetadataEvent::class,
+                            message: "Nested source intersection: " .
+                            implode(', ', $intersection),
+                            level: Level::ERROR,
+                            breadcrumb: ["structure"]
+                        ));
             }
 
         } else
             $this->content["dependencies"]["local"] = null;
 
-        Bus::removeReceiver(self::class);
+        $this->bus->removeReceiver(self::class);
 
-        return new Internal(
-            $this->getRawLayers(),
-            $this->content
+        return $this->box->get(Internal::class,
+            layers: $this->getRawLayers(),
+            content: $this->content
         );
+    }
+
+    /**
+     * Adds production layer.
+     *
+     * @param string $file File.
+     * @param string $content Content.
+     * @throws MetadataError Invalid metadata exception.
+     */
+    public function addProductionLayer(string $content, string $file): void
+    {
+        $content = json_decode($content, true);
+
+        if ($content === null)
+            throw $this->box->get(MetadataError::class,
+
+                // identifier
+                source: $this->layers["object"]["content"]["raw"]["source"],
+                message: "Can't decode JSON content. " .
+                json_last_error_msg(),
+                layer: $file
+            );
+
+        $this->addLayer("production", $content, $file);
+    }
+
+    /**
+     * Normalizes individually layer.
+     *
+     * @param string $layer Layer.
+     */
+    private function normalizeIndividually(string $layer): void
+    {
+        // optional development
+        // validate and extract ids
+        if (!isset($this->layers[$layer]["content"]["parsed"]["structure"]))
+            return;
+
+        $this->bus->addReceiver(self::class, $this->handleBusEvent(...),
+            MetadataEvent::class);
+
+        $this->layer = $layer;
+        $content = $this->layers[$layer]["content"]["parsed"];
+
+        $this->box->get(Structure::class,
+            layer: $layer)
+            ->normalize(
+                $content,
+                $this->content["structure"]["cache"]
+            );
+
+        // extract dependencies
+        foreach ($content["structure"]["sources"] as $dir => $sources)
+            if ($dir)
+                $this->setDependencies($sources);
+
+        $this->bus->removeReceiver(self::class);
+    }
+
+    /**
+     * Sets dependencies.
+     *
+     * @param array $sources Sources.
+     */
+    private function setDependencies(array $sources): void
+    {
+        $dependencies = &$this->layers[$this->layer]["content"]["parsed"]["dependencies"];
+
+        foreach ($sources as $source) {
+            $source = explode('/', $source);
+
+            // remove api and reference
+            array_shift($source);
+            array_pop($source);
+
+            // remove ' parts
+            foreach ($source as $i => $segment)
+                if ($segment[0] === "'")
+                    unset($source[$i]);
+
+            $dependencies[] = implode('/', $source);
+        }
+    }
+
+    /**
+     * Adds layer.
+     *
+     * @param string $layer Layer.
+     * @param string $file File.
+     * @param array $content Content.
+     */
+    private function addLayer(string $layer, array $content, string $file = ""): void
+    {
+        $this->content = [];
+        $this->layer = $layer;
+        $this->layers[$layer] = [
+            "file" => $file,
+            "content" => [
+                "raw" => $content
+            ]
+        ];
+
+        // bus wrapper
+        // error handling
+        $this->bus->addReceiver(self::class, $this->handleBusEvent(...),
+            MetadataEvent::class);
+
+        $this->box->get(Interpreter::class)
+            ->interpret($layer, $content);
+
+        $this->box->get(Parser::class)
+            ->parse($content);
+
+        $this->bus->removeReceiver(self::class);
+
+        $this->layers[$layer]["content"]["parsed"] = [
+            "dependencies" => [],
+            ...$content
+        ];
+    }
+
+    /**
+     * Normalizes metadata.
+     */
+    private function normalize(): void
+    {
+        $this->layer = "all";
+        $this->content = [];
+
+        $this->bus->addReceiver(self::class, $this->handleBusEvent(...),
+            MetadataEvent::class);
+
+        // overlay existing
+        foreach ($this->layers as $layer)
+            if ($layer)
+                $this->box->get(Normalizer::class)
+                    ->overlay($this->content, $layer["content"]["parsed"]);
+
+        unset($this->content["dependencies"]);
+
+        $this->box->get(Normalizer::class)
+            ->normalize($this->content);
+
+        $this->bus->removeReceiver(self::class);
+    }
+
+    /**
+     * Returns raw layers.
+     *
+     * @return array Layers.
+     */
+    private function getRawLayers(): array
+    {
+        $layers = [];
+
+        foreach ($this->layers as $category => $layer)
+            if ($layer)
+                $layers[$layer["file"] ?? $category] = $layer["content"]["raw"];
+
+        return $layers;
+    }
+
+    /**
+     * Handles bus event.
+     *
+     * @param MetadataEvent $event Root event.
+     * @throws MetadataError Invalid metadata exception.
+     */
+    protected function handleBusEvent(MetadataEvent $event): void
+    {
+        $breadcrumb = $event->getBreadcrumb();
+        $abstract = $event->getAbstract();
+        $layer = "unknown layer";
+        $row = 0;
+
+        switch ($this->layer) {
+            case "object":
+                $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+
+                // reverse
+                // take first match
+                foreach (array_reverse($backtrace) as $entry)
+                    if ($entry["class"] == self::class) {
+                        $layer = $entry["file"];
+                        $row = $entry["line"];
+                        break;
+                    }
+
+                break;
+
+            case "production":
+            case "bot":
+            case "local":
+            case "development":
+                $layer = $this->layers[$this->layer]["file"];
+                break;
+
+            // all
+            default:
+                $layer = $this->layers["production"]["file"];
+        }
+
+        $metadata = $this->box->get(MetadataError::class,
+
+            // identifier
+            source: $this->layers["object"]["content"]["raw"]["source"],
+            message: $event->getMessage(),
+            layer: $layer,
+            breadcrumb: $breadcrumb,
+            row: $row
+        );
+
+        match ($event->getLevel()) {
+            Level::ERROR => throw $metadata,
+            Level::WARNING => $this->box->get(Log::class)->warning($metadata),
+            Level::NOTICE => $this->box->get(Log::class)->notice($metadata),
+            Level::VERBOSE => $this->box->get(Log::class)->verbose($metadata),
+            Level::INFO => $this->box->get(Log::class)->info($metadata)
+        };
     }
 }

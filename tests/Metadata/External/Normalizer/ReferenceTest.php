@@ -38,7 +38,7 @@ class ReferenceTest extends Test
     public function testNormalizedReference(): void
     {
         // reference as semantic version
-        if (Reference::getNormalizedReference("==1.0.0") !== [
+        if ((new Reference)->getNormalizedReference("==1.0.0") !== [
             "reference" => "==1.0.0"
             ])
             $this->handleFailedTest();
@@ -48,7 +48,7 @@ class ReferenceTest extends Test
     {
         // offset commit|branch|tag reference
         // handle as semantic version
-        if (Reference::getNormalizedReference("1.0.0:ref") !== [
+        if ((new Reference)->getNormalizedReference("1.0.0:ref") !== [
                 "version" => "1.0.0",
                 "reference" => "ref"
             ])

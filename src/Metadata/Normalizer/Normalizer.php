@@ -21,7 +21,8 @@
 
 namespace Valvoid\Fusion\Metadata\Normalizer;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 
@@ -31,24 +32,35 @@ use Valvoid\Fusion\Log\Events\Level;
 class Normalizer
 {
     /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
+    /**
      * Normalizes meta.
      *
      * @param array $meta Meta.
      */
-    public static function normalize(array &$meta): void
+    public function normalize(array &$meta): void
     {
-        $meta = self::removeResetEntries($meta);
+        $meta = $this->removeResetEntries($meta);
         $keys = ["id", "version", "name", "description", "structure",
             "environment"];
 
         // require
         foreach ($keys as $key)
             if (!isset($meta[$key]))
-                Bus::broadcast(new MetadataEvent(
-                    "Meta must have \"$key\" key.",
-                    Level::ERROR,
-                    [$key]
-                ));
+                $this->bus->broadcast(
+                    $this->box->get(MetadataEvent::class,
+                        message: "Meta must have '$key' key.",
+                        level: Level::ERROR,
+                        breadcrumb: [$key]
+                    ));
 
         // empty root package dir or
         // nested package inside parent structure dir and
@@ -58,15 +70,18 @@ class Normalizer
 
         $meta["environment"]["php"]["modules"] ??= [];
 
-        Structure::normalize($meta, "all");
+        $this->box->get(Structure::class,
+            layer: "all")
+                ->normalize($meta);
 
         if (!$meta["structure"]["cache"] &&
             !$meta["structure"]["stateful"])
-            Bus::broadcast(new MetadataEvent(
-                "Structure must have a nested state directory.",
-                Level::ERROR,
-                ["structure"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "Structure must have a nested state directory.",
+                    level: Level::ERROR,
+                    breadcrumb: ["structure"]
+                ));
     }
 
     /**
@@ -75,11 +90,11 @@ class Normalizer
      * @param array $meta Meta.
      * @return array Cleared meta.
      */
-    private static function removeResetEntries(array $meta): array
+    private function removeResetEntries(array $meta): array
     {
         foreach ($meta as $key => $value) {
             if (is_array($value))
-                $meta[$key] = self::removeResetEntries($value);
+                $meta[$key] = $this->removeResetEntries($value);
 
             if ($meta[$key] === null)
                 unset($meta[$key]);
@@ -94,7 +109,7 @@ class Normalizer
      * @param array $content Lower meta.
      * @param array $layer Higher meta.
      */
-    public static function overlay(array &$content, array $layer): void
+    public function overlay(array &$content, array $layer): void
     {
         foreach ($layer as $key => $value)
             if ($value === null)
@@ -107,7 +122,7 @@ class Normalizer
                 if (!isset($content[$key]) || !is_array($content[$key]))
                     $content[$key] = [];
 
-                self::overlay($content[$key], $value);
+                $this->overlay($content[$key], $value);
 
                 // extend with seq value if not exist
                 // one to many add rule

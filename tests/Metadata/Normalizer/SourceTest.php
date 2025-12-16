@@ -21,16 +21,28 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Normalizer;
 
+use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Metadata\Normalizer\Source;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Test;
 
 class SourceTest extends Test
 {
     protected string|array $coverage = Source::class;
+    private BoxMock $box;
+    private BusMock $bus;
 
     public function __construct()
     {
+        $this->box = new BoxMock;
+        $this->bus = new BusMock;
+        $this->box->get = function (string $class, ...$args) {
+            if ($class == "Valvoid\Fusion\Bus\Events\Metadata")
+                return new MetadataEvent(...$args);
+        };
         $this->testSources();
+        $this->box->unsetInstance();
     }
 
     public function testSources(): void
@@ -38,7 +50,8 @@ class SourceTest extends Test
         $sources = [];
 
         // leading slash legacy ballast
-        Source::normalize([
+        (new Source($this->box, $this->bus))
+            ->normalize([
             ["/path1" => "/source1"],
             ["/path2" => "/source2"],
             ["/path2" => "/source3"]
@@ -50,10 +63,7 @@ class SourceTest extends Test
                 "/path2" => [
                     "source2",
                     "source3"
-                ]]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+                ]])
+            $this->handleFailedTest();
     }
 }

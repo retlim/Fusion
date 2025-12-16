@@ -21,16 +21,39 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Parser;
 
+use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Metadata\Parser\Environment;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Metadata\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Test;
 
 class EnvironmentTest extends Test
 {
     protected string|array $coverage = Environment::class;
-
+    private BoxMock $box;
+    private BusMock $bus;
     public function __construct()
     {
+        $this->box = new BoxMock;
+        $this->bus = new BusMock;
+        $this->box->get = function (string $class, ...$args) {
+            if ($class == "Valvoid\Fusion\Bus\Events\Metadata")
+                return new MetadataEvent(...$args);
+
+            if ($class == "Valvoid\Fusion\Metadata\Interpreter\Environment")
+                return new class extends \Valvoid\Fusion\Metadata\Interpreter\Environment
+                {
+                    public function __construct(){}
+
+                    public function isSemanticVersionCorePattern(string $entry): bool
+                    {
+                        return true;
+                    }
+                };
+        };
+
         $this->testParse();
+        $this->box->unsetInstance();
     }
 
     public function testParse(): void
@@ -42,7 +65,8 @@ class EnvironmentTest extends Test
             ]
         ];
 
-        Environment::parse($environment);
+        (new Environment($this->box, $this->bus))
+            ->parse($environment);
 
         if ($environment != [
             "php" => [
@@ -71,10 +95,6 @@ class EnvironmentTest extends Test
                         "sign" => "<="
                     ]
                 ]]
-            ]]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]]) $this->handleFailedTest();
     }
 }

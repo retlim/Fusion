@@ -21,7 +21,8 @@
 
 namespace Valvoid\Fusion\Metadata\Interpreter;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 
@@ -31,25 +32,36 @@ use Valvoid\Fusion\Log\Events\Level;
 class Structure
 {
     /**
+     * Constructs the interpreter.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
+    /**
      * Interprets the structure entry.
      *
      * @param mixed $entry Entry.
      */
-    public static function interpret(mixed $entry): void
+    public function interpret(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new MetadataEvent(
-                "The value, package structure, of the \"structure\" " .
-                "index must be an assoc array.",
-                Level::ERROR,
-                ["structure"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value, package structure, of the 'structure' " .
+                    "index must be an assoc array.",
+                    level: Level::ERROR,
+                    breadcrumb: ["structure"]
+                ));
 
-        self::interpretStructure($entry, ["structure"]);
+        $this->interpretStructure($entry, ["structure"]);
     }
 
     /**
@@ -58,58 +70,62 @@ class Structure
      * @param array $entry Structure.
      * @param array $breadcrumb Index path inside meta.
      */
-    private static function interpretStructure(array $entry, array $breadcrumb): void
+    private function interpretStructure(array $entry, array $breadcrumb): void
     {
         foreach ($entry as $key => $value) {
             if (is_string($key))
 
                 // empty
                 if (!$key)
-                    Bus::broadcast(new MetadataEvent(
-                        "The \"$key\" index, source or path prefix, " .
-                        "must be a non-empty string.",
-                        Level::ERROR,
-                        [...$breadcrumb, $key]
-                    ));
+                    $this->bus->broadcast(
+                        $this->box->get(MetadataEvent::class,
+                            message: "The '$key' index, source or path prefix, " .
+                            "must be a non-empty string.",
+                            level: Level::ERROR,
+                            breadcrumb: [...$breadcrumb, $key]
+                        ));
 
                 // path identifier
                 elseif ($key[0] === '/') {
 
                     // only separator
                     if ($key === '/')
-                        Bus::broadcast(new MetadataEvent(
-                            "The \"$key\" index, path prefix, " .
-                            "must consist of non-empty separated parts. " .
-                            "Separator \"/\" must have trailing chars.",
-                            Level::ERROR,
-                            [...$breadcrumb, $key]
-                        ));
+                        $this->bus->broadcast(
+                            $this->box->get(MetadataEvent::class,
+                                message: "The '$key' index, path prefix, " .
+                                "must consist of non-empty separated parts. " .
+                                "Separator '/' must have trailing chars.",
+                                level: Level::ERROR,
+                                breadcrumb: [...$breadcrumb, $key]
+                            ));
                 }
 
             if (is_array($value))
-                self::interpretStructure($value, [...$breadcrumb, $key]);
+                $this->interpretStructure($value, [...$breadcrumb, $key]);
 
             // not reset
             elseif ($value !== null) {
 
                 // non-empty string
                 if (!is_string($value) || !$value)
-                    Bus::broadcast(new MetadataEvent(
-                        "The value, source suffix, of the \"$key\" index " .
-                        "must be a non-empty string.",
-                        Level::ERROR,
-                        [...$breadcrumb, $key]
-                    ));
+                    $this->bus->broadcast(
+                        $this->box->get(MetadataEvent::class,
+                            message: "The value, source suffix, of the '$key' index " .
+                            "must be a non-empty string.",
+                            level: Level::ERROR,
+                            breadcrumb: [...$breadcrumb, $key]
+                        ));
 
                 // source
                 if ($value[0] === '/')
-                    Bus::broadcast(new MetadataEvent(
-                        "The value, source suffix, of the \"$key\" index " .
-                        "must be of type source. Leading separator \"/\" is a path " .
-                        "type identifier.",
-                        Level::ERROR,
-                        [...$breadcrumb, $key]
-                    ));
+                    $this->bus->broadcast(
+                        $this->box->get(MetadataEvent::class,
+                            message: "The value, source suffix, of the '$key' index " .
+                            "must be of type source. Leading separator '/' is a path " .
+                            "type identifier.",
+                            level: Level::ERROR,
+                            breadcrumb: [...$breadcrumb, $key]
+                        ));
             }
         }
     }

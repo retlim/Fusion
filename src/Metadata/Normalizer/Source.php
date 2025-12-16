@@ -21,7 +21,8 @@
 
 namespace Valvoid\Fusion\Metadata\Normalizer;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 
@@ -31,12 +32,22 @@ use Valvoid\Fusion\Log\Events\Level;
 class Source
 {
     /**
+     * Constructs the normalizer.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
+    /**
      * Normalizes source.
      *
      * @param array $category
      * @param array $sources
      */
-    public static function normalize(array $category, array &$sources): void
+    public function normalize(array $category, array &$sources): void
     {
         foreach ($category as $entry)
             foreach ($entry as $path => $source) {
@@ -47,12 +58,13 @@ class Source
 
                 // unique self-source
                 if ($path == "" && isset($sources[$path]))
-                    Bus::broadcast(new MetadataEvent(
-                        "Multi root source. Root source must be unique ($path - $source).",
-                        Level::ERROR,
-                        ["structure"],
-                        [$path, $source]
-                    ));
+                    $this->bus->broadcast(
+                        $this->box->get(MetadataEvent::class,
+                            message: "Multi root source. Root source must be unique ($path - $source).",
+                            level: Level::ERROR,
+                            breadcrumb: ["structure"],
+                            abstract: [$path, $source]
+                        ));
 
                 // path conflict
                 // folder and source have same parent or
@@ -62,21 +74,23 @@ class Source
                     if (is_array($v))
                         foreach ($v as $p => $s) {
                             if (str_starts_with($path, $p) || str_starts_with($p, $path))
-                                Bus::broadcast(new MetadataEvent(
-                                    "Path conflict. Source and path must be in " .
-                                    "different parent folder ($path - $source).",
-                                    Level::ERROR,
-                                    ["structure"],
-                                    [$path, $source]
-                                ));
+                                $this->bus->broadcast(
+                                    $this->box->get(MetadataEvent::class,
+                                        message: "Path conflict. Source and path must be in " .
+                                        "different parent folder ($path - $source).",
+                                        level: Level::ERROR,
+                                        breadcrumb: ["structure"],
+                                        abstract: [$path, $source]
+                                    ));
 
                             if ($s == $source) {
-                                Bus::broadcast(new MetadataEvent(
-                                    "Redundant source.",
-                                    Level::NOTICE,
-                                    ["structure"],
-                                    [$path, $source]
-                                ));
+                                $this->bus->broadcast(
+                                    $this->box->get(MetadataEvent::class,
+                                        message: "Redundant source.",
+                                        level: Level::NOTICE,
+                                        breadcrumb: ["structure"],
+                                        abstract: [$path, $source]
+                                    ));
 
                                 // jump over
                                 continue 3;
@@ -84,21 +98,23 @@ class Source
                         }
 
                     elseif ($path != $k && $k != "" && (str_starts_with($path, $k) || str_starts_with($k, $path)))
-                        Bus::broadcast(new MetadataEvent(
-                            "Path conflict. Source and path must be in " .
-                            "different parent folder ($path - $source).",
-                            Level::ERROR,
-                            ["structure"],
-                            [$path, $source]
-                        ));
+                        $this->bus->broadcast(
+                            $this->box->get(MetadataEvent::class,
+                                message: "Path conflict. Source and path must be in " .
+                                "different parent folder ($path - $source).",
+                                level: Level::ERROR,
+                                breadcrumb: ["structure"],
+                                abstract: [$path, $source]
+                            ));
 
                     elseif ($v == $source) {
-                        Bus::broadcast(new MetadataEvent(
-                            "Redundant source.",
-                            Level::NOTICE,
-                            ["structure"],
-                            [$path, $source]
-                        ));
+                        $this->bus->broadcast(
+                            $this->box->get(MetadataEvent::class,
+                                message: "Redundant source.",
+                                level: Level::NOTICE,
+                                breadcrumb: ["structure"],
+                                abstract: [$path, $source]
+                            ));
 
                         // jump over
                         continue 2;

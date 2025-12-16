@@ -35,7 +35,7 @@ class Reference
      *     version?: string
      * } Normalized reference.
      */
-    public static function getNormalizedReference(string $reference): array
+    public function getNormalizedReference(string $reference): array
     {
         $reference = explode(':', $reference);
 

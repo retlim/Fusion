@@ -22,14 +22,22 @@
 namespace Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Metadata\Normalizer\Normalizer;
 
-class BoxMock extends Box
+class NormalizerMock extends Normalizer
 {
-    public Closure $get;
+    public Closure $normalize;
+    public Closure $overlay;
 
-    public function get(string $class, ...$args): object
+    public function __construct() {}
+
+    public function normalize(array &$meta): void
     {
-        return call_user_func($this->get, $class, ...$args);
+        call_user_func_array($this->normalize, [&$meta]);
+    }
+
+    public function overlay(array &$content, array $layer): void
+    {
+        call_user_func($this->overlay, $content, $layer);
     }
 }

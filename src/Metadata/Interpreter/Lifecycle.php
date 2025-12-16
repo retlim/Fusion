@@ -21,7 +21,8 @@
 
 namespace Valvoid\Fusion\Metadata\Interpreter;
 
-use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;
 
@@ -31,38 +32,50 @@ use Valvoid\Fusion\Log\Events\Level;
 class Lifecycle
 {
     /**
+     * Constructs the interpreter.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
+    /**
      * Interprets the lifecycle entry.
      *
      * @param mixed $entry Potential lifecycle entry.
      */
-    public static function interpret(mixed $entry): void
+    public function interpret(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new MetadataEvent(
-                "The value of the \"lifecycle\" index must be an assoc array.",
-                Level::ERROR,
-                ["lifecycle"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value of the 'lifecycle' index must be an assoc array.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle"]
+                ));
 
         foreach ($entry as $key => $value)
             match($key) {
-                "download" => self::interpretDownload($value),
-                "copy" => self::interpretCopy($value),
-                "install" => self::interpretInstall($value),
-                "update" => self::interpretUpdate($value),
-                "migrate" => self::interpretMigrate($value),
-                "delete" => self::interpretDelete($value),
-                default => Bus::broadcast(new MetadataEvent(
-                    "The unknown \"$key\" index must be " .
-                    "\"download\", \"copy\", \"install\", \"update\", \"migrate\", or " .
-                    "\"delete\" string.",
-                    Level::ERROR,
-                    ["lifecycle", $key]
-                ))
+                "download" => $this->interpretDownload($value),
+                "copy" => $this->interpretCopy($value),
+                "install" => $this->interpretInstall($value),
+                "update" => $this->interpretUpdate($value),
+                "migrate" => $this->interpretMigrate($value),
+                "delete" => $this->interpretDelete($value),
+                default => $this->bus->broadcast(
+                    $this->box->get(MetadataEvent::class,
+                        message: "The unknown '$key' index must be " .
+                        "'download', 'copy', 'install', 'update', 'migrate', or " .
+                        "'delete' string.",
+                        level: Level::ERROR,
+                        breadcrumb: ["lifecycle", $key]
+                    ))
             };
     }
 
@@ -71,26 +84,28 @@ class Lifecycle
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretDownload(mixed $entry): void
+    private function interpretDownload(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_string($entry) || !$entry)
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a non-empty string.",
-                Level::ERROR,
-                ["lifecycle", "download"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a non-empty string.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "download"]
+                ));
 
         if ($entry[0] !== '/')
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a file relative to " .
-                "own package root and starting with a leading forward slash.",
-                Level::ERROR,
-                ["lifecycle", "download"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a file relative to " .
+                    "own package root and starting with a leading forward slash.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "download"]
+                ));
     }
 
     /**
@@ -98,26 +113,28 @@ class Lifecycle
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretCopy(mixed $entry): void
+    private function interpretCopy(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_string($entry) || !$entry)
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a non-empty string.",
-                Level::ERROR,
-                ["lifecycle", "copy"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a non-empty string.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "copy"]
+                ));
 
         if ($entry[0] !== '/')
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a file relative to " .
-                "own package root and starting with a leading forward slash.",
-                Level::ERROR,
-                ["lifecycle", "copy"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a file relative to " .
+                    "own package root and starting with a leading forward slash.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "copy"]
+                ));
     }
 
     /**
@@ -125,26 +142,28 @@ class Lifecycle
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretInstall(mixed $entry): void
+    private function interpretInstall(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_string($entry) || !$entry)
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a non-empty string.",
-                Level::ERROR,
-                ["lifecycle", "install"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a non-empty string.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "install"]
+                ));
 
         if ($entry[0] !== '/')
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a file relative to " .
-                "own package root and starting with a leading forward slash.",
-                Level::ERROR,
-                ["lifecycle", "install"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a file relative to " .
+                    "own package root and starting with a leading forward slash.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "install"]
+                ));
     }
 
     /**
@@ -152,26 +171,28 @@ class Lifecycle
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretDelete(mixed $entry): void
+    private function interpretDelete(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_string($entry) || !$entry)
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a non-empty string.",
-                Level::ERROR,
-                ["lifecycle", "delete"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a non-empty string.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "delete"]
+                ));
 
         if ($entry[0] !== '/')
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a file relative to " .
-                "own package root and starting with a leading forward slash.",
-                Level::ERROR,
-                ["lifecycle", "delete"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a file relative to " .
+                    "own package root and starting with a leading forward slash.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "delete"]
+                ));
     }
 
     /**
@@ -179,26 +200,28 @@ class Lifecycle
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretUpdate(mixed $entry): void
+    private function interpretUpdate(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_string($entry) || !$entry)
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a non-empty string.",
-                Level::ERROR,
-                ["lifecycle", "update"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a non-empty string.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "update"]
+                ));
 
         if ($entry[0] !== '/')
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a file relative to " .
-                "own package root and starting with a leading forward slash.",
-                Level::ERROR,
-                ["lifecycle", "update"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a file relative to " .
+                    "own package root and starting with a leading forward slash.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "update"]
+                ));
     }
 
     /**
@@ -206,25 +229,27 @@ class Lifecycle
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretMigrate(mixed $entry): void
+    private function interpretMigrate(mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_string($entry) || !$entry)
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a non-empty string.",
-                Level::ERROR,
-                ["lifecycle", "migrate"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a non-empty string.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "migrate"]
+                ));
 
         if ($entry[0] !== '/')
-            Bus::broadcast(new MetadataEvent(
-                "The value must be a file relative to " .
-                "own package root and starting with a leading forward slash.",
-                Level::ERROR,
-                ["lifecycle", "migrate"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value must be a file relative to " .
+                    "own package root and starting with a leading forward slash.",
+                    level: Level::ERROR,
+                    breadcrumb: ["lifecycle", "migrate"]
+                ));
     }
 }

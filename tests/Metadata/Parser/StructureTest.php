@@ -23,10 +23,16 @@ namespace Valvoid\Fusion\Tests\Metadata\Parser;
 
 use Valvoid\Fusion\Metadata\Parser\Structure;
 use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Metadata\Parser\Parser;
 
 class StructureTest extends Test
 {
-    protected string|array $coverage = Structure::class;
+    protected string|array $coverage = [
+        Structure::class,
+
+        //ballast
+        Parser::class
+    ];
 
     public function __construct()
     {
@@ -51,7 +57,7 @@ class StructureTest extends Test
             ],
         ];
 
-        Structure::parse($metadata);
+        (new Structure)->parse($metadata);
 
         if ($metadata != [
                 "/cache" => [
@@ -77,10 +83,6 @@ class StructureTest extends Test
                         ]
                     ]
                 ],
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]) $this->handleFailedTest();
     }
 }

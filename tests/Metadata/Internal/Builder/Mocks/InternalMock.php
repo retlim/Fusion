@@ -19,17 +19,20 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks;
+namespace Valvoid\Fusion\Tests\Metadata\Internal\Builder\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Metadata\Internal\Internal;
 
-class BoxMock extends Box
+class InternalMock extends Internal
 {
-    public Closure $get;
+    public Closure $getContent;
+    public array $args; // layers content
 
-    public function get(string $class, ...$args): object
+    public function __construct() {}
+
+    public function getContent(): array
     {
-        return call_user_func($this->get, $class, ...$args);
+       return call_user_func($this->getContent);
     }
 }

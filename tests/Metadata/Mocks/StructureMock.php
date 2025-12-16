@@ -19,17 +19,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks;
+namespace Valvoid\Fusion\Tests\Metadata\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Metadata\Normalizer\Structure;
 
-class BoxMock extends Box
+class StructureMock extends Structure
 {
-    public Closure $get;
+    public Closure $normalize;
+    public array $args;
 
-    public function get(string $class, ...$args): object
+    public function __construct(...$args)
     {
-        return call_user_func($this->get, $class, ...$args);
+        $this->args = $args;
+    }
+
+    public function normalize(array &$meta, ?string $cache = null): void
+    {
+        call_user_func_array($this->normalize, [&$meta, $cache]);
     }
 }
