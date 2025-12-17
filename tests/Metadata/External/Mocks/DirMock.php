@@ -21,28 +21,22 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\External\Mocks;
 
-use Valvoid\Fusion\Dir\Proxy;
+use Valvoid\Fusion\Dir\Dir;
 
-class DirMock implements Proxy
+class DirMock extends Dir
 {
-    public function getStateDir(): string
+    public static function getStateDir(): string
     {
         return __DIR__;
     }
 
-    public function getTaskDir(): string {return "";}
-    public function getCacheDir(): string {return "";}
-    public function getOtherDir(): string {return "";}
-    public function getPackagesDir(): string
+    public static function getPackagesDir(): string
     {
         return __DIR__;
     }
-    public function getRootDir(): string {return "";}
-    public function createDir(string $dir, int $permissions): void {}
-    public function rename(string $from, string $to): void {}
-    public function copy(string $from, string $to): void {}
-    public function delete(string $file): void {}
-    public function clear(string $dir, string $path): void {}
-    public function getHubDir(): string {return "";}
-    public function getLogDir(): string {return "";}
+
+    public static function getRootDir(): string
+    {
+        return __DIR__;
+    }
 }

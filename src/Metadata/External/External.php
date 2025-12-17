@@ -87,17 +87,17 @@ class External extends Metadata
         if ($errno == E_USER_ERROR)
             $this->throwLifecycleError($message);
 
-        $lifecycle = new Lifecycle(
-            $message,
-            array_key_first($this->layers),
-            $this->getLifecycleBreadcrumb(),
-            $this->getPath()
+        $lifecycle = $this->box->get(Lifecycle::class,
+            message: $message,
+            layer: array_key_first($this->layers),
+            breadcrumb: $this->getLifecycleBreadcrumb(),
+            path: $this->getPath()
         );
 
         match ($errno) {
-            E_USER_NOTICE => Log::notice($lifecycle),
-            E_USER_WARNING => Log::warning($lifecycle),
-            default => Log::info($lifecycle)
+            E_USER_NOTICE => $this->box->get(Log::class)->notice($lifecycle),
+            E_USER_WARNING => $this->box->get(Log::class)->warning($lifecycle),
+            default => $this->box->get(Log::class)->info($lifecycle)
         };
 
         // log
@@ -113,11 +113,11 @@ class External extends Metadata
      */
     protected function throwLifecycleError(string $message): void
     {
-        throw new Lifecycle(
-            $message,
-            array_key_first($this->layers),
-            $this->getLifecycleBreadcrumb(),
-            $this->getPath()
+        throw $this->box->get(Lifecycle::class,
+            message: $message,
+            layer: array_key_first($this->layers),
+            breadcrumb: $this->getLifecycleBreadcrumb(),
+            path:$this->getPath()
         );
     }
 
@@ -129,7 +129,8 @@ class External extends Metadata
     private function getPath(): array
     {
         return $this->path ??=
-            Group::getPath($this->layers["object"]["source"]);
+            $this->box->get(Group::class)
+                ::getPath($this->layers["object"]["source"]);
     }
 
     /**
@@ -145,7 +146,7 @@ class External extends Metadata
 
         $this->lifecycle = [
             "state" => "download",
-            "root" => Dir::getStateDir() . $this->getDir(),
+            "root" => $this->box->get(Dir::class)::getStateDir() . $this->getDir(),
             "file" => $this->content["lifecycle"]["download"]
         ];
 
@@ -166,7 +167,7 @@ class External extends Metadata
 
         $this->lifecycle = [
             "state" => "install",
-            "root" => Dir::getRootDir() . $this->getDir(),
+            "root" => $this->box->get(Dir::class)::getRootDir() . $this->getDir(),
             "file" => $this->content["lifecycle"]["install"]
         ];
 
@@ -186,10 +187,10 @@ class External extends Metadata
             return false;
 
         $id = $this->getId();
-        $metadata = Group::getInternalMetas()[$id];
+        $metadata = $this->box->get(Group::class)::getInternalMetas()[$id];
         $this->lifecycle = [
             "state" => "migrate",
-            "root" => Dir::getPackagesDir() ."/$id",
+            "root" => $this->box->get(Dir::class)::getPackagesDir() ."/$id",
             "file" => $this->content["lifecycle"]["migrate"]
         ];
 

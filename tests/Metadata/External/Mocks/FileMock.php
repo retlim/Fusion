@@ -21,33 +21,22 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\External\Mocks;
 
-use Valvoid\Fusion\Tasks\Group;
-use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
+use Closure;
+use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Wrappers\File;
 
-class GroupMock extends Group
+class FileMock extends File
 {
-    public static function getInternalMetas(): array
+    public Closure $require;
+    public Closure $exists;
+
+    public function require(string $file, mixed ...$variables): mixed
     {
-        return [
-            "identifier" => new class extends InternalMeta
-            {
-                public function __construct() {}
+        return call_user_func($this->require, $file, ...$variables);
+    }
 
-                public function getId(): string
-                {
-                    return "id";
-                }
-
-                public function getSource(): string
-                {
-                    return "--dir--";
-                }
-
-                public function getVersion(): string
-                {
-                    return "--version--";
-                }
-            }
-        ];
+    public function exists(string $file): bool
+    {
+        return call_user_func($this->exists, $file);
     }
 }

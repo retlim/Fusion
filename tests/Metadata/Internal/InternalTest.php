@@ -21,10 +21,12 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Internal;
 
+use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Metadata\Internal\Category;
 use Valvoid\Fusion\Metadata\Internal\Internal;
 use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\DirMock;
+use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\GroupMock;
 use Valvoid\Fusion\Tests\Metadata\Internal\Mocks\LogMock;
 use Valvoid\Fusion\Tests\Test;
@@ -33,14 +35,20 @@ class InternalTest extends Test
 {
     /** @var string|array  */
     protected string|array $coverage = Internal::class;
-    protected BoxMock $container;
+    protected BoxMock $box;
     protected Internal $metadata;
+
+    private DirMock $dir;
+    private GroupMock $group;
+    private LogMock $log;
+    private FileMock $file;
+
     protected array $layers = [
         "layers"
     ];
     protected array $content = [
         "id" => "identifier",
-        "source" => __DIR__ ."/Mocks",
+        "source" => "--source--",
         "dir" => "/",
         "version" => "version",
         "environment" => ["environment"],
@@ -67,11 +75,51 @@ class InternalTest extends Test
 
     public function __construct()
     {
-        $this->metadata = new Internal($this->layers, $this->content);
-        $this->container = new BoxMock;
-        $this->container->group = new GroupMock;
-        $this->container->log = new LogMock;
-        $this->container->dir = new DirMock;
+        $this->box = new BoxMock;
+        $this->metadata = new Internal($this->box,$this->layers, $this->content);
+        $this->log = new LogMock;
+        $this->dir = new DirMock;
+        $this->group = new GroupMock;
+        $this->file = new FileMock;
+
+        $this->file->exists = function ($file) {
+
+            return str_ends_with($file, "/copy.php") ||
+                str_ends_with($file, "/migrate.php") ||
+                str_ends_with($file, "/update.php") ||
+                str_ends_with($file, "/delete.php");
+        };
+        $this->file->require = function ($file, mixed ...$variables) {
+            if (str_ends_with($file, "/copy.php"))
+                echo "copy";
+
+            if (str_ends_with($file, "/update.php"))
+                echo "update";
+
+            if (str_ends_with($file, "/delete.php"))
+                echo "delete";
+
+            if (str_ends_with($file, "/migrate.php")) {
+                extract(...$variables);
+                echo "migrate:". ( $dir ?? "") .":". ( $version ?? "no ver");
+            }
+
+            return true;
+        };
+
+        $this->box->get = function (string $class, ...$args) {
+            if ($class == "Valvoid\Fusion\Dir\Dir")
+                return $this->dir;
+
+            if ($class == "Valvoid\Fusion\Wrappers\File")
+                return $this->file;
+
+            if ($class == "Valvoid\Fusion\Log\Log")
+                return $this->log;
+
+            if ($class == "Valvoid\Fusion\Tasks\Group")
+                return $this->group;
+        };
 
         $this->testVersion();
         $this->testDir();
@@ -94,35 +142,84 @@ class InternalTest extends Test
         $this->testLifecycleDelete();
         $this->testLifecycleMigrate();
 
-        $this->container::unsetInstance();
+        $this->log::$verbose = null;
+        $this->log::$debug = null;
+        $this->box::unsetInstance();
     }
 
     public function testLifecycleCopy(): void
     {
+        $verbose =
+        $debug = null;
+
+        $this->log::$verbose = function (string|Event $event) use (&$verbose) {
+            $verbose = $event;
+        };
+
+        $this->log::$debug = function (string|Event $event) use (&$debug) {
+            $debug = $event;
+        };
+
         if ($this->metadata->onCopy() !== true ||
-            $this->container->log->event !== "copy")
+            $debug !== "copy" ||
+            $verbose !== "callback exit indicator '1'")
             $this->handleFailedTest();
     }
 
     public function testLifecycleMigrate(): void
     {
-        // dir + version of external package
+        $verbose =
+        $debug = null;
+
+        $this->log::$verbose = function (string|Event $event) use (&$verbose) {
+            $verbose = $event;
+        };
+
+        $this->log::$debug = function (string|Event $event) use (&$debug) {
+            $debug = $event;
+        };
+
         if ($this->metadata->onMigrate() !== true ||
-            $this->container->log->event !== "migrate:/identifier:version")
+            $debug !== "migrate:/identifier:version" ||
+            $verbose !== "callback exit indicator '1'")
             $this->handleFailedTest();
     }
 
     public function testLifecycleUpdate(): void
     {
+        $verbose =
+        $debug = null;
+
+        $this->log::$verbose = function (string|Event $event) use (&$verbose) {
+            $verbose = $event;
+        };
+
+        $this->log::$debug = function (string|Event $event) use (&$debug) {
+            $debug = $event;
+        };
+
         if ($this->metadata->onUpdate() !== true ||
-            $this->container->log->event !== "update")
+            $debug !== "update" ||
+            $verbose !== "callback exit indicator '1'")
             $this->handleFailedTest();
     }
 
     public function testLifecycleDelete(): void
     {
+        $verbose =
+        $debug = null;
+
+        $this->log::$verbose = function (string|Event $event) use (&$verbose) {
+            $verbose = $event;
+        };
+
+        $this->log::$debug = function (string|Event $event) use (&$debug) {
+            $debug = $event;
+        };
+
         if ($this->metadata->onDelete() !== true ||
-            $this->container->log->event !== "delete")
+            $debug !== "delete" ||
+            $verbose !== "callback exit indicator '1'")
             $this->handleFailedTest();
     }
 
@@ -179,7 +276,7 @@ class InternalTest extends Test
     public function testSource(): void
     {
         // internal source is a dir
-        if ($this->metadata->getSource() !== __DIR__ ."/Mocks")
+        if ($this->metadata->getSource() !== "--source--")
             $this->handleFailedTest();
     }
 
@@ -215,7 +312,7 @@ class InternalTest extends Test
     {
         // package has "fusion.local.json" and
         // dependencies in it
-        $metadata = new Internal([], ["dependencies" => [
+        $metadata = new Internal($this->box,[], ["dependencies" => [
             "local" => ["id"]
         ]]);
 
@@ -231,7 +328,7 @@ class InternalTest extends Test
 
     public function testDevelopmentIds(): void
     {
-        $metadata = new Internal([], ["dependencies" => [
+        $metadata = new Internal($this->box,[], ["dependencies" => [
             "development" => ["id"]
         ]]);
 

@@ -21,20 +21,15 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Internal\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Box\Box;
 
 class BoxMock extends Box
 {
-    public $log;
-    public $dir;
-    public $group;
+    public Closure $get;
 
     public function get(string $class, ...$args): object
     {
-        return match($class) {
-            "Valvoid\Fusion\Dir\Proxy" => $this->dir,
-            "Valvoid\Fusion\Log\Proxy" => $this->log,
-            "Valvoid\Fusion\Group\Group" => $this->group
-        };
+        return call_user_func($this->get, $class, ...$args);
     }
 }

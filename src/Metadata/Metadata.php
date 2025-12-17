@@ -21,21 +21,17 @@
 
 namespace Valvoid\Fusion\Metadata;
 
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Log\Events\Errors\Lifecycle;
 use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Metadata.
  */
 abstract class Metadata
 {
-    /** @var array Parsed layers. */
-    protected array $layers;
-
-    /** @var array Merged layers. */
-    protected array $content = [];
-
     /** @var array{
      *     state: string,
      *     root: string,
@@ -51,14 +47,14 @@ abstract class Metadata
     /**
      * Constructs the metadata.
      *
-     * @param array $layers Layers.
-     * @param array $content Content.
+     * @param Box $box Dependency injection container.
+     * @param array $layers Parsed layers.
+     * @param array $content Merged layers.
      */
-    public function __construct(array $layers, array $content)
-    {
-        $this->layers = $layers;
-        $this->content = $content;
-    }
+    public function __construct(
+        protected readonly Box $box,
+        protected array $layers,
+        protected array $content) {}
 
     /**
      * Returns structure sub meta.
@@ -222,7 +218,7 @@ abstract class Metadata
 
         $this->lifecycle = [
             "state" => "copy",
-            "root" => Dir::getStateDir() . $this->getDir(),
+            "root" => $this->box->get(Dir::class)->getStateDir() . $this->getDir(),
             "file" => $this->content["lifecycle"]["copy"]
         ];
 
@@ -247,25 +243,24 @@ abstract class Metadata
      */
     protected function requireCallback(array $variables = []): bool
     {
-        $callback = $this->lifecycle["root"] . $this->lifecycle["file"];
+        $hook = $this->lifecycle["root"] . $this->lifecycle["file"];
+        $file = $this->box->get(File::class);
 
-        if (!file_exists($callback))
+        if (!$file->exists($hook))
             $this->throwLifecycleError(
-                "The file \"" . $this->lifecycle["file"] . "\" does not exist."
+                "The file '" . $this->lifecycle["file"] . "' does not exist."
             );
 
         set_error_handler($this->errorHandlerCallback(...));
-
         ob_start();
-        extract($variables);
-        unset($variables);
 
-        $indicator = require_once $callback;
+        $indicator = $file->require($hook, $variables);
 
         restore_error_handler();
 
-        Log::verbose("callback exit indicator \"$indicator\"");
-        Log::debug(ob_get_clean());
+        $log = $this->box->get(Log::class);
+        $log::verbose("callback exit indicator '$indicator'");
+        $log::debug(ob_get_clean());
 
         return $indicator;
     }

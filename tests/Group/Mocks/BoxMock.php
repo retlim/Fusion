@@ -31,8 +31,10 @@ class BoxMock extends Box
     public Group $group;
     public function get(string $class, ...$args): object
     {
-        return $this->group ??= new class implements Group
+        return $this->group ??= new class($this) implements Group
         {
+            public function __construct(public Box $box){}
+
             public $calls = [];
 
             public function setInternalMetas(array $metas): void
@@ -61,13 +63,13 @@ class BoxMock extends Box
             {
                 $this->calls[] = __FUNCTION__;
 
-                return new InternalMeta([],[]);
+                return new InternalMeta($this->box,[],[]);
             }
 
             public function getRootMetadata(): ExternalMeta|InternalMeta
             {
                 $this->calls[] = __FUNCTION__;
-                return new InternalMeta([],[]);
+                return new InternalMeta($this->box, [],[]);
             }
 
             public function hasDownloadable(): bool

@@ -101,16 +101,16 @@ class Internal extends Metadata
         if ($errno == E_USER_ERROR)
             $this->throwLifecycleError($message);
 
-        $lifecycle = new Lifecycle(
-            $message,
-            $this->getLifecycleLayer(),
-            $this->getLifecycleBreadcrumb()
+        $lifecycle = $this->box->get(Lifecycle::class,
+            message: $message,
+            layer: $this->getLifecycleLayer(),
+            breadcrumb: $this->getLifecycleBreadcrumb()
         );
 
         match ($errno) {
-            E_USER_NOTICE => Log::notice($lifecycle),
-            E_USER_WARNING => Log::warning($lifecycle),
-            default => Log::info($lifecycle)
+            E_USER_NOTICE => $this->box->get(Log::class)->notice($lifecycle),
+            E_USER_WARNING => $this->box->get(Log::class)->warning($lifecycle),
+            default => $this->box->get(Log::class)->info($lifecycle)
         };
 
         // log
@@ -126,10 +126,10 @@ class Internal extends Metadata
      */
     protected function throwLifecycleError(string $message): void
     {
-        throw new Lifecycle(
-            $message,
-            $this->getLifecycleLayer(),
-            $this->getLifecycleBreadcrumb()
+        throw $this->box->get(Lifecycle::class,
+            message: $message,
+            layer: $this->getLifecycleLayer(),
+            breadcrumb: $this->getLifecycleBreadcrumb()
         );
     }
 
@@ -203,7 +203,7 @@ class Internal extends Metadata
             return false;
 
         $id = $this->getId();
-        $metadata = Group::getExternalMetas()[$id];
+        $metadata = $this->box->get(Group::class)::getExternalMetas()[$id];
         $this->lifecycle = [
             "state" => "migrate",
             "root" => $this->getSource(),
@@ -212,7 +212,7 @@ class Internal extends Metadata
 
         // break variable scope
         return $this->requireCallback([
-            "dir" => Dir::getPackagesDir() ."/$id",
+            "dir" => $this->box->get(Dir::class)::getPackagesDir() ."/$id",
             "version" => $metadata->getVersion()
         ]);
     }

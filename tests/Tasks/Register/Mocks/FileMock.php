@@ -45,7 +45,7 @@ class FileMock extends File
         return call_user_func($this->exists, $file);
     }
 
-    public function require(string $file): mixed
+    public function require(string $file, mixed ...$variables): mixed
     {
         return call_user_func($this->require, $file);
     }

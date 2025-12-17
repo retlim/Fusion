@@ -21,23 +21,20 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Internal\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Log\Events\Event;
-use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Proxy;
+use Valvoid\Fusion\Log\Log;
 
-class LogMock implements Proxy
+class LogMock extends Log
 {
-    public $event = "";
+    public static Closure|null $verbose;
+    public static Closure|null $debug;
 
-    public function addInterceptor(Interceptor $interceptor): void {}
-    public function removeInterceptor(): void {}
-    public function error(string|Event $event): void {}
-    public function warning(string|Event $event): void {}
-    public function notice(string|Event $event): void {}
-    public function info(string|Event $event): void {}
-    public function verbose(string|Event $event): void {}
-    public function debug(string|Event $event): void
+    public static function verbose(string|Event $event): void {
+        call_user_func(self::$verbose, $event);
+    }
+    public static function debug(string|Event $event): void
     {
-        $this->event = $event;
+        call_user_func(self::$debug, $event);
     }
 }

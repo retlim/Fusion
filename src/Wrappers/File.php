@@ -68,8 +68,13 @@ class File
      * @param string $file File.
      * @return mixed Content.
      */
-    public function require(string $file): mixed
+    public function require(string $file, mixed ...$variables): mixed
     {
+        if ($variables) {
+            extract(...$variables);
+            unset($variables);
+        }
+
         return require $file;
     }
 

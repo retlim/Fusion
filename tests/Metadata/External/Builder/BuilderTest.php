@@ -60,7 +60,6 @@ class BuilderTest extends Test
         $this->parser = new ParserMock;
         $this->structure = new StructureMock;
         $this->external = new ExternalMock;
-
         $this->box->get = function (string $class, ...$args) {
             if ($class == "Valvoid\Fusion\Metadata\External\Parser\Source") {
                 $this->source->args = $args;

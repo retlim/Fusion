@@ -29,7 +29,7 @@ class FileMock extends File
     public Closure $require;
     public Closure $is;
 
-    public function require(string $file): mixed
+    public function require(string $file, mixed ...$variables): mixed
     {
         return call_user_func($this->require, $file);
     }

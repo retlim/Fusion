@@ -21,20 +21,12 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\Internal\Mocks;
 
-use Valvoid\Fusion\Group\Group;
+use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
-use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
 
-class GroupMock implements Group
+class GroupMock extends Group
 {
-    public function setInternalMetas(array $metas): void {}
-    public function setImplication(array $implication): void {}
-    public function setExternalMetas(array $metas): void {}
-    public function getExternalRootMetadata(): ?ExternalMeta {return null;}
-    public function getInternalRootMetadata(): InternalMeta {return new InternalMeta([],[]);}
-    public function getRootMetadata(): ExternalMeta|InternalMeta {return new InternalMeta([],[]);}
-    public function hasDownloadable(): bool {return false;}
-    public function getExternalMetas(): array
+    public static function getExternalMetas(): array
     {
         return [
             "identifier" => new class extends ExternalMeta
@@ -53,9 +45,4 @@ class GroupMock implements Group
             }
         ];
     }
-    public function getInternalMetas(): array {return [];}
-    public function setImplicationBreadcrumb(array $breadcrumb): void {}
-    public function getImplication(): array {return [];}
-    public function getPath(string $source): array {return [];}
-    public function getSourcePath(array $implication, string $source): array {return [];}
 }
