@@ -131,17 +131,6 @@ abstract class Metadata
     }
 
     /**
-     * Returns structure states category sub meta.
-     *
-     * @return string[] Structure states.
-     * @deprecated Will be removed in version 2.0.0
-     */
-    public function getStructureStates(): array
-    {
-        return $this->content["structure"]["states"];
-    }
-
-    /**
      * Returns ID sub meta.
      *
      * @return string ID.

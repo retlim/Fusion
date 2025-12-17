@@ -85,7 +85,6 @@ class InternalTest extends Test
         $this->testSource();
         $this->testStructure();
         $this->testStructureSources();
-        $this->testStructureStates();
         $this->testStructureMutables();
         $this->testEnvironment();
         $this->testContent();
@@ -142,13 +141,6 @@ class InternalTest extends Test
     public function testEnvironment(): void
     {
         if ($this->metadata->getEnvironment() !== $this->content["environment"])
-            $this->handleFailedTest();
-    }
-
-    public function testStructureStates(): void
-    {
-        if ($this->metadata->getStructureStates() !==
-            $this->content["structure"]["states"])
             $this->handleFailedTest();
     }
 

@@ -310,19 +310,6 @@ class Shift extends Task
                     $this->copyDir($from, $to);
                 }
 
-                // deprecated is now mutable
-                // refresh states
-                foreach ($metadata->getStructureStates() as $state) {
-                    $to = $metadata->getSource() . $state;
-                    $from = "$stateDir$dir$state";
-
-                    // state is optional
-                    if ($this->dir->is($from)) {
-                        $this->directory->delete($to);
-                        $this->directory->rename($from, $to);
-                    }
-                }
-
                 // refresh mutables
                 foreach ($metadata->getStructureMutables() as $mutable) {
                     $to = $metadata->getSource() . $mutable;
