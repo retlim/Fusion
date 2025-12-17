@@ -151,8 +151,7 @@ class Logic implements Proxy
 
         if (isset($metadata["structure"]) &&
             is_array($metadata["structure"])) {
-            $path = $this->getStatePath($metadata["structure"]) ??
-                $this->getCachePath($metadata["structure"]);
+            $path = $this->getStatefulPath($metadata["structure"]);
 
         } else $path = null;
 
@@ -218,15 +217,15 @@ class Logic implements Proxy
     }
 
     /**
-     * Returns the cache path defined in the given structure.
+     * Returns the stateful path defined in the given structure.
      *
      * @param array $struct Package structure.
      * @param string $breadcrumb Internal path prefix.
-     * @return string|null Cache path, or null if not found.
+     * @return string|null Stateful path, or null if not found.
      */
-    protected function getStatePath(array $struct, string $breadcrumb = ""): ?string
+    protected function getStatefulPath(array $struct, string $breadcrumb = ""): ?string
     {
-        // assoc or seq key due to loadable inside cache folder
+        // assoc or seq key due to loadable inside stateful folder
         foreach ($struct as $key => $value)
             if ($value == "stateful")
                 return is_string($key) ?
@@ -234,33 +233,7 @@ class Logic implements Proxy
                     $breadcrumb;
 
             elseif (is_array($value))
-                if ($dir = $this->getStatePath($value, is_string($key) ?
-                    $breadcrumb . $key :
-                    $breadcrumb))
-                    return $dir;
-
-        return null;
-    }
-
-    /**
-     * Returns the cache path defined in the given structure.
-     *
-     * @param array $struct Package structure.
-     * @param string $breadcrumb Internal path prefix.
-     * @return string|null Cache path, or null if not found.
-     * @deprecated
-     */
-    protected function getCachePath(array $struct, string $breadcrumb = ""): ?string
-    {
-        // assoc or seq key due to loadable inside cache folder
-        foreach ($struct as $key => $value)
-            if ($value == "cache")
-                return is_string($key) ?
-                    $breadcrumb . $key :
-                    $breadcrumb;
-
-            elseif (is_array($value))
-                if ($dir = $this->getCachePath($value, is_string($key) ?
+                if ($dir = $this->getStatefulPath($value, is_string($key) ?
                     $breadcrumb . $key :
                     $breadcrumb))
                     return $dir;

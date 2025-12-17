@@ -332,7 +332,7 @@ class LogicTest extends Test
                 $this->handleFailedTest();
 
             return json_encode(["structure" => [
-                "/c" => "cache"
+                "/c" => "stateful"
             ]]);
         };
 
