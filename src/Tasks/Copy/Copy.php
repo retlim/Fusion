@@ -39,7 +39,7 @@ use Valvoid\Fusion\Wrappers\File;
  */
 class Copy extends Task
 {
-    /** @var string[] Cache and nested source dirs. */
+    /** @var string[] Generatable stateful dirs. */
     private array $lockedDirs = [];
 
     /**
@@ -74,7 +74,7 @@ class Copy extends Task
     {
         $this->log->info("cache internal packages");
 
-        // only if remote external
+        // only if remote external packages
         // do nothing if only internal as it is
         if (!$this->group->hasDownloadable())
             return;
@@ -83,20 +83,10 @@ class Copy extends Task
         $externalMetas = $this->group->getExternalMetas();
         $packagesDir = $this->directory->getPackagesDir();
 
-        // potential extensions paths to
-        // copy only existing packages
-        // take external IDs because special cases like clone
-        // after clone repo there are maybe committed pseudo extensions
-        // no internal packages yet
-        // identify them by external valid IDs
-        $pseudoIds = array_keys($externalMetas);
-
-        foreach ($pseudoIds as $i => $id)
-            if (isset($internalMetas[$id]))
-                unset($pseudoIds[$i]);
-
-        // copy recyclable and moveable to state
         foreach ($internalMetas as $id => $metadata)
+
+            // copy recyclable and
+            // moveable to state
             if ($metadata->getCategory() != InternalMetaCategory::OBSOLETE) {
                 $from = $metadata->getSource();
                 $to = "$packagesDir/$id";
@@ -104,7 +94,7 @@ class Copy extends Task
                 // lock unimportant dirs
                 // cache directory
                 $this->lockedDirs = [
-                    $from . $metadata->getStructureCache()
+                    $from . $metadata->getStatefulPath()
                 ];
 
                 $this->directory->createDir($to);
@@ -112,45 +102,11 @@ class Copy extends Task
                     $this->box->get(Content::class,
                         content: $metadata->getContent()));
 
-                // nested source wrapper directories
-                // "delete"/ignore obsolete package extensions
-                foreach ($metadata->getStructureSources() as $dir => $source)
-                    if ($dir) {
-                        $this->lockedDirs[] = $from . $dir;
-
-                        // copy pseudos
-                        foreach ($pseudoIds as $pseudoId) {
-                            $extension = "$from$dir/$pseudoId";
-
-                            if ($this->dir->is($extension)) {
-                                $this->directory->createDir("$to$dir/$pseudoId");
-                                $this->copy($extension, "$to$dir/$pseudoId");
-                            }
-                        }
-                    }
-
-                // clear obsolete extensions
-                // copy only valid
-                foreach ($metadata->getStructureExtensions() as $dir) {
-                    $this->lockedDirs[] = $from . $dir;
-
-                    foreach ($internalMetas as $extenderId => $extender)
-                        if ($extender->getCategory() != InternalMetaCategory::OBSOLETE) {
-                            $extension = "$from$dir/$extenderId";
-
-                            if ($this->dir->is($extension)) {
-                                $this->directory->createDir("$to$dir/$extenderId");
-                                $this->copy($extension, "$to$dir/$extenderId");
-                            }
-                        }
-                }
-
-                // content
                 $this->copy($from, $to);
 
-            // new version
-            // migrate
-            // keep persistence
+            // new version downloaded into indi state and
+            // obsolete old exists in current state
+            // trigger migrate hook
             } elseif (isset($externalMetas[$id])) {
                 $parser = $this->box->get(Parser::class);
                 $internalVersion = $parser::getInflatedVersion($metadata->getVersion());
@@ -158,37 +114,10 @@ class Copy extends Task
 
                 // higher version must support
                 // up and downgrade
-                if ($this->box->get(Interpreter::class)
+                $this->box->get(Interpreter::class)
                     ::isBiggerThan($externalVersion, $internalVersion) ?
                         $externalMetas[$id]->onMigrate() :
-                        $metadata->onMigrate())
-
-                    // indicator result
-                    continue;
-
-                $extensions = $externalMetas[$id]->getStructureExtensions();
-
-                // no custom migration script
-                // default fallback migration
-                // non-breaking changes or
-                if ($internalVersion["major"] == $externalVersion["major"] ||
-
-                    // same extension directories
-                    !array_diff($metadata->getStructureExtensions(), $extensions)) {
-                    $from = $metadata->getSource();
-                    $to = "$packagesDir/$id";
-
-                    foreach ($extensions as $dir)
-                        foreach ($internalMetas as $extenderId => $extender)
-                            if ($extender->getCategory() != InternalMetaCategory::OBSOLETE) {
-                                $extension = "$from$dir/$extenderId";
-
-                                if ($this->dir->is($extension)) {
-                                    $this->directory->createDir("$to$dir/$extenderId");
-                                    $this->copy($extension, "$to$dir/$extenderId");
-                                }
-                            }
-                }
+                        $metadata->onMigrate();
             }
     }
 
@@ -204,8 +133,8 @@ class Copy extends Task
         $filenames = $this->dir->getFilenames($from, SCANDIR_SORT_NONE);
 
         if ($filenames === false)
-            throw new Error(
-                "Can't read directory '$from'."
+            throw $this->box->get(Error::class,
+                message: "Can't read directory '$from'."
             );
 
         foreach ($filenames as $filename)
@@ -217,7 +146,6 @@ class Copy extends Task
                     $this->directory->copy($file, $copy);
 
                 // do not copy locked dirs
-                // cache and source
                 elseif (!in_array($file, $this->lockedDirs)) {
                     $this->directory->createDir($copy);
                     $this->copy($file, $copy);

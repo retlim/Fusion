@@ -63,7 +63,7 @@ class Structure
      *
      * @param array $meta Meta.
      */
-    public function normalize(array &$meta, ?string $cache = null): void
+    public function normalize(array &$meta): void
     {
         $this->extractStructure($meta["structure"], "", "");
 

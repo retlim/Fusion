@@ -595,9 +595,6 @@ class ShiftTest extends Test
                 "source" => "/root",
                 "structure" => [
                     "cache" => "/c",
-                    "extensions" => [
-                        "/ex0"
-                    ],
                     "states" => [
                         "/st0"
                     ],
@@ -733,7 +730,6 @@ class ShiftTest extends Test
                 $onInstall != ["i1", "i2"] ||
                 $delete != [
                     "/root/c/f1",
-                    "/root/ex0",
                     "/root/st0",
                     "/root/mt0",
                     "/si2/f5",
@@ -745,7 +741,6 @@ class ShiftTest extends Test
                     "/root/di1/d0",
                     "/root/di2"] ||
                 $rename != [
-                    "/tmp/state/ex0->/root/ex0",
                     "/tmp/state/st0->/root/st0",
                     "/tmp/state/mt0->/root/mt0",
                     "/tmp/state/di1/d0->/root/di1/d0",
@@ -767,7 +762,6 @@ class ShiftTest extends Test
                 $isDir != [
                     "/root/c/log",
                     "/root/c/f1",
-                    "/tmp/state/ex0",
                     "/tmp/state/st0",
                     "/tmp/state/mt0",
                     "/si2/f5",

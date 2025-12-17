@@ -106,17 +106,6 @@ abstract class Metadata
     }
 
     /**
-     * Returns structure namespaces.
-     *
-     * @return array<string, string> Structure loadable.
-     * @deprecated
-     */
-    public function getStructureNamespaces(): array
-    {
-        return $this->content["structure"]["namespaces"];
-    }
-
-    /**
      * Returns production dependency IDs.
      *
      * @return string[] IDs.
@@ -124,17 +113,6 @@ abstract class Metadata
     public function getProductionIds(): array
     {
         return $this->content["dependencies"]["production"];
-    }
-
-    /**
-     * Returns structure extensions category sub meta.
-     *
-     * @return string[] Structure extension.
-     * @deprecated Will be removed in version 2.0.0
-     */
-    public function getStructureExtensions(): array
-    {
-        return $this->content["structure"]["extensions"];
     }
 
     /**

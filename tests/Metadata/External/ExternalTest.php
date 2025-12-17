@@ -86,8 +86,6 @@ class ExternalTest extends Test
         $this->testStructure();
         $this->testStructureCache();
         $this->testStructureSources();
-        $this->testStructureNamespaces();
-        $this->testStructureExtensions();
         $this->testStructureStates();
         $this->testStructureMutables();
         $this->testEnvironment();
@@ -144,20 +142,6 @@ class ExternalTest extends Test
     {
         if ($this->metadata->getStructureMutables() !==
             $this->content["structure"]["mutables"])
-            $this->handleFailedTest();
-    }
-
-    public function testStructureExtensions(): void
-    {
-        if ($this->metadata->getStructureExtensions() !==
-            $this->content["structure"]["extensions"])
-            $this->handleFailedTest();
-    }
-
-    public function testStructureNamespaces(): void
-    {
-        if ($this->metadata->getStructureNamespaces() !==
-            $this->content["structure"]["namespaces"])
             $this->handleFailedTest();
     }
 

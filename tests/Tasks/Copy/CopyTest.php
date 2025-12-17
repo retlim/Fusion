@@ -48,8 +48,6 @@ class CopyTest extends Test
 
         $this->testPackageCategory();
         $this->testCustomMigration();
-        $this->testDefaultMigration();
-        $this->testExtensions();
 
         $this->box::unsetInstance();
     }
@@ -76,7 +74,7 @@ class CopyTest extends Test
                 InternalCategory::RECYCLABLE, [
                 "source" => "/s0",
                 "structure" => [
-                    "cache" => "/state",
+                    "stateful" => "/state",
                     "extensions" => [],
                     "sources" => [
                         "/deps" => ""
@@ -88,7 +86,7 @@ class CopyTest extends Test
                 InternalCategory::MOVABLE, [
                 "source" => "/s0/deps/i1",
                 "structure" => [
-                    "cache" => "/state",
+                    "stateful" => "/state",
                     "sources" => [],
                     "extensions" => []
                 ]
@@ -225,269 +223,6 @@ class CopyTest extends Test
             if ($semver != ["0", "1"] ||
                 $migrate != ["1"] ||
                 $compare !== [[["1"], ["0"]]])
-                $this->handleFailedTest();
-
-        } catch (Exception) {
-            $this->handleFailedTest();
-        }
-    }
-
-    public function testDefaultMigration(): void
-    {
-        try {
-            $directory = new DirectoryMock;
-            $dir = new DirMock;
-            $file = new FileMock;
-            $group = new GroupMock;
-            $task = new Copy(
-                box: $this->box,
-                group: $group,
-                log: new LogMock,
-                directory: $directory,
-                file: $file,
-                dir: $dir,
-                config: []);
-
-            $directory->cache = function () {return "/tmp";};
-            $group->internalMetas["i0"] = new InternalMetadataMock(
-                InternalCategory::OBSOLETE, [
-                "version" => "0",
-                "source" => "/s0",
-                "structure" => [
-                    "cache" => "/state",
-                    "extensions" => ["/e"],
-                    "sources" => [
-                        "/deps" => ["/i1", "/i2"]
-                    ]
-                ]
-            ]);
-            $group->internalMetas["i1"] = new InternalMetadataMock(
-                InternalCategory::RECYCLABLE, [
-                "source" => "/s0/deps/i1",
-                "structure" => [
-                    "cache" => "/state",
-                    "extensions" => [],
-                    "sources" => []
-                ]
-            ]);
-            $group->internalMetas["i2"] = new InternalMetadataMock(
-                InternalCategory::OBSOLETE, []);
-            $group->externalMetas["i0"] = new ExternalMetadataMock(
-                ExternalCategory::DOWNLOADABLE, [
-                "version" => "1",
-                "dir" => "/s0",
-                "structure" => [
-                    "extensions" => ["/e"],
-                ]
-            ]);
-
-            $migrate =
-            $compare =
-            $isDir =
-            $isFile =
-            $create =
-            $semver = [];
-
-            ParserMock::$version = function (string $version) use (&$semver) {
-                $semver[] = $version;
-
-                return ["major" => "4", "v" => $version];
-            };
-
-            InterpreterMock::$compare = function (array $a, array $b) use (&$compare) {
-                $compare[] = [$a, $b];
-
-                return true;
-            };
-
-            $group->internalMetas["i0"]->migrate = function () use (&$migrate) {
-                $migrate[] = "0";
-
-                return false;
-            };
-
-            $group->externalMetas["i0"]->migrate = function () use (&$migrate) {
-                $migrate[] = "1";
-
-                return false;
-            };
-
-            $dir->is = function (string $dir) use (&$isDir) {
-                $isDir[] = $dir;
-
-                return $dir == "/s0/e/i1";
-            };
-
-            $directory->create = function (string $dir) use (&$create) {
-                $create[] = $dir;
-            };
-
-            $dir->filenames = function (string $dir) use (&$filenames) {
-                $filenames[] = $dir;
-
-                if ($dir == "/s0/e/i1")
-                    return ["d0", "f0"];
-
-                if ($dir == "/s0/e/i1/d0")
-                    return ["f1"];
-
-                return [];
-            };
-
-            $file->is = function (string $file) use (&$isFile) {
-                $isFile[] = $file;
-
-                return $file == "/s0/e/i1/f0" ||
-                    $file == "/s0/e/i1/d0/f1";
-            };
-
-            $directory->copy = function (string $from, string $to) use (&$copy) {
-                $copy[] = "$from->$to";
-            };
-
-            $task->execute();
-
-            InterpreterMock::$compare =
-            ParserMock::$version = null;
-
-            if ($isDir != ["/s0/e/i1"] ||
-                $copy != [
-                    "/s0/e/i1/d0/f1->/tmp/i0/e/i1/d0/f1",
-                    "/s0/e/i1/f0->/tmp/i0/e/i1/f0"] ||
-                $isFile != [
-                    "/s0/e/i1/d0",
-                    "/s0/e/i1/d0/f1",
-                    "/s0/e/i1/f0"] ||
-                $filenames != [
-                    "/s0/e/i1",
-                    "/s0/e/i1/d0",
-                    "/s0/deps/i1"] ||
-                $create != [
-                    "/tmp/i0/e/i1",
-                    "/tmp/i0/e/i1/d0",
-                    "/tmp/i1"] ||
-                $semver != ["0", "1"] ||
-                $migrate != ["1"] ||
-                $compare !== [[[
-                    "major" => "4",
-                    "v" => "1"], [
-                    "major" => "4",
-                    "v" => "0"]]])
-                $this->handleFailedTest();
-
-        } catch (Exception) {
-            $this->handleFailedTest();
-        }
-    }
-
-    public function testExtensions(): void
-    {
-        try {
-            $directory = new DirectoryMock;
-            $dir = new DirMock;
-            $file = new FileMock;
-            $group = new GroupMock;
-            $task = new Copy(
-                box: $this->box,
-                group: $group,
-                log: new LogMock,
-                directory: $directory,
-                file: $file,
-                dir: $dir,
-                config: []);
-
-            $directory->cache = function () {return "/tmp";};
-            $group->externalMetas = [];
-            $group->internalMetas["i0"] = new InternalMetadataMock(
-                InternalCategory::OBSOLETE, []);
-
-            $group->internalMetas["i1"] = new InternalMetadataMock(
-                InternalCategory::MOVABLE, [
-                "source" => "/s0/deps/i1",
-                "structure" => [
-                    "cache" => "/state",
-                    "sources" => [],
-                    "extensions" => [
-                        "/e"
-                    ]
-                ]
-            ]);
-
-            $group->internalMetas["i2"] = new InternalMetadataMock(
-                InternalCategory::RECYCLABLE, [
-                "source" => "/s0/deps/i2",
-                "structure" => [
-                    "cache" => "/state",
-                    "sources" => [],
-                    "extensions" => []
-                ]
-            ]);
-
-            $create =
-            $filenames =
-            $copy =
-            $isDir =
-            $isFile = [];
-
-            $directory->create = function (string $dir) use (&$create) {
-                $create[] = $dir;
-            };
-
-            $dir->is = function (string $dir) use (&$isDir) {
-                $isDir[] = $dir;
-
-                return $dir == "/s0/deps/i1/e/i2";
-            };
-
-            $dir->filenames = function (string $dir) use (&$filenames) {
-                $filenames[] = $dir;
-
-                if ($dir == "/s0/deps/i1/e/i2")
-                    return ["d0", "f0"];
-
-                // test nested
-                if ($dir == "/s0/deps/i1/e/i2/d0")
-                    return ["f1"];
-
-                if ($dir == "/s0/deps/i1")
-                    return ["f2"];
-
-                return [];
-            };
-
-            $file->is = function (string $file) use (&$isFile) {
-                $isFile[] = $file;
-
-                return $file == "/s0/deps/i1/e/i2/f0" ||
-                    $file == "/s0/deps/i1/e/i2/d0/f1" ||
-                    $file == "/s0/deps/i1/f2";
-            };
-
-            $directory->copy = function (string $from, string $to) use (&$copy) {
-                $copy[] = "$from->$to";
-            };
-
-            $task->execute();
-
-            if ($create != [
-                    "/tmp/i1",
-                    "/tmp/i1/e/i2",
-                    "/tmp/i1/e/i2/d0",
-                    "/tmp/i2"] ||
-                $filenames != [
-                    "/s0/deps/i1/e/i2",
-                    "/s0/deps/i1/e/i2/d0",
-                    "/s0/deps/i1",
-                    "/s0/deps/i2"] ||
-                $isFile != [
-                    "/s0/deps/i1/e/i2/d0",
-                    "/s0/deps/i1/e/i2/d0/f1",
-                    "/s0/deps/i1/e/i2/f0",
-                    "/s0/deps/i1/f2"] ||
-                $copy != [
-                    "/s0/deps/i1/e/i2/d0/f1->/tmp/i1/e/i2/d0/f1",
-                    "/s0/deps/i1/e/i2/f0->/tmp/i1/e/i2/f0",
-                    "/s0/deps/i1/f2->/tmp/i1/f2"])
                 $this->handleFailedTest();
 
         } catch (Exception) {

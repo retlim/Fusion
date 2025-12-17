@@ -259,10 +259,7 @@ class Builder
 
         $this->box->get(Structure::class,
             layer: $layer)
-            ->normalize(
-                $content,
-                $this->content["structure"]["cache"]
-            );
+            ->normalize($content);
 
         // extract dependencies
         foreach ($content["structure"]["sources"] as $dir => $sources)

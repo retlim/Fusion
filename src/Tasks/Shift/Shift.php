@@ -310,18 +310,6 @@ class Shift extends Task
                     $this->copyDir($from, $to);
                 }
 
-                // refresh extensions
-                foreach ($metadata->getStructureExtensions() as $extension) {
-                    $to = $metadata->getSource() . $extension;
-                    $from = "$stateDir$dir$extension";
-
-                    // extension is optional
-                    if ($this->dir->is($from)) {
-                        $this->directory->delete($to);
-                        $this->directory->rename($from, $to);
-                    }
-                }
-
                 // deprecated is now mutable
                 // refresh states
                 foreach ($metadata->getStructureStates() as $state) {
