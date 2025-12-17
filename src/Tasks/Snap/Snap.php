@@ -90,7 +90,7 @@ class Snap extends Task
             $metadata = $this->group->getRootMetadata();
             $id = $metadata->getId();
             $cacheDir = $this->directory->getPackagesDir() . "/$id" .
-                $metadata->getStructureCache();
+                $metadata->getStatefulPath();
         }
 
         // do not cache root

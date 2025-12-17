@@ -170,7 +170,7 @@ class ShiftTest extends Test
             $group->internalMetas["i0"] = new InternalMetadataMock(
                 InternalCategory::OBSOLETE, [
                 "structure" => [
-                    "cache" => "/c"
+                    "stateful" => "/c"
                 ]
             ]);
 
@@ -182,7 +182,7 @@ class ShiftTest extends Test
             $group->externalMetas["i0"] = new ExternalMetadataMock(
                 ExternalCategory::DOWNLOADABLE, [
                 "structure" => [
-                    "cache" => "/c"
+                    "stateful" => "/c"
                 ]
             ]);
 
@@ -306,7 +306,7 @@ class ShiftTest extends Test
             $group->internalMetas["i0"] = new InternalMetadataMock(
                 InternalCategory::OBSOLETE, [
                 "structure" => [
-                    "cache" => "/c0"
+                    "stateful" => "/c0"
                 ]
             ]);
             $group->internalMetas["i0"]->delete = function () use (&$onDelete) {
@@ -316,7 +316,7 @@ class ShiftTest extends Test
             $group->externalMetas["i0"] = new ExternalMetadataMock(
                 ExternalCategory::DOWNLOADABLE, [
                 "structure" => [
-                    "cache" => "/c1"
+                    "stateful" => "/c1"
                 ]
             ]);
 
@@ -448,7 +448,7 @@ class ShiftTest extends Test
             $group->internalMetas["i0"] = new InternalMetadataMock(
                 InternalCategory::OBSOLETE, [
                 "structure" => [
-                    "cache" => "/c"
+                    "stateful" => "/c"
                 ]
             ]);
             $group->internalMetas["i0"]->delete = function () use (&$onDelete) {
@@ -458,7 +458,7 @@ class ShiftTest extends Test
             $group->externalMetas["i0"] = new ExternalMetadataMock(
                 ExternalCategory::DOWNLOADABLE, [
                 "structure" => [
-                    "cache" => "/c/new"
+                    "stateful" => "/c/new"
                 ]
             ]);
 
@@ -594,7 +594,7 @@ class ShiftTest extends Test
                 "dir" => "",
                 "source" => "/root",
                 "structure" => [
-                    "cache" => "/c",
+                    "stateful" => "/c",
                     "states" => [
                         "/st0"
                     ],
@@ -816,7 +816,7 @@ class ShiftTest extends Test
                 "source" => "/#",
                 "dir" => "",
                 "structure" => [
-                    "cache" => "/c",
+                    "stateful" => "/c",
                     "sources" => []
                 ]
             ]);
@@ -835,7 +835,7 @@ class ShiftTest extends Test
                 ExternalCategory::DOWNLOADABLE, [
                 "dir" => "",
                 "structure" => [
-                    "cache" => "/c"
+                    "stateful" => "/c"
                 ]
             ]);
 
@@ -1023,7 +1023,7 @@ class ShiftTest extends Test
                 "source" => "/#",
                 "dir" => "",
                 "structure" => [
-                    "cache" => "/c",
+                    "stateful" => "/c",
                     "extensions" => [],
                     "states" => [],
                     "mutables" => [],

@@ -120,12 +120,12 @@ class Extend extends Task
 
                 $separators = substr_count($this->directory->getRootDir() .
                     $metadata->getDir() .
-                    $metadata->getStructureCache(), '/');
+                    $metadata->getStatefulPath(), '/');
 
                 $this->structures[$id] = [
                     "dir" => "$this->packagesDir/$id",
                     "separators" => $separators,
-                    "state" => $metadata->getStructureCache(),
+                    "state" => $metadata->getStatefulPath(),
                     "extendables" => $metadata->getExtendablePaths()
                 ];
             }
@@ -145,12 +145,12 @@ class Extend extends Task
 
                 $separators = substr_count($this->directory->getRootDir() .
                     $metadata->getDir() .
-                    $metadata->getStructureCache(), '/');
+                    $metadata->getStatefulPath(), '/');
 
                 $this->structures[$id] = [
                     "dir" => "$this->packagesDir/$id",
                     "separators" => $separators,
-                    "state" => $metadata->getStructureCache(),
+                    "state" => $metadata->getStatefulPath(),
                     "extendables" => $metadata->getExtendablePaths()
                 ];
             }
@@ -170,12 +170,12 @@ class Extend extends Task
                             $dir;
 
                     $separators = substr_count($metadata->getSource() .
-                        $metadata->getStructureCache(), '/');
+                        $metadata->getStatefulPath(), '/');
 
                     $this->structures[$id] = [
                         "dir" => $metadata->getSource(),
                         "separators" => $separators,
-                        "state" => $metadata->getStructureCache(),
+                        "state" => $metadata->getStatefulPath(),
                         "extendables" => $metadata->getExtendablePaths()
                     ];
                 }

@@ -81,21 +81,6 @@ abstract class Metadata
     }
 
     /**
-     * Returns structure cache.
-     *
-     * @return string Structure cache.
-     * @deprecated Use {@see getStatefulPath} instead.
-     */
-    public function getStructureCache(): string
-    {
-        if (isset($this->content["structure"]["stateful"]) &&
-            $this->content["structure"]["stateful"] !== "")
-            return $this->content["structure"]["stateful"];
-
-        return $this->content["structure"]["cache"];
-    }
-
-    /**
      * Returns stateful structure path.
      *
      * @return string Stateful structure path.

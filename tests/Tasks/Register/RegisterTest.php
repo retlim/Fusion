@@ -70,7 +70,7 @@ class RegisterTest extends Test
                 "source" => "/s0",
                 "dir" => "",
                 "structure" => [
-                    "cache" => "/c0",
+                    "stateful" => "/c0",
                 ]
             ]);
 
@@ -80,7 +80,7 @@ class RegisterTest extends Test
                 "source" => "/s1",
                 "dir" => "/deps/i1",
                 "structure" => [
-                    "cache" => "/c1"
+                    "stateful" => "/c1"
                 ]
             ]);
 
@@ -89,7 +89,7 @@ class RegisterTest extends Test
                 "source" => "/s2",
                 "dir" => "/deps/i2",
                 "structure" => [
-                    "cache" => "/c2"
+                    "stateful" => "/c2"
                 ]
             ]);
 
@@ -242,7 +242,7 @@ class RegisterTest extends Test
                 "id" => "i0",
                 "dir" => "",
                 "structure" => [
-                    "cache" => "/c0"
+                    "stateful" => "/c0"
                 ]
             ])];
             $group->internalRoot = $group->internalMetas["i0"];
@@ -250,7 +250,7 @@ class RegisterTest extends Test
                 ExternalCategory::DOWNLOADABLE,[
                 "dir" => "",
                 "structure" => [
-                    "cache" => "/c0",
+                    "stateful" => "/c0",
                 ]
             ]);
 
@@ -258,7 +258,7 @@ class RegisterTest extends Test
                 ExternalCategory::DOWNLOADABLE,[
                 "dir" => "/deps/i1",
                 "structure" => [
-                    "cache" => "/c1"
+                    "stateful" => "/c1"
                 ]
             ]);
 
@@ -266,7 +266,7 @@ class RegisterTest extends Test
                 ExternalCategory::DOWNLOADABLE,[
                 "dir" => "/deps/i2",
                 "structure" => [
-                    "cache" => "/c2",
+                    "stateful" => "/c2",
                 ]
             ]);
 

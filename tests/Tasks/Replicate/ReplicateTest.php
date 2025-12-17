@@ -95,7 +95,7 @@ class ReplicateTest extends Test
                     // parsed/normalized structure
                     if ($source == "i0")
                         $structure = [
-                            "cache" => "/c0",
+                            "stateful" => "/c0",
                             "sources" => [
                                 "/deps" => ["i1"]
                             ]
@@ -220,7 +220,7 @@ class ReplicateTest extends Test
 
             $group->internalMetas["i0"] = new InternalMetadataMock([
                 "structure" => [
-                    "cache" => "/state",
+                    "stateful" => "/state",
                     "sources" => [
                         // actually source like adapter/id/pattern
                         "/deps" => ["i1", "i2", "i3"]

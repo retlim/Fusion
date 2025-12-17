@@ -84,7 +84,6 @@ class InternalTest extends Test
         $this->testCategory();
         $this->testSource();
         $this->testStructure();
-        $this->testStructureCache();
         $this->testStructureSources();
         $this->testStructureStates();
         $this->testStructureMutables();
@@ -164,13 +163,6 @@ class InternalTest extends Test
     {
         if ($this->metadata->getStructureSources() !==
             $this->content["structure"]["sources"])
-            $this->handleFailedTest();
-    }
-
-    public function testStructureCache(): void
-    {
-        if ($this->metadata->getStructureCache() !==
-            $this->content["structure"]["cache"])
             $this->handleFailedTest();
     }
 

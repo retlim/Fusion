@@ -92,7 +92,7 @@ class Register extends Task
                     $this->box->get(Content::class,
                         content: $metadata->getContent()));
 
-                $state = "$packages/$id" . $metadata->getStructureCache();
+                $state = "$packages/$id" . $metadata->getStatefulPath();
                 $this->states[$id] = $state;
 
                 $this->collectInflatedCode($state, $metadata->getDir());
@@ -104,7 +104,7 @@ class Register extends Task
                     $this->box->get(Content::class,
                         content: $metadata->getContent()));
 
-                $state = "$packages/$id" . $metadata->getStructureCache();
+                $state = "$packages/$id" . $metadata->getStatefulPath();
                 $this->states[$id] = $state;
 
                 $this->collectInflatedCode($state, $metadata->getDir());
@@ -113,7 +113,7 @@ class Register extends Task
         $rootMetadata = $this->group->getExternalRootMetadata() ??
             $this->group->getInternalRootMetadata();
 
-        $path = $rootMetadata->getStructureCache();
+        $path = $rootMetadata->getStatefulPath();
 
         $this->writeAutoloader(
             "$packages/" . $rootMetadata->getId() . $path,
@@ -138,7 +138,7 @@ class Register extends Task
                 $this->box->get(Content::class,
                     content: $metadata->getContent()));
 
-            $state = $metadata->getSource() . $metadata->getStructureCache();
+            $state = $metadata->getSource() . $metadata->getStatefulPath();
             $this->states[$id] = $state;
 
             $this->collectInflatedCode($state, $metadata->getDir());
@@ -146,7 +146,7 @@ class Register extends Task
 
         $this->writeAutoloader(
             $this->directory->getCacheDir(),
-            $this->group->getInternalRootMetadata()->getStructureCache()
+            $this->group->getInternalRootMetadata()->getStatefulPath()
         );
 
         $this->writePrefixes();

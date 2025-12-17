@@ -76,7 +76,7 @@ class ExtendTest extends Test
                 "source" => "/s0",
                 "dir" => "/d0",
                 "structure" => [
-                    "cache" => "/state",
+                    "stateful" => "/state",
                     "mappings" => [
                         // 1:1 mapping
                         "/##" => ":i1/i1/ex00",
@@ -95,7 +95,7 @@ class ExtendTest extends Test
                 InternalCategory::RECYCLABLE, [
                 "source" => "/s0/deps/s1",
                 "structure" => [
-                    "cache" => "/state",
+                    "stateful" => "/state",
                     "mappings" => [],
                     "extendables" => [
                         "/ex00",
@@ -169,7 +169,7 @@ class ExtendTest extends Test
                     "id" => "i0",
                     "dir" => "", // relative to root dir
                     "structure" => [
-                        "cache" => "/state",
+                        "stateful" => "/state",
                         "mappings" => [],
                         "extendables" => [],
                         "sources" => [
@@ -203,7 +203,7 @@ class ExtendTest extends Test
                 "id" => "i0",
                 "dir" => "", // relative to root dir
                 "structure" => [
-                    "cache" => "/state",
+                    "stateful" => "/state",
                     "mappings" => [
                         "/###i0" => ":i1/ex",
                         "/###i00" => ":i1/ex0"
@@ -224,7 +224,7 @@ class ExtendTest extends Test
                 "id" => "i1",
                 "dir" => "/deps/i1",
                 "structure" => [
-                    "cache" => "/state",
+                    "stateful" => "/state",
                     "mappings" => [],
                     "sources" => [],
                     "extendables" => [
@@ -238,7 +238,7 @@ class ExtendTest extends Test
                 "id" => "i2",
                 "dir" => "/deps/i2",
                 "structure" => [
-                    "cache" => "/state",
+                    "stateful" => "/state",
                     "mappings" => [
                         "/###i2" => ":i1/ex",
                         "/###i22" => ":i1/ex0"
@@ -325,7 +325,7 @@ class ExtendTest extends Test
                     "id" => "i0",
                     "dir" => "", // relative to root dir
                     "structure" => [
-                        "cache" => "/state",
+                        "stateful" => "/state",
                         "mappings" => [
                             "/###i0" => ":i1/ex",
                             "/###i00" => ":i1/ex0"
@@ -365,7 +365,7 @@ class ExtendTest extends Test
                 "id" => "i0",
                 "dir" => "", // relative to root dir
                 "structure" => [
-                    "cache" => "/state",
+                    "stateful" => "/state",
                     "mappings" => [
                         "/###i0" => ":i1/ex",
                         "/###i00" => ":i1/ex0"
@@ -386,7 +386,7 @@ class ExtendTest extends Test
                 "id" => "i1",
                 "dir" => "/deps/i1",
                 "structure" => [
-                    "cache" => "/state",
+                    "stateful" => "/state",
                     "mappings" => [],
                     "sources" => [],
                     "extendables" => [
@@ -400,7 +400,7 @@ class ExtendTest extends Test
                 "id" => "i2",
                 "dir" => "/deps/i2",
                 "structure" => [
-                    "cache" => "/state",
+                    "stateful" => "/state",
                     "mappings" => [
                         "/###i2" => ":i1/ex",
                         "/###i22" => ":i1/ex0"

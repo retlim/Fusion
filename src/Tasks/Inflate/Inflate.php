@@ -103,7 +103,7 @@ class Inflate extends Task
                 // take current
                 $dir = "$packagesDir/$id";
                 $this->idParts = explode('/', $id);
-                $cache = $dir . $meta->getStructureCache();
+                $cache = $dir . $meta->getStatefulPath();
 
                 $this->inflatePackage($dir, $cache);
             }
@@ -118,7 +118,7 @@ class Inflate extends Task
                 // take current
                 $dir = "$packagesDir/$id";
                 $this->idParts = explode('/', $id);
-                $cache = $dir . $meta->getStructureCache();
+                $cache = $dir . $meta->getStatefulPath();
 
                 $this->inflatePackage($dir, $cache);
             }
@@ -145,7 +145,7 @@ class Inflate extends Task
             // take absolute source dir as it is
             $dir = $meta->getSource();
             $this->idParts = explode('/', $id);
-            $cache = $dir . $meta->getStructureCache();
+            $cache = $dir . $meta->getStatefulPath();
 
             $this->inflatePackage($dir, $cache);
         }

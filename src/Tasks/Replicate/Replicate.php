@@ -205,7 +205,7 @@ class Replicate extends Task implements Interceptor
         );
 
         // get remote production snapshot file
-        $snapId = $this->hub->addSnapshotRequest($metadata->getSource(), $metadata->getStructureCache());
+        $snapId = $this->hub->addSnapshotRequest($metadata->getSource(), $metadata->getStatefulPath());
         $this->requests[$snapId] = [
 
             // optional snapshot file path

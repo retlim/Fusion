@@ -168,7 +168,7 @@ class SnapTest extends Test
                 "id" => "i0",
                 "source" => ["reference" => ""],
                 "structure" => [
-                    "cache" => "/state"
+                    "stateful" => "/state"
                 ],
                 "dependencies" => [
                     "production" => ["i1", "i2"]
@@ -250,7 +250,7 @@ class SnapTest extends Test
                 "id" => "i0",
                 "source" => ["reference" => ""],
                 "structure" => [
-                    "cache" => "/state"
+                    "stateful" => "/state"
                 ],
                 "dependencies" => [
                     "production" => ["i1"],

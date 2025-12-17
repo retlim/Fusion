@@ -151,8 +151,8 @@ class Shift extends Task
         if ($hasInternalFusion)
             $this->persistCurrentCode();
 
-        $internalCachePath = $this->group->getInternalRootMetadata()->getStructureCache();
-        $externalCachePath = $this->externalRootMeta->getStructureCache();
+        $internalCachePath = $this->group->getInternalRootMetadata()->getStatefulPath();
+        $externalCachePath = $this->externalRootMeta->getStatefulPath();
         $this->lockedDirs = [
             $this->directory->getCacheDir() . "/log",
             $this->state,
@@ -278,7 +278,7 @@ class Shift extends Task
             // override only cache
             if ($metadata->getCategory() == InternalMetaCategory::RECYCLABLE) {
                 $dir = $metadata->getDir();
-                $cache = $metadata->getStructureCache();
+                $cache = $metadata->getStatefulPath();
                 $from = "$stateDir$dir$cache";
                 $to = $metadata->getSource() . $cache;
 

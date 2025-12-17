@@ -73,7 +73,7 @@ class InflateTest extends Test
                 InternalCategory::RECYCLABLE, [
                 "source" => "/s0",
                 "structure" => [
-                    "cache" => "/c0",
+                    "stateful" => "/c0",
                 ]
             ]);
 
@@ -81,7 +81,7 @@ class InflateTest extends Test
                 InternalCategory::RECYCLABLE, [
                 "source" =>"/s1",
                 "structure" => [
-                    "cache" => "/c1"
+                    "stateful" => "/c1"
                 ]
             ]);
 
@@ -89,7 +89,7 @@ class InflateTest extends Test
                 InternalCategory::RECYCLABLE, [
                 "source" => "/s2",
                 "structure" => [
-                    "cache" => "/c2"
+                    "stateful" => "/c2"
                 ]
             ]);
 
@@ -282,21 +282,21 @@ class InflateTest extends Test
             $group->externalMetas["i0"] = new ExternalMetadataMock(
                 ExternalCategory::DOWNLOADABLE,[
                 "structure" => [
-                    "cache" => "/state"
+                    "stateful" => "/state"
                 ]
             ]);
 
             $group->externalMetas["i1"] = new ExternalMetadataMock(
                 ExternalCategory::DOWNLOADABLE,[
                 "structure" => [
-                    "cache" => "/state"
+                    "stateful" => "/state"
                 ]
             ]);
 
             $group->externalMetas["i2"] = new ExternalMetadataMock(
                 ExternalCategory::DOWNLOADABLE,[
                 "structure" => [
-                    "cache" => "/state"
+                    "stateful" => "/state"
                 ]
             ]);
 
