@@ -35,7 +35,7 @@ use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Proxy as LogProxy;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Builder as ExternalMetadataBuilder;
 use Valvoid\Fusion\Metadata\External\External as ExternalMetadata;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
@@ -82,7 +82,7 @@ class Replicate extends Task implements Interceptor
      * @param HubProxy $hub Hub.
      * @param DirProxy $directory Current working directory.
      * @param Extension $extension Standard extension logic wrapper.
-     * @param LogProxy $log Event log.
+     * @param Log $log Event log.
      * @param File $file Standard file logic wrapper.
      * @param array $config Task config.
      */
@@ -92,7 +92,7 @@ class Replicate extends Task implements Interceptor
         private readonly HubProxy $hub,
         private readonly DirProxy $directory,
         private readonly Extension $extension,
-        private readonly LogProxy $log,
+        private readonly Log $log,
         private readonly File $file,
         array $config)
     {

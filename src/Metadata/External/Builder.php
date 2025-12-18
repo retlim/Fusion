@@ -26,7 +26,7 @@ use Valvoid\Fusion\Bus\Proxy as Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Errors\Metadata as MetadataError;
 use Valvoid\Fusion\Log\Events\Level;
-use Valvoid\Fusion\Log\Proxy as Log;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Normalizer\Reference;
 use Valvoid\Fusion\Metadata\External\Parser\Source;
 use Valvoid\Fusion\Metadata\Interpreter\Interpreter;

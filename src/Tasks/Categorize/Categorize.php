@@ -23,7 +23,7 @@ namespace Valvoid\Fusion\Tasks\Categorize;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Group\Group as GroupProxy;
-use Valvoid\Fusion\Log\Proxy as LogProxy;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
 use Valvoid\Fusion\Metadata\External\External;
@@ -59,13 +59,13 @@ class Categorize extends Task
      *
      * @param Box $box Dependency injection container.
      * @param GroupProxy $group Tasks group.
-     * @param LogProxy $log Event log.
+     * @param Log $log Event log.
      * @param array $config Task config.
      */
     public function __construct(
         private readonly Box $box,
         private readonly GroupProxy $group,
-        private readonly LogProxy $log,
+        private readonly Log $log,
         array $config)
     {
         parent::__construct($config);

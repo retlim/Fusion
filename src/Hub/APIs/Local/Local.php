@@ -21,6 +21,7 @@
 
 namespace Valvoid\Fusion\Hub\APIs\Local;
 
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\Responses\Local\Archive;
 use Valvoid\Fusion\Hub\Responses\Local\File;
 use Valvoid\Fusion\Hub\Responses\Local\References;
@@ -41,7 +42,10 @@ abstract class Local
      *
      * @param array $config Config.
      */
-    public function __construct(string $root, array $config)
+    public function __construct(
+        protected readonly Box $box,
+        string $root,
+        array $config)
     {
         $this->root = $root;
         $this->config = $config;

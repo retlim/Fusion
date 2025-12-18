@@ -26,11 +26,13 @@ use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
 use Valvoid\Fusion\Hub\Requests\Remote\References;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\APIMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\CacheMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\CurlMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks\RequestErrorMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\Curl;
 
@@ -53,15 +55,27 @@ class ReferencesTest extends Test
         "path" => "/path",
         "prefix" => ""
     ];
-
+    public Curl $curl;
+    public Log $log;
+    private BoxMock $box;
     public function __construct()
     {
         $this->curlMock = new CurlMock;
-        $container = new BoxMock;
-        $container->curl = $this->curlMock;
-        $container->log = new LogMock;
+        $this->box = new BoxMock;
+        $this->curl = $this->curlMock;
+        $this->log = new LogMock;
         $this->apiMock = new APIMock;
         $this->cacheMock = new CacheMock;
+        $this->box->get = function(string $class, ...$args): object
+        {
+            if ("Valvoid\Fusion\Log\Log" === $class)
+                return $this->log;
+
+            if ("Valvoid\Fusion\Log\Events\Errors\Request" === $class)
+                return new RequestErrorMock;
+
+            return $this->curl;
+        };
 
         try {
 
@@ -71,7 +85,7 @@ class ReferencesTest extends Test
             // sync data before
 
             // sync request
-            $this->references = new References(2,
+            $this->references = new References($this->box,2,
                 $this->cacheMock, $this->source, $this->apiMock);
 
             // async cache request
@@ -92,7 +106,7 @@ class ReferencesTest extends Test
             $this->handleFailedTest();
         }
 
-        $container::unsetInstance();
+        $this->box::unsetInstance();
     }
 
     public function testInit(): void
@@ -115,7 +129,7 @@ class ReferencesTest extends Test
     {
         // set source prefix
         $this->source["prefix"] = "v";
-        $this->references = new References(2,
+        $this->references = new References($this->box,2,
             $this->cacheMock, $this->source, $this->apiMock);
 
         $this->references->addCacheId(1);
@@ -225,7 +239,7 @@ class ReferencesTest extends Test
     public function testUnauthorizedStatus(): void
     {
         // reset request tokens
-        $this->references = new References(2,
+        $this->references = new References($this->box,2,
             $this->cacheMock, $this->source, $this->apiMock);
 
         $this->references->addCacheId(1);
@@ -268,7 +282,7 @@ class ReferencesTest extends Test
     public function testNotFoundStatus(): void
     {
         // reset request tokens
-        $this->references = new References(2,
+        $this->references = new References($this->box,2,
             $this->cacheMock, $this->source, $this->apiMock);
 
         $this->references->addCacheId(1);
@@ -308,7 +322,7 @@ class ReferencesTest extends Test
     public function testForbiddenStatus(): void
     {
         // reset request tokens
-        $this->references = new References(2,
+        $this->references = new References($this->box,2,
             $this->cacheMock, $this->source, $this->apiMock);
 
         $this->references->addCacheId(1);

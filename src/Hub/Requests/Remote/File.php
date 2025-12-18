@@ -51,10 +51,12 @@ class File extends Remote
      * @param RemoteApi $api API.
      * @throws Error Internal error.
      */
-    public function __construct(int $id, Cache $cache, array $source, string $path,
+    public function __construct(
+        private readonly Box $box,
+        int $id, Cache $cache, array $source, string $path,
                                 string $filename, RemoteApi $api)
     {
-        parent::__construct($id, $cache, $source, $api);
+        parent::__construct($this->box, $id, $cache, $source, $api);
 
         $pointer = $this->source["reference"];
 
@@ -119,11 +121,12 @@ class File extends Remote
         $code = $this->curl->getInfo(CURLINFO_RESPONSE_CODE);
         $headers = $this->headers["response"];
 
-        Log::debug(new Request(
-            array_key_first($this->cacheIds),
-            $content,
-            [$this->url]
-        ));
+        $this->box->get(Log::class)
+            ->debug($this->box->get(Request::class,
+                id: array_key_first($this->cacheIds),
+                message: $content,
+                sources:[$this->url]
+            ));
 
         switch ($this->api->getStatus($code, $headers)) {
             case Status::OK:

@@ -21,6 +21,7 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Remote;
 
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Remote\Offset as RemoteOffsetApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Status;
@@ -51,10 +52,12 @@ class Offset extends Remote
      * @param RemoteOffsetApi $api API.
      * @throws Request Invalid request exception.
      */
-    public function __construct(int $id, Cache $cache, array $source,
+    public function __construct(
+        private readonly Box $box,
+        int $id, Cache $cache, array $source,
                                 RemoteOffsetApi $api, string $inline, array $inflated)
     {
-        parent::__construct($id, $cache, $source, $api);
+        parent::__construct($this->box, $id, $cache, $source, $api);
 
         $this->inline = $inline;
         $this->inflated = $inflated;
@@ -111,11 +114,12 @@ class Offset extends Remote
         $code = $this->curl->getInfo(CURLINFO_RESPONSE_CODE);
         $headers = $this->headers["response"];
 
-        Log::debug(new Request(
-            array_key_first($this->cacheIds),
-            $content,
-            [$this->url]
-        ));
+        $this->box->get(Log::class)
+            ->debug($this->box->get(Request::class,
+                id: array_key_first($this->cacheIds),
+                message: $content,
+                sources: [$this->url]
+            ));
 
         switch ($this->api->getStatus($code, $headers)) {
             case Status::OK:

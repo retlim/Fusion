@@ -34,7 +34,7 @@ use Valvoid\Fusion\Hub\Responses\Local\Archive as ArchiveResponse;
 class DirTest extends Test
 {
     protected Dir $api;
-    protected BoxMock $container;
+    protected BoxMock $box;
     protected string|array $coverage = [
         Dir::class,
 
@@ -44,9 +44,9 @@ class DirTest extends Test
 
     public function __construct()
     {
-        $this->container = new BoxMock;
-        $this->container->file = new FileMock;
-        $this->api = new Dir("/root", []);
+        $this->box = new BoxMock;
+        $this->box->file = new FileMock;
+        $this->api = new Dir($this->box,"/root", []);
 
         $this->testRoot();
         $this->testFileLocation();
@@ -54,7 +54,7 @@ class DirTest extends Test
         $this->testReferences();
         $this->testArchive();
 
-        $this->container::unsetInstance();
+        $this->box::unsetInstance();
     }
 
     public function testRoot(): void
@@ -95,7 +95,7 @@ class DirTest extends Test
                 $references->getEntries() !== ["_"])
                 $this->handleFailedTest();
 
-            if ($this->container->file->file !== "/root/-/fusion.json")
+            if ($this->box->file->file !== "/root/-/fusion.json")
                 $this->handleFailedTest();
 
         } catch (Error) {

@@ -35,7 +35,7 @@ use Valvoid\Fusion\Wrappers\Program;
 class GitTest extends Test
 {
     protected Git $api;
-    protected BoxMock $container;
+    protected BoxMock $box;
     protected string|array $coverage = [
         Git::class,
 
@@ -45,9 +45,9 @@ class GitTest extends Test
 
     public function __construct()
     {
-        $this->container = new BoxMock;
-        $this->container->program = new GitMock;
-        $this->api = new Git("/root", []);
+        $this->box = new BoxMock;
+        $this->box->program = new GitMock;
+        $this->api = new Git($this->box,"/root", []);
 
         $this->testRoot();
         $this->testFileLocation();
@@ -56,7 +56,7 @@ class GitTest extends Test
         $this->testReferences();
         $this->testArchive();
 
-        $this->container::unsetInstance();
+        $this->box::unsetInstance();
     }
 
     public function testRoot(): void

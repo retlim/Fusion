@@ -23,10 +23,11 @@ namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
 
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Proxy;
+use Valvoid\Fusion\Log\Log;
 
-class LogMock implements Proxy
+class LogMock extends Log
 {
+    public function __construct(){}
     public function addInterceptor(Interceptor $interceptor): void {}
     public function removeInterceptor(): void {}
     public function error(string|Event $event): void {}

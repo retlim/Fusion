@@ -27,14 +27,16 @@ use Valvoid\Fusion\Log\Log;
 
 class LogMock extends Log
 {
-    public static Closure|null $verbose;
-    public static Closure|null $debug;
+    public Closure $verbose;
+    public Closure $debug;
 
-    public static function verbose(string|Event $event): void {
-        call_user_func(self::$verbose, $event);
+    public function __construct() {}
+
+    public function verbose(string|Event $event): void {
+        call_user_func($this->verbose, $event);
     }
-    public static function debug(string|Event $event): void
+    public function debug(string|Event $event): void
     {
-        call_user_func(self::$debug, $event);
+        call_user_func($this->debug, $event);
     }
 }

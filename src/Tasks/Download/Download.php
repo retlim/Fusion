@@ -33,7 +33,7 @@ use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Proxy as LogProxy;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
 use Valvoid\Fusion\Tasks\Task;
@@ -61,7 +61,7 @@ class Download extends Task implements Interceptor
      *
      * @param Box $box Dependency injection container.
      * @param GroupProxy $group Tasks group.
-     * @param LogProxy $log Event log.
+     * @param Log $log Event log.
      * @param DirProxy $directory Current working directory.
      * @param Extension $extension Standard extension logic wrapper.
      * @param File $file Standard file logic wrapper.
@@ -71,7 +71,7 @@ class Download extends Task implements Interceptor
     public function __construct(
         private readonly Box $box,
         private readonly GroupProxy $group,
-        private readonly LogProxy $log,
+        private readonly Log $log,
         private readonly HubProxy $hub,
         private readonly DirProxy $directory,
         private readonly Extension $extension,

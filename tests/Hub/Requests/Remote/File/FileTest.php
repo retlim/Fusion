@@ -22,17 +22,22 @@
 namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File;
 
 use Throwable;
+use Valvoid\Fusion\Dir\Proxy;
 use Valvoid\Fusion\Hub\Requests\Remote\File;
 use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
+use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\StreamMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\APIMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\CacheMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\CurlMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\FileMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks\RequestErrorMock;
 use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Wrappers\Curl;
 use Valvoid\Fusion\Wrappers\File as Wrapper;
 
 class FileTest extends Test
@@ -54,16 +59,42 @@ class FileTest extends Test
         "reference" => "1.0.0",
         "prefix" => ""
     ];
+    private BoxMock $box;
+    public Curl $curl;
+    public Log $log;
+    public StreamMock $stream;
+    public Proxy $dir;
+    private FileMock $fileMock;
 
     public function __construct()
     {
         $this->curlMock = new CurlMock;
-        $container = new BoxMock;
-        $container->curl = $this->curlMock;
-        $container->log = new LogMock;
-        $container->file = new FileMock;
+        $this->box = new BoxMock;
+        $this->curl = $this->curlMock;
+        $this->log = new LogMock;
+        $this->fileMock = new FileMock;
         $this->apiMock = new APIMock;
         $this->cacheMock = new CacheMock;
+
+        $this->box->get = function (string $class, ...$args): object
+        {
+            if ("Valvoid\Fusion\Log\Log" === $class)
+                return $this->log;
+
+            if ("Valvoid\Fusion\Dir\Proxy" === $class)
+                return $this->dir;
+
+            if ("Valvoid\Fusion\Wrappers\Stream" === $class)
+                return $this->stream;
+
+            if ("Valvoid\Fusion\Wrappers\File" === $class)
+                return $this->fileMock;
+
+            if ("Valvoid\Fusion\Log\Events\Errors\Request" === $class)
+                return new RequestErrorMock;
+
+            return $this->curl;
+        };
 
         try {
 
@@ -73,7 +104,7 @@ class FileTest extends Test
             // sync data before
 
             // sync request
-            $this->file = new File(2, $this->cacheMock, $this->source,
+            $this->file = new File($this->box,2, $this->cacheMock, $this->source,
                 "/nested", "/filename", $this->apiMock);
 
             // async cache request
@@ -93,7 +124,7 @@ class FileTest extends Test
             $this->handleFailedTest();
         }
 
-        $container::unsetInstance();
+        $this->box::unsetInstance();
     }
 
     public function testInit(): void
@@ -156,7 +187,7 @@ class FileTest extends Test
     public function testUnauthorizedStatus(): void
     {
         // reset request tokens
-        $this->file = new File(2, $this->cacheMock, $this->source,
+        $this->file = new File($this->box,2, $this->cacheMock, $this->source,
             "/path", "filename", $this->apiMock);
 
         $this->file->addCacheId(1);
@@ -199,7 +230,7 @@ class FileTest extends Test
     public function testNotFoundStatus(): void
     {
         // reset request tokens
-        $this->file = new File(2, $this->cacheMock, $this->source,
+        $this->file = new File($this->box,2, $this->cacheMock, $this->source,
             "/path", "filename", $this->apiMock);
 
         $this->file->addCacheId(1);
@@ -237,7 +268,7 @@ class FileTest extends Test
     public function testForbiddenStatus(): void
     {
         // reset request tokens
-        $this->file = new File(2, $this->cacheMock, $this->source,
+        $this->file = new File($this->box,2, $this->cacheMock, $this->source,
             "/path", "filename", $this->apiMock);
 
         $this->file->addCacheId(1);

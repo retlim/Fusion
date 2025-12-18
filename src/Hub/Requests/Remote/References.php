@@ -21,6 +21,7 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Remote;
 
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Status;
 use Valvoid\Fusion\Hub\Cache;
@@ -47,9 +48,11 @@ class References extends RemoteRequest
      * @param RemoteApi $api API.
      * @throws Error Internal error.
      */
-    public function __construct(int $id, Cache $cache, array $source, RemoteApi $api)
+    public function __construct(
+        private readonly Box $box,
+        int $id, Cache $cache, array $source, RemoteApi $api)
     {
-        parent::__construct($id, $cache, $source, $api);
+        parent::__construct($this->box, $id, $cache, $source, $api);
 
         $this->prefix = strlen($source["prefix"]);
         $this->url = $this->api->getReferencesUrl($source["path"]);
@@ -97,11 +100,12 @@ class References extends RemoteRequest
         $code = $this->curl->getInfo(CURLINFO_RESPONSE_CODE);
         $headers = $this->headers["response"];
 
-        Log::debug(new Request(
-            array_key_first($this->cacheIds),
-            $content,
-            [$this->url]
-        ));
+        $this->box->get(Log::class)
+            ->debug($this->box->get(Request::class,
+                id: array_key_first($this->cacheIds),
+                message: $content,
+                sources: [$this->url]
+            ));
 
         switch ($this->api->getStatus($code, $headers)) {
             case Status::OK:

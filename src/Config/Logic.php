@@ -401,10 +401,10 @@ class Logic implements Proxy
 
         match ($event->getLevel()) {
             Level::ERROR => throw $config,
-            Level::WARNING => Log::warning($config),
-            Level::NOTICE => Log::notice($config),
-            Level::VERBOSE => Log::verbose($config),
-            Level::INFO => Log::info($config)
+            Level::WARNING => $this->box->get(Log::class)->warning($config),
+            Level::NOTICE => $this->box->get(Log::class)->notice($config),
+            Level::VERBOSE => $this->box->get(Log::class)->verbose($config),
+            Level::INFO => $this->box->get(Log::class)->info($config)
         };
     }
 }

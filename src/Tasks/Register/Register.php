@@ -26,7 +26,7 @@ use Valvoid\Fusion\Dir\Proxy as DirProxy;
 use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Infos\Content;
-use Valvoid\Fusion\Log\Proxy as LogProxy;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalMetaCategory;
 use Valvoid\Fusion\Tasks\Task;
@@ -52,7 +52,7 @@ class Register extends Task
      * @param Box $box Dependency injection container.
      * @param GroupProxy $group Tasks group.
      * @param DirProxy $directory Current working directory.
-     * @param LogProxy $log Event log.
+     * @param Log $log Event log.
      * @param File $file Standard file logic wrapper.
      * @param array $config Task config.
      */
@@ -60,7 +60,7 @@ class Register extends Task
         private readonly Box $box,
         private readonly GroupProxy $group,
         private readonly DirProxy $directory,
-        private readonly LogProxy $log,
+        private readonly Log $log,
         private readonly File $file,
         array $config)
     {

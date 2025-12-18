@@ -35,7 +35,7 @@ use Valvoid\Fusion\Log\Events\Errors\Request;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Proxy as LogProxy;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Builder as ExternalMetadataBuilder;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
@@ -78,7 +78,7 @@ class Build extends Task implements Interceptor
      * @param GroupProxy $group Tasks group.
      * @param HubProxy $hub Hub.
      * @param Extension $extension Standard extension logic wrapper.
-     * @param LogProxy $log Event log.
+     * @param Log $log Event log.
      * @param array $config Task config.
      */
     public function __construct(
@@ -86,7 +86,7 @@ class Build extends Task implements Interceptor
         private readonly GroupProxy $group,
         private readonly HubProxy $hub,
         private readonly Extension $extension,
-        private readonly LogProxy $log,
+        private readonly Log $log,
         array $config)
     {
         parent::__construct($config);

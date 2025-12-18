@@ -101,9 +101,6 @@ class FusionTest extends Test
                         "class" => "Valvoid\Fusion\Bus\Logic",
                         "abstraction" => "Valvoid\Fusion\Bus\Proxy",
                     ],[
-                    "class" => "Valvoid\Fusion\Log\Logic",
-                    "abstraction" => "Valvoid\Fusion\Log\Proxy",
-                ],[
                     "class" => "Valvoid\Fusion\Config\Logic",
                     "abstraction" => "Valvoid\Fusion\Config\Proxy",
                 ],[
@@ -186,9 +183,6 @@ class FusionTest extends Test
                     "class" => "Valvoid\Fusion\Bus\Logic",
                     "abstraction" => "Valvoid\Fusion\Bus\Proxy",
                 ],[
-                    "class" => "Valvoid\Fusion\Log\Logic",
-                    "abstraction" => "Valvoid\Fusion\Log\Proxy",
-                ],[
                     "class" => "Valvoid\Fusion\Config\Logic",
                     "abstraction" => "Valvoid\Fusion\Config\Proxy",
                 ],[
@@ -265,7 +259,7 @@ class FusionTest extends Test
                 if ($class == "Valvoid\Fusion\Config\Logic")
                     return $config;
 
-                if ($class == "Valvoid\Fusion\Log\Logic")
+                if ($class == "Valvoid\Fusion\Log\Log")
                     return new LogMock;
 
                 if ($class == "Valvoid\Fusion\Dir\Logic")
@@ -311,9 +305,6 @@ class FusionTest extends Test
                 $map != [[
                     "class" => "Valvoid\Fusion\Bus\Logic",
                     "abstraction" => "Valvoid\Fusion\Bus\Proxy",
-                ],[
-                    "class" => "Valvoid\Fusion\Log\Logic",
-                    "abstraction" => "Valvoid\Fusion\Log\Proxy",
                 ],[
                     "class" => "Valvoid\Fusion\Config\Logic",
                     "abstraction" => "Valvoid\Fusion\Config\Proxy",
@@ -388,7 +379,7 @@ class FusionTest extends Test
                 if ($class == "Valvoid\Fusion\Config\Logic")
                     return $config;
 
-                if ($class == "Valvoid\Fusion\Log\Logic")
+                if ($class == "Valvoid\Fusion\Log\Log")
                     return new LogMock;
 
                 if ($class == "Valvoid\Fusion\Dir\Logic")
@@ -434,9 +425,6 @@ class FusionTest extends Test
                 $map != [[
                     "class" => "Valvoid\Fusion\Bus\Logic",
                     "abstraction" => "Valvoid\Fusion\Bus\Proxy",
-                ],[
-                    "class" => "Valvoid\Fusion\Log\Logic",
-                    "abstraction" => "Valvoid\Fusion\Log\Proxy",
                 ],[
                     "class" => "Valvoid\Fusion\Config\Logic",
                     "abstraction" => "Valvoid\Fusion\Config\Proxy",

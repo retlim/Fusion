@@ -32,9 +32,12 @@ use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Events\Infos\Error as InfoError;
 use Valvoid\Fusion\Log\Events\Infos\Id;
 use Valvoid\Fusion\Log\Events\Infos\Name;
+use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Tests\Log\Mocks\BoxMock;
+use Valvoid\Fusion\Tests\Log\Mocks\ConfigMock;
 use Valvoid\Fusion\Tests\Log\Mocks\InterceptorMock;
+use Valvoid\Fusion\Tests\Log\Mocks\SerializerMock;
 use Valvoid\Fusion\Tests\Test;
 
 class LogTest extends Test
@@ -56,39 +59,167 @@ class LogTest extends Test
         Request::class
     ];
 
-    private BoxMock $container;
+    private BoxMock $box;
+    private ConfigMock $config;
     private InterceptorMock $interceptor;
+    private Log $log;
+    private SerializerMock $serializer;
 
     public function __construct()
     {
-        $this->container = new BoxMock;
+        $this->box = new BoxMock;
         $this->interceptor = new InterceptorMock;
+        $this->config = new ConfigMock;
+        $this->serializer = new SerializerMock([]);
 
-        // static
-        $this->testStaticInterface();
-        $this->container::unsetInstance();
+        $this->box->get = function (string $class, ...$args) {
+            if ($class == "Valvoid\Fusion\Tests\Log\Mocks\SerializerMock")
+                return $this->serializer;
+        };
+
+        $this->config->get = function (...$breadcrumb) {
+            if ($breadcrumb == ["log", "serializers"])
+                return ["test" => ["serializer" => SerializerMock::class]];
+
+            $this->handleFailedTest();
+        };
+
+        $this->log = new Log($this->box, $this->config);
+
+        $this->testInterceptor();
+        $this->testError();
+        $this->testWarning();
+        $this->testNotice();
+        $this->testInfo();
+        $this->testVerbose();
+        $this->testDebug();
+
+        $this->box::unsetInstance();
     }
 
-    public function testStaticInterface(): void
+    public function testInterceptor(): void
     {
-        Log::removeInterceptor();
-        Log::addInterceptor($this->interceptor);
-        Log::debug("");
-        Log::error("");
-        Log::warning("");
-        Log::notice("");
-        Log::info("");
-        Log::debug("");
+        $level =
+        $event =
+        $interceptor = null;
 
-        // static functions connected to same non-static functions
-        if ($this->container->log->calls !== [
-                "removeInterceptor",
-                "addInterceptor",
-                "debug",
-                "error",
-                "warning",
-                "notice",
-                "info",
-                "debug"]) $this->handleFailedTest();
+        $this->log->addInterceptor($this->interceptor);
+        $this->interceptor->extend = function ($event) use (&$interceptor) {
+            $interceptor = $event;
+        };
+
+        $this->serializer->log = function ($l, $e) use (&$level, &$event) {
+            $level = $l;
+            $event = $e;
+        };
+
+        $this->log->error("error");
+
+        if ($level !== Level::ERROR ||
+            $event !== "error" ||
+            $interceptor !== "error")
+            $this->handleFailedTest();
+    }
+
+    public function testError(): void
+    {
+        $level =
+        $event = null;
+
+        $this->serializer->log = function ($l, $e) use (&$level, &$event) {
+            $level = $l;
+            $event = $e;
+        };
+
+        $this->log->error("error");
+
+        if ($level !== Level::ERROR ||
+            $event !== "error")
+            $this->handleFailedTest();
+    }
+
+    public function testWarning(): void
+    {
+        $level =
+        $event = null;
+
+        $this->serializer->log = function ($l, $e) use (&$level, &$event) {
+            $level = $l;
+            $event = $e;
+        };
+
+        $this->log->warning("warning");
+
+        if ($level !== Level::WARNING ||
+            $event !== "warning")
+            $this->handleFailedTest();
+    }
+
+    public function testNotice(): void
+    {
+        $level =
+        $event = null;
+
+        $this->serializer->log = function ($l, $e) use (&$level, &$event) {
+            $level = $l;
+            $event = $e;
+        };
+
+        $this->log->notice("notice");
+
+        if ($level !== Level::NOTICE ||
+            $event !== "notice")
+            $this->handleFailedTest();
+    }
+
+    public function testInfo(): void
+    {
+        $level =
+        $event = null;
+
+        $this->serializer->log = function ($l, $e) use (&$level, &$event) {
+            $level = $l;
+            $event = $e;
+        };
+
+        $this->log->info("info");
+
+        if ($level !== Level::INFO ||
+            $event !== "info")
+            $this->handleFailedTest();
+    }
+
+    public function testVerbose(): void
+    {
+        $level =
+        $event = null;
+
+        $this->serializer->log = function ($l, $e) use (&$level, &$event) {
+            $level = $l;
+            $event = $e;
+        };
+
+        $this->log->verbose("verbose");
+
+        if ($level !== Level::VERBOSE ||
+            $event !== "verbose")
+            $this->handleFailedTest();
+    }
+
+    public function testDebug(): void
+    {
+        $level =
+        $event = null;
+
+        $this->serializer->log = function ($l, $e) use (&$level, &$event) {
+            $level = $l;
+            $event = $e;
+        };
+
+        $this->log->debug("debug");
+
+        if ($level !== Level::DEBUG ||
+            $event !== "debug")
+            $this->handleFailedTest();
     }
 }

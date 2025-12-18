@@ -19,20 +19,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks;
+namespace Valvoid\Fusion\Tests\Log\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Proxy;
-use Valvoid\Fusion\Log\Log;
-use Valvoid\Fusion\Wrappers\Curl;
+use Valvoid\Fusion\Log\Events\Event;
+use Valvoid\Fusion\Log\Events\Level;
+use Valvoid\Fusion\Log\Serializers\Streams\Stream;
 
-class BoxMock extends Box
+class SerializerMock implements Stream
 {
-    public Closure $get;
+    public Closure $log;
 
-    public function get(string $class, ...$args): object
+    public function __construct(protected array $config) {}
+
+    public function log(Level $level, string|Event $event): void
     {
-        return call_user_func($this->get, $class, ...$args);
+        call_user_func($this->log, $level, $event);
     }
 }

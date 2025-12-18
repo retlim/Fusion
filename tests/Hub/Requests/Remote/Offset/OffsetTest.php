@@ -25,11 +25,13 @@ use Throwable;
 use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
 use Valvoid\Fusion\Hub\Requests\Remote\Offset;
 use Valvoid\Fusion\Log\Events\Errors\Request;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\APIMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\CacheMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\CurlMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Offset\Mocks\RequestErrorMock;
 use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Wrappers\Curl;
 
@@ -63,15 +65,27 @@ class OffsetTest extends Test
             "offset" => "main",
             "sign" => "=="
         ]];
-
+    public Curl $curl;
+    public Log $log;
+    private BoxMock $box;
     public function __construct()
     {
         $this->curlMock = new CurlMock;
-        $container = new BoxMock;
-        $container->curl = $this->curlMock;
-        $container->log = new LogMock;
+        $this->box = new BoxMock;
+        $this->curl = $this->curlMock;
+        $this->log = new LogMock;
         $this->apiMock = new APIMock;
         $this->cacheMock = new CacheMock;
+        $this->box->get = function (string $class, ...$args): object
+        {
+            if ("Valvoid\Fusion\Log\Log" === $class)
+                return $this->log;
+
+            if ("Valvoid\Fusion\Log\Events\Errors\Request" === $class)
+                return new RequestErrorMock;
+
+            return $this->curl;
+        };
 
         try {
 
@@ -79,7 +93,7 @@ class OffsetTest extends Test
             // if no cache for a package
             // pause/async cache request and
             // sync data before
-            $this->offset = new Offset(2, $this->cacheMock, $this->source,
+            $this->offset = new Offset($this->box,2, $this->cacheMock, $this->source,
                 $this->apiMock, $this->data["version"], $this->data["entry"]);
 
             // async cache request
@@ -99,7 +113,7 @@ class OffsetTest extends Test
             $this->handleFailedTest();
         }
 
-        $container::unsetInstance();
+        $this->box::unsetInstance();
     }
 
     public function testInit(): void
@@ -179,7 +193,7 @@ class OffsetTest extends Test
     public function testUnauthorizedStatus(): void
     {
         // reset request tokens
-        $this->offset = new Offset(2, $this->cacheMock, $this->source,
+        $this->offset = new Offset($this->box,2, $this->cacheMock, $this->source,
             $this->apiMock, $this->data["version"], $this->data["entry"]);
 
         $this->offset->addCacheId(1);
@@ -222,7 +236,7 @@ class OffsetTest extends Test
     public function testNotFoundStatus(): void
     {
         // reset request tokens
-        $this->offset = new Offset(2, $this->cacheMock, $this->source,
+        $this->offset = new Offset($this->box,2, $this->cacheMock, $this->source,
             $this->apiMock, $this->data["version"], $this->data["entry"]);
 
         $this->offset->addCacheId(1);
@@ -262,7 +276,7 @@ class OffsetTest extends Test
     public function testForbiddenStatus(): void
     {
         // reset request tokens
-        $this->offset = new Offset(2, $this->cacheMock, $this->source,
+        $this->offset = new Offset($this->box,2, $this->cacheMock, $this->source,
             $this->apiMock, $this->data["version"], $this->data["entry"]);
 
         $this->offset->addCacheId(1);

@@ -51,9 +51,11 @@ class Archive extends Remote
      * @param RemoteApi $api API.
      * @throws Error Internal error.
      */
-    public function __construct(int $id, Cache $cache, array $source, RemoteApi $api)
+    public function __construct(
+        private readonly Box $box,
+        int $id, Cache $cache, array $source, RemoteApi $api)
     {
-        parent::__construct($id, $cache, $source, $api);
+        parent::__construct($this->box, $id, $cache, $source, $api);
 
         $reference = $this->source["reference"];
 
@@ -216,11 +218,12 @@ class Archive extends Remote
 
         // pointer for override
         $this->rewindStream();
-        Log::debug(new Request(
-            array_key_first($this->cacheIds),
-            $content,
-            [$this->url]
-        ));
+        $this->box->get(Log::class)
+            ->debug($this->box->get(Request::class,
+                id: array_key_first($this->cacheIds),
+                message: $content,
+                sources: [$this->url]
+            ));
 
         return $content;
     }

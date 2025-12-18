@@ -75,7 +75,9 @@ abstract class Remote extends Request
      * @param array $source Structure source.
      * @throws Error Internal error.
      */
-    public function __construct(int $id, Cache $cache, array $source, RemoteApi $api)
+    public function __construct(
+        private readonly Box $box,
+        int $id, Cache $cache, array $source, RemoteApi $api)
     {
         parent::__construct($id, $cache, $source);
 
@@ -150,11 +152,12 @@ abstract class Remote extends Request
         // exchange and notify
         if ($this->tokens) {
             if ($this->api->addInvalidToken($token))
-                Log::notice(new RequestError(
-                    array_key_first($this->cacheIds),
-                    "Invalid \"$preview...\" token. $message Trying another one.",
-                    [$this->url]
-                ));
+                $this->box->get(Log::class)
+                    ->notice($this->box->get(RequestError::class,
+                        id: array_key_first($this->cacheIds),
+                        message: "Invalid \"$preview...\" token. $message Trying another one.",
+                        sources: [$this->url]
+                    ));
 
             $headers = $this->headers["request"];
             $headers[] = $this->auth . reset($this->tokens);
@@ -185,11 +188,12 @@ abstract class Remote extends Request
         // has more
         // exchange and notify
         if ($this->tokens) {
-            Log::notice(new RequestError(
-                array_key_first($this->cacheIds),
-                "Bad \"$preview...\" token. $message Trying another one.",
-                [$this->url]
-            ));
+            $this->box->get(Log::class)
+                ->notice($this->box->get(RequestError::class,
+                    id: array_key_first($this->cacheIds),
+                    message: "Bad \"$preview...\" token. $message Trying another one.",
+                    sources: [$this->url]
+                ));
 
             $headers = $this->headers["request"];
             $headers[] = $this->auth . reset($this->tokens);

@@ -21,9 +21,15 @@
 
 namespace Valvoid\Fusion\Tests\Log\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Interceptor;
 
-class InterceptorMock implements Interceptor {
-    public function extend(string|Event $event): void {}
+class InterceptorMock implements Interceptor
+{
+    public Closure $extend;
+    public function extend(string|Event $event): void
+    {
+        call_user_func($this->extend, $event);
+    }
 }

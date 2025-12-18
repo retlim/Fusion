@@ -39,8 +39,7 @@ use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Event as LogEvent;
 use Valvoid\Fusion\Log\Events\Infos\Name;
 use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Logic as LogLogic;
-use Valvoid\Fusion\Log\Proxy as LogProxy;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Tasks\Task;
 use Valvoid\Fusion\Wrappers\Dir;
 use Valvoid\Fusion\Wrappers\File;
@@ -80,7 +79,6 @@ class Fusion
 
         // set up proxies
         $box->map(BusLogic::class, BusProxy::class);
-        $box->map(LogLogic::class, LogProxy::class);
         $box->map(ConfigLogic::class, ConfigProxy::class);
         $box->map(GroupLogic::class, GroupProxy::class);
         $box->map(DirLogic::class, DirProxy::class);
@@ -88,7 +86,7 @@ class Fusion
 
         // shareable objects
         $box->recycle(BusLogic::class,
-            LogLogic::class,
+            Log::class,
             ConfigLogic::class,
             GroupLogic::class,
             DirLogic::class,
@@ -165,7 +163,7 @@ class Fusion
      */
     public function execute(string $id): bool
     {
-        $log = $this->box->get(LogLogic::class);
+        $log = $this->box->get(Log::class);
 
         try {
             $entry = $this->box->get(ConfigLogic::class)

@@ -19,20 +19,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks;
+namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks;
 
-use Closure;
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Proxy;
-use Valvoid\Fusion\Log\Log;
-use Valvoid\Fusion\Wrappers\Curl;
+use Valvoid\Fusion\Log\Events\Errors\Request;
 
-class BoxMock extends Box
+class RequestErrorMock extends Request
 {
-    public Closure $get;
-
-    public function get(string $class, ...$args): object
-    {
-        return call_user_func($this->get, $class, ...$args);
-    }
+    public function __construct() {}
 }

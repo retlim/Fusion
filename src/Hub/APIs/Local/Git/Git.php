@@ -155,10 +155,12 @@ class Git extends LocalOffsetApi
      */
     private function logExecError(int $code, array $output): void
     {
-        Log::verbose("\"$code\" exit code.");
+        $this->box->get(Log::class)
+            ->verbose("\"$code\" exit code.");
 
         foreach ($output as $line)
-            Log::verbose($line);
+            $this->box->get(Log::class)
+                ->verbose($line);
     }
 
     /**

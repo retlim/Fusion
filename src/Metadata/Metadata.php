@@ -259,8 +259,8 @@ abstract class Metadata
         restore_error_handler();
 
         $log = $this->box->get(Log::class);
-        $log::verbose("callback exit indicator '$indicator'");
-        $log::debug(ob_get_clean());
+        $log->verbose("callback exit indicator '$indicator'");
+        $log->debug(ob_get_clean());
 
         return $indicator;
     }

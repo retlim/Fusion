@@ -21,60 +21,15 @@
 
 namespace Valvoid\Fusion\Tests\Log\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Log\Events\Event;
-use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Proxy;
 
 class BoxMock extends Box
 {
-    public Proxy $log;
+    public Closure $get;
+
     public function get(string $class, ...$args): object
     {
-        return $this->log ??= new class implements Proxy
-        {
-            public $calls = [];
-
-            public function addInterceptor(Interceptor $interceptor): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function removeInterceptor(): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function error(string|Event $event): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function warning(string|Event $event): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function notice(string|Event $event): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function info(string|Event $event): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function verbose(string|Event $event): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function debug(string|Event $event): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-        };
+        return call_user_func($this->get, $class, ...$args);
     }
-
 }

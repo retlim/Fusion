@@ -22,18 +22,22 @@
 namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive;
 
 use Throwable;
+use Valvoid\Fusion\Dir\Proxy;
 use Valvoid\Fusion\Hub\Requests\Remote\Archive;
 use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\APIMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\BoxMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\CacheMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\CurlMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\DirMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\LogMock;
+use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\RequestErrorMock;
 use Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive\Mocks\StreamMock;
 use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Wrappers\Curl;
 use Valvoid\Fusion\Wrappers\Stream;
 
 class ArchiveTest extends Test
@@ -55,19 +59,38 @@ class ArchiveTest extends Test
         "reference" => "1.0.0",
         "prefix" => ""
     ];
-
+    private BoxMock $box;
+    public Curl $curl;
+    public Log $log;
+    public StreamMock $stream;
+    public Proxy $dir;
     public function __construct()
     {
         $this->curlMock = new CurlMock;
-        $container = new BoxMock;
-        $container->curl = $this->curlMock;
-        $container->log = new LogMock;
-        $container->stream = new StreamMock;
-        $container->dir = new DirMock;
-
+        $this->box = new BoxMock;
+        $this->curl = $this->curlMock;
+        $this->log = new LogMock;
+        $this->stream = new StreamMock;
+        $this->dir = new DirMock;
         $this->apiMock = new APIMock;
         $this->cacheMock = new CacheMock;
 
+        $this->box->get = function (string $class, ...$args): object
+        {
+            if ("Valvoid\Fusion\Log\Log" === $class)
+                return $this->log;
+
+            if ("Valvoid\Fusion\Dir\Proxy" === $class)
+                return $this->dir;
+
+            if ("Valvoid\Fusion\Wrappers\Stream" === $class)
+                return $this->stream;
+
+            if ("Valvoid\Fusion\Log\Events\Errors\Request" === $class)
+                return new RequestErrorMock;
+
+            return $this->curl;
+        };
         try {
 
             // all requests are cache requests
@@ -76,7 +99,7 @@ class ArchiveTest extends Test
             // sync data before
 
             // sync request
-            $this->archive = new Archive(2, $this->cacheMock,
+            $this->archive = new Archive($this->box,2, $this->cacheMock,
                 $this->source, $this->apiMock);
 
             // async cache request
@@ -96,7 +119,7 @@ class ArchiveTest extends Test
             $this->handleFailedTest();
         }
 
-        $container::unsetInstance();
+        $this->box::unsetInstance();
     }
 
 
@@ -161,7 +184,7 @@ class ArchiveTest extends Test
     public function testUnauthorizedStatus(): void
     {
         // reset request tokens
-        $this->archive = new Archive(2, $this->cacheMock,
+        $this->archive = new Archive($this->box,2, $this->cacheMock,
             $this->source, $this->apiMock);
 
         $this->archive->addCacheId(1);
@@ -204,7 +227,7 @@ class ArchiveTest extends Test
     public function testNotFoundStatus(): void
     {
         // reset request tokens
-        $this->archive = new Archive(2, $this->cacheMock,
+        $this->archive = new Archive($this->box,2, $this->cacheMock,
             $this->source, $this->apiMock);
 
         $this->archive->addCacheId(1);
@@ -242,7 +265,7 @@ class ArchiveTest extends Test
     public function testForbiddenStatus(): void
     {
         // reset request tokens
-        $this->archive = new Archive(2, $this->cacheMock,
+        $this->archive = new Archive($this->box,2, $this->cacheMock,
             $this->source, $this->apiMock);
 
         $this->archive->addCacheId(1);

@@ -21,24 +21,15 @@
 
 namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Log\Proxy;
-use Valvoid\Fusion\Wrappers\Curl;
 
 class BoxMock extends Box
 {
-    public Curl $curl;
-    public Proxy $log;
-    public FileMock $file;
+    public Closure $get;
 
     public function get(string $class, ...$args): object
     {
-        if ("Valvoid\Fusion\Log\Proxy" === $class)
-            return $this->log;
-
-        if ("Valvoid\Fusion\Wrappers\File" === $class)
-            return $this->file;
-
-        return $this->curl;
+        return call_user_func($this->get, $class, ...$args);
     }
 }

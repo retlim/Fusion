@@ -22,107 +22,150 @@
 namespace Valvoid\Fusion\Log;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Log\Events\Errors\Error;
+use Valvoid\Fusion\Config\Proxy as Config;
 use Valvoid\Fusion\Log\Events\Event;
+use Valvoid\Fusion\Log\Events\Infos\Error as ErrorInfo;
 use Valvoid\Fusion\Log\Events\Interceptor;
+use Valvoid\Fusion\Log\Events\Level;
+use Valvoid\Fusion\Log\Serializers\Files\File;
+use Valvoid\Fusion\Log\Serializers\Streams\Stream;
 
 /**
- * Static event log proxy.
+ * Event log.
  */
 class Log
 {
+    /** @var File[]|Stream[] Output formatters. */
+    protected array $serializers = [];
+
+    /** @var Interceptor Event interceptor. */
+    protected Interceptor $interceptor;
+
+    /**
+     * Constructs the log.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Config $config Config
+     */
+    public function __construct(
+        private readonly Box $box,
+        Config $config,
+    )
+    {
+        foreach ($config->get("log", "serializers") as $serializer)
+            $this->serializers[] = $this->box->get($serializer["serializer"],
+                config: $serializer);
+
+        // verbose debug log
+        // wrap all to extended serializer info
+        set_error_handler(function ($code, $message) {
+            $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+
+            // clear self-entry
+            unset($backtrace[0]);
+
+            // top down flow
+            $backtrace = array_reverse($backtrace);
+
+            $this->verbose(new ErrorInfo($message, $code, $backtrace));
+        });
+    }
+
+    /** Destructs the log instance. */
+    public function __destruct()
+    {
+        restore_error_handler();
+    }
+
     /**
      * Adds event interceptor.
      *
      * @param Interceptor $interceptor Interceptor.
-     * @throws Error Internal error.
      */
-    public static function addInterceptor(Interceptor $interceptor): void
+    public function addInterceptor(Interceptor $interceptor): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->addInterceptor($interceptor);
+        $this->interceptor = $interceptor;
+    }
+
+    /** Removes event interceptor. */
+    public function removeInterceptor(): void
+    {
+        unset($this->interceptor);
     }
 
     /**
-     * Removes event interceptor.
+     * Logs event.
      *
-     * @throws Error Internal error.
+     * @param Level $level Level.
+     * @param Event|string $event Event.
      */
-    public static function removeInterceptor(): void
+    protected function log(Level $level, Event|string $event): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->removeInterceptor();
+        // extend manually
+        if (isset($this->interceptor))
+            $this->interceptor->extend($event);
+
+        foreach ($this->serializers as $serializer)
+            $serializer->log($level, $event);
     }
 
     /**
      * Logs error event.
      *
      * @param Event|string $event Event.
-     * @throws Error Internal error.
      */
-    public static function error(Event|string $event): void
+    public function error(Event|string $event): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->error($event);
+        $this->log(Level::ERROR, $event);
     }
 
     /**
      * Logs warning event.
      *
      * @param Event|string $event Event.
-     * @throws Error Internal error.
      */
-    public static function warning(Event|string $event): void
+    public function warning(Event|string $event): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->warning($event);
+        $this->log(Level::WARNING, $event);
     }
 
     /**
      * Logs notice event.
      *
      * @param Event|string $event Event.
-     * @throws Error Internal error.
      */
-    public static function notice(Event|string $event): void
+    public function notice(Event|string $event): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->notice($event);
+        $this->log(Level::NOTICE, $event);
     }
 
     /**
      * Logs info event.
      *
      * @param Event|string $event Event.
-     * @throws Error Internal error.
      */
-    public static function info(Event|string $event): void
+    public function info(Event|string $event): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->info($event);
+        $this->log(Level::INFO, $event);
     }
 
     /**
      * Logs verbose event.
      *
      * @param Event|string $event Event.
-     * @throws Error Internal error.
      */
-    public static function verbose(Event|string $event): void
+    public function verbose(Event|string $event): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->verbose($event);
+        $this->log(Level::VERBOSE, $event);
     }
 
     /**
      * Logs debug event.
      *
      * @param Event|string $event Event.
-     * @throws Error Internal error.
      */
-    public static function debug(Event|string $event): void
+    public function debug(Event|string $event): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->debug($event);
+        $this->log(Level::DEBUG, $event);
     }
 }

@@ -98,8 +98,8 @@ class Logic implements Proxy
 
         foreach ($conf->get("hub", "apis") as $id => $api)
             $this->apis[$id] = (is_subclass_of($api["api"], LocalApi::class)) ?
-                new $api["api"]($root, $api) :
-                new $api["api"]($api);
+                $this->box->get($api["api"], root: $root, config: $api) :
+                $this->box->get($api["api"], config: $api);
 
         // recycle data
         foreach ([CURL_LOCK_DATA_SSL_SESSION,
@@ -607,14 +607,15 @@ class Logic implements Proxy
                 // do not spam
                 // only noticeable delays
                 if ($delay > 10)
-                    Log::notice(new RequestError(
-                        $request->getCacheIds()[0],
-                        "Rate limit exceeded. The API blocks " .
-                        "all queued requests until \"" .
-                        date("H:i:s", time() + $delay) .
-                        " ($delay sec)\" - waiting ...",
-                        [$request->getUrl()]
-                    ));
+                    $this->box->get(Log::class)
+                        ->notice($this->box->get(RequestError::class,
+                            id: $request->getCacheIds()[0],
+                            message: "Rate limit exceeded. The API blocks " .
+                            "all queued requests until \"" .
+                            date("H:i:s", time() + $delay) .
+                            " ($delay sec)\" - waiting ...",
+                            sources: [$request->getUrl()]
+                        ));
 
                 sleep($delay);
             }

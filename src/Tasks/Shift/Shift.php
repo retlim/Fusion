@@ -30,7 +30,7 @@ use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Lifecycle;
 use Valvoid\Fusion\Log\Events\Infos\Content;
-use Valvoid\Fusion\Log\Proxy as LogProxy;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalMetaCategory;
@@ -72,7 +72,7 @@ class Shift extends Task
      * @param Box $box Dependency injection container.
      * @param BusProxy $bus Event bus.
      * @param GroupProxy $group Tasks group.
-     * @param LogProxy $log Event log.
+     * @param Log $log Event log.
      * @param DirProxy $directory Current working directory.
      * @param File $file Standard file logic wrapper.
      * @param Dir $dir Standard dir logic wrapper.
@@ -82,7 +82,7 @@ class Shift extends Task
         private readonly Box $box,
         private readonly BusProxy $bus,
         private readonly GroupProxy $group,
-        private readonly LogProxy $log,
+        private readonly Log $log,
         private readonly DirProxy $directory,
         private readonly File $file,
         private readonly Dir $dir,

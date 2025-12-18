@@ -142,8 +142,6 @@ class InternalTest extends Test
         $this->testLifecycleDelete();
         $this->testLifecycleMigrate();
 
-        $this->log::$verbose = null;
-        $this->log::$debug = null;
         $this->box::unsetInstance();
     }
 
@@ -152,11 +150,11 @@ class InternalTest extends Test
         $verbose =
         $debug = null;
 
-        $this->log::$verbose = function (string|Event $event) use (&$verbose) {
+        $this->log->verbose = function (string|Event $event) use (&$verbose) {
             $verbose = $event;
         };
 
-        $this->log::$debug = function (string|Event $event) use (&$debug) {
+        $this->log->debug = function (string|Event $event) use (&$debug) {
             $debug = $event;
         };
 
@@ -171,11 +169,11 @@ class InternalTest extends Test
         $verbose =
         $debug = null;
 
-        $this->log::$verbose = function (string|Event $event) use (&$verbose) {
+        $this->log->verbose = function (string|Event $event) use (&$verbose) {
             $verbose = $event;
         };
 
-        $this->log::$debug = function (string|Event $event) use (&$debug) {
+        $this->log->debug = function (string|Event $event) use (&$debug) {
             $debug = $event;
         };
 
@@ -190,11 +188,11 @@ class InternalTest extends Test
         $verbose =
         $debug = null;
 
-        $this->log::$verbose = function (string|Event $event) use (&$verbose) {
+        $this->log->verbose = function (string|Event $event) use (&$verbose) {
             $verbose = $event;
         };
 
-        $this->log::$debug = function (string|Event $event) use (&$debug) {
+        $this->log->debug = function (string|Event $event) use (&$debug) {
             $debug = $event;
         };
 
@@ -209,11 +207,11 @@ class InternalTest extends Test
         $verbose =
         $debug = null;
 
-        $this->log::$verbose = function (string|Event $event) use (&$verbose) {
+        $this->log->verbose = function (string|Event $event) use (&$verbose) {
             $verbose = $event;
         };
 
-        $this->log::$debug = function (string|Event $event) use (&$debug) {
+        $this->log->debug = function (string|Event $event) use (&$debug) {
             $debug = $event;
         };
 
