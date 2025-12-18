@@ -21,6 +21,7 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Local;
 
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;
 use Valvoid\Fusion\Hub\Cache;
@@ -49,10 +50,12 @@ class Offset extends Local
      * @param LocalOffsetApi $api API.
      * @throws RequestError Request exception.
      */
-    public function __construct(int $id, Cache $cache, array $source,
-                                LocalOffsetApi $api, string $inline, array $inflated)
+    public function __construct(
+        private readonly Box $box,
+        int $id, Cache $cache, array $source,
+        LocalOffsetApi $api, string $inline, array $inflated)
     {
-        parent::__construct($id, $cache, $source, $api);
+        parent::__construct($box, $id, $cache, $source, $api);
 
         if (!$this->cache->lockOffset($source, $inline, $inflated["offset"], $id))
             $this->throwError(

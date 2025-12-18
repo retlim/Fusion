@@ -51,7 +51,7 @@ class ReferencesTest extends Test
         $container->dir = new DirMock;
 
         try {
-            $this->references = new References(2, $this->cacheMock,
+            $this->references = new References($container, 2, $this->cacheMock,
                 $this->source, $this->apiMock);
 
             $this->references->addCacheId(1);

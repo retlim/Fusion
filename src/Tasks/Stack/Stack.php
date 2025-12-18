@@ -25,7 +25,7 @@ use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Group\Group as GroupProxy;
-use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
 use Valvoid\Fusion\Metadata\External\External;
@@ -47,14 +47,14 @@ class Stack extends Task
      * @param Box $box Dependency injection container.
      * @param GroupProxy $group Tasks group.
      * @param Log $log Event log.
-     * @param DirProxy $directory Current working directory.
+     * @param Directory $directory Current working directory.
      * @param array $config Task config.
      */
     public function __construct(
         private readonly Box $box,
         private readonly GroupProxy $group,
         private readonly Log $log,
-        private readonly DirProxy $directory,
+        private readonly Directory $directory,
         array $config)
     {
         parent::__construct($config);

@@ -41,9 +41,11 @@ class Archive extends Local
      * @param array $source Structure source.
      * @param LocalApi $api API.
      */
-    public function __construct(int $id, Cache $cache, array $source, LocalApi $api)
+    public function __construct(
+        private readonly Box $box,
+        int $id, Cache $cache, array $source, LocalApi $api)
     {
-        parent::__construct($id, $cache, $source, $api);
+        parent::__construct($box, $id, $cache, $source, $api);
 
         $this->cache->lockFile($this->source, "/archive.zip", $id);
     }
@@ -72,7 +74,7 @@ class Archive extends Local
         if (is_string($response))
             $this->throwError($response);
 
-        $file = Box::getInstance()->get(File::class);
+        $file = $this->box->get(File::class);
 
         if ($response->getFile() != "$dir/archive.zip" ||
             !$file->exists("$dir/archive.zip"))

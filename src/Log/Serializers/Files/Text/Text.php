@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Log\Serializers\Files\Text;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Log\Events\Errors\Config;
 use Valvoid\Fusion\Log\Events\Errors\Deadlock;
 use Valvoid\Fusion\Log\Events\Errors\Environment;
@@ -49,8 +49,8 @@ class Text implements File
     /** @var string Filename. */
     private string $filename;
 
-    /** @var DirProxy Root package directory. */
-    private DirProxy $directory;
+    /** @var Dir Root package directory. */
+    private Dir $directory;
 
     /** @var string Storage dir. */
     private string $storage;
@@ -65,7 +65,7 @@ class Text implements File
         $this->threshold = $config["threshold"];
         $this->filename = $config["filename"];
 
-        $this->directory = Box::getInstance()->get(DirProxy::class);
+        $this->directory = Box::getInstance()->get(Dir::class);
         $this->storage = $this->directory->getLogDir();
     }
 

@@ -62,7 +62,7 @@ class ArchiveTest extends Test
         $this->boxMock->file = new FileMock;
 
         try {
-            $this->archive = new Archive(2, $this->cacheMock,
+            $this->archive = new Archive($this->boxMock,2, $this->cacheMock,
                 $this->source, $this->apiMock);
 
             $this->archive->addCacheId(1);

@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\Archive;
 
 use Throwable;
-use Valvoid\Fusion\Dir\Proxy;
+use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Hub\Requests\Remote\Archive;
 use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
 use Valvoid\Fusion\Log\Events\Errors\Error;
@@ -63,7 +63,7 @@ class ArchiveTest extends Test
     public Curl $curl;
     public Log $log;
     public StreamMock $stream;
-    public Proxy $dir;
+    public Dir $dir;
     public function __construct()
     {
         $this->curlMock = new CurlMock;
@@ -80,7 +80,7 @@ class ArchiveTest extends Test
             if ("Valvoid\Fusion\Log\Log" === $class)
                 return $this->log;
 
-            if ("Valvoid\Fusion\Dir\Proxy" === $class)
+            if ("Valvoid\Fusion\Dir\Dir" === $class)
                 return $this->dir;
 
             if ("Valvoid\Fusion\Wrappers\Stream" === $class)

@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Hub;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Hub\APIs\Local\Local;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote;
 use Valvoid\Fusion\Log\Events\Errors\Error;
@@ -49,7 +49,7 @@ class Cache
     /**
      * Constructs the cache.
      *
-     * @param DirProxy $directory Root package directory.
+     * @param Directory $directory Root package directory.
      * @param Box $box Dependency injection container.
      * @param string $root Projects current working directory.
      * @param Dir $dir Wrapper for standard directory operations.
@@ -57,7 +57,7 @@ class Cache
      * @throws Error Internal error.
      */
     public function __construct(
-        private readonly DirProxy $directory,
+        private readonly Directory $directory,
         private readonly Box $box,
         private readonly string $root,
         private readonly Dir $dir,

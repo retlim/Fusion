@@ -63,7 +63,7 @@ class OffsetTest extends Test
         $container->dir = new DirMock;
 
         try {
-            $this->offset = new Offset(2, $this->cacheMock, $this->source,
+            $this->offset = new Offset($container,2, $this->cacheMock, $this->source,
                 $this->apiMock, $this->data["version"], $this->data["entry"]);
 
             $this->offset->addCacheId(1);

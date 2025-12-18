@@ -22,13 +22,15 @@
 namespace Valvoid\Fusion\Tests\Hub\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Dir\Proxy;
+use Valvoid\Fusion\Dir\Dir;
 
-class DirectoryMock implements Proxy
+class DirectoryMock extends Dir
 {
     public Closure $cache;
     public Closure $create;
     public Closure $copy;
+
+    public function __construct(){}
 
     public function getPackagesDir(): string
     {

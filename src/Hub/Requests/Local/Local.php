@@ -21,6 +21,7 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Local;
 
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\Cache;
@@ -45,7 +46,9 @@ abstract class Local extends Request
      * @param int $id Request ID.
      * @param array $source Structure source.
      */
-    public function __construct(int $id, Cache $cache, array $source, LocalApi $api)
+    public function __construct(
+        private readonly Box $box,
+        int $id, Cache $cache, array $source, LocalApi $api)
     {
         parent::__construct($id, $cache, $source);
 
@@ -87,7 +90,7 @@ abstract class Local extends Request
     {
         // local paths are relative to projects parent dir
         // show absolute for better debug
-        $source = Dir::getRootDir();
+        $source = $this->box->get(Dir::class)->getRootDir();
         $source = dirname($source);
         $source .= $this->source["path"];
 

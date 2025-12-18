@@ -23,13 +23,13 @@ namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Proxy;
-use Valvoid\Fusion\Dir\Logic;
+use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 
 class BoxMock extends Box
 {
     public BusMock $bus;
-    public Logic $dir;
+    public Dir $dir;
 
     public function get(string $class, ...$args): object
     {

@@ -212,7 +212,7 @@ class Internal extends Metadata
 
         // break variable scope
         return $this->requireCallback([
-            "dir" => $this->box->get(Dir::class)::getPackagesDir() ."/$id",
+            "dir" => $this->box->get(Dir::class)->getPackagesDir() ."/$id",
             "version" => $metadata->getVersion()
         ]);
     }

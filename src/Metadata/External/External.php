@@ -146,7 +146,7 @@ class External extends Metadata
 
         $this->lifecycle = [
             "state" => "download",
-            "root" => $this->box->get(Dir::class)::getStateDir() . $this->getDir(),
+            "root" => $this->box->get(Dir::class)->getStateDir() . $this->getDir(),
             "file" => $this->content["lifecycle"]["download"]
         ];
 
@@ -167,7 +167,7 @@ class External extends Metadata
 
         $this->lifecycle = [
             "state" => "install",
-            "root" => $this->box->get(Dir::class)::getRootDir() . $this->getDir(),
+            "root" => $this->box->get(Dir::class)->getRootDir() . $this->getDir(),
             "file" => $this->content["lifecycle"]["install"]
         ];
 
@@ -190,7 +190,7 @@ class External extends Metadata
         $metadata = $this->box->get(Group::class)::getInternalMetas()[$id];
         $this->lifecycle = [
             "state" => "migrate",
-            "root" => $this->box->get(Dir::class)::getPackagesDir() ."/$id",
+            "root" => $this->box->get(Dir::class)->getPackagesDir() ."/$id",
             "file" => $this->content["lifecycle"]["migrate"]
         ];
 

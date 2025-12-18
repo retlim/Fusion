@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\File;
 
 use Throwable;
-use Valvoid\Fusion\Dir\Proxy;
+use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Hub\Requests\Remote\File;
 use Valvoid\Fusion\Hub\Requests\Remote\Lifecycle;
 use Valvoid\Fusion\Log\Events\Errors\Error;
@@ -63,7 +63,7 @@ class FileTest extends Test
     public Curl $curl;
     public Log $log;
     public StreamMock $stream;
-    public Proxy $dir;
+    public Dir $dir;
     private FileMock $fileMock;
 
     public function __construct()
@@ -81,7 +81,7 @@ class FileTest extends Test
             if ("Valvoid\Fusion\Log\Log" === $class)
                 return $this->log;
 
-            if ("Valvoid\Fusion\Dir\Proxy" === $class)
+            if ("Valvoid\Fusion\Dir\Dir" === $class)
                 return $this->dir;
 
             if ("Valvoid\Fusion\Wrappers\Stream" === $class)

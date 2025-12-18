@@ -22,6 +22,7 @@
 namespace Valvoid\Fusion\Hub\Requests\Cache;
 
 use Closure;
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;
@@ -48,8 +49,10 @@ class Versions extends Cache
      * @param LocalApi|RemoteApi $api API.
      * @param array $offsets Offsets.
      */
-    public function __construct(int $id, HubCache $cache, array $source,
-                                LocalApi|RemoteApi $api, array $offsets)
+    public function __construct(
+        private readonly Box $box,
+        int $id, HubCache $cache, array $source,
+        LocalApi|RemoteApi $api, array $offsets)
     {
         parent::__construct($id, $cache, $source, $api);
 
@@ -82,7 +85,7 @@ class Versions extends Cache
             } else {
 
                 // local paths are relative to projects parent dir
-                $source = Dir::getRootDir();
+                $source = $this->box->get(Dir::class)->getRootDir();
                 $source = dirname($source);
 
                 if ($this->api instanceof LocalOffsetApi)

@@ -50,7 +50,7 @@ class VersionsTest extends Test
         $container->dir = new DirMock;
         $this->cacheMock = new CacheMock;
         $this->apiMock = new APIMock;
-        $this->versions = new Versions(1, $this->cacheMock, $this->source,
+        $this->versions = new Versions($container,1, $this->cacheMock, $this->source,
             $this->apiMock, []);
 
         $this->testInit();

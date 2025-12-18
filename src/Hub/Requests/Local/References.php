@@ -21,6 +21,7 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Local;
 
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\Cache;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
@@ -42,9 +43,11 @@ class References extends Local
      * @param array $source Structure source.
      * @param LocalApi $api API.
      */
-    public function __construct(int $id, Cache $cache, array $source, LocalApi $api)
+    public function __construct(
+        private readonly Box $box,
+        int $id, Cache $cache, array $source, LocalApi $api)
     {
-        parent::__construct($id, $cache, $source, $api);
+        parent::__construct($box, $id, $cache, $source, $api);
 
         $this->cache->lockReferences($source, $id);
 

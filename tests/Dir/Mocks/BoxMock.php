@@ -21,90 +21,15 @@
 
 namespace Valvoid\Fusion\Tests\Dir\Mocks;
 
+use Closure;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Proxy;
 
 class BoxMock extends Box
 {
-    public Proxy $dir;
+    public Closure $get;
+
     public function get(string $class, ...$args): object
     {
-        return $this->dir ??= new class implements Proxy
-        {
-            public $calls = [];
-
-            public function getTaskDir(): string
-            {
-                $this->calls[] = __FUNCTION__;
-                return "";
-            }
-
-            public function getStateDir(): string
-            {
-                $this->calls[] = __FUNCTION__;
-                return "";
-            }
-
-            public function getCacheDir(): string
-            {
-                $this->calls[] = __FUNCTION__;
-                return "";
-            }
-
-            public function getOtherDir(): string
-            {
-                $this->calls[] = __FUNCTION__;
-                return "";
-            }
-
-            public function getPackagesDir(): string
-            {
-                $this->calls[] = __FUNCTION__;
-                return "";
-            }
-
-            public function getRootDir(): string
-            {
-                $this->calls[] = __FUNCTION__;
-                return "";
-            }
-
-            public function createDir(string $dir, int $permissions): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function rename(string $from, string $to): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function copy(string $from, string $to): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function delete(string $file): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function clear(string $dir, string $path): void
-            {
-                $this->calls[] = __FUNCTION__;
-            }
-
-            public function getHubDir(): string
-            {
-                $this->calls[] = __FUNCTION__;
-                return "";
-            }
-
-            public function getLogDir(): string
-            {
-                $this->calls[] = __FUNCTION__;
-                return "";
-            }
-        };
+        return call_user_func($this->get, $class, ...$args);
     }
 }

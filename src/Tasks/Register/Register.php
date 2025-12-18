@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Tasks\Register;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Infos\Content;
@@ -51,7 +51,7 @@ class Register extends Task
      *
      * @param Box $box Dependency injection container.
      * @param GroupProxy $group Tasks group.
-     * @param DirProxy $directory Current working directory.
+     * @param Directory $directory Current working directory.
      * @param Log $log Event log.
      * @param File $file Standard file logic wrapper.
      * @param array $config Task config.
@@ -59,7 +59,7 @@ class Register extends Task
     public function __construct(
         private readonly Box $box,
         private readonly GroupProxy $group,
-        private readonly DirProxy $directory,
+        private readonly Directory $directory,
         private readonly Log $log,
         private readonly File $file,
         array $config)

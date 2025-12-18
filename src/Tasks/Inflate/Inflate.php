@@ -23,7 +23,7 @@ namespace Valvoid\Fusion\Tasks\Inflate;
 
 use PhpToken;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Infos\Content;
@@ -53,7 +53,7 @@ class Inflate extends Task
      *
      * @param Box $box Dependency injection container.
      * @param GroupProxy $group Tasks group.
-     * @param DirProxy $directory Current working directory.
+     * @param Directory $directory Current working directory.
      * @param Log $log Event log.
      * @param File $file Standard file logic wrapper.
      * @param Dir $dir Standard dir logic wrapper.
@@ -62,7 +62,7 @@ class Inflate extends Task
     public function __construct(
         private readonly Box $box,
         private readonly GroupProxy $group,
-        private readonly DirProxy $directory,
+        private readonly Directory $directory,
         private readonly Log $log,
         private readonly File $file,
         private readonly Dir $dir,

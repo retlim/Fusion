@@ -62,7 +62,7 @@ class FileTest extends Test
         $this->containerMock->file = new FileMock;
 
         try {
-            $this->file = new File(2, $this->cacheMock,
+            $this->file = new File($this->containerMock,2, $this->cacheMock,
                 $this->source, "/nested", "/filename", $this->apiMock);
 
             $this->file->addCacheId(1);

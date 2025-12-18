@@ -21,10 +21,12 @@
 
 namespace Valvoid\Fusion\Tests\Hub\Requests\Local\Archive\Mocks;
 
-use Valvoid\Fusion\Dir\Proxy;
+use Valvoid\Fusion\Dir\Dir;
 
-class DirMock implements Proxy
+class DirMock extends Dir
 {
+    public function __construct(){}
+
     public function getRootDir(): string
     {
         return "/root";
@@ -35,7 +37,7 @@ class DirMock implements Proxy
     public function getCacheDir(): string {return "";}
     public function getOtherDir(): string {return "";}
     public function getPackagesDir(): string {return "";}
-    public function createDir(string $dir, int $permissions): void {}
+    public function createDir(string $dir, int $permissions = 755): void {}
     public function rename(string $from, string $to): void {}
     public function copy(string $from, string $to): void{}
     public function delete(string $file): void {}

@@ -25,7 +25,7 @@ use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Bus\Proxy as BusProxy;
-use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Lifecycle;
@@ -73,7 +73,7 @@ class Shift extends Task
      * @param BusProxy $bus Event bus.
      * @param GroupProxy $group Tasks group.
      * @param Log $log Event log.
-     * @param DirProxy $directory Current working directory.
+     * @param Directory $directory Current working directory.
      * @param File $file Standard file logic wrapper.
      * @param Dir $dir Standard dir logic wrapper.
      * @param array $config Task config.
@@ -83,7 +83,7 @@ class Shift extends Task
         private readonly BusProxy $bus,
         private readonly GroupProxy $group,
         private readonly Log $log,
-        private readonly DirProxy $directory,
+        private readonly Directory $directory,
         private readonly File $file,
         private readonly Dir $dir,
         private readonly System $system,

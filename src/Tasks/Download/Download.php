@@ -24,7 +24,7 @@ namespace Valvoid\Fusion\Tasks\Download;
 use Exception;
 use PharData;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Hub\Proxy as HubProxy;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive;
@@ -62,7 +62,7 @@ class Download extends Task implements Interceptor
      * @param Box $box Dependency injection container.
      * @param GroupProxy $group Tasks group.
      * @param Log $log Event log.
-     * @param DirProxy $directory Current working directory.
+     * @param Directory $directory Current working directory.
      * @param Extension $extension Standard extension logic wrapper.
      * @param File $file Standard file logic wrapper.
      * @param Dir $dir Standard dir logic wrapper.
@@ -73,7 +73,7 @@ class Download extends Task implements Interceptor
         private readonly GroupProxy $group,
         private readonly Log $log,
         private readonly HubProxy $hub,
-        private readonly DirProxy $directory,
+        private readonly Directory $directory,
         private readonly Extension $extension,
         private readonly File $file,
         private readonly Dir $dir,

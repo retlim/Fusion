@@ -24,6 +24,7 @@ namespace Valvoid\Fusion\Tests\Hub\Mocks;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\Logic;
 use Valvoid\Fusion\Hub\Proxy as HubProxy;
+use Valvoid\Fusion\Hub\Requests\Cache\Versions;
 
 class BoxMock extends Box
 {
@@ -41,6 +42,7 @@ class BoxMock extends Box
             "Valvoid\Fusion\Hub\Proxy" => $this->hub ??= new ($this->classes[$class]),
             "Valvoid\Fusion\Hub\Cache" => $this->cache ??= new ($this->classes[$class]),
             "Valvoid\Fusion\Wrappers\File" => new ($this->classes[$class]),
+            "Valvoid\Fusion\Hub\Requests\Cache\Versions" => new Versions($this, ...$args),
             default => new $class(...$args)
         };
     }

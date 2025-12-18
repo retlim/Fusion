@@ -22,11 +22,11 @@
 namespace Valvoid\Fusion\Tests\Hub\Requests\Local\Offset\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Proxy;
+use Valvoid\Fusion\Dir\Dir;
 
 class BoxMock extends Box
 {
-    public Proxy $dir;
+    public Dir $dir;
 
     public function get(string $class, ...$args): object
     {

@@ -28,8 +28,7 @@ use Valvoid\Fusion\Bus\Logic as BusLogic;
 use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Config\Logic as ConfigLogic;
 use Valvoid\Fusion\Config\Proxy as ConfigProxy;
-use Valvoid\Fusion\Dir\Logic as DirLogic;
-use Valvoid\Fusion\Dir\Proxy as DirProxy;
+use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Group\Logic as GroupLogic;
 use Valvoid\Fusion\Hub\Logic as HubLogic;
@@ -81,7 +80,6 @@ class Fusion
         $box->map(BusLogic::class, BusProxy::class);
         $box->map(ConfigLogic::class, ConfigProxy::class);
         $box->map(GroupLogic::class, GroupProxy::class);
-        $box->map(DirLogic::class, DirProxy::class);
         $box->map(HubLogic::class, HubProxy::class);
 
         // shareable objects
@@ -89,7 +87,7 @@ class Fusion
             Log::class,
             ConfigLogic::class,
             GroupLogic::class,
-            DirLogic::class,
+            Directory::class,
             HubLogic::class);
 
         $root = $dir->getDirname(__DIR__);
@@ -120,9 +118,6 @@ class Fusion
             // keep session active if
             // recursive or nested update/upgrade
             Root::class);
-
-        $box->inject(DirLogic::class,
-            config: $config->get());
     }
 
     /**
@@ -217,7 +212,7 @@ class Fusion
      */
     private function normalize(): void
     {
-        $dir = $this->box->get(DirLogic::class);
+        $dir = $this->box->get(Directory::class);
 
         $dir->delete($dir->getStateDir());
         $dir->delete($dir->getTaskDir());

@@ -25,17 +25,18 @@ use Valvoid\Fusion\Dir\Dir;
 
 class DirMock extends Dir
 {
-    public static function getStateDir(): string
+    public function __construct(){}
+    public function getStateDir(): string
     {
         return __DIR__;
     }
 
-    public static function getPackagesDir(): string
+    public function getPackagesDir(): string
     {
         return __DIR__;
     }
 
-    public static function getRootDir(): string
+    public function getRootDir(): string
     {
         return __DIR__;
     }

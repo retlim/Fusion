@@ -19,21 +19,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Hub\Requests\Local\File\Mocks;
+namespace Valvoid\Fusion\Tests\Dir\Mocks;
 
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Dir;
+use Closure;
+use Valvoid\Fusion\Config\Logic;
 
-class BoxMock extends Box
+class ConfigMock extends Logic
 {
-    public Dir $dir;
-    public FileMock $file;
+    public Closure $get;
 
-    public function get(string $class, ...$args): object
+    public function __construct() {}
+
+    public function get(string ...$breadcrumb): mixed
     {
-        if ("Valvoid\Fusion\Wrappers\File" === $class)
-            return $this->file;
-
-        return $this->dir;
+        return call_user_func($this->get, ...$breadcrumb);
     }
 }

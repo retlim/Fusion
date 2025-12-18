@@ -52,10 +52,12 @@ class File extends Local
      * @param LocalApi $api API.
      * @throws Error Internal error.
      */
-    public function __construct(int $id, Cache $cache, array $source, string $path,
+    public function __construct(
+        private readonly Box $box,
+        int $id, Cache $cache, array $source, string $path,
                                 string $filename, LocalApi $api)
     {
-        parent::__construct($id, $cache, $source, $api);
+        parent::__construct($box, $id, $cache, $source, $api);
 
         // non-nested [api]/[path]/[reference]/fusion.json and
         // [api]/[path]/[reference]/snapshot.json
@@ -92,7 +94,7 @@ class File extends Local
         if (is_string($response))
             $this->throwError($response);
 
-        $wrapper = Box::getInstance()->get(Wrapper::class);
+        $wrapper = $this->box->get(Wrapper::class);
 
         if ($wrapper->put($this->file, $response->getContent()) === false)
             throw new Error(

@@ -22,9 +22,9 @@
 namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Dir\Proxy;
+use Valvoid\Fusion\Dir\Dir;
 
-class DirectoryMock implements Proxy
+class DirectoryMock extends Dir
 {
     public Closure $root;
     public Closure $other;
@@ -37,7 +37,7 @@ class DirectoryMock implements Proxy
     public Closure $rename;
     public Closure $clear;
     public Closure $copy;
-
+    public function __construct(){}
     public function getCacheDir(): string
     {
         return call_user_func($this->cache);

@@ -107,9 +107,6 @@ class FusionTest extends Test
                     "class" => "Valvoid\Fusion\Group\Logic",
                     "abstraction" => "Valvoid\Fusion\Group\Group",
                 ],[
-                    "class" => "Valvoid\Fusion\Dir\Logic",
-                    "abstraction" => "Valvoid\Fusion\Dir\Proxy",
-                ],[
                     "class" => "Valvoid\Fusion\Hub\Logic",
                     "abstraction" => "Valvoid\Fusion\Hub\Proxy",
                 ]])
@@ -189,9 +186,6 @@ class FusionTest extends Test
                     "class" => "Valvoid\Fusion\Group\Logic",
                     "abstraction" => "Valvoid\Fusion\Group\Group",
                 ],[
-                    "class" => "Valvoid\Fusion\Dir\Logic",
-                    "abstraction" => "Valvoid\Fusion\Dir\Proxy",
-                ],[
                     "class" => "Valvoid\Fusion\Hub\Logic",
                     "abstraction" => "Valvoid\Fusion\Hub\Proxy",
                 ]])
@@ -262,7 +256,7 @@ class FusionTest extends Test
                 if ($class == "Valvoid\Fusion\Log\Log")
                     return new LogMock;
 
-                if ($class == "Valvoid\Fusion\Dir\Logic")
+                if ($class == "Valvoid\Fusion\Dir\Dir")
                     return $directory;
 
                 if ($class == "Valvoid\Fusion\Log\Events\Infos\Name")
@@ -299,7 +293,7 @@ class FusionTest extends Test
                     "/#/fusion.json",
                     "/#/state/prefixes.php"] ||
                 sizeof($tasks) != 2 ||
-                $cGet != [[/*dir*/], ["tasks", "test"]] || // group
+                $cGet != [["tasks", "test"]] || // group
                 $delete != ["/#s", "/#t", "/#p", "/#o"] ||
                 $load != [true] ||
                 $map != [[
@@ -311,9 +305,6 @@ class FusionTest extends Test
                 ],[
                     "class" => "Valvoid\Fusion\Group\Logic",
                     "abstraction" => "Valvoid\Fusion\Group\Group",
-                ],[
-                    "class" => "Valvoid\Fusion\Dir\Logic",
-                    "abstraction" => "Valvoid\Fusion\Dir\Proxy",
                 ],[
                     "class" => "Valvoid\Fusion\Hub\Logic",
                     "abstraction" => "Valvoid\Fusion\Hub\Proxy",
@@ -382,7 +373,7 @@ class FusionTest extends Test
                 if ($class == "Valvoid\Fusion\Log\Log")
                     return new LogMock;
 
-                if ($class == "Valvoid\Fusion\Dir\Logic")
+                if ($class == "Valvoid\Fusion\Dir\Dir")
                     return $directory;
 
                 if ($class == "Valvoid\Fusion\Log\Events\Infos\Name")
@@ -419,7 +410,7 @@ class FusionTest extends Test
                     "/#/fusion.json",
                     "/#/state/prefixes.php"] ||
                 sizeof($tasks) != 1 ||
-                $cGet != [[/*dir*/], ["tasks", "test"]] || // group
+                $cGet != [["tasks", "test"]] || // group
                 $delete != ["/#s", "/#t", "/#p", "/#o"] ||
                 $load != [true] ||
                 $map != [[
@@ -431,9 +422,6 @@ class FusionTest extends Test
                 ],[
                     "class" => "Valvoid\Fusion\Group\Logic",
                     "abstraction" => "Valvoid\Fusion\Group\Group",
-                ],[
-                    "class" => "Valvoid\Fusion\Dir\Logic",
-                    "abstraction" => "Valvoid\Fusion\Dir\Proxy",
                 ],[
                     "class" => "Valvoid\Fusion\Hub\Logic",
                     "abstraction" => "Valvoid\Fusion\Hub\Proxy",

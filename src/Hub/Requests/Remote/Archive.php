@@ -141,7 +141,8 @@ class Archive extends Remote
                 // clear header callback
                 // enable destruct
                 $this->curl->reset();
-                Dir::rename("$this->dir/archive", "$this->dir/archive.zip");
+                $this->box->get(Dir::class)
+                    ->rename("$this->dir/archive", "$this->dir/archive.zip");
                 $this->cache->unlockFile($this->source, "/archive.zip");
 
                 return Lifecycle::DONE;

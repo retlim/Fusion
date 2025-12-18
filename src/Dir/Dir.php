@@ -21,62 +21,236 @@
 
 namespace Valvoid\Fusion\Dir;
 
-use Exception;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Fusion\Bus\Events\Cache;
+use Valvoid\Fusion\Bus\Proxy as Bus;
+use Valvoid\Fusion\Config\Proxy as Config;
 use Valvoid\Fusion\Log\Events\Errors\Error;
+use Valvoid\Fusion\Wrappers\Dir as DirWrapper;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
- * Root package directory roxy providing normalized filesystem operations.
+ * Root package directory providing normalized filesystem operations
+ * and locations.
  */
 class Dir
 {
+    /** @var string Root dir of the package. */
+    private string $root;
+
+    /**
+     * @var string Mutable package cache dir. May change via bus
+     * event during migration if the new package version defines a
+     * different cache path in its metadata structure.
+     */
+    private string $state;
+
+    /**
+     * @var string OS-level cache directory for immutable artifacts
+     * like downloaded packages.
+     */
+    private string $osCache;
+
+    /**
+     * @var string OS-level state directory for mutable runtime data
+     * like logs or build flow directories.
+     */
+    private string $osState;
+
+    /**
+     * Constructs the directory.
+     *
+     * @param DirWrapper $dir Wrapper for standard directory operations.
+     * @param File $file Wrapper for standard file operations.
+     * @param Bus $bus Event bus.
+     * @param Config $config Config.
+     * @throws Error Internal error exception.
+     */
+    public function __construct(
+        private readonly DirWrapper $dir,
+        private readonly File $file,
+        Bus $bus,
+        Config $config)
+    {
+        $this->osState = $config->get("state", "path");
+        $this->osCache = $config->get("cache", "path");
+        $this->root = $config->get("dir", "path");
+
+        $bus->addReceiver(static::class, $this->handleBusEvent(...),
+
+            // new cache dir event
+            Cache::class);
+
+        // replace existing content with placeholder or
+        // recycle package / empty dir content
+        if ($dir->is($this->root))
+            $config->get("dir", "clearable") ?
+                $this->replaceContent() :
+                $this->recycleContent();
+
+        // create new placeholder package
+        elseif ($config->get("dir", "creatable"))
+            $this->createContent();
+
+        else throw new Error(
+            "Can't create the specified directory '$this->root' " .
+            "because 'creatable' is not set to true."
+        );
+    }
+
+    /**
+     * Recycles existing package or just empty dir content.
+     *
+     * @throws Error Internal error exception.
+     */
+    private function recycleContent(): void
+    {
+        // production metadata
+        $file = "$this->root/fusion.json";
+
+        if (!$this->file->exists($file)) {
+            $filenames = $this->dir->getFilenames($this->root);
+
+            if ($filenames === false)
+                throw new Error(
+                    "Can't scan directory '$this->root'. " .
+                    "Check permissions."
+                );
+
+            // 2 = symbolic ., ..
+            if (count($filenames) > 2)
+                throw new Error(
+                    "Unexpected content in directory " .
+                    "'$this->root'. Set 'clearable' to true to allow " .
+                    "automatic cleanup."
+                );
+
+            // empty existing dir
+            // just add placeholder (default path)
+            $this->copy(__DIR__ . "/placeholder.json", $file);
+
+            // default placeholder
+            $this->state = "$this->root/state";
+
+            return;
+        }
+
+        $metadata = $this->file->get($file);
+
+        if ($metadata === false)
+            throw new Error(
+                "Can't read metadata file '$file'. Check file " .
+                "access and permissions."
+            );
+
+        $metadata = json_decode($metadata, true);
+
+        if ($metadata === null)
+            throw new Error(
+                "Can't decode metadata file '$file'. JSON error: " .
+                json_last_error_msg()
+            );
+
+        if (isset($metadata["structure"]) &&
+            is_array($metadata["structure"])) {
+            $path = $this->getStatefulPath($metadata["structure"]);
+
+        } else $path = null;
+
+        if ($path === null)
+            throw new Error(
+                "Can't determine cache path from '$file'. The " .
+                "directory is not empty and automatic deletion is not " .
+                "authorized. Set 'clearable' to true to allow deletion "  .
+                "of invalid content."
+            );
+
+        $this->state = $this->root . $path;
+    }
+
+    /**
+     * Create new placeholder package content.
+     *
+     * @throws Error Internal error exception.
+     */
+    private function createContent(): void
+    {
+        if (!$this->dir->create($this->root))
+            throw new Error(
+                "Can't create directory '$this->root' " .
+                "(value of 'path'). Check parent directory permissions."
+            );
+
+        $this->copy(__DIR__ . "/placeholder.json",
+
+            // rename to production metadata
+            "$this->root/fusion.json");
+
+        // default placeholder
+        $this->state = "$this->root/state";
+    }
+
+    /**
+     * Replaces existing content with placeholder package.
+     *
+     * @throws Error Internal error exception.
+     */
+    private function replaceContent(): void
+    {
+        $filenames = $this->dir->getFilenames($this->root);
+
+        if ($filenames === false)
+            throw new Error(
+                "Can't scan directory '$this->root'. Check " .
+                "permissions."
+            );
+
+        foreach ($filenames as $filename)
+            if ($filename != "." && $filename != "..")
+                $this->delete("$this->root/$filename");
+
+        $this->copy(__DIR__ . "/placeholder.json",
+
+            // rename to production metadata
+            "$this->root/fusion.json");
+
+        // default placeholder
+        $this->state = "$this->root/state";
+    }
+
+    /**
+     * Returns the stateful path defined in the given structure.
+     *
+     * @param array $struct Package structure.
+     * @param string $breadcrumb Internal path prefix.
+     * @return string|null Stateful path, or null if not found.
+     */
+    protected function getStatefulPath(array $struct, string $breadcrumb = ""): ?string
+    {
+        // assoc or seq key due to loadable inside stateful folder
+        foreach ($struct as $key => $value)
+            if ($value == "stateful")
+                return is_string($key) ?
+                    $breadcrumb . $key :
+                    $breadcrumb;
+
+            elseif (is_array($value))
+                if ($dir = $this->getStatefulPath($value, is_string($key) ?
+                    $breadcrumb . $key :
+                    $breadcrumb))
+                    return $dir;
+
+        return null;
+    }
+
     /**
      * Returns the directory used for temporary task data during
      * package operations.
      *
      * @return string Absolute path to the task directory.
-     * @throws Error|Exception Internal error.
      */
-    public static function getTaskDir(): string
+    public function getTaskDir(): string
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getTaskDir();
-    }
-
-    /**
-     * Returns the directory used to store the new state.
-     *
-     * @return string Absolute path to the state directory.
-     * @throws Error|Exception Internal error.
-     */
-    public static function getStateDir(): string
-    {
-        return Box::getInstance()->get(Proxy::class)
-            ->getStateDir();
-    }
-
-    /**
-     * Returns absolute cache directory.
-     *
-     * @return string Directory.
-     * @throws Error|Exception Internal error.
-     */
-    public static function getCacheDir(): string
-    {
-        return Box::getInstance()->get(Proxy::class)
-            ->getCacheDir();
-    }
-
-    /**
-     * Returns other directory.
-     *
-     * @return string Directory.
-     * @throws Error|Exception Internal error.
-     */
-    public static function getOtherDir(): string
-    {
-        return Box::getInstance()->get(Proxy::class)
-            ->getOtherDir();
+        return "$this->osState/task";
     }
 
     /**
@@ -84,24 +258,50 @@ class Dir
      * are stored.
      *
      * @return string Absolute path to the hub directory.
-     * @throws Exception
      */
-    public static function getHubDir(): string
+    public function getHubDir(): string
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getHubDir();
+        return "$this->osCache/hub";
     }
 
     /**
      * Returns the storage directory where logs are stored.
      *
      * @return string Absolute path to the log directory.
-     * @throws Exception
      */
-    public static function getLogDir(): string
+    public function getLogDir(): string
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getLogDir();
+        return "$this->osState/log";
+    }
+
+    /**
+     * Returns the directory used to store the new state.
+     *
+     * @return string Absolute path to the state directory.
+     */
+    public function getStateDir(): string
+    {
+        return "$this->osState/state";
+    }
+
+    /**
+     * Returns absolute cache directory.
+     *
+     * @return string Directory.
+     */
+    public function getCacheDir(): string
+    {
+        return $this->state;
+    }
+
+    /**
+     * Returns other directory.
+     *
+     * @return string Directory.
+     */
+    public function getOtherDir(): string
+    {
+        return "$this->osState/other";
     }
 
     /**
@@ -109,24 +309,20 @@ class Dir
      * are stored individually by their ID subdirectories.
      *
      * @return string Absolute path to the new state packages directory.
-     * @throws Error|Exception Internal error.
      */
-    public static function getPackagesDir(): string
+    public function getPackagesDir(): string
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getPackagesDir();
+        return "$this->osState/packages";
     }
 
     /**
      * Returns root directory.
      *
      * @return string Root dir.
-     * @throws Error|Exception Internal error.
      */
-    public static function getRootDir(): string
+    public function getRootDir(): string
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getRootDir();
+        return $this->root;
     }
 
     /**
@@ -135,12 +331,14 @@ class Dir
      * @param string $dir Dir.
      * @param int $permissions Permissions.
      * @throws Error Internal error.
-     * @throws Exception
      */
-    public static function createDir(string $dir, int $permissions = 0755): void
+    public function createDir(string $dir, int $permissions = 0755): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->createDir($dir, $permissions);
+        if (!$this->file->exists($dir) &&
+            !$this->dir->create($dir, $permissions))
+            throw new Error(
+                "Can't create directory '$dir'."
+            );
     }
 
     /**
@@ -149,12 +347,31 @@ class Dir
      * @param string $from Current file or directory.
      * @param string $to To file or directory.
      * @throws Error Internal error.
-     * @throws Exception
      */
-    public static function rename(string $from, string $to): void
+    public function rename(string $from, string $to): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->rename($from, $to);
+        // normalize to parent directory
+        // not all php os builds can't handle replacement
+        if ($this->file->is($to)) {
+            if (!$this->file->unlink($to))
+                throw new Error(
+                    "Can't rename the file '$from' to '$to' " .
+                    "because the target file cannot be normalized to the "  .
+                    "parent directory '" . dirname($to) . "'."
+                );
+
+        } elseif ($this->dir->is($to))
+            if (!$this->dir->delete($to))
+                throw new Error(
+                    "Can't rename the directory '$from' to '$to' " .
+                    "because the target directory cannot be normalized to the "  .
+                    "parent directory '" . dirname($to) . "'."
+                );
+
+        if (!$this->dir->rename($from, $to))
+            throw new Error(
+                "Can't rename the file '$from' to '$to'."
+            );
     }
 
     /**
@@ -163,12 +380,13 @@ class Dir
      * @param string $from Current file.
      * @param string $to To file.
      * @throws Error Internal error.
-     * @throws Exception
      */
-    public static function copy(string $from, string $to): void
+    public function copy(string $from, string $to): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->copy($from, $to);
+        if (!$this->file->copy($from, $to))
+            throw new Error(
+                "Can't copy the file '$from' to '$to'."
+            );
     }
 
     /**
@@ -176,12 +394,31 @@ class Dir
      *
      * @param string $file Dir or file.
      * @throws Error Internal error.
-     * @throws Exception
      */
-    public static function delete(string $file): void
+    public function delete(string $file): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->delete($file);
+        if ($this->dir->is($file)) {
+            $filenames = $this->dir->getFilenames($file, SCANDIR_SORT_NONE);
+
+            if ($filenames === false)
+                throw new Error(
+                    "Can't get filenames from dir '$file'."
+                );
+
+            foreach ($filenames as $filename)
+                if ($filename != "." && $filename != "..")
+                    $this->delete("$file/$filename");
+
+            if (!$this->dir->delete($file))
+                throw new Error(
+                    "Can't delete the directory '$file'."
+                );
+
+        } elseif ($this->file->is($file))
+            if (!$this->file->unlink($file))
+                throw new Error(
+                    "Can't delete the file '$file'."
+                );
     }
 
     /**
@@ -190,11 +427,35 @@ class Dir
      * @param string $dir Directory.
      * @param string $path Path.
      * @throws Error Internal error.
-     * @throws Exception
      */
-    public static function clear(string $dir, string $path): void
+    public function clear(string $dir, string $path): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->clear($dir, $path);
+        $directory = $dir . $path;
+
+        while ($directory != $dir) {
+            if ($this->dir->is($directory)) {
+                $filenames = $this->dir->getFilenames($directory);
+
+                if (isset($filenames[2]))
+                    break;
+
+                if (!$this->dir->delete($directory))
+                    throw new Error(
+                        "Can't delete the directory '$directory'."
+                    );
+            }
+
+            $directory = dirname($directory);
+        }
+    }
+
+    /**
+     * Handles bus event.
+     *
+     * @param Cache $event Event.
+     */
+    protected function handleBusEvent(Cache $event): void
+    {
+        $this->state = $event->getDir();
     }
 }

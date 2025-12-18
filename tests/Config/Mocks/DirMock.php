@@ -29,7 +29,7 @@ class DirMock extends Dir
     public Closure $dirname;
     public Closure $filenames;
     public Closure $is;
-
+    public function __construct(){}
     public function getDirname(string $path, int $levels = 1): string
     {
         return call_user_func($this->dirname, $path, $levels);

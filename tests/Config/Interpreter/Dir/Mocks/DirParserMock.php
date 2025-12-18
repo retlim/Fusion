@@ -22,7 +22,6 @@
 namespace Valvoid\Fusion\Tests\Config\Interpreter\Dir\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Config\Parser\Dir;
 
 class DirParserMock extends Dir
