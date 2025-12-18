@@ -22,15 +22,15 @@
 namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Hub\Proxy;
+use Valvoid\Fusion\Hub\Hub;
 
-class HubMock implements Proxy
+class HubMock extends Hub
 {
     public Closure $version;
     public Closure $metadata;
     public Closure $execute;
     public Closure $snapshot;
-
+    public function __construct(){}
     public function addVersionsRequest(array $source): int
     {
         return call_user_func($this->version, $source);

@@ -31,8 +31,7 @@ use Valvoid\Fusion\Config\Proxy as ConfigProxy;
 use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Group\Logic as GroupLogic;
-use Valvoid\Fusion\Hub\Logic as HubLogic;
-use Valvoid\Fusion\Hub\Proxy as HubProxy;
+use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Event as LogEvent;
@@ -80,7 +79,6 @@ class Fusion
         $box->map(BusLogic::class, BusProxy::class);
         $box->map(ConfigLogic::class, ConfigProxy::class);
         $box->map(GroupLogic::class, GroupProxy::class);
-        $box->map(HubLogic::class, HubProxy::class);
 
         // shareable objects
         $box->recycle(BusLogic::class,
@@ -88,7 +86,7 @@ class Fusion
             ConfigLogic::class,
             GroupLogic::class,
             Directory::class,
-            HubLogic::class);
+            Hub::class);
 
         $root = $dir->getDirname(__DIR__);
         $this->root = $this->getRoot($root);

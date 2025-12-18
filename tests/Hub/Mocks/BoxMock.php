@@ -22,13 +22,12 @@
 namespace Valvoid\Fusion\Tests\Hub\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Hub\Logic;
-use Valvoid\Fusion\Hub\Proxy as HubProxy;
+use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Requests\Cache\Versions;
 
 class BoxMock extends Box
 {
-    public HubProxy $hub;
+    public Hub $hub;
     public ConfigMock $config;
     public CacheMock $cache;
 
@@ -39,7 +38,7 @@ class BoxMock extends Box
     public function get(string $class, ...$args): object
     {
         return match ($class) {
-            "Valvoid\Fusion\Hub\Proxy" => $this->hub ??= new ($this->classes[$class]),
+            "Valvoid\Fusion\Hub\Hub" => $this->hub ??= new ($this->classes[$class]),
             "Valvoid\Fusion\Hub\Cache" => $this->cache ??= new ($this->classes[$class]),
             "Valvoid\Fusion\Wrappers\File" => new ($this->classes[$class]),
             "Valvoid\Fusion\Hub\Requests\Cache\Versions" => new Versions($this, ...$args),
@@ -47,16 +46,11 @@ class BoxMock extends Box
         };
     }
 
-    public function setUpStaticTests(): void
-    {
-        $this->classes["Valvoid\Fusion\Hub\Proxy"] = ProxyMock::class;
-    }
-
     public function setUpLogicTests(): void
     {
         // reset
         unset($this->hub);
 
-        $this->classes["Valvoid\Fusion\Hub\Proxy"] = Logic::class;
+        $this->classes["Valvoid\Fusion\Hub\Hub"] = Hub::class;
     }
 }

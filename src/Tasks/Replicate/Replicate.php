@@ -24,7 +24,7 @@ namespace Valvoid\Fusion\Tasks\Replicate;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Group\Group as GroupProxy;
-use Valvoid\Fusion\Hub\Proxy as HubProxy;
+use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata as MetadataResponse;
 use Valvoid\Fusion\Hub\Responses\Cache\Snapshot;
 use Valvoid\Fusion\Hub\Responses\Cache\Versions;
@@ -79,7 +79,7 @@ class Replicate extends Task implements Interceptor
      *
      * @param Box $box Dependency injection container.
      * @param GroupProxy $group Tasks group.
-     * @param HubProxy $hub Hub.
+     * @param Hub $hub Hub.
      * @param Directory $directory Current working directory.
      * @param Extension $extension Standard extension logic wrapper.
      * @param Log $log Event log.
@@ -89,7 +89,7 @@ class Replicate extends Task implements Interceptor
     public function __construct(
         private readonly Box $box,
         private readonly GroupProxy $group,
-        private readonly HubProxy $hub,
+        private readonly Hub $hub,
         private readonly Directory $directory,
         private readonly Extension $extension,
         private readonly Log $log,

@@ -23,7 +23,6 @@ namespace Valvoid\Fusion\Tests\Hub;
 
 use Exception;
 use Valvoid\Fusion\Hub\Hub;
-use Valvoid\Fusion\Hub\Logic;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive as CacheArchive;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata;
@@ -68,10 +67,6 @@ class HubTest extends Test
     {
         $this->box = new BoxMock;
 
-        // static
-        $this->box->setUpStaticTests();
-        $this->testStaticInterface();
-
         // logic
         $this->box->setUpLogicTests();
         $this->testErrorRequest();
@@ -87,7 +82,7 @@ class HubTest extends Test
 
     public function testArchiveCacheRequest(): void
     {
-        $hub = new Logic(
+        $hub = new Hub(
             box: $this->box,
             curlMulti: new CurlMulti,
             curlShare: new CurlShare,
@@ -123,7 +118,7 @@ class HubTest extends Test
 
     public function testFileCacheRequest(): void
     {
-        $hub = new Logic(
+        $hub = new Hub(
             box: $this->box,
             curlMulti: new CurlMulti,
             curlShare: new CurlShare,
@@ -174,7 +169,7 @@ class HubTest extends Test
 
     public function testVersionsCacheRequest(): void
     {
-        $hub = new Logic(
+        $hub = new Hub(
             box: $this->box,
             curlMulti: new CurlMulti,
             curlShare: new CurlShare,
@@ -220,7 +215,7 @@ class HubTest extends Test
     {
         // unknown api
         $source = ["api" => "whatever"];
-        $hub = new Logic(
+        $hub = new Hub(
             box: $this->box,
             curlMulti: new CurlMulti,
             curlShare: new CurlShare,
@@ -277,23 +272,5 @@ class HubTest extends Test
             if (!($exception instanceof Request))
                 $this->handleFailedTest();
         }
-    }
-
-    public function testStaticInterface(): void
-    {
-        Hub::addVersionsRequest([]);
-        Hub::addMetadataRequest([]);
-        Hub::addSnapshotRequest([],"");
-        Hub::addArchiveRequest([]);
-        Hub::executeRequests(function (){});
-
-        // static functions connected to same non-static functions
-        if ($this->box->hub->calls !== [
-                "addVersionsRequest",
-                "addMetadataRequest",
-                "addSnapshotRequest",
-                "addArchiveRequest",
-                "executeRequests",])
-            $this->handleFailedTest();
     }
 }

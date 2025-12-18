@@ -26,7 +26,7 @@ use PharData;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Group\Group as GroupProxy;
-use Valvoid\Fusion\Hub\Proxy as HubProxy;
+use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Request;
@@ -72,7 +72,7 @@ class Download extends Task implements Interceptor
         private readonly Box $box,
         private readonly GroupProxy $group,
         private readonly Log $log,
-        private readonly HubProxy $hub,
+        private readonly Hub $hub,
         private readonly Directory $directory,
         private readonly Extension $extension,
         private readonly File $file,

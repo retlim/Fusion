@@ -24,7 +24,7 @@ namespace Valvoid\Fusion\Tasks\Build;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Fusion;
 use Valvoid\Fusion\Group\Group as GroupProxy;
-use Valvoid\Fusion\Hub\Proxy as HubProxy;
+use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata as MetadataResponse;
 use Valvoid\Fusion\Hub\Responses\Cache\Versions as VersionsResponse;
 use Valvoid\Fusion\Log\Events\Errors\Deadlock as DeadlockError;
@@ -76,7 +76,7 @@ class Build extends Task implements Interceptor
      *
      * @param Box $box Dependency injection container.
      * @param GroupProxy $group Tasks group.
-     * @param HubProxy $hub Hub.
+     * @param Hub $hub Hub.
      * @param Extension $extension Standard extension logic wrapper.
      * @param Log $log Event log.
      * @param array $config Task config.
@@ -84,7 +84,7 @@ class Build extends Task implements Interceptor
     public function __construct(
         private readonly Box $box,
         private readonly GroupProxy $group,
-        private readonly HubProxy $hub,
+        private readonly Hub $hub,
         private readonly Extension $extension,
         private readonly Log $log,
         array $config)

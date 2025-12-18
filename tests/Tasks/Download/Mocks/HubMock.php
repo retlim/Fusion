@@ -22,13 +22,13 @@
 namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Hub\Proxy;
+use Valvoid\Fusion\Hub\Hub;
 
-class HubMock implements Proxy
+class HubMock extends Hub
 {
     public Closure $add;
     public Closure $execute;
-
+    public function __construct(){}
     public function addArchiveRequest(array $source): int
     {
         return call_user_func($this->add, $source);
