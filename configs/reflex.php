@@ -19,15 +19,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-return [
-    "structure" => [
-        "/configs" => [
-            "/reflex.php" => ":valvoid/reflex/config"
-        ],
+$root = dirname(__DIR__);
+$tests = "$root/tests";
 
-        "valvoid.com/valvoid" => [
-            "fusion" => null,
-            "/dependencies" => "reflex/1.0.0",
-        ]
+return [
+    "units" => [
+        "code" => "$root/src",
+        "ignore" => "$root/src/Wrappers",
+        "tests" =>  "$tests/Units"
+    ],
+    "integrations" => [
+        "tests" =>  "$tests/Integrations",
     ]
 ];

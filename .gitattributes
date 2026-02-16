@@ -3,6 +3,7 @@
 *.php diff=php
 *.neon linguist-language=neon
 
+/configs/reflex.php export-ignore
 /state/loadable/tests export-ignore
 /tests export-ignore
 CHANGELOG.md export-ignore
