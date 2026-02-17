@@ -1,0 +1,44 @@
+<?php
+/*
+ * Reflex – PHP Testing Framework
+ * Copyright © Valvoid
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+namespace Valvoid\Fusion\Tests\Integrations;
+
+use Valvoid\Reflex\Test\Wrapper;
+
+class VersionTest extends Wrapper
+{
+    public function testVersion(): void
+    {
+        $CI_COMMIT_TAG = getenv("CI_COMMIT_TAG");
+        $metadata = file_get_contents(__DIR__ . '/../../fusion.json');
+
+        if ($metadata === false)
+            $this->fail("Can't read fusion.json");
+
+        $metadata = json_decode($metadata, true);
+
+        if ($metadata === null)
+            $this->fail("Can't decode fusion.json");
+
+        $this->validate($metadata["version"])
+            ->as($CI_COMMIT_TAG);
+    }
+}
