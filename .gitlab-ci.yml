@@ -25,6 +25,8 @@ analyze code:
 build development package:
   stage: test
   image: valvoid/fusion:1
+  variables:
+    XDG_STATE_HOME: $CI_BUILDS_DIR/.state
   script:
     - fusion build
   artifacts:
