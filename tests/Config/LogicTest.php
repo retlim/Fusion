@@ -79,14 +79,14 @@ class LogicTest extends Test
 
             // default config
             $dir->filenames = function ($dir) {
-                if ($dir == "/#/config")
+                if ($dir == "/#/configs/fusion")
                     return ["f0.php"];
             };
 
             $dir->is = fn () => false;
             $file->include = function ($file) use (&$include) {
                 $include[] = $file;
-                if ($file == "/#/config/f0.php")
+                if ($file == "/#/configs/fusion/f0.php")
                     return ["f0"];
             };
 
@@ -154,7 +154,7 @@ class LogicTest extends Test
             if ($id != ["valvoid/fusion"] ||
                 $exists != ["/#/state/loadable/lazy.php", "/#c/config.json"] ||
                 $require != ["/#/state/extensions.php"] ||
-                $include != ["/#/config/f0.php"] ||
+                $include != ["/#/configs/fusion/f0.php"] ||
                 $interpret != [
                     ["f0"], // default
                     ["config" => ["path" => "/#c"]]] || // runtime
@@ -195,7 +195,7 @@ class LogicTest extends Test
 
             // default config
             $dir->filenames = function ($dir) {
-                if ($dir == "/#/config")
+                if ($dir == "/#/configs/fusion")
                     return ["f0.php"];
 
                 if ($dir == "/#/extensions/config/ex0")
@@ -211,7 +211,7 @@ class LogicTest extends Test
             };
             $file->include = function ($file) use (&$include) {
                 $include[] = $file;
-                if ($file == "/#/config/f0.php")
+                if ($file == "/#/configs/fusion/f0.php")
                     return ["f0"];
 
                 if ($file == "/#/extensions/config/ex0/f1.php")
@@ -288,7 +288,7 @@ class LogicTest extends Test
                 $exists != ["/#/state/loadable/lazy.php", "/#c/config.json"] ||
                 $require != ["/#/state/extensions.php"] ||
                 $include != [
-                    "/#/config/f0.php"] ||
+                    "/#/configs/fusion/f0.php"] ||
                 $interpret != [
                     ["f0"], // default
                     ["config" => ["path" => "/#c"]]] || // runtime
@@ -329,14 +329,14 @@ class LogicTest extends Test
 
             // default config
             $dir->filenames = function ($dir) {
-                if ($dir == "/#/config")
+                if ($dir == "/#/configs/fusion")
                     return ["f0.php"];
             };
 
             $dir->is = fn () => false;
             $file->include = function ($file) use (&$include) {
                 $include[] = $file;
-                if ($file == "/#/config/f0.php")
+                if ($file == "/#/configs/fusion/f0.php")
                     return ["f0"];
             };
 
@@ -410,7 +410,7 @@ class LogicTest extends Test
             if ($id != ["i0/i0"] ||
                 $exists != ["/#/state/loadable/lazy.php", "/#c/config.json"] ||
                 $require != ["/#/state/extensions.php"] ||
-                $include != ["/#/config/f0.php"] ||
+                $include != ["/#/configs/fusion/f0.php"] ||
                 $interpret != [
                     ["f0"], // default
                     ["config" => ["path" => "/#c"]]] || // runtime
@@ -450,14 +450,14 @@ class LogicTest extends Test
 
             // default config
             $dir->filenames = function ($dir) {
-                if ($dir == "/#/config")
+                if ($dir == "/#/configs/fusion")
                     return ["f0.php"];
             };
 
             $dir->is = fn () => false;
             $file->include = function ($file) use (&$include) {
                 $include[] = $file;
-                if ($file == "/#/config/f0.php")
+                if ($file == "/#/configs/fusion/f0.php")
                     return ["f0"];
             };
 
@@ -527,7 +527,7 @@ class LogicTest extends Test
 
             if ($id != ["valvoid/fusion"] ||
                 $require != ["/#/state/extensions.php"] ||
-                $include != ["/#/config/f0.php"] ||
+                $include != ["/#/configs/fusion/f0.php"] ||
                 $interpret != [
                     ["f0"], // default
                     ["f1"], // persistence
@@ -568,14 +568,14 @@ class LogicTest extends Test
 
             // default config
             $dir->filenames = function ($dir) {
-                if ($dir == "/#/config")
+                if ($dir == "/#/configs/fusion")
                     return ["f0.php"];
             };
 
             $dir->is = fn () => false;
             $file->include = function ($file) use (&$include) {
                 $include[] = $file;
-                if ($file == "/#/config/f0.php")
+                if ($file == "/#/configs/fusion/f0.php")
                     return ["f0"];
             };
 
@@ -634,7 +634,7 @@ class LogicTest extends Test
             $config->load(false);
 
             if ($id != ["valvoid/fusion"] ||
-                $include != ["/#/config/f0.php"] ||
+                $include != ["/#/configs/fusion/f0.php"] ||
                 $interpret != [
                     ["f0"], // default
                     [// runtime
