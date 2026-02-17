@@ -42,9 +42,13 @@ test units:
   stage: test
   image: php:$VERSION-alpine
   before_script:
-    - apk add --no-cache libzip-dev
+    - apk add --no-cache libzip-dev linux-headers
+    - apk add --update --no-cache --virtual .build-dependencies $PHPIZE_DEPS
+    - pecl install xdebug
+    - docker-php-ext-enable xdebug
     - docker-php-ext-configure zip
     - docker-php-ext-install zip
+    - echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
   needs:
     - job: build development package
       artifacts: true
