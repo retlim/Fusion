@@ -190,7 +190,7 @@ class Logic implements Proxy
     {
         $this->loadConfigs(
             $this->configs["default"],
-            "$this->root/config"
+            "$this->root/configs/fusion"
         );
 
         $this->overlayConfigs($this->configs["default"]);
