@@ -51,9 +51,6 @@ class Extend extends Task
     /** @var array  Structures. */
     private array $structures = [];
 
-    /** @var array Parents per package id. */
-    private array $filters = [];
-
     /**
      * Constructs the task.
      *
@@ -98,7 +95,6 @@ class Extend extends Task
 
         // flat implication to sorted ids
         $this->initIds($implication);
-        $this->initFilters($implication, []);
         $mappings = [];
 
         // extend new state
@@ -228,48 +224,5 @@ class Extend extends Task
 
             $this->indexes[] = $id;
         }
-    }
-
-    /**
-     * Get parents of package index. truncate
-     * Get structure filter.
-     *
-     * @param array $tree
-     * @param array $filter
-     */
-    private function initFilters(array $tree, array $filter): void
-    {
-        foreach ($tree as $id => $subtree) {
-
-            // handle multiple parent
-            // package can be a dependency of multiple packages
-            // init if not yet
-            $this->filters[$id] ??= [];
-            $this->filters[$id] = array_merge_recursive($this->filters[$id], $filter);
-            $this->filters[$id] = array_merge_recursive($this->filters[$id],
-
-                // create assoc array from id and
-                // add it as recursive
-                $this->getAssoc(explode('/', $id)));
-
-            $this->initFilters($subtree["implication"], $this->filters[$id]);
-        }
-    }
-
-    /**
-     * Returns assoc array.
-     *
-     * @param array $breadcrumb
-     * @return array
-     */
-    private function getAssoc(array $breadcrumb): array
-    {
-        $result = [];
-        $key = array_shift($breadcrumb);
-
-        if ($key)
-            $result[$key] = $this->getAssoc($breadcrumb);
-
-        return $result;
     }
 }

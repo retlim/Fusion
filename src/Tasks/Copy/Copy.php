@@ -94,9 +94,12 @@ class Copy extends Task
                 // lock unimportant dirs
                 // cache directory
                 $this->lockedDirs = [
-                    $from . $metadata->getStatefulPath(),
-                    "$from/dependencies" // todo --- exclude obsolete dirs
+                    $from . $metadata->getStatefulPath()
                 ];
+
+                // do not copy deps
+                foreach ($metadata->getStructureSources() as $dir => $sources)
+                    $this->lockedDirs[] = $from . $dir;
 
                 $this->directory->createDir($to);
                 $this->log->info(
