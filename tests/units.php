@@ -42,7 +42,8 @@ spl_autoload_register(function (string $loadable) use ($root, $lazy)
 
 try {
     foreach ($lazy as $classname => $dir) {
-        if (!str_ends_with($classname, "Test"))
+        if (!str_ends_with($classname, "Test") ||
+            str_starts_with($classname, "Valvoid\Fusion\Tests\Units"))
             continue;
 
         $reflection = new ReflectionClass($classname);

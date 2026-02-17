@@ -25,7 +25,6 @@ use Exception;
 use PharData;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Dir as Directory;
-use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive;
 use Valvoid\Fusion\Log\Events\Errors\Error;
@@ -36,6 +35,7 @@ use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Category as ExternalMetaCategory;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
+use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 use Valvoid\Fusion\Wrappers\Dir;
 use Valvoid\Fusion\Wrappers\Extension;
@@ -60,7 +60,7 @@ class Download extends Task implements Interceptor
      * Constructs the task.
      *
      * @param Box $box Dependency injection container.
-     * @param GroupProxy $group Tasks group.
+     * @param Group $group Tasks group.
      * @param Log $log Event log.
      * @param Directory $directory Current working directory.
      * @param Extension $extension Standard extension logic wrapper.
@@ -70,7 +70,7 @@ class Download extends Task implements Interceptor
      */
     public function __construct(
         private readonly Box $box,
-        private readonly GroupProxy $group,
+        private readonly Group $group,
         private readonly Log $log,
         private readonly Hub $hub,
         private readonly Directory $directory,

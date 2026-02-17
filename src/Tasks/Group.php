@@ -21,123 +21,153 @@
 
 namespace Valvoid\Fusion\Tasks;
 
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Group\Group as Proxy;
-use Valvoid\Fusion\Log\Events\Errors\Error;
-use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
-use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
+use Valvoid\Box\Box;
+use Valvoid\Fusion\Fusion;
+use Valvoid\Fusion\Metadata\External\Category;
+use Valvoid\Fusion\Metadata\External\External as ExternalMetadata;
+use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
+use Valvoid\Fusion\Util\Metadata\Structure;
 
 /**
- * Static task group proxy.
+ * Common progress between tasks.
  */
 class Group
 {
+    /** @var array<string, InternalMetadata> Internal metas by ID. */
+    protected array $internalMetas = [];
+
+    /** @var array<string, ExternalMetadata> External metas by ID. */
+    protected array $externalMetas = [];
+
+    /** @var array Root-leaf metadata relations (inline sources - ID's). */
+    protected array $implication = [];
+
+    /** @var bool Loadable external indicator. */
+    protected bool $downloadable;
+
+    /** @var InternalMetadata Internal root meta. */
+    protected InternalMetadata $internalRootMeta;
+
+    /** @var ?ExternalMetadata Recursive external root meta. */
+    protected ?ExternalMetadata $externalRootMeta = null;
+
+    /** @var string[] Runtime layer implication breadcrumb. */
+    protected array $implicationBreadcrumb = [];
+
     /**
      * Sets internal metas.
      *
-     * @param array<string, InternalMeta> $metas Metas.
-     * @throws Error Internal error.
+     * @param array<string, InternalMetadata> $metas Metas.
      */
-    public static function setInternalMetas(array $metas): void
+    public function setInternalMetas(array $metas): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->setInternalMetas($metas);
+        $this->internalMetas = $metas;
+
+        foreach ($metas as $meta)
+            if (!$meta->getDir()) {
+                $this->internalRootMeta = $meta;
+
+                break;
+            }
     }
 
     /**
      * Sets implication.
      *
      * @param array $implication Implication.
-     * @throws Error Internal error.
      */
-    public static function setImplication(array $implication): void
+    public function setImplication(array $implication): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->setImplication($implication);
+        $this->implication = $implication;
     }
 
     /**
      * Sets external metas.
      *
-     * @param array<string, ExternalMeta> $metas Metas.
-     * @throws Error Internal error.
+     * @param array<string, ExternalMetadata> $metas Metas.
      */
-    public static function setExternalMetas(array $metas): void
+    public function setExternalMetas(array $metas): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->setExternalMetas($metas);
+        $this->externalMetas = $metas;
+        $this->externalRootMeta = null;
+
+        foreach ($metas as $meta)
+            if (!$meta->getDir())
+                $this->externalRootMeta = $meta;
+
+        unset($this->downloadable);
     }
 
     /**
      * Returns optional external root meta.
      *
-     * @return ExternalMeta|null Meta.
-     * @throws Error Internal error.
+     * @return ExternalMetadata|null Meta.
      */
-    public static function getExternalRootMetadata(): ?ExternalMeta
+    public function getExternalRootMetadata(): ?ExternalMetadata
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getExternalRootMetadata();
+        return $this->externalRootMeta;
     }
 
     /**
      * Returns internal root meta.
      *
-     * @return InternalMeta Meta.
-     * @throws Error Internal error.
+     * @return InternalMetadata Meta.
      */
-    public static function getInternalRootMetadata(): InternalMeta
+    public function getInternalRootMetadata(): InternalMetadata
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getInternalRootMetadata();
+        return $this->internalRootMeta;
     }
 
     /**
      * Returns root metadata.
      *
-     * @return ExternalMeta|InternalMeta Meta.
-     * @throws Error Internal error.
+     * @return ExternalMetadata|InternalMetadata Meta.
      */
-    public static function getRootMetadata(): ExternalMeta|InternalMeta
+    public function getRootMetadata(): ExternalMetadata|InternalMetadata
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getRootMetadata();
+        return $this->externalRootMeta ??
+            $this->internalRootMeta;
     }
 
     /**
      * Returns indicator for loadable meta.
      *
      * @return bool Indicator.
-     * @throws Error Internal error.
      */
-    public static function hasDownloadable(): bool
+    public function hasDownloadable(): bool
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->hasDownloadable();
+        if (!isset($this->downloadable)) {
+            $this->downloadable = false;
+
+            foreach ($this->externalMetas as $meta)
+                if ($meta->getCategory() == Category::DOWNLOADABLE) {
+                    $this->downloadable = true;
+
+                    return true;
+                }
+        }
+
+        return $this->downloadable;
     }
 
     /**
      * Returns external metas.
      *
-     * @return array<string, ExternalMeta> Metas.
-     * @throws Error Internal error.
+     * @return array<string, ExternalMetadata> Metas.
      */
-    public static function getExternalMetas(): array
+    public function getExternalMetas(): array
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getExternalMetas();
+        return $this->externalMetas;
     }
 
     /**
      * Returns internal metas.
      *
-     * @return array<string, InternalMeta> Metas.
-     * @throws Error Internal error.
+     * @return array<string, InternalMetadata> Metas.
      */
-    public static function getInternalMetas(): array
+    public function getInternalMetas(): array
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getInternalMetas();
+        return $this->internalMetas;
     }
 
     /**
@@ -145,24 +175,32 @@ class Group
      * at runtime layer passed to the Fusion object.
      *
      * @param string[] $breadcrumb Breadcrumb.
-     * @throws Error Internal error.
      */
-    public static function setImplicationBreadcrumb(array $breadcrumb): void
+    public function setImplicationBreadcrumb(array $breadcrumb): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->setImplicationBreadcrumb($breadcrumb);
+        $this->implicationBreadcrumb = $breadcrumb;
     }
 
     /**
      * Returns implication.
      *
      * @return array Implication.
-     * @throws Error Internal error.
      */
-    public static function getImplication(): array
+    public function getImplication(): array
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getImplication();
+        return $this->implication;
+    }
+
+    /**
+     * Returns a trace for the first match of the source inside
+     * the implication.
+     *
+     * @param string $source Inline package source.
+     * @return array<string, string> Trace.
+     */
+    public function getEventTrace(string $source): array
+    {
+        return $this->getPath($source);
     }
 
     /**
@@ -170,12 +208,90 @@ class Group
      *
      * @param string $source Source.
      * @return array Path.
-     * @throws Error Internal error.
+     * @deprecated Will be renamed to {@see getEventTrace} in
+     * version 3.0.0. The term "path" is confusing here, as it
+     * * is already used in the metadata structure and overlaps
+     * * with implication semantics.
      */
-    public static function getPath(string $source): array
+    public function getPath(string $source): array
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getPath($source);
+        $sourceTrace = $this->getSourceTrace($this->implication, $source);
+        $eventTrace = [];
+
+        if ($this->implicationBreadcrumb) {
+            $id = array_key_first($sourceTrace);
+
+            // remove recursive root
+            if ($id) {
+                $source = array_shift($sourceTrace);
+                $metadata = $this->externalMetas[$id];
+            }
+
+            $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+
+            // reverse
+            // take first match
+            foreach (array_reverse($backtrace) as $entry)
+                if ($entry["class"] == Fusion::class) {
+                    $eventTrace[] = [
+                        "layer" => $entry["line"] . " - " . $entry["file"] . " (runtime config layer)",
+                        "breadcrumb" => $this->implicationBreadcrumb,
+                        "source" => $source
+                    ];
+
+                    break;
+                }
+
+        } else
+            $metadata = $this->internalRootMeta;
+
+        foreach ($sourceTrace as $id => $source) {
+            if (isset($metadata))
+                foreach ($metadata->getLayers() as $layer => $content)
+                    if (isset($content["structure"])) {
+                        $breadcrumb = Structure::getBreadcrumb(
+                            $content["structure"],
+                            $source,
+                            ["structure"]
+                        );
+
+                        if ($breadcrumb) {
+                            $eventTrace[] = [
+                                "layer" => $layer,
+                                "breadcrumb" => $breadcrumb,
+                                "source" => $source
+                            ];
+
+                            // take first match
+                            break;
+                        }
+                    }
+
+            // next parent
+            // last own entry - maybe not built yet
+            if (!isset($this->externalMetas[$id]))
+                break;
+
+            $metadata = $this->externalMetas[$id];
+        }
+
+        return $eventTrace;
+    }
+
+    /**
+     * Returns a trace for the first match of the source within the
+     * implication. The trace is a flat associative array with package
+     * identifier keys mapped to package source values, ordered
+     * hierarchically from top to bottom.
+     *
+     * @param array $implication Built dependency graph.
+     * @param string $source Inline package source.
+     * @return array<string, string> Trace, or an empty array if no
+     * match is found.
+     */
+    public function getSourceTrace(array $implication, string $source): array
+    {
+        return $this->getSourcePath($implication, $source);
     }
 
     /**
@@ -184,11 +300,30 @@ class Group
      * @param array $implication Implication.
      * @param string $source Source.
      * @return array Path.
-     * @throws Error Internal error.
+     * @deprecated Will be renamed to {@see getSourceTrace} in
+     * version 3.0.0. The term "path" is confusing here, as it
+     * is already used in the metadata structure and overlaps
+     * with implication semantics.
      */
-    public static function getSourcePath(array $implication, string $source): array
+    public function getSourcePath(array $implication, string $source): array
     {
-        return Box::getInstance()->get(Proxy::class)
-            ->getSourcePath($implication, $source);
+        $trace = [];
+
+        foreach ($implication as $identifier => $entry) {
+            if ($source == $entry["source"])
+                return [
+                    $identifier => $entry["source"]
+                ];
+
+            $trace = $this->getSourceTrace($entry["implication"], $source);
+
+            if ($trace)
+                return [
+                    $identifier => $entry["source"],
+                    ...$trace
+                ];
+        }
+
+        return $trace;
     }
 }

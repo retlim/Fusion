@@ -24,9 +24,9 @@ namespace Valvoid\Fusion\Tests\Tasks\Image\Mocks;
 use Closure;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Proxy;
-use Valvoid\Fusion\Group\Group;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Metadata\Internal\Builder;
+use Valvoid\Fusion\Tasks\Group;
 
 class BoxMock extends Box
 {

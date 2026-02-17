@@ -203,7 +203,8 @@ class Internal extends Metadata
             return false;
 
         $id = $this->getId();
-        $metadata = $this->box->get(Group::class)::getExternalMetas()[$id];
+        $metadata = $this->box->get(Group::class)
+            ->getExternalMetas()[$id];
         $this->lifecycle = [
             "state" => "migrate",
             "root" => $this->getSource(),

@@ -130,7 +130,7 @@ class External extends Metadata
     {
         return $this->path ??=
             $this->box->get(Group::class)
-                ::getPath($this->layers["object"]["source"]);
+                ->getPath($this->layers["object"]["source"]);
     }
 
     /**
@@ -187,7 +187,7 @@ class External extends Metadata
             return false;
 
         $id = $this->getId();
-        $metadata = $this->box->get(Group::class)::getInternalMetas()[$id];
+        $metadata = $this->box->get(Group::class)->getInternalMetas()[$id];
         $this->lifecycle = [
             "state" => "migrate",
             "root" => $this->box->get(Dir::class)->getPackagesDir() ."/$id",

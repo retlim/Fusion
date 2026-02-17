@@ -43,14 +43,4 @@ abstract class Task
      * Executes the task.
      */
     abstract public function execute(): void;
-
-    /**
-     * Returns task description.
-     *
-     * @return string|null Description.
-     */
-    public function getDescription(): ?string
-    {
-        return null;
-    }
 }

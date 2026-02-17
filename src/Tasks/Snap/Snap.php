@@ -22,13 +22,13 @@
 namespace Valvoid\Fusion\Tasks\Snap;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Dir\Dir as Directory;
-use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Infos\Content;
+use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\External as ExternalMetadata;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
+use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 use Valvoid\Fusion\Wrappers\File;
 
@@ -50,7 +50,7 @@ class Snap extends Task
      * Constructs the task.
      *
      * @param Box $box Dependency injection container.
-     * @param GroupProxy $group Tasks group.
+     * @param Group $group Tasks group.
      * @param Log $log Event log.
      * @param Directory $directory Current working directory.
      * @param File $file Standard file logic wrapper.
@@ -58,7 +58,7 @@ class Snap extends Task
      */
     public function __construct(
         private readonly Box $box,
-        private readonly GroupProxy $group,
+        private readonly Group $group,
         private readonly Log $log,
         private readonly Directory $directory,
         private readonly File $file,

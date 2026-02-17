@@ -21,6 +21,7 @@
 
 namespace Valvoid\Fusion\Tasks\Build;
 
+use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Log\Events\Errors\Deadlock as DeadlockError;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Tasks\Group;
@@ -61,8 +62,12 @@ class Deadlock
      * @param array $metas
      * @param ?string $source
      */
-    public function __construct(array $deadlock, array $implication, array $metas,
-                                ?string $source = null)
+    public function __construct(
+        private readonly Box $box,
+        array $deadlock,
+        array $implication,
+        array $metas,
+        ?string $source = null)
     {
         $this->id = $deadlock["id"];
         $this->locked = $deadlock["locked"];
@@ -118,7 +123,8 @@ class Deadlock
             ];
 
         } else
-            $metadata = Group::getInternalRootMetadata();
+            $metadata = $this->box->get(Group::class)
+                ->getInternalRootMetadata();
 
         foreach ($implicationPath as $id => $entry) {
             foreach ($metadata?->getLayers() as $layer => $content)

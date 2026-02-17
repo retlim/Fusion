@@ -21,12 +21,12 @@
 
 namespace Valvoid\Fusion\Tests\Metadata\External\Mocks;
 
-use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
+use Valvoid\Fusion\Tasks\Group;
 
 class GroupMock extends Group
 {
-    public static function getInternalMetas(): array
+    public function getInternalMetas(): array
     {
         return [
             "identifier" => new class extends InternalMeta

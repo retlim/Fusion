@@ -23,7 +23,6 @@ namespace Valvoid\Fusion\Tasks\Replicate;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Dir as Directory;
-use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata as MetadataResponse;
 use Valvoid\Fusion\Hub\Responses\Cache\Snapshot;
@@ -40,6 +39,7 @@ use Valvoid\Fusion\Metadata\External\Builder as ExternalMetadataBuilder;
 use Valvoid\Fusion\Metadata\External\External as ExternalMetadata;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
 use Valvoid\Fusion\Metadata\Metadata;
+use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 use Valvoid\Fusion\Util\Reference\Normalizer;
 use Valvoid\Fusion\Wrappers\Extension;
@@ -78,7 +78,7 @@ class Replicate extends Task implements Interceptor
      * Constructs the task.
      *
      * @param Box $box Dependency injection container.
-     * @param GroupProxy $group Tasks group.
+     * @param Group $group Tasks group.
      * @param Hub $hub Hub.
      * @param Directory $directory Current working directory.
      * @param Extension $extension Standard extension logic wrapper.
@@ -88,7 +88,7 @@ class Replicate extends Task implements Interceptor
      */
     public function __construct(
         private readonly Box $box,
-        private readonly GroupProxy $group,
+        private readonly Group $group,
         private readonly Hub $hub,
         private readonly Directory $directory,
         private readonly Extension $extension,

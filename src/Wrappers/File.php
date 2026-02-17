@@ -66,6 +66,7 @@ class File
      * Returns required file content.
      *
      * @param string $file File.
+     * @param mixed ...$variables Variable to extract.
      * @return mixed Content.
      */
     public function require(string $file, mixed ...$variables): mixed

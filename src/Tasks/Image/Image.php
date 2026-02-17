@@ -23,13 +23,13 @@ namespace Valvoid\Fusion\Tasks\Image;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Config\Config;
-use Valvoid\Fusion\Group\Group;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Errors\Metadata as MetaError;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\Internal\Builder as InternalMetadataBuilder;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
+use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 use Valvoid\Fusion\Wrappers\Dir;
 use Valvoid\Fusion\Wrappers\File;

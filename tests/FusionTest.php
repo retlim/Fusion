@@ -103,9 +103,6 @@ class FusionTest extends Test
                     ],[
                     "class" => "Valvoid\Fusion\Config\Logic",
                     "abstraction" => "Valvoid\Fusion\Config\Proxy",
-                ],[
-                    "class" => "Valvoid\Fusion\Group\Logic",
-                    "abstraction" => "Valvoid\Fusion\Group\Group",
                 ]])
                 $this->handleFailedTest();
 
@@ -179,9 +176,6 @@ class FusionTest extends Test
                 ],[
                     "class" => "Valvoid\Fusion\Config\Logic",
                     "abstraction" => "Valvoid\Fusion\Config\Proxy",
-                ],[
-                    "class" => "Valvoid\Fusion\Group\Logic",
-                    "abstraction" => "Valvoid\Fusion\Group\Group",
                 ]])
                 $this->handleFailedTest();
 
@@ -296,9 +290,6 @@ class FusionTest extends Test
                 ],[
                     "class" => "Valvoid\Fusion\Config\Logic",
                     "abstraction" => "Valvoid\Fusion\Config\Proxy",
-                ],[
-                    "class" => "Valvoid\Fusion\Group\Logic",
-                    "abstraction" => "Valvoid\Fusion\Group\Group",
                 ]])
                 $this->handleFailedTest();
 
@@ -410,9 +401,6 @@ class FusionTest extends Test
                 ],[
                     "class" => "Valvoid\Fusion\Config\Logic",
                     "abstraction" => "Valvoid\Fusion\Config\Proxy",
-                ],[
-                    "class" => "Valvoid\Fusion\Group\Logic",
-                    "abstraction" => "Valvoid\Fusion\Group\Group",
                 ]])
                 $this->handleFailedTest();
 

@@ -21,11 +21,11 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
 
-use Valvoid\Fusion\Group\Group;
 use Valvoid\Fusion\Metadata\External\External as ExternalMeta;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMeta;
+use Valvoid\Fusion\Tasks\Group;
 
-class GroupMock implements Group
+class GroupMock extends Group
 {
     public array $implication;
     public array $internalMetas;

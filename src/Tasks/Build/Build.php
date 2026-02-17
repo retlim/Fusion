@@ -23,7 +23,6 @@ namespace Valvoid\Fusion\Tasks\Build;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Fusion;
-use Valvoid\Fusion\Group\Group as GroupProxy;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Responses\Cache\Metadata as MetadataResponse;
 use Valvoid\Fusion\Hub\Responses\Cache\Versions as VersionsResponse;
@@ -41,6 +40,7 @@ use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
 use Valvoid\Fusion\Metadata\Metadata;
 use Valvoid\Fusion\Tasks\Build\SAT\Solver;
+use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 use Valvoid\Fusion\Util\Metadata\Structure;
 use Valvoid\Fusion\Util\Reference\Normalizer;
@@ -75,7 +75,7 @@ class Build extends Task implements Interceptor
      * Constructs the task.
      *
      * @param Box $box Dependency injection container.
-     * @param GroupProxy $group Tasks group.
+     * @param Group $group Tasks group.
      * @param Hub $hub Hub.
      * @param Extension $extension Standard extension logic wrapper.
      * @param Log $log Event log.
@@ -83,7 +83,7 @@ class Build extends Task implements Interceptor
      */
     public function __construct(
         private readonly Box $box,
-        private readonly GroupProxy $group,
+        private readonly Group $group,
         private readonly Hub $hub,
         private readonly Extension $extension,
         private readonly Log $log,
@@ -219,6 +219,7 @@ class Build extends Task implements Interceptor
             // take topmost deadlock
             } elseif ($i == 0)
                 $deadlock = new Deadlock(
+                    $this->box,
                     $solver->getDeadlock(),
                     $this->implication,
                     $this->metas,
@@ -330,6 +331,7 @@ class Build extends Task implements Interceptor
             $this->extractStructure($path);
 
         } else (new Deadlock(
+            $this->box,
             $solver->getDeadlock(),
             $this->implication,
             $this->metas

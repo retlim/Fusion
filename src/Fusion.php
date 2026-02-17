@@ -29,8 +29,6 @@ use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Config\Logic as ConfigLogic;
 use Valvoid\Fusion\Config\Proxy as ConfigProxy;
 use Valvoid\Fusion\Dir\Dir as Directory;
-use Valvoid\Fusion\Group\Group as GroupProxy;
-use Valvoid\Fusion\Group\Logic as GroupLogic;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
@@ -38,6 +36,7 @@ use Valvoid\Fusion\Log\Events\Event as LogEvent;
 use Valvoid\Fusion\Log\Events\Infos\Name;
 use Valvoid\Fusion\Log\Events\Interceptor;
 use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
 use Valvoid\Fusion\Wrappers\Dir;
 use Valvoid\Fusion\Wrappers\File;
@@ -78,15 +77,6 @@ class Fusion
         // set up proxies
         $box->map(BusLogic::class, BusProxy::class);
         $box->map(ConfigLogic::class, ConfigProxy::class);
-        $box->map(GroupLogic::class, GroupProxy::class);
-
-        // shareable objects
-        $box->recycle(BusLogic::class,
-            Log::class,
-            ConfigLogic::class,
-            GroupLogic::class,
-            Directory::class,
-            Hub::class);
 
         $root = $dir->getDirname(__DIR__);
         $this->root = $this->getRoot($root);
@@ -100,8 +90,17 @@ class Fusion
         // fallback, raw prefix
         // to fix broken state for example
         else $this->prefixes = [
-            __NAMESPACE__ => substr($root, strlen($this->root)) . "/src"
+            __NAMESPACE__ => substr($root, strlen($this->root)) .
+                "/src"
         ];
+
+        // share common object instances
+        $box->recycle(BusLogic::class,
+            Log::class,
+            ConfigLogic::class,
+            Group::class,
+            Directory::class,
+            Hub::class);
 
         $bus = $box->get(BusLogic::class);
         $config = $box->get(ConfigLogic::class,
@@ -111,7 +110,8 @@ class Fusion
             config: $config);
 
         $config->load($overlay);
-        $bus->addReceiver(self::class, $this->handleBusEvent(...),
+        $bus->addReceiver(self::class,
+            $this->handleBusEvent(...),
 
             // keep session active if
             // recursive or nested update/upgrade
