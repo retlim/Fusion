@@ -98,8 +98,8 @@ class ShiftTest extends Test
 
             $group->internalMetas["i1"] = new InternalMetadataMock(
                 InternalCategory::OBSOLETE, [
-                    "source" => "/si1",
-                    "dir" => "/di1"
+                "source" => "/si1",
+                "dir" => "/di1"
             ]);
 
             $group->internalMetas["i0"]->update = function () use (&$onUpdate) {
@@ -161,7 +161,7 @@ class ShiftTest extends Test
 
             $filenames =
             $delete =
-            $rename =
+            $copy =
             $exists =
             $onDelete =
             $onInstall =
@@ -229,8 +229,8 @@ class ShiftTest extends Test
                 $delete[] = $file;
             };
 
-            $directory->rename = function (string $from, string $to) use (&$rename) {
-                $rename[] = "$from->$to";
+            $directory->copy = function (string $from, string $to) use (&$copy) {
+                $copy[] = "$from->$to";
             };
 
             $file->exists = function (string $file) use (&$exists) {
@@ -247,8 +247,9 @@ class ShiftTest extends Test
                     "/root/c/f2",
                     "/root/d0/f3",
                     "/root/d0",
-                    "/root/f0"] ||
-                $rename != [
+                    "/root/f0",
+                    "/tmp/state/f1"] ||
+                $copy != [
                     "/tmp/state/f1->/root/f1"] ||
                 $filenames != [
                     "/root",
@@ -300,8 +301,8 @@ class ShiftTest extends Test
             $create =
             $onDelete =
             $onInstall =
-            $rename =
-            $is = [];
+            $copy =
+            $is = $isFile = [];
             $group->hasDownloadable = true;
             $group->internalMetas["i0"] = new InternalMetadataMock(
                 InternalCategory::OBSOLETE, [
@@ -362,16 +363,22 @@ class ShiftTest extends Test
                     $dir == "/tmp/state/c1";
             };
 
+            $file->is = function (string $file) use (&$isFile) {
+                $isFile[] = $file;
+
+                return $file == "/root/c0/f2";
+            };
+
             $directory->delete = function (string $file) use (&$delete) {
                 $delete[] = $file;
             };
 
             $directory->create = function (string $file) use (&$create) {
-              $create[] = $file;
+                $create[] = $file;
             };
 
-            $directory->rename = function (string $from, string $to) use (&$rename) {
-                $rename[] = "$from->$to";
+            $directory->copy = function (string $from, string $to) use (&$copy) {
+                $copy[] = "$from->$to";
             };
 
             $file->exists = function (string $file) use (&$exists) {
@@ -387,14 +394,18 @@ class ShiftTest extends Test
                 $delete != [
                     "/root/c0/f2",
                     "/root/f0",
-                    "/root/c0"] ||
+                    "/root/c0",
+                    "/root/c0",
+                    "/tmp/state/c1/f3",
+                    "/tmp/state/f1"] ||
                 $create != ["/root/c1"] ||
-                $rename != [
-                    "/root/c0->/root/c1",
+                $copy != [
+                    "/root/c0/f2->/root/c1/f2",
                     "/tmp/state/c1/f3->/root/c1/f3",
                     "/tmp/state/f1->/root/f1"] ||
                 $filenames != [
                     "/root",
+                    "/root/c0",
                     "/root/c0",
                     "/tmp/state",
                     "/tmp/state/c1"] ||
@@ -442,8 +453,8 @@ class ShiftTest extends Test
             $create =
             $onDelete =
             $onInstall =
-            $rename =
-            $is = [];
+            $copy =
+            $is = $isFile = [];
             $group->hasDownloadable = true;
             $group->internalMetas["i0"] = new InternalMetadataMock(
                 InternalCategory::OBSOLETE, [
@@ -502,6 +513,12 @@ class ShiftTest extends Test
                     $dir == "/tmp/state/c";
             };
 
+            $file->is = function (string $file) use (&$isFile) {
+                $isFile[] = $file;
+
+                return $file =="/root/c/f2";
+            };
+
             $directory->delete = function (string $file) use (&$delete) {
                 $delete[] = $file;
             };
@@ -510,8 +527,8 @@ class ShiftTest extends Test
                 $create[] = $file;
             };
 
-            $directory->rename = function (string $from, string $to) use (&$rename) {
-                $rename[] = "$from->$to";
+            $directory->copy = function (string $from, string $to) use (&$copy) {
+                $copy[] = "$from->$to";
             };
 
             $file->exists = function (string $file) use (&$exists) {
@@ -526,16 +543,21 @@ class ShiftTest extends Test
                 $delete != [
                     "/root/c/f2",
                     "/root/f0",
-                    "/root/c"] ||
+                    "/root/c",
+                    "/root/c",
+                    "/root/c-",
+                    "/tmp/state/c/f3",
+                    "/tmp/state/f1"] ||
                 $create != ["/root/c/new"] ||
-                $rename != [
-                    "/root/c->/root/c-",
-                    "/root/c-->/root/c/new",
+                $copy != [
+                    "/root/c/f2->/root/c-/f2",
                     "/tmp/state/c/f3->/root/c/f3",
                     "/tmp/state/f1->/root/f1"] ||
                 $filenames != [
                     "/root",
                     "/root/c",
+                    "/root/c",
+                    "/root/c-",
                     "/tmp/state",
                     "/tmp/state/c"] ||
                 $is != [
@@ -580,7 +602,6 @@ class ShiftTest extends Test
             $delete =
             $exists =
             $create =
-            $rename =
             $copy =
             $onUpdate =
             $onDelete =
@@ -688,6 +709,7 @@ class ShiftTest extends Test
                 return $dir == "/root/c" ||
                     $dir == "/root/c/log" ||
                     $dir == "/tmp/state/ex0" ||
+                    $dir == "/tmp/state/st0" ||
                     $dir == "/tmp/state/mt0" ||
                     $dir == "/tmp/state/di1/d0" ||
                     $dir == "/tmp/state/c";
@@ -699,10 +721,6 @@ class ShiftTest extends Test
 
             $directory->create = function (string $file) use (&$create) {
                 $create[] = $file;
-            };
-
-            $directory->rename = function (string $from, string $to) use (&$rename) {
-                $rename[] = "$from->$to";
             };
 
             $directory->copy = function (string $from, string $to) use (&$copy) {
@@ -717,7 +735,8 @@ class ShiftTest extends Test
             $file->is = function (string $file) use (&$isFile) {
                 $isFile[] = $file;
 
-                return $file == "/tmp/state/c/f4";
+                return $file == "/tmp/state/c/f4" ||
+                    $file == "/tmp/state/di1/d0/f8";
             };
             $task->execute();
 
@@ -727,32 +746,36 @@ class ShiftTest extends Test
                 $delete != [
                     "/root/c/f1",
                     "/root/mt0",
+                    "/tmp/state/mt0",
                     "/si2/f5",
                     "/si2",
                     "/si3/f6",
-                    "/si3"] ||
+                    "/si3",
+                    "/tmp/state/di1/d0",
+                    "/tmp/state/di1/f7"] ||
                 $create != [
                     "/root/di1",
                     "/root/di1/d0",
                     "/root/di2"] ||
-                $rename != [
-                    "/tmp/state/mt0->/root/mt0",
-                    "/tmp/state/di1/d0->/root/di1/d0",
+                $copy != [
+                    "/tmp/state/c/f4->/root/c/f4",
+                    "/tmp/state/di1/d0/f8->/root/di1/d0/f8",
                     "/tmp/state/di1/f7->/root/di1/f7"] ||
                 $filenames != [
                     "/root/c",
                     "/tmp/state/c",
+                    "/tmp/state/mt0",
                     "/si2",
                     "/si3",
                     "/tmp/state/di1",
+                    "/tmp/state/di1/d0",
                     "/tmp/state/di2"] ||
                 $exists != [
                     "/root/c",
                     "/root/di1",
                     "/root/di1/d0",
                     "/root/di2"] ||
-                $copy != ["/tmp/state/c/f4->/root/c/f4"] ||
-                $isFile != ["/tmp/state/c/f4"] ||
+                $isFile != ["/tmp/state/c/f4", "/tmp/state/di1/d0/f8"] ||
                 $isDir != [
                     "/root/c/log",
                     "/root/c/f1",
@@ -792,7 +815,6 @@ class ShiftTest extends Test
 
             $filenames =
             $delete =
-            $rename =
             $exists =
             $create =
             $onDelete =
@@ -891,10 +913,6 @@ class ShiftTest extends Test
                 $create[] = $file;
             };
 
-            $directory->rename = function (string $from, string $to) use (&$rename) {
-                $rename[] = "$from->$to";
-            };
-
             $directory->copy = function (string $from, string $to) use (&$copy) {
                 $copy[] = "$from->$to";
             };
@@ -928,13 +946,14 @@ class ShiftTest extends Test
                     "/#/c/f2->/tmp/other/valvoid/fusion/c/f2",
                     "/#/d0/f3->/tmp/other/valvoid/fusion/d0/f3",
                     "/#/f0->/tmp/other/valvoid/fusion/f0",
-                    "/#/fusion->/tmp/other/valvoid/fusion/fusion"] ||
+                    "/#/fusion->/tmp/other/valvoid/fusion/fusion",
+                    "/tmp/state/f1->/#/f1"] ||
                 $delete != [
                     "/#/c/f2",
                     "/#/d0/f3",
                     "/#/d0",
-                    "/#/f0"] ||
-                $rename != ["/tmp/state/f1->/#/f1"] ||
+                    "/#/f0",
+                    "/tmp/state/f1"] ||
                 $exists != ["/#/c"] ||
                 $get != ["/tmp/state/fusion"] ||
                 $put != [
@@ -998,7 +1017,6 @@ class ShiftTest extends Test
 
             $filenames =
             $delete =
-            $rename =
             $exists =
             $create =
             $onDelete =
@@ -1120,10 +1138,6 @@ class ShiftTest extends Test
                 $create[] = $file;
             };
 
-            $directory->rename = function (string $from, string $to) use (&$rename) {
-                $rename[] = "$from->$to";
-            };
-
             $directory->copy = function (string $from, string $to) use (&$copy) {
                 $copy[] = "$from->$to";
             };
@@ -1174,14 +1188,15 @@ class ShiftTest extends Test
                     "/#/c/f2->/tmp/other/valvoid/fusion/c/f2",
                     "/#/deps/valvoid/fusion/d0/f4->/tmp/other/valvoid/fusion/deps/valvoid/fusion/d0/f4",
                     "/#/deps/valvoid/fusion/f3->/tmp/other/valvoid/fusion/deps/valvoid/fusion/f3",
-                    "/#/deps/valvoid/fusion/fusion->/tmp/other/valvoid/fusion/deps/valvoid/fusion/fusion"] ||
+                    "/#/deps/valvoid/fusion/fusion->/tmp/other/valvoid/fusion/deps/valvoid/fusion/fusion",
+                    "/tmp/state/deps/valvoid/fusion/d1/f6->/#/deps/valvoid/fusion/d1/f6",
+                    "/tmp/state/deps/valvoid/fusion/f5->/#/deps/valvoid/fusion/f5"] ||
                 $delete != [
                     "/#/c/f2",
                     "/#/deps/valvoid/fusion/d0",
-                    "/#/deps/valvoid/fusion/f3"] ||
-                $rename != [
-                    "/tmp/state/deps/valvoid/fusion/d1/f6->/#/deps/valvoid/fusion/d1/f6",
-                    "/tmp/state/deps/valvoid/fusion/f5->/#/deps/valvoid/fusion/f5"] ||
+                    "/#/deps/valvoid/fusion/f3",
+                    "/tmp/state/deps/valvoid/fusion/d1/f6",
+                    "/tmp/state/deps/valvoid/fusion/f5"] ||
                 $exists != [
                     "/#/c",
                     "/#/deps/valvoid/fusion",
