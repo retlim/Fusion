@@ -19,37 +19,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Options;
+namespace Valvoid\Fusion\Tests\Units\Options;
 
-use Throwable;
 use Valvoid\Fusion\Options\Version;
-use Valvoid\Fusion\Tests\Options\Mocks\FileMock;
-use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Wrappers\File;
+use Valvoid\Reflex\Test\Wrapper;
 
-class VersionTest extends Test
+class VersionTest extends Wrapper
 {
-    protected string|array $coverage = Version::class;
-
-    public function __construct()
-    {
-        $this->testSemanticVersion();
-    }
-
     public function testSemanticVersion(): void
     {
-        try {
-            $file = new FileMock;
-            $file->get = function () {
-                return "{\"version\": \"###\"}";
-            };
+        $file = $this->createStub(File::class);
+        $file->fake('get')
+            ->return("{\"version\": \"###\"}");
 
-            $version = new Version($file);
+        $version = new Version($file);
 
-            if ($version->semver !== "###")
-                $this->handleFailedTest();
-
-        } catch (Throwable) {
-            $this->handleFailedTest();
-        }
+        $this->validate($version->semver)
+            ->as("###");
     }
 }
