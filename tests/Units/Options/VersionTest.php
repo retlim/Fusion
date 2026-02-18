@@ -29,9 +29,12 @@ class VersionTest extends Wrapper
 {
     public function testSemanticVersion(): void
     {
-        $file = $this->createStub(File::class);
-        $file->fake('get')
-            ->return("{\"version\": \"###\"}");
+        $filename = dirname(__DIR__, 3) . "/fusion.json";
+        $file = $this->createMock(File::class);
+
+        $file->fake("get")
+            ->expect(file: $filename)
+            ->return('{"version": "###"}');
 
         $version = new Version($file);
 

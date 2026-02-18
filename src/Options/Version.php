@@ -40,7 +40,7 @@ class Version
      */
     public function __construct(File $file)
     {
-        $filename = __DIR__ . "/../../fusion.json";
+        $filename = dirname(__DIR__, 2) . "/fusion.json";
         $metadata = $file->get($filename);
 
         if ($metadata === false)
