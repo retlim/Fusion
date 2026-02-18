@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.0](/../../compare/1.0...1.1.0) - Feb 18, 2026
+
+- Replace rename with copy for cross filesystem compatibility ([#43](https://gitlab.com/valvoid/fusion/code/-/issues/43))
+
 ## [1.1.0](/../../compare/1.0...1.1.0) - Nov 01, 2025
 
 - Add namespace prefixes to state directory ([#32](https://gitlab.com/valvoid/fusion/code/-/issues/32))
