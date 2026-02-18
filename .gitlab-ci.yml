@@ -13,7 +13,7 @@ build development package:
   stage: state
   image: valvoid/fusion:1
   script:
-    - fusion build
+    - fusion build log.serializers.stream.threshold=debug
   artifacts:
     name: dev-package-build
     paths:
