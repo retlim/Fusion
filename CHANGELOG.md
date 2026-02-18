@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.0](/../../compare/1.0...1.1.0) - Feb 18, 2026
+## [1.1.1](/../../compare/1.1.0...1.1.1) - Feb 18, 2026
 
 - Replace rename with copy for cross filesystem compatibility ([#43](https://gitlab.com/valvoid/fusion/code/-/issues/43))
 
