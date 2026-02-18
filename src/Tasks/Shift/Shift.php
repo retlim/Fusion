@@ -209,10 +209,16 @@ class Shift extends Task
                 // clear old ballast leading dirs
                 // parent dir must exist
                 // rename temp to new
-                $this->directory->rename($oldCacheDir, $tempCacheDir);
+                // cross filesystem rename
+                $this->copyDir($oldCacheDir, $tempCacheDir);
+                $this->directory->delete($oldCacheDir);
+
                 $this->directory->delete($cachePrefixDir);
                 $this->directory->createDir($newCacheDir);
-                $this->directory->rename($tempCacheDir, $newCacheDir);
+
+                // cross filesystem rename
+                $this->copyDir($tempCacheDir, $newCacheDir);
+                $this->directory->delete($tempCacheDir);
 
             } else {
 
@@ -220,7 +226,10 @@ class Shift extends Task
                 // rename old to new
                 // clear old ballast leading dirs
                 $this->directory->createDir($newCacheDir);
-                $this->directory->rename($oldCacheDir, $newCacheDir);
+
+                // cross filesystem rename
+                $this->copyDir($oldCacheDir, $newCacheDir);
+                $this->directory->delete($oldCacheDir);
                 $this->directory->delete($cachePrefixDir);
             }
 
@@ -285,7 +294,10 @@ class Shift extends Task
                 // clear nested
                 if ($dir) {
                     $this->directory->delete($to);
-                    $this->directory->rename($from, $to);
+
+                    // cross filesystem rename
+                    $this->copyDir($from, $to);
+                    $this->directory->delete($from);
 
                 // root
                 // keep static content
@@ -318,7 +330,10 @@ class Shift extends Task
                     // extension is optional
                     if ($this->dir->is($from)) {
                         $this->directory->delete($to);
-                        $this->directory->rename($from, $to);
+
+                        // cross filesystem rename
+                        $this->copyDir($from, $to);
+                        $this->directory->delete($from);
                     }
                 }
 
@@ -330,7 +345,10 @@ class Shift extends Task
                     // state is optional
                     if ($this->dir->is($from)) {
                         $this->directory->delete($to);
-                        $this->directory->rename($from, $to);
+
+                        // cross filesystem rename
+                        $this->copyDir($from, $to);
+                        $this->directory->delete($from);
                     }
                 }
 
@@ -342,7 +360,10 @@ class Shift extends Task
                     // mutable is optional
                     if ($this->dir->is($from)) {
                         $this->directory->delete($to);
-                        $this->directory->rename($from, $to);
+
+                        // cross filesystem rename
+                        $this->copyDir($from, $to);
+                        $this->directory->delete($from);
                     }
                 }
 
@@ -448,7 +469,10 @@ class Shift extends Task
 
                     } else {
                         $this->directory->createDir($target);
-                        $this->directory->rename($source, $target);
+
+                        // cross filesystem rename
+                        $this->copyDir($source, $target);
+                        $this->directory->delete($source);
                     }
 
                 else $this->shiftFile($source, $target);
@@ -479,7 +503,12 @@ class Shift extends Task
                     "Can't write to executed file \"$to\"."
                 );
 
-        } else $this->directory->rename($from, $to);
+        } else {
+
+            // cross filesystem rename
+            $this->directory->copy($from, $to);
+            $this->directory->delete($from);
+        }
     }
 
     /**
