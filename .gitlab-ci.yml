@@ -11,9 +11,9 @@ stages:
 
 build development package:
   stage: state
-  image: valvoid/fusion:1.2.1
+  image: valvoid/fusion:1
   script:
-    - fusion build log.serializers.stream.threshold=debug
+    - fusion build
   artifacts:
     name: dev-package-build
     paths:
