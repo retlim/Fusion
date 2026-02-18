@@ -11,7 +11,7 @@ stages:
 
 build development package:
   stage: state
-  image: valvoid/fusion:1.2.2
+  image: valvoid/fusion:1.2
   script:
     - fusion build
   artifacts:
