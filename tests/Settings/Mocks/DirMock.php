@@ -27,21 +27,9 @@ use Valvoid\Fusion\Wrappers\Dir;
 class DirMock extends Dir
 {
     public Closure $dirname;
-    public Closure $filenames;
-    public Closure $is;
 
     public function getDirname(string $path, int $levels = 1): string
     {
         return call_user_func($this->dirname, $path, $levels);
-    }
-
-    public function getFilenames(string $dir, int $order = SCANDIR_SORT_ASCENDING): array|false
-    {
-        return call_user_func($this->filenames, $dir, $order);
-    }
-
-    public function is(string $dir): bool
-    {
-        return call_user_func($this->is, $dir);
     }
 }

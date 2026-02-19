@@ -23,9 +23,9 @@ namespace Valvoid\Fusion\Tests\Settings;
 
 use Throwable;
 use Valvoid\Fusion\Settings\Config;
-use Valvoid\Fusion\Tests\Options\Mocks\DirMock;
-use Valvoid\Fusion\Tests\Options\Mocks\FileMock;
-use Valvoid\Fusion\Tests\Options\Mocks\SystemMock;
+use Valvoid\Fusion\Tests\Settings\Mocks\DirMock;
+use Valvoid\Fusion\Tests\Settings\Mocks\FileMock;
+use Valvoid\Fusion\Tests\Settings\Mocks\SystemMock;
 use Valvoid\Fusion\Tests\Test;
 
 class ConfigTest extends Test

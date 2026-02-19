@@ -122,11 +122,9 @@ class Paths
      */
     private function getNonNestedPath(string $path): string
     {
-        $match = null;
-
         while ($path) {
             if ($this->file->is("$path/fusion.json"))
-                $match = $path;
+                return $path;
 
             $parent = $this->dir->getDirname($path);
 
@@ -136,7 +134,7 @@ class Paths
             $path = $parent;
         }
 
-        return $match ?? throw new Exception(
+        return throw new Exception(
             "Cant read path '$path'."
         );
     }

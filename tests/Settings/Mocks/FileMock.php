@@ -27,15 +27,9 @@ use Valvoid\Fusion\Wrappers\File;
 class FileMock extends File
 {
     public Closure $get;
+    public Closure $put;
     public Closure $is;
-    public Closure $require;
     public Closure $exists;
-    public Closure $include;
-
-    public function include(string $file): mixed
-    {
-        return call_user_func($this->include, $file);
-    }
 
     public function get(string $file): string|false
     {
@@ -47,13 +41,13 @@ class FileMock extends File
         return call_user_func($this->is, $file);
     }
 
-    public function require(string $file, mixed ...$variables): mixed
-    {
-        return call_user_func($this->require, $file);
-    }
-
     public function exists(string $file): bool
     {
         return call_user_func($this->exists, $file);
+    }
+
+    public function put(string $file, mixed $data): int|false
+    {
+        return call_user_func($this->put, $file, $data);
     }
 }
