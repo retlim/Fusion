@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Tests\Units\Config;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy;
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Config\Interpreter\Interpreter;
 use Valvoid\Fusion\Config\Normalizer\Normalizer;
@@ -39,7 +39,7 @@ class ConfigTest extends Wrapper
         $box = $this->createMock(Box::class);
         $dir = $this->createMock(Dir::class);
         $file = $this->createMock(File::class);
-        $bus = $this->createStub(Proxy::class);
+        $bus = $this->createStub(Bus::class);
         $interpreter = $this->createMock(Interpreter::class);
         $dirNormalizer = $this->createMock(DirNormalizer::class);
         $parser = $this->createMock(Parser::class);
@@ -131,7 +131,7 @@ class ConfigTest extends Wrapper
         $box = $this->recycleMock(Box::class);
         $dir = $this->recycleMock(Dir::class);
         $file = $this->recycleMock(File::class);
-        $bus = $this->recycleStub(Proxy::class);
+        $bus = $this->recycleStub(Bus::class);
         $dirNormalizer = $this->resetMock(DirNormalizer::class);
 
         $dirNormalizer->fake("normalize")
@@ -166,7 +166,7 @@ class ConfigTest extends Wrapper
         $box = $this->createMock(Box::class);
         $dir = $this->createMock(Dir::class);
         $file = $this->createMock(File::class);
-        $bus = $this->recycleStub(Proxy::class);
+        $bus = $this->recycleStub(Bus::class);
         $interpreter = $this->createMock(Interpreter::class);
         $dirNormalizer = $this->createMock(DirNormalizer::class);
         $parser = $this->createMock(Parser::class);
@@ -278,7 +278,7 @@ class ConfigTest extends Wrapper
         $box = $this->createMock(Box::class);
         $dir = $this->recycleMock(Dir::class);
         $file = $this->createMock(File::class);
-        $bus = $this->recycleStub(Proxy::class);
+        $bus = $this->recycleStub(Bus::class);
         $interpreter = $this->createMock(Interpreter::class);
         $dirNormalizer = $this->recycleMock(DirNormalizer::class);
         $parser = $this->createMock(Parser::class);

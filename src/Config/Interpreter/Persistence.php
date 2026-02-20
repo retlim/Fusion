@@ -23,7 +23,7 @@ namespace Valvoid\Fusion\Config\Interpreter;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Log\Events\Level;
 
 /**
@@ -35,11 +35,11 @@ class Persistence
      * Constructs the interpreter.
      *
      * @param Box $box Dependency injection container.
-     * @param BusProxy $bus Event bus.
+     * @param Bus $bus Event bus.
      */
     public function __construct(
         private readonly Box $box,
-        private readonly BusProxy $bus) {}
+        private readonly Bus $bus) {}
 
     /**
      * Interprets the persistence config.

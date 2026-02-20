@@ -48,7 +48,7 @@ class InterpreterTest extends Test
     {
         $this->container->bus->event = false;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->container->bus);
         $interpreter->interpret([], Git::class);
 
         if ($this->container->bus->event !== false)
@@ -59,7 +59,7 @@ class InterpreterTest extends Test
     {
         $this->container->bus->event = false;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->container->bus);
         $interpreter->interpret([], [
             "api" => Git::class
         ]);
@@ -72,7 +72,7 @@ class InterpreterTest extends Test
     {
         $this->container->bus->event = false;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->container->bus);
         $interpreter->interpret([], 34);
 
         if ($this->container->bus->event === false)

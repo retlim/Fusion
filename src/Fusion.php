@@ -24,8 +24,7 @@ namespace Valvoid\Fusion;
 use Exception;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Root;
-use Valvoid\Fusion\Bus\Logic as BusLogic;
-use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Hub\Hub;
@@ -73,9 +72,6 @@ class Fusion
             // high priority
             prepend: true);
 
-        // set up proxies
-        $box->map(BusLogic::class, BusProxy::class);
-
         $root = $dir->getDirname(__DIR__);
         $this->root = $this->getRoot($root);
         $prefixes = "$root/state/prefixes.php";
@@ -93,14 +89,14 @@ class Fusion
         ];
 
         // share common object instances
-        $box->recycle(BusLogic::class,
+        $box->recycle(Bus::class,
             Log::class,
             Config::class,
             Group::class,
             Directory::class,
             Hub::class);
 
-        $bus = $box->get(BusLogic::class);
+        $bus = $box->get(Bus::class);
         $config = $box->get(Config::class,
             root: $root,
             path: $this->root,

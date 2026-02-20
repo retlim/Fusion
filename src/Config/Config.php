@@ -24,7 +24,7 @@ namespace Valvoid\Fusion\Config;
 use Exception;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Interpreter\Dir as DirectoryInterpreter;
 use Valvoid\Fusion\Config\Interpreter\Interpreter;
 use Valvoid\Fusion\Config\Normalizer\Dir as DirectoryNormalizer;
@@ -66,7 +66,7 @@ class Config
      * @param array $config Runtime config layer.
      * @param Dir $dir Wrapper for standard directory operations.
      * @param File $file Wrapper for standard file operations.
-     * @param BusProxy $bus Event bus.
+     * @param Bus $bus Event bus.
      * @throws Error
      */
     public function __construct(
@@ -77,7 +77,7 @@ class Config
         private readonly File $file,
         string $path,
         array $config,
-        BusProxy $bus)
+        Bus $bus)
     {
         $bus->addReceiver(self::class, $this->handleBusEvent(...),
 

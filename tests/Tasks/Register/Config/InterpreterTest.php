@@ -51,7 +51,7 @@ class InterpreterTest extends Test
     {
         $this->bus->event = null;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->bus);
         $interpreter->interpret([], null);
 
         // assert nothing
@@ -63,7 +63,7 @@ class InterpreterTest extends Test
     {
         $this->bus->event = null;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->bus);
         $interpreter->interpret([], 3455);
 
         if ($this->bus->event === null ||
@@ -75,7 +75,7 @@ class InterpreterTest extends Test
     {
         $this->bus->event = null;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->bus);
         $interpreter->interpret([], Register::class);
 
         // assert nothing
@@ -87,7 +87,7 @@ class InterpreterTest extends Test
     {
         $this->bus->event = null;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->bus);
         $interpreter->interpret([], [
             "task" => Register::class
         ]);

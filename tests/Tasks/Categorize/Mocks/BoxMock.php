@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Categorize\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy;
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 
 class BoxMock extends Box
@@ -32,7 +32,7 @@ class BoxMock extends Box
     public LogMock $log;
     public function get(string $class, ...$args): object
     {
-        if ($class === Proxy::class)
+        if ($class === Bus::class)
             return $this->bus;
 
         if ($class === Content::class)

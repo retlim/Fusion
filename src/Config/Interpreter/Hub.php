@@ -28,7 +28,7 @@ use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Hub\APIs\Local\Local;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote;
 use Valvoid\Fusion\Log\Events\Level;
-use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Bus;
 
 /**
  * Hub config interpreter.
@@ -40,12 +40,12 @@ class Hub
      *
      * @param Box $box Dependency injection container.
      * @param Config $config Config.
-     * @param BusProxy $bus Event bus.
+     * @param Bus $bus Event bus.
      */
     public function __construct(
         private readonly Box $box,
         private readonly Config $config,
-        private readonly BusProxy $bus) {}
+        private readonly Bus $bus) {}
 
     /**
      * Interprets the hub config.

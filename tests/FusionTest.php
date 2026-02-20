@@ -54,8 +54,7 @@ class FusionTest extends Test
     {
         try {
             $is =
-            $load =
-            $map = [];
+            $load = [];
             $file = new FileMock;
             $file->is = function ($file) use (&$is) {
                 if ($file == "/#/state/prefixes.php" ||
@@ -66,12 +65,6 @@ class FusionTest extends Test
             };
             $dir = new DirMock;
             $dir->dirname = fn () => "/#";
-            $this->box->map = function ($class, $abstraction) use (&$map) {
-                $map[] = [
-                    "class" => $class,
-                    "abstraction" => $abstraction
-                ];
-            };
 
             $bus = new BusMock;
             $bus->add = function ($id, $callback, ...$events) {};
@@ -81,7 +74,7 @@ class FusionTest extends Test
             };
             $config->get = function (string ...$breadcrumb) {return [];};
             $this->box->get = function ($class, ...$args) use ($bus, $config) {
-                if ($class == "Valvoid\Fusion\Bus\Logic")
+                if ($class == "Valvoid\Fusion\Bus\Bus")
                     return $bus;
                 if ($class == "Valvoid\Fusion\Config\Config")
                     return $config;
@@ -96,11 +89,7 @@ class FusionTest extends Test
             if ($is != [
                     "/#/fusion.json",
                     "/#/state/prefixes.php"] ||
-                $load != [true] ||
-                $map != [[
-                        "class" => "Valvoid\Fusion\Bus\Logic",
-                        "abstraction" => "Valvoid\Fusion\Bus\Proxy",
-                    ]])
+                $load != [true])
                 $this->handleFailedTest();
 
         } catch (Throwable) {
@@ -113,8 +102,7 @@ class FusionTest extends Test
         try {
             $is =
             $load =
-            $require =
-            $map = [];
+            $require = [];
             $file = new FileMock;
             $file->is = function ($file) use (&$is) {
                 if ($file == "/#/state/prefixes.php" ||
@@ -135,13 +123,6 @@ class FusionTest extends Test
 
             $dir = new DirMock;
             $dir->dirname = fn () => "/#";
-            $this->box->map = function ($class, $abstraction) use (&$map) {
-                $map[] = [
-                    "class" => $class,
-                    "abstraction" => $abstraction
-                ];
-            };
-
             $bus = new BusMock;
             $bus->add = function ($id, $callback, ...$events) {};
             $config = new ConfigMock;
@@ -150,7 +131,7 @@ class FusionTest extends Test
             };
             $config->get = function (string ...$breadcrumb) {return [];};
             $this->box->get = function ($class, ...$args) use ($bus, $config) {
-                if ($class == "Valvoid\Fusion\Bus\Logic")
+                if ($class == "Valvoid\Fusion\Bus\Bus")
                     return $bus;
                 if ($class == "Valvoid\Fusion\Config\Config")
                     return $config;
@@ -166,11 +147,7 @@ class FusionTest extends Test
                     "/#/fusion.json",
                     "/#/state/prefixes.php"] ||
                 $require != ["/#/state/prefixes.php"] ||
-                $load != [true] ||
-                $map != [[
-                    "class" => "Valvoid\Fusion\Bus\Logic",
-                    "abstraction" => "Valvoid\Fusion\Bus\Proxy",
-                ]])
+                $load != [true])
                 $this->handleFailedTest();
 
         } catch (Throwable) {
@@ -184,8 +161,7 @@ class FusionTest extends Test
             $is =
             $load =
             $cGet =
-            $tasks =
-            $map = [];
+            $tasks =[];
             $file = new FileMock;
             $file->is = function ($file) use (&$is) {
                 if ($file == "/#/state/prefixes.php" ||
@@ -196,13 +172,6 @@ class FusionTest extends Test
             };
             $dir = new DirMock;
             $dir->dirname = fn () => "/#";
-            $this->box->map = function ($class, $abstraction) use (&$map) {
-                $map[] = [
-                    "class" => $class,
-                    "abstraction" => $abstraction
-                ];
-            };
-
             $bus = new BusMock;
             $bus->add = function ($id, $callback, ...$events) {};
             $config = new ConfigMock;
@@ -230,7 +199,7 @@ class FusionTest extends Test
 
             $this->box->get = function ($class, ...$args) use
             ($bus, $config, $directory, &$tasks) {
-                if ($class == "Valvoid\Fusion\Bus\Logic")
+                if ($class == "Valvoid\Fusion\Bus\Bus")
                     return $bus;
                 if ($class == "Valvoid\Fusion\Config\Config")
                     return $config;
@@ -277,11 +246,7 @@ class FusionTest extends Test
                 sizeof($tasks) != 2 ||
                 $cGet != [["tasks", "test"]] || // group
                 $delete != ["/#s", "/#t", "/#p", "/#o"] ||
-                $load != [true] ||
-                $map != [[
-                    "class" => "Valvoid\Fusion\Bus\Logic",
-                    "abstraction" => "Valvoid\Fusion\Bus\Proxy",
-                ]])
+                $load != [true])
                 $this->handleFailedTest();
 
         } catch (Throwable) {
@@ -295,8 +260,7 @@ class FusionTest extends Test
             $is =
             $load =
             $cGet =
-            $tasks =
-            $map = [];
+            $tasks = [];
             $file = new FileMock;
             $file->is = function ($file) use (&$is) {
                 if ($file == "/#/state/prefixes.php" ||
@@ -307,12 +271,6 @@ class FusionTest extends Test
             };
             $dir = new DirMock;
             $dir->dirname = fn () => "/#";
-            $this->box->map = function ($class, $abstraction) use (&$map) {
-                $map[] = [
-                    "class" => $class,
-                    "abstraction" => $abstraction
-                ];
-            };
 
             $bus = new BusMock;
             $bus->add = function ($id, $callback, ...$events) {};
@@ -338,7 +296,7 @@ class FusionTest extends Test
 
             $this->box->get = function ($class, ...$args) use
             ($bus, $config, $directory, &$tasks) {
-                if ($class == "Valvoid\Fusion\Bus\Logic")
+                if ($class == "Valvoid\Fusion\Bus\Bus")
                     return $bus;
                 if ($class == "Valvoid\Fusion\Config\Config")
                     return $config;
@@ -385,11 +343,7 @@ class FusionTest extends Test
                 sizeof($tasks) != 1 ||
                 $cGet != [["tasks", "test"]] || // group
                 $delete != ["/#s", "/#t", "/#p", "/#o"] ||
-                $load != [true] ||
-                $map != [[
-                    "class" => "Valvoid\Fusion\Bus\Logic",
-                    "abstraction" => "Valvoid\Fusion\Bus\Proxy",
-                ]])
+                $load != [true])
                 $this->handleFailedTest();
 
         } catch (Throwable) {

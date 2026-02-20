@@ -22,11 +22,11 @@
 namespace Valvoid\Fusion\Tests\Hub\APIs\Remote\Valvoid\Config\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy;
+use Valvoid\Fusion\Bus\Bus;
 
 class BoxMock extends Box
 {
-    public Proxy $bus;
+    public Bus $bus;
 
     public function get(string $class, ...$args): object
     {

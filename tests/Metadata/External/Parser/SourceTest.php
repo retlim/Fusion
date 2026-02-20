@@ -22,6 +22,7 @@
 namespace Valvoid\Fusion\Tests\Metadata\External\Parser;
 
 use Valvoid\Fusion\Metadata\External\Parser\Source;
+use Valvoid\Fusion\Tests\Mocks\BusMock;
 use Valvoid\Fusion\Tests\Test;
 
 class SourceTest extends Test
@@ -34,7 +35,7 @@ class SourceTest extends Test
 
     public function __construct()
     {
-        $parser = new Source("api.com/path1/" .
+        $parser = new Source(new BusMock,"api.com/path1/" .
 
             // package ID exception
             "'path2/" .

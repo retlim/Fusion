@@ -52,7 +52,7 @@ class InterpreterTest extends Test
     {
         $this->container->bus->event = null;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->container->bus);
         $interpreter->interpret([], [
             "api" => GitHub::class,
             "protocol" => "http",
@@ -70,7 +70,7 @@ class InterpreterTest extends Test
     {
         $this->container->bus->event = null;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->container->bus);
         $interpreter->interpret([], GitHub::class);
 
         if ($this->container->bus->event !== null)
@@ -81,7 +81,7 @@ class InterpreterTest extends Test
     {
         $this->container->bus->event = null;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->container->bus);
         $interpreter->interpret([], 34);
 
         if ($this->container->bus->event === null ||
@@ -93,7 +93,7 @@ class InterpreterTest extends Test
     {
         $this->container->bus->event = null;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->container->bus);
         $interpreter->interpret([], null);
 
         if ($this->container->bus->event !== null)

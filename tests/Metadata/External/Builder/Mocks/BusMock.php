@@ -23,9 +23,9 @@ namespace Valvoid\Fusion\Tests\Metadata\External\Builder\Mocks;
 
 use Closure;
 use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Bus;
 
-class BusMock implements BusProxy
+class BusMock extends Bus
 {
     public function addReceiver(string $id, Closure $callback, string ...$events): void {}
     public function broadcast(Event $event): void{}

@@ -32,6 +32,8 @@ use Valvoid\Fusion\Log\Serializers\Files\JSON\JSON;
  */
 class Interpreter implements ConfigInterpreter
 {
+    public function __construct(private readonly Bus $bus) {}
+
     /**
      * Interprets the JSON serializer config.
      *
@@ -53,7 +55,7 @@ class Interpreter implements ConfigInterpreter
                     "serializer" => self::interpretSerializer($breadcrumb, $value),
                     "threshold" => self::interpretThreshold($breadcrumb, $value),
                     "filename" => self::interpretFilename($breadcrumb, $value),
-                    default => Bus::broadcast(new ConfigEvent(
+                    default => $this->bus->broadcast(new ConfigEvent(
                         "The unknown \"$key\" index must be " .
                         "\"serializer\" or \"threshold\" string.",
                         Level::ERROR,
@@ -61,7 +63,7 @@ class Interpreter implements ConfigInterpreter
                     ))
                 };
 
-        else Bus::broadcast(new ConfigEvent(
+        else $this->bus->broadcast(new ConfigEvent(
             "The value must be the default \"" . JSON::class .
             "\" class name string or a configured array serializer.",
             Level::ERROR,
@@ -74,10 +76,10 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry Serializer entry.
      */
-    private static function interpretDefaultSerializer(array $breadcrumb, mixed $entry): void
+    private function interpretDefaultSerializer(array $breadcrumb, mixed $entry): void
     {
         if ($entry !== JSON::class)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value must be the \"" . JSON::class .
                 "\" class name string.",
                 Level::ERROR,
@@ -90,13 +92,13 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry Serializer entry.
      */
-    private static function interpretSerializer(array $breadcrumb, mixed $entry): void
+    private function interpretSerializer(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null || $entry === JSON::class)
             return;
 
-        Bus::broadcast(new ConfigEvent(
+        $this->bus->broadcast(new ConfigEvent(
             "The value, serializer class name, of the \"serializer\" " .
             "index must be the \"" . JSON::class . "\" string.",
             Level::ERROR,
@@ -109,14 +111,14 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry Filename entry.
      */
-    private static function interpretFilename(array $breadcrumb, mixed $entry): void
+    private function interpretFilename(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null || $entry == "Y.m.d"  || $entry == "Y.m" ||
             $entry == "Y.m.d_H:i" || $entry == "Y.m.d_H" || $entry == "Y")
             return;
 
-        Bus::broadcast(new ConfigEvent(
+        $this->bus->broadcast(new ConfigEvent(
             "The value of the \"filename\" " .
             "index must be the \"Y.m.d\", \"Y.m\", \"Y.m.d_H:i\", " .
             "\"Y.m.d_H\", or \"Y\" string.",
@@ -130,14 +132,14 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry Threshold entry.
      */
-    private static function interpretThreshold(array $breadcrumb, mixed $entry): void
+    private function interpretThreshold(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null || $entry instanceof Level)
             return;
 
         if (!is_string($entry) || Level::tryFromName($entry) === null)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value of the \"threshold\" " .
                 "index must be a case or a related value of the \"" .
                 Level::class . "\".",

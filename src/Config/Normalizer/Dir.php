@@ -26,7 +26,7 @@ use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Config\Parser\Dir as DirectoryParser;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Level;
-use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Wrappers\System;
 use Valvoid\Fusion\Wrappers\Dir as DirWrapper;
 
@@ -46,7 +46,7 @@ class Dir
         private readonly Box $box,
         private readonly DirWrapper $dir,
         private readonly DirectoryParser $parser,
-        private readonly BusProxy $bus,
+        private readonly Bus $bus,
         private readonly System $system) {}
 
     /**

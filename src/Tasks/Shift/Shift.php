@@ -24,7 +24,7 @@ namespace Valvoid\Fusion\Tasks\Shift;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Events\Root;
-use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Errors\Lifecycle;
@@ -70,7 +70,7 @@ class Shift extends Task
      * Constructs the task.
      *
      * @param Box $box Dependency injection container.
-     * @param BusProxy $bus Event bus.
+     * @param Bus $bus Event bus.
      * @param Group $group Tasks group.
      * @param Log $log Event log.
      * @param Directory $directory Current working directory.
@@ -80,7 +80,7 @@ class Shift extends Task
      */
     public function __construct(
         private readonly Box $box,
-        private readonly BusProxy $bus,
+        private readonly Bus $bus,
         private readonly Group $group,
         private readonly Log $log,
         private readonly Directory $directory,

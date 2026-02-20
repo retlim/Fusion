@@ -49,7 +49,9 @@ class Source
      *
      * @param string $source Inline source.
      */
-    public function __construct(string $source)
+    public function __construct(
+        private readonly Bus $bus,
+        string $source)
     {
         // API, nth path parts, reference
         $parts = explode('/', $source);
@@ -273,9 +275,9 @@ class Source
      *
      * @param string $message Message.
      */
-    private static function throwError(string $message): void
+    private function throwError(string $message): void
     {
-        Bus::broadcast(new MetadataEvent(
+        $this->bus->broadcast(new MetadataEvent(
             $message,
             Level::ERROR,
 

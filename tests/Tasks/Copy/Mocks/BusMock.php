@@ -23,9 +23,9 @@ namespace Valvoid\Fusion\Tests\Tasks\Copy\Mocks;
 
 use Closure;
 use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy;
+use Valvoid\Fusion\Bus\Bus;
 
-class BusMock implements Proxy
+class BusMock extends Bus
 {
     public ?Event $event = null;
 

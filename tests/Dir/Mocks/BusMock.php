@@ -22,10 +22,10 @@
 namespace Valvoid\Fusion\Tests\Dir\Mocks;
 
 use Closure;
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy;
 
-class BusMock implements Proxy
+class BusMock extends Bus
 {
     public $id;
     public $callback;

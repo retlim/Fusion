@@ -32,6 +32,8 @@ use Valvoid\Fusion\Tasks\Image\Image;
  */
 class Interpreter implements ConfigInterpreter
 {
+    public function __construct(private readonly Bus $bus) {}
+
     /**
      * Interprets the image task config.
      *
@@ -51,7 +53,7 @@ class Interpreter implements ConfigInterpreter
             foreach ($entry as $key => $value)
                 match ($key) {
                     "task" => self::interpretTask($breadcrumb, $value),
-                    default => Bus::broadcast(new ConfigEvent(
+                    default => $this->bus->broadcast(new ConfigEvent(
                         "The unknown \"$key\" index must be " .
                         "\"task\" string.",
                         Level::ERROR,
@@ -59,7 +61,7 @@ class Interpreter implements ConfigInterpreter
                     ))
                 };
 
-        else Bus::broadcast(new ConfigEvent(
+        else $this->bus->broadcast(new ConfigEvent(
             "The value must be the default \"" . Image::class .
             "\" class name string or a configured array task.",
             Level::ERROR,
@@ -73,10 +75,10 @@ class Interpreter implements ConfigInterpreter
      * @param array $breadcrumb Index path inside the config.
      * @param mixed $entry Task entry.
      */
-    private static function interpretDefaultTask(array $breadcrumb, mixed $entry): void
+    private function interpretDefaultTask(array $breadcrumb, mixed $entry): void
     {
         if ($entry !== Image::class)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value must be the \"" . Image::class .
                 "\" class name string.",
                 Level::ERROR,
@@ -90,14 +92,14 @@ class Interpreter implements ConfigInterpreter
      * @param array $breadcrumb Index path inside the config.
      * @param mixed $entry Task entry.
      */
-    private static function interpretTask(array $breadcrumb, mixed $entry): void
+    private function interpretTask(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if ($entry !== Image::class)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value, task class name, of the \"task\" " .
                 "index must be the \"" . Image::class . "\" string.",
                 Level::ERROR,

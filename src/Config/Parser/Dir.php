@@ -24,7 +24,7 @@ namespace Valvoid\Fusion\Config\Parser;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Log\Events\Level;
-use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Wrappers\Dir as DirWrapper;
 use Valvoid\Fusion\Wrappers\File;
 
@@ -38,13 +38,13 @@ class Dir
      *
      * @param Box $box Dependency injection container.
      * @param DirWrapper $dir Wrapper for standard directory operations.
-     * @param BusProxy $bus Event bus.
+     * @param Bus $bus Event bus.
      * @param File $file Wrapper for standard file operations.
      */
     public function __construct(
         private readonly Box $box,
         private readonly DirWrapper $dir,
-        private readonly BusProxy $bus,
+        private readonly Bus $bus,
         private readonly File $file) {}
 
     /**

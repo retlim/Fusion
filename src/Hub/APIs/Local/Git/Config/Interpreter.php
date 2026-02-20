@@ -32,6 +32,8 @@ use Valvoid\Fusion\Log\Events\Level;
  */
 class Interpreter implements ConfigInterpreter
 {
+    public function __construct(private readonly Bus $bus) {}
+
     /**
      * Interprets the directory config.
      *
@@ -51,7 +53,7 @@ class Interpreter implements ConfigInterpreter
             foreach ($entry as $key => $value)
                 match ($key) {
                     "api" => self::interpretApi($breadcrumb, $value),
-                    default => Bus::broadcast(new ConfigEvent(
+                    default => $this->bus->broadcast(new ConfigEvent(
                         "The unknown \"$key\" index must be " .
                         "\"api\" string.",
                         Level::ERROR,
@@ -59,7 +61,7 @@ class Interpreter implements ConfigInterpreter
                     ))
                 };
 
-        else Bus::broadcast(new ConfigEvent(
+        else $this->bus->broadcast(new ConfigEvent(
             "The value must be the default \"" . Git::class .
             "\" class name string or a configured array API.",
             Level::ERROR,
@@ -72,10 +74,10 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry API entry.
      */
-    private static function interpretDefaultApi(array $breadcrumb, mixed $entry): void
+    private function interpretDefaultApi(array $breadcrumb, mixed $entry): void
     {
         if ($entry !== Git::class)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value must be the \"" . Git::class .
                 "\" class name string.",
                 Level::ERROR,
@@ -88,14 +90,14 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry API entry.
      */
-    private static function interpretApi(array $breadcrumb, mixed $entry): void
+    private function interpretApi(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if ($entry !== Git::class)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value, API class name, of the \"api\" " .
                 "index must be the \"" . Git::class . "\" string.",
                 Level::ERROR,

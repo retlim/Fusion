@@ -32,6 +32,8 @@ use Valvoid\Fusion\Log\Events\Level;
  */
 class Interpreter implements ConfigInterpreter
 {
+    public function __construct(private readonly Bus $bus) {}
+
     /**
      * Interprets the Bitbucket config.
      *
@@ -54,7 +56,7 @@ class Interpreter implements ConfigInterpreter
                     "protocol" => self::interpretProtocol($breadcrumb, $value),
                     "domain" => self::interpretDomain($breadcrumb, $value),
                     "tokens" => self::interpretTokens($breadcrumb, $value),
-                    default => Bus::broadcast(new ConfigEvent(
+                    default => $this->bus->broadcast(new ConfigEvent(
                         "The unknown \"$key\" index must be " .
                         "\"tokens\", \"api\", \"protocol\" or \"domain\" string.",
                         Level::ERROR,
@@ -62,7 +64,7 @@ class Interpreter implements ConfigInterpreter
                     ))
                 };
 
-        else Bus::broadcast(new ConfigEvent(
+        else $this->bus->broadcast(new ConfigEvent(
             "The value must be the default \"" . Bitbucket::class .
             "\" class name string or a configured array API.",
             Level::ERROR,
@@ -75,10 +77,10 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry API entry.
      */
-    private static function interpretDefaultApi(array $breadcrumb, mixed $entry): void
+    private function interpretDefaultApi(array $breadcrumb, mixed $entry): void
     {
         if ($entry !== Bitbucket::class)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value must be the \"" . Bitbucket::class .
                 "\" class name string.",
                 Level::ERROR,
@@ -92,14 +94,14 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry API entry.
      */
-    private static function interpretApi(array $breadcrumb, mixed $entry): void
+    private function interpretApi(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if ($entry !== Bitbucket::class)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value, API class name, of the \"api\" " .
                 "index must be the \"" . Bitbucket::class . "\" string.",
                 Level::ERROR,
@@ -112,7 +114,7 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry Entry.
      */
-    private static function interpretTokens(array $breadcrumb, mixed $entry): void
+    private function interpretTokens(array $breadcrumb, mixed $entry): void
     {
         // token or null - normalizer reset value
         if ($entry === null || (is_string($entry) && $entry))
@@ -123,7 +125,7 @@ class Interpreter implements ConfigInterpreter
             self::validateTokensGroup(["tokens"], $entry);
 
         else
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value, token or token group, of " .
                 "the \"tokens\" index must be a non-empty array or string.",
                 Level::ERROR,
@@ -137,14 +139,14 @@ class Interpreter implements ConfigInterpreter
      * @param array $breadcrumb Index path inside the config.
      * @param array $entry Group entry.
      */
-    private static function validateTokensGroup(array $breadcrumb, array $entry): void
+    private function validateTokensGroup(array $breadcrumb, array $entry): void
     {
         foreach ($entry as $key => $value) {
 
             // path
             if (is_string($key))
                 if ($key == "")
-                    Bus::broadcast(new ConfigEvent(
+                    $this->bus->broadcast(new ConfigEvent(
                         "The \"$key\" index, path, must be a non-empty string.",
                         Level::ERROR,
                         [...$breadcrumb, $key]
@@ -153,7 +155,7 @@ class Interpreter implements ConfigInterpreter
                 // group
                 elseif (is_array($value)) {
                     if (empty($value))
-                        Bus::broadcast(new ConfigEvent(
+                        $this->bus->broadcast(new ConfigEvent(
                             "The value, group, of the \"$key\" " .
                             "index must be a non-empty array.",
                             Level::ERROR,
@@ -169,7 +171,7 @@ class Interpreter implements ConfigInterpreter
                 continue;
 
             else
-                Bus::broadcast(new ConfigEvent(
+                $this->bus->broadcast(new ConfigEvent(
                     "The value, token, of the \"$key\" " .
                     "index must be a non-empty string.",
                     Level::ERROR,
@@ -184,14 +186,14 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry Protocol entry.
      */
-    private static function interpretProtocol(array $breadcrumb, mixed $entry): void
+    private function interpretProtocol(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if ($entry != "https" && $entry != "http")
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value of the \"protocol\" index " .
                 "must be an \"https\" or \"http\" string.",
                 Level::ERROR,
@@ -204,14 +206,14 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry Domain entry.
      */
-    private static function interpretDomain(array $breadcrumb, mixed $entry): void
+    private function interpretDomain(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!filter_var($entry, FILTER_VALIDATE_DOMAIN))
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value of the \"domain\" index " .
                 "must be an domain string.",
                 Level::ERROR,

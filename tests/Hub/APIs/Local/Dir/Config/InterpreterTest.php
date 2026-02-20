@@ -48,7 +48,7 @@ class InterpreterTest extends Test
     {
         $this->boxMock->bus->event = false;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->boxMock->bus);
         $interpreter->interpret([], Dir::class);
 
         if ($this->boxMock->bus->event !== false)
@@ -59,7 +59,7 @@ class InterpreterTest extends Test
     {
         $this->boxMock->bus->event = false;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->boxMock->bus);
         $interpreter->interpret([], [
             "api" => Dir::class
         ]);
@@ -72,7 +72,7 @@ class InterpreterTest extends Test
     {
         $this->boxMock->bus->event = false;
 
-        $interpreter = new Interpreter;
+        $interpreter = new Interpreter($this->boxMock->bus);
         $interpreter->interpret([], 34);
 
         if ($this->boxMock->bus->event === false)

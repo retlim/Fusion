@@ -19,8 +19,41 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Bus\Mocks;
+namespace Valvoid\Fusion\Tests\Units\Bus;
 
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Event;
+use Valvoid\Reflex\Test\Wrapper;
 
-class EventMock implements Event {}
+class BusTest extends Wrapper
+{
+    private Event|null $event = null;
+
+    public function testReceiver(): void
+    {
+        $event = $this->createStub(Event::class);
+
+        $bus = new Bus;
+        $bus->addReceiver("#",
+            $this->handleEvent(...),
+            $event::class);
+
+        $bus->broadcast($event);
+
+        $this->validate($this->event)
+            ->as($event);
+
+        $this->event = null;
+
+        $bus->removeReceiver("#");
+        $bus->broadcast($event);
+
+        $this->validate($this->event)
+            ->asNull();
+    }
+
+    private function handleEvent(Event $event): void
+    {
+        $this->event = $event;
+    }
+}

@@ -23,7 +23,7 @@ namespace Valvoid\Fusion\Config\Normalizer;
 
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
-use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Normalizer;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Log\Events\Level;
@@ -38,12 +38,12 @@ class Hub
      *
      * @param Box $box Dependency injection container.
      * @param Config $config Config.
-     * @param BusProxy $bus Event bus.
+     * @param Bus $bus Event bus.
      */
     public function __construct(
         private readonly Box $box,
         private readonly Config $config,
-        private readonly BusProxy $bus) {}
+        private readonly Bus $bus) {}
 
     /**
      * Normalizes the hub config.

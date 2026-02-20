@@ -25,7 +25,7 @@ use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Config\Parser\Dir as DirectoryParser;
 use Valvoid\Fusion\Log\Events\Level;
-use Valvoid\Fusion\Bus\Proxy as BusProxy;
+use Valvoid\Fusion\Bus\Bus;
 
 /**
  * Directories config interpreter.
@@ -36,11 +36,11 @@ class Dir
      * Constructs the interpreter.
      *
      * @param Box $box Dependency injection container.
-     * @param BusProxy $bus Event bus.
+     * @param Bus $bus Event bus.
      */
     public function __construct(
         private readonly Box $box,
-        private readonly BusProxy $bus) {}
+        private readonly Bus $bus) {}
 
     /**
      * Interprets current working directory entry.

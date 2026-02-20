@@ -22,40 +22,44 @@
 namespace Valvoid\Fusion\Bus;
 
 use Closure;
-use Exception;
-use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Log\Events\Errors\Error;
 
 /**
- * Static event bus proxy.
+ * Default event bus implementation.
  */
 class Bus
 {
+    /** @var Closure Event receivers. */
+    protected array $receivers = [];
+
     /**
      * Adds event receiver.
      *
      * @param string $id Receiver ID.
      * @param Closure $callback Receiver callback.
      * @param string ...$events Event class name IDs.
-     * @throws Error|Exception Internal error.
      */
-    public static function addReceiver(string $id, Closure $callback, string ...$events): void
+    public function addReceiver(string $id, Closure $callback, string ...$events): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->addReceiver($id, $callback, ...$events);
+        foreach ($events as $event)
+            $this->receivers[$event][$id] = $callback;
     }
 
     /**
      * Sends the event to all receivers.
      *
      * @param Event $event Event.
-     * @throws Error|Exception Internal error.
      */
-    public static function broadcast(Event $event): void
+    public function broadcast(Event $event): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->broadcast($event);
+        $receivers = $this->receivers[$event::class] ??
+
+            // fallback
+            // broadcast has no confirmation
+            [];
+
+        foreach ($receivers as $callback)
+            $callback($event);
     }
 
     /**
@@ -63,11 +67,15 @@ class Bus
      *
      * @param string $id Receiver ID.
      * @param string ...$events Event class name IDs.
-     * @throws Error|Exception Internal error.
      */
-    public static function removeReceiver(string $id, string ...$events): void
+    public function removeReceiver(string $id, string ...$events): void
     {
-        Box::getInstance()->get(Proxy::class)
-            ->removeReceiver($id, ...$events);
+        // clear selected event or
+        // complete
+        if (!$events)
+            $events = array_keys($this->receivers);
+
+        foreach ($events as $event)
+            unset($this->receivers[$event][$id]);
     }
 }

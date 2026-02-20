@@ -23,9 +23,9 @@ namespace Valvoid\Fusion\Tests\Hub\APIs\Remote\GitLab\Config\Mocks;
 
 use Closure;
 use Valvoid\Fusion\Bus\Events\Event;
-use Valvoid\Fusion\Bus\Proxy;
+use Valvoid\Fusion\Bus\Bus;
 
-class BusMock implements Proxy
+class BusMock extends Bus
 {
     // last event
     public ?Event $event = null;

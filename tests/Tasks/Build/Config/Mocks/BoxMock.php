@@ -22,14 +22,14 @@
 namespace Valvoid\Fusion\Tests\Tasks\Build\Config\Mocks;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Bus\Proxy;
+use Valvoid\Fusion\Bus\Bus;
 
 class BoxMock extends Box
 {
     public BusMock $bus;
     public function get(string $class, ...$args): object
     {
-        if ($class === Proxy::class)
+        if ($class === Bus::class)
             return $this->bus;
 
         return parent::get($class, ...$args);

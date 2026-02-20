@@ -33,6 +33,8 @@ use Valvoid\Fusion\Util\Version\Interpreter as VersionInterpreter;
  */
 class Interpreter implements ConfigInterpreter
 {
+    public function __construct(private readonly Bus $bus) {}
+
     /**
      * Interprets the build task config.
      *
@@ -54,7 +56,7 @@ class Interpreter implements ConfigInterpreter
                     "environment" => self::interpretEnvironment($breadcrumb, $value),
                     "task" => self::interpretTask($breadcrumb, $value),
                     "source" => self::interpretSource($breadcrumb, $value),
-                    default => Bus::broadcast(new ConfigEvent(
+                    default => $this->bus->broadcast(new ConfigEvent(
                         "The unknown \"$key\" index must be \"task\", " .
                         "\"environment\", or \"source\" string.",
                         Level::ERROR,
@@ -62,7 +64,7 @@ class Interpreter implements ConfigInterpreter
                     ))
                 };
 
-        else Bus::broadcast(new ConfigEvent(
+        else $this->bus->broadcast(new ConfigEvent(
             "The value must be the default \"" . Build::class .
             "\" class name string or a configured array task.",
             Level::ERROR,
@@ -75,10 +77,10 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry Task entry.
      */
-    private static function interpretDefaultTask(array $breadcrumb, mixed $entry): void
+    private function interpretDefaultTask(array $breadcrumb, mixed $entry): void
     {
         if ($entry !== Build::class)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value must be the \"" . Build::class .
                 "\" class name string.",
                 Level::ERROR,
@@ -92,14 +94,14 @@ class Interpreter implements ConfigInterpreter
      * @param array $breadcrumb Index path inside the config.
      * @param mixed $entry Task entry.
      */
-    private static function interpretTask(array $breadcrumb, mixed $entry): void
+    private function interpretTask(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if ($entry !== Build::class)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value, task class name, of the \"task\" " .
                 "index must be the \"" . Build::class . "\" string.",
                 Level::ERROR,
@@ -113,14 +115,14 @@ class Interpreter implements ConfigInterpreter
      * @param array $breadcrumb Index path inside the config.
      * @param mixed $entry Source entry.
      */
-    private static function interpretSource(array $breadcrumb, mixed $entry): void
+    private function interpretSource(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_string($entry) || !$entry)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value, source, of the \"source\" " .
                 "index must be a non-empty string.",
                 Level::ERROR,
@@ -134,14 +136,14 @@ class Interpreter implements ConfigInterpreter
      * @param array $breadcrumb Index path inside the config.
      * @param mixed $entry Environment entry.
      */
-    private static function interpretEnvironment(array $breadcrumb, mixed $entry): void
+    private function interpretEnvironment(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value, environment config, of the \"environment\" " .
                 "index must be an assoc array.",
                 Level::ERROR,
@@ -154,7 +156,7 @@ class Interpreter implements ConfigInterpreter
 
                 // pass error to builder
                 // prevent redundant error handling
-                default => Bus::broadcast(new ConfigEvent(
+                default => $this->bus->broadcast(new ConfigEvent(
                     "The unknown \"$key\" index must be \"php\" string.",
                     Level::ERROR,
                     [...$breadcrumb, $key]
@@ -168,14 +170,14 @@ class Interpreter implements ConfigInterpreter
      * @param array $breadcrumb Index path inside the config.
      * @param mixed $entry Php version.
      */
-    private static function interpretPhp(array $breadcrumb, mixed $entry): void
+    private function interpretPhp(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_array($entry) || empty($entry))
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value of the \"php\" index must be an assoc array.",
                 Level::ERROR,
                 [...$breadcrumb, "environment", "php"]
@@ -187,7 +189,7 @@ class Interpreter implements ConfigInterpreter
 
                 // pass error to builder
                 // prevent redundant error handling
-                default => Bus::broadcast(new ConfigEvent(
+                default => $this->bus->broadcast(new ConfigEvent(
                     "The unknown \"$key\" index must be \"version\" string.",
                     Level::ERROR,
                     [...$breadcrumb, $key]
@@ -201,7 +203,7 @@ class Interpreter implements ConfigInterpreter
      * @param array $breadcrumb Index path inside the config.
      * @param mixed $entry PHP version.
      */
-    private static function interpretPhpVersion(array $breadcrumb, mixed $entry): void
+    private function interpretPhpVersion(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
@@ -209,7 +211,7 @@ class Interpreter implements ConfigInterpreter
 
         if (!is_string($entry) || !$entry ||
             !VersionInterpreter::isSemanticCoreVersion($entry))
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value of the \"version\" index must be a " .
                 "core (major.minor.patch) semantic version string.",
                 Level::ERROR,

@@ -32,6 +32,8 @@ use Valvoid\Fusion\Tasks\Categorize\Categorize;
  */
 class Interpreter implements ConfigInterpreter
 {
+    public function __construct(private readonly Bus $bus) {}
+
     /**
      * Interprets the categorize task config.
      *
@@ -52,7 +54,7 @@ class Interpreter implements ConfigInterpreter
                 match ($key) {
                     "task" => self::interpretTask($breadcrumb, $value),
                     "efficiently" => self::interpretEfficiently($breadcrumb, $value),
-                    default => Bus::broadcast(new ConfigEvent(
+                    default => $this->bus->broadcast(new ConfigEvent(
                         "The unknown \"$key\" index must be \"task\", " .
                         "or \"efficiently\" string.",
                         Level::ERROR,
@@ -60,7 +62,7 @@ class Interpreter implements ConfigInterpreter
                     ))
                 };
 
-        else Bus::broadcast(new ConfigEvent(
+        else $this->bus->broadcast(new ConfigEvent(
             "The value must be the default \"" . Categorize::class .
             "\" class name string or a configured array task.",
             Level::ERROR,
@@ -73,10 +75,10 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry Task entry.
      */
-    private static function interpretDefaultTask(array $breadcrumb, mixed $entry): void
+    private function interpretDefaultTask(array $breadcrumb, mixed $entry): void
     {
         if ($entry !== Categorize::class)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value must be the \"" . Categorize::class .
                 "\" class name string.",
                 Level::ERROR,
@@ -89,14 +91,14 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry Task entry.
      */
-    private static function interpretTask(array $breadcrumb, mixed $entry): void
+    private function interpretTask(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if ($entry !== Categorize::class)
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value, task class name, of the \"task\" " .
                 "index must be the \"" . Categorize::class . "\" string.",
                 Level::ERROR,
@@ -109,14 +111,14 @@ class Interpreter implements ConfigInterpreter
      *
      * @param mixed $entry Source entry.
      */
-    private static function interpretEfficiently(array $breadcrumb, mixed $entry): void
+    private function interpretEfficiently(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)
             return;
 
         if (!is_bool($entry))
-            Bus::broadcast(new ConfigEvent(
+            $this->bus->broadcast(new ConfigEvent(
                 "The value of the \"efficiently\" " .
                 "index must be a boolean.",
                 Level::ERROR,
