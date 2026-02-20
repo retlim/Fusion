@@ -23,7 +23,7 @@ namespace Valvoid\Fusion\Hub;
 
 use Closure;
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Config\Proxy as ConfigProxy;
+use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Offset as RemoteOffsetApi;
@@ -81,14 +81,14 @@ class Hub
      * @param Box $box Dependency injection container.
      * @param CurlMulti $curlMulti Curl multi wrapper.
      * @param CurlShare $curlShare Curl share wrapper.
-     * @param ConfigProxy $conf Config.
+     * @param Config $conf Config.
      * @throws HubError Hub error.
      */
     public function __construct(
         private readonly Box $box,
         private readonly CurlMulti $curlMulti,
         private readonly CurlShare $curlShare,
-        ConfigProxy $conf)
+        Config $conf)
     {
         // local API root
         $root = $conf->get("dir", "path");

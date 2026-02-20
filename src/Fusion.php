@@ -26,8 +26,7 @@ use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Bus\Logic as BusLogic;
 use Valvoid\Fusion\Bus\Proxy as BusProxy;
-use Valvoid\Fusion\Config\Logic as ConfigLogic;
-use Valvoid\Fusion\Config\Proxy as ConfigProxy;
+use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Log\Events\Errors\Config as ConfigError;
@@ -76,7 +75,6 @@ class Fusion
 
         // set up proxies
         $box->map(BusLogic::class, BusProxy::class);
-        $box->map(ConfigLogic::class, ConfigProxy::class);
 
         $root = $dir->getDirname(__DIR__);
         $this->root = $this->getRoot($root);
@@ -97,13 +95,13 @@ class Fusion
         // share common object instances
         $box->recycle(BusLogic::class,
             Log::class,
-            ConfigLogic::class,
+            Config::class,
             Group::class,
             Directory::class,
             Hub::class);
 
         $bus = $box->get(BusLogic::class);
-        $config = $box->get(ConfigLogic::class,
+        $config = $box->get(Config::class,
             root: $root,
             path: $this->root,
             prefixes: $this->prefixes,
@@ -159,7 +157,7 @@ class Fusion
         $log = $this->box->get(Log::class);
 
         try {
-            $entry = $this->box->get(ConfigLogic::class)
+            $entry = $this->box->get(Config::class)
                 ->get("tasks", $id) ??
                     throw new InternalError(
                         "Task id '$id' does not exist."

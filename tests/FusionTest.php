@@ -83,7 +83,7 @@ class FusionTest extends Test
             $this->box->get = function ($class, ...$args) use ($bus, $config) {
                 if ($class == "Valvoid\Fusion\Bus\Logic")
                     return $bus;
-                if ($class == "Valvoid\Fusion\Config\Logic")
+                if ($class == "Valvoid\Fusion\Config\Config")
                     return $config;
             };
 
@@ -100,10 +100,7 @@ class FusionTest extends Test
                 $map != [[
                         "class" => "Valvoid\Fusion\Bus\Logic",
                         "abstraction" => "Valvoid\Fusion\Bus\Proxy",
-                    ],[
-                    "class" => "Valvoid\Fusion\Config\Logic",
-                    "abstraction" => "Valvoid\Fusion\Config\Proxy",
-                ]])
+                    ]])
                 $this->handleFailedTest();
 
         } catch (Throwable) {
@@ -155,7 +152,7 @@ class FusionTest extends Test
             $this->box->get = function ($class, ...$args) use ($bus, $config) {
                 if ($class == "Valvoid\Fusion\Bus\Logic")
                     return $bus;
-                if ($class == "Valvoid\Fusion\Config\Logic")
+                if ($class == "Valvoid\Fusion\Config\Config")
                     return $config;
             };
 
@@ -173,9 +170,6 @@ class FusionTest extends Test
                 $map != [[
                     "class" => "Valvoid\Fusion\Bus\Logic",
                     "abstraction" => "Valvoid\Fusion\Bus\Proxy",
-                ],[
-                    "class" => "Valvoid\Fusion\Config\Logic",
-                    "abstraction" => "Valvoid\Fusion\Config\Proxy",
                 ]])
                 $this->handleFailedTest();
 
@@ -238,7 +232,7 @@ class FusionTest extends Test
             ($bus, $config, $directory, &$tasks) {
                 if ($class == "Valvoid\Fusion\Bus\Logic")
                     return $bus;
-                if ($class == "Valvoid\Fusion\Config\Logic")
+                if ($class == "Valvoid\Fusion\Config\Config")
                     return $config;
 
                 if ($class == "Valvoid\Fusion\Log\Log")
@@ -287,9 +281,6 @@ class FusionTest extends Test
                 $map != [[
                     "class" => "Valvoid\Fusion\Bus\Logic",
                     "abstraction" => "Valvoid\Fusion\Bus\Proxy",
-                ],[
-                    "class" => "Valvoid\Fusion\Config\Logic",
-                    "abstraction" => "Valvoid\Fusion\Config\Proxy",
                 ]])
                 $this->handleFailedTest();
 
@@ -349,7 +340,7 @@ class FusionTest extends Test
             ($bus, $config, $directory, &$tasks) {
                 if ($class == "Valvoid\Fusion\Bus\Logic")
                     return $bus;
-                if ($class == "Valvoid\Fusion\Config\Logic")
+                if ($class == "Valvoid\Fusion\Config\Config")
                     return $config;
 
                 if ($class == "Valvoid\Fusion\Log\Log")
@@ -398,9 +389,6 @@ class FusionTest extends Test
                 $map != [[
                     "class" => "Valvoid\Fusion\Bus\Logic",
                     "abstraction" => "Valvoid\Fusion\Bus\Proxy",
-                ],[
-                    "class" => "Valvoid\Fusion\Config\Logic",
-                    "abstraction" => "Valvoid\Fusion\Config\Proxy",
                 ]])
                 $this->handleFailedTest();
 

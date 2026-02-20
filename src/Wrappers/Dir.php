@@ -37,7 +37,7 @@ class Dir
      * failure. If directory is not a directory, then boolean false is
      * returned, and an error of level E_WARNING is generated.
      */
-    public function getFilenames(string $dir, int $order = SCANDIR_SORT_ASCENDING): array|false
+    public function getFilenames(string $dir, int $order = \SCANDIR_SORT_ASCENDING): array|false
     {
         return scandir($dir, $order);
     }

@@ -23,7 +23,7 @@ namespace Valvoid\Fusion\Dir;
 
 use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Proxy as Bus;
-use Valvoid\Fusion\Config\Proxy as Config;
+use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Wrappers\Dir as DirWrapper;
 use Valvoid\Fusion\Wrappers\File;

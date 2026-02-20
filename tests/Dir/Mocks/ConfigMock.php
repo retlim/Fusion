@@ -22,9 +22,9 @@
 namespace Valvoid\Fusion\Tests\Dir\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Config\Logic;
+use Valvoid\Fusion\Config\Config;
 
-class ConfigMock extends Logic
+class ConfigMock extends Config
 {
     public Closure $get;
 

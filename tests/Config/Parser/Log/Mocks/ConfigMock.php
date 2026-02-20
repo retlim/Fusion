@@ -22,13 +22,15 @@
 namespace Valvoid\Fusion\Tests\Config\Parser\Log\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Config\Proxy;
+use Valvoid\Fusion\Config\Config;
 
-class ConfigMock implements Proxy
+class ConfigMock extends Config
 {
     public Closure $get;
     public Closure $lazy;
     public Closure $has;
+
+    public function __construct(){}
 
     public function get(string ...$breadcrumb): mixed
     {

@@ -25,7 +25,7 @@ use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Bus\Proxy as BusProxy;
 use Valvoid\Fusion\Config\Normalizer;
-use Valvoid\Fusion\Config\Proxy as ConfigProxy;
+use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Log\Events\Level;
 
 /**
@@ -37,12 +37,12 @@ class Tasks
      * Constructs the normalizer.
      *
      * @param Box $box Dependency injection container.
-     * @param ConfigProxy $config Config.
+     * @param Config $config Config.
      * @param BusProxy $bus Event bus.
      */
     public function __construct(
         private readonly Box $box,
-        private readonly ConfigProxy $config,
+        private readonly Config $config,
         private readonly BusProxy $bus) {}
 
     /**

@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Log;
 
 use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Config\Proxy as Config;
+use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Infos\Error as ErrorInfo;
 use Valvoid\Fusion\Log\Events\Interceptor;

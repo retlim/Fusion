@@ -21,10 +21,12 @@
 
 namespace Valvoid\Fusion\Tests\Hub\Mocks;
 
-use Valvoid\Fusion\Config\Proxy;
+use Valvoid\Fusion\Config\Config;
 
-class ConfigMock implements Proxy
+class ConfigMock extends Config
 {
+    public function __construct() {}
+
     public function get(string ...$breadcrumb): mixed
     {
         // normalized

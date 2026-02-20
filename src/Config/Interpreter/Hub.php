@@ -24,7 +24,7 @@ namespace Valvoid\Fusion\Config\Interpreter;
 use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Config\Interpreter;
-use Valvoid\Fusion\Config\Proxy as ConfigProxy;
+use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Hub\APIs\Local\Local;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote;
 use Valvoid\Fusion\Log\Events\Level;
@@ -39,12 +39,12 @@ class Hub
      * Constructs the interpreter.
      *
      * @param Box $box Dependency injection container.
-     * @param ConfigProxy $config Config.
+     * @param Config $config Config.
      * @param BusProxy $bus Event bus.
      */
     public function __construct(
         private readonly Box $box,
-        private readonly ConfigProxy $config,
+        private readonly Config $config,
         private readonly BusProxy $bus) {}
 
     /**

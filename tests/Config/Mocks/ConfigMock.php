@@ -22,9 +22,9 @@
 namespace Valvoid\Fusion\Tests\Config\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Config\Proxy;
+use Valvoid\Fusion\Config\Config;
 
-class ConfigMock implements Proxy
+class ConfigMock extends Config
 {
     public Closure $get;
     public Closure $lazy;

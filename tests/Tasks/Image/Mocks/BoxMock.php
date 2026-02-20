@@ -46,7 +46,7 @@ class BoxMock extends Box
         if ($class === Group::class)
             return $this->group;
 
-        if ($class === \Valvoid\Fusion\Config\Proxy::class)
+        if ($class === \Valvoid\Fusion\Config\Config::class)
             return $this->config;
 
         if ($class === Builder::class)
