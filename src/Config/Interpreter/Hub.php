@@ -159,7 +159,7 @@ class Hub
                     ["hub", "apis", $id, "api"]
                 );
 
-            $interpreter::interpret(
+            $interpreter->interpret(
                 ["hub", "apis", $id, "api"],
                 $entry
             );
@@ -188,7 +188,7 @@ class Hub
         if ($this->config->hasLazy($class)) {
             $interpreter = $this->box->get($class);
 
-            $interpreter::interpret(
+            $interpreter->interpret(
                 ["hub", "apis", $id],
                 $entry
             );

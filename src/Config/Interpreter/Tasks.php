@@ -215,7 +215,7 @@ class Tasks
                     $breadcrumb
                 );
 
-            $interpreter::interpret($breadcrumb, $entry);
+            $interpreter->interpret($breadcrumb, $entry);
         }
     }
 
@@ -248,7 +248,7 @@ class Tasks
                     $breadcrumb
                 );
 
-            $interpreter::interpret($breadcrumb, $entry);
+            $interpreter->interpret($breadcrumb, $entry);
         }
     }
 

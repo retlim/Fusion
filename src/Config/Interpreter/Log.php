@@ -160,7 +160,7 @@ class Log
                     ["log", "serializers", $id, "serializer"]
                 );
 
-            $interpreter::interpret(
+            $interpreter->interpret(
                 ["log", "serializers", $id, "serializer"],
                 $entry
             );
@@ -189,7 +189,7 @@ class Log
         if ($this->config->hasLazy($class)) {
             $interpreter = $this->box->get($class);
 
-            $interpreter::interpret(
+            $interpreter->interpret(
                 ["log", "serializers", $id],
                 $entry
             );

@@ -38,7 +38,7 @@ class Interpreter extends ConfigInterpreter
      * @param array $breadcrumb Index path inside the config to the passed sub config.
      * @param mixed $entry Sub config to interpret.
      */
-    public static function interpret(array $breadcrumb, mixed $entry): void
+    public function interpret(array $breadcrumb, mixed $entry): void
     {
         // overlay reset value
         if ($entry === null)

@@ -51,7 +51,8 @@ class InterpreterTest extends Test
     {
         $this->bus->event = null;
 
-        Interpreter::interpret([], null);
+        $interpreter = new Interpreter;
+        $interpreter->interpret([], null);
 
         // assert nothing
         if ($this->bus->event !== null)
@@ -63,7 +64,8 @@ class InterpreterTest extends Test
         $this->bus->event = null;
 
         // must be string or array
-        Interpreter::interpret([], 3455);
+        $interpreter = new Interpreter;
+        $interpreter->interpret([], 3455);
 
         if ($this->bus->event === null ||
             $this->bus->event->getLevel() !== Level::ERROR)
@@ -75,7 +77,8 @@ class InterpreterTest extends Test
         $this->bus->event = null;
 
         // default string task config
-        Interpreter::interpret([], Build::class);
+        $interpreter = new Interpreter;
+        $interpreter->interpret([], Build::class);
 
         // assert nothing
         if ($this->bus->event !== null)
@@ -86,7 +89,8 @@ class InterpreterTest extends Test
     {
         $this->bus->event = null;
 
-        Interpreter::interpret([], [
+        $interpreter = new Interpreter;
+        $interpreter->interpret([], [
             "task" => Build::class
         ]);
 

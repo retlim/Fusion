@@ -32,5 +32,5 @@ abstract class Interpreter
      * @param array $breadcrumb Index path inside the config to the passed sub config.
      * @param mixed $entry Sub config to interpret.
      */
-    abstract public static function interpret(array $breadcrumb, mixed $entry): void;
+    abstract public function interpret(array $breadcrumb, mixed $entry): void;
 }

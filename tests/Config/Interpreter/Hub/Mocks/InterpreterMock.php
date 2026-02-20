@@ -28,7 +28,7 @@ class InterpreterMock extends Interpreter
     public static array $breadcrumb;
     public static mixed $entry;
 
-    public static function interpret(array $breadcrumb, mixed $entry): void
+    public function interpret(array $breadcrumb, mixed $entry): void
     {
         self::$breadcrumb = $breadcrumb;
         self::$entry = $entry;

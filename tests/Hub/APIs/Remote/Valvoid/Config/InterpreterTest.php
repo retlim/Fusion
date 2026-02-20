@@ -52,7 +52,8 @@ class InterpreterTest extends Test
     {
         $this->container->bus->event = null;
 
-        Interpreter::interpret([], [
+        $interpreter = new Interpreter;
+        $interpreter->interpret([], [
             "api" => Valvoid::class,
             "protocol" => "http",
             "domain" => "valvoid.com",
@@ -69,7 +70,8 @@ class InterpreterTest extends Test
     {
         $this->container->bus->event = null;
 
-        Interpreter::interpret([], Valvoid::class);
+        $interpreter = new Interpreter;
+        $interpreter->interpret([], Valvoid::class);
 
         if ($this->container->bus->event !== null)
             $this->handleFailedTest();
@@ -79,7 +81,8 @@ class InterpreterTest extends Test
     {
         $this->container->bus->event = null;
 
-        Interpreter::interpret([], 34);
+        $interpreter = new Interpreter;
+        $interpreter->interpret([], 34);
 
         if ($this->container->bus->event === null ||
             $this->container->bus->event->getLevel() !== Level::ERROR)
@@ -90,7 +93,8 @@ class InterpreterTest extends Test
     {
         $this->container->bus->event = null;
 
-        Interpreter::interpret([], null);
+        $interpreter = new Interpreter;
+        $interpreter->interpret([], null);
 
         if ($this->container->bus->event !== null)
             $this->handleFailedTest();
