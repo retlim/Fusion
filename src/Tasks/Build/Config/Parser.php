@@ -33,7 +33,7 @@ class Parser extends ConfigParser
      * @param array $breadcrumb
      * @param array $config
      */
-    public static function parse(array $breadcrumb, array &$config): void
+    public function parse(array $breadcrumb, array &$config): void
     {
         if (isset($config["environment"]["php"]["version"]))
             $config["environment"]["php"]["version"] = VersionParser::getInflatedVersion(

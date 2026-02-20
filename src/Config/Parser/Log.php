@@ -89,7 +89,7 @@ class Log
                                 ["log", "serializers", $key]
                             );
 
-                        $parser::parse(
+                        $parser->parse(
                             ["log", "serializers", $key],
                             $value
                         );
@@ -125,7 +125,7 @@ class Log
                     [...$breadcrumb, "serializer"]
                 );
 
-            $parser::parse($breadcrumb, $config);
+            $parser->parse($breadcrumb, $config);
         }
     }
 

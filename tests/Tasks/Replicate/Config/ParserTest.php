@@ -44,7 +44,8 @@ class ParserTest extends Test
             "patch" => "4"
         ];
 
-        Parser::parse([], $config);
+        $parser = new Parser;
+        $parser->parse([], $config);
 
         if ($config !== $assertion)
             $this->handleFailedTest();

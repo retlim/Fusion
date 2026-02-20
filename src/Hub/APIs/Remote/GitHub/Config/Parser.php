@@ -29,7 +29,7 @@ use Valvoid\Fusion\Config\Parser as ConfigParser;
 class Parser extends ConfigParser
 {
     /** @inheritdoc */
-    public static function parse(array $breadcrumb, array &$config): void
+    public function parse(array $breadcrumb, array &$config): void
     {
         if (isset($config["tokens"])) {
             if (is_string($config["tokens"]))

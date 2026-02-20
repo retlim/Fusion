@@ -25,7 +25,7 @@ use Valvoid\Fusion\Config\Parser as ConfigParser;
 
 class ParserMock extends ConfigParser
 {
-    public static function parse(array $breadcrumb, array &$config): void
+    public function parse(array $breadcrumb, array &$config): void
     {
         $config = [
             "breadcrumb" => $breadcrumb,

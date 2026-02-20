@@ -47,7 +47,8 @@ class ParserTest extends Test
             ]
         ];
 
-        Parser::parse([], $config);
+        $parser = new Parser;
+        $parser->parse([], $config);
 
         if ($config["tokens"] !== [
                 "token1",

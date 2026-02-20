@@ -89,7 +89,7 @@ class Hub
                                 ["hub", "apis", $key]
                             );
 
-                        $parser::parse(
+                        $parser->parse(
                             ["hub", "apis", $key],
                             $value
                         );
@@ -125,7 +125,7 @@ class Hub
                     [...$breadcrumb, "api"]
                 );
 
-            $parser::parse($breadcrumb, $config);
+            $parser->parse($breadcrumb, $config);
         }
     }
 

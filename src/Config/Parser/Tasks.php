@@ -89,7 +89,7 @@ class Tasks
                                 ["tasks", $key]
                             );
 
-                        $parser::parse(
+                        $parser->parse(
                             ["tasks", $key],
                             $value
                         );
@@ -143,7 +143,7 @@ class Tasks
                                 ["tasks", $groupId, $taskId]
                             );
 
-                        $parser::parse($breadcrumb, $task);
+                        $parser->parse($breadcrumb, $task);
                     }
                 }
 
@@ -181,7 +181,7 @@ class Tasks
                     [...$breadcrumb, "task"]
                 );
 
-            $parser::parse($breadcrumb, $config);
+            $parser->parse($breadcrumb, $config);
         }
     }
 

@@ -32,5 +32,5 @@ abstract class Parser
      * @param array $breadcrumb Index path inside the config to the passed sub config.
      * @param array $config Sub config to parse.
      */
-    abstract public static function parse(array $breadcrumb, array &$config): void;
+    abstract public function parse(array $breadcrumb, array &$config): void;
 }
