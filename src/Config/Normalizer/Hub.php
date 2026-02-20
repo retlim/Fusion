@@ -89,7 +89,7 @@ class Hub
                                 ["hub", "apis", $key]
                             );
 
-                        $normalizer::normalize(
+                        $normalizer->normalize(
                             ["hub", "apis", $key],
                             $value
                         );
@@ -125,7 +125,7 @@ class Hub
                     [...$breadcrumb, "api"]
                 );
 
-            $normalizer::normalize($breadcrumb, $config);
+            $normalizer->normalize($breadcrumb, $config);
         }
     }
 

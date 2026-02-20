@@ -29,7 +29,7 @@ use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
 class Normalizer extends ConfigNormalizer
 {
     /** @inheritdoc */
-    public static function normalize(array $breadcrumb, array &$config): void
+    public function normalize(array $breadcrumb, array &$config): void
     {
         $config["tokens"] ??= [];
         $config["protocol"] ??= "https";

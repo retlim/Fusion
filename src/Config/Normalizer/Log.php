@@ -89,7 +89,7 @@ class Log
                                 ["log", "serializers", $key]
                             );
 
-                        $normalizer::normalize(
+                        $normalizer->normalize(
                             ["log", "serializers", $key],
                             $value
                         );
@@ -125,7 +125,7 @@ class Log
                     [...$breadcrumb, "serializer"]
                 );
 
-            $normalizer::normalize($breadcrumb, $config);
+            $normalizer->normalize($breadcrumb, $config);
         }
     }
 

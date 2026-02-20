@@ -29,7 +29,7 @@ use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
 class Normalizer extends ConfigNormalizer
 {
     /** @inheritdoc */
-    public static function normalize(array $breadcrumb, array &$config): void
+    public function normalize(array $breadcrumb, array &$config): void
     {
         // $breadcrumb[0] -> "tasks"
         if (isset($breadcrumb[2])) {

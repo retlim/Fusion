@@ -89,7 +89,7 @@ class Tasks
                                 ["tasks", $key]
                             );
 
-                        $normalizer::normalize(
+                        $normalizer->normalize(
                             ["tasks", $key],
                             $value
                         );
@@ -143,7 +143,7 @@ class Tasks
                                 ["tasks", $groupId, $taskId]
                             );
 
-                        $normalizer::normalize($breadcrumb, $task);
+                        $normalizer->normalize($breadcrumb, $task);
                     }
                 }
 
@@ -181,7 +181,7 @@ class Tasks
                     [...$breadcrumb, "task"]
                 );
 
-            $normalizer::normalize($breadcrumb, $config);
+            $normalizer->normalize($breadcrumb, $config);
         }
     }
 

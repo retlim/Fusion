@@ -38,7 +38,8 @@ class NormalizerTest extends Test
     {
         $config = [];
 
-        Normalizer::normalize(["t", "g", "i"], $config);
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["t", "g", "i"], $config);
 
         if ($config !== ["group" => "g", "id" => "i"])
             $this->handleFailedTest();
@@ -48,7 +49,8 @@ class NormalizerTest extends Test
     {
         $config = [];
 
-        Normalizer::normalize(["t", "i"], $config);
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["t", "i"], $config);
 
         if ($config !== ["id" => "i"])
             $this->handleFailedTest();

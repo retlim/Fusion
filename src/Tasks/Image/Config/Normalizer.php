@@ -34,7 +34,7 @@ class Normalizer extends ConfigNormalizer
      * @param array $breadcrumb Index path inside the config.
      * @param array $config Config to normalize.
      */
-    public static function normalize(array $breadcrumb, array &$config): void
+    public function normalize(array $breadcrumb, array &$config): void
     {
         // $breadcrumb[0] -> "tasks"
         if (isset($breadcrumb[2])) {

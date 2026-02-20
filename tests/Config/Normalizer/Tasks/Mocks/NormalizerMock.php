@@ -25,7 +25,7 @@ use Valvoid\Fusion\Config\Normalizer;
 
 class NormalizerMock extends Normalizer
 {
-    public static function normalize(array $breadcrumb, array &$config): void
+    public function normalize(array $breadcrumb, array &$config): void
     {
         $config = [
             "breadcrumb" => $breadcrumb,

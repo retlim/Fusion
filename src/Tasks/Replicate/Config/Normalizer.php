@@ -30,7 +30,7 @@ class Normalizer extends ConfigNormalizer
 {
 
     /** @inheritdoc */
-    public static function normalize(array $breadcrumb, array &$config): void
+    public function normalize(array $breadcrumb, array &$config): void
     {
         $config["source"] ??= false;
 

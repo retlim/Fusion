@@ -39,7 +39,8 @@ class NormalizerTest extends Test
     {
         $config = [];
 
-        Normalizer::normalize(["hub", "apis", "bitbucket.org"], $config);
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["hub", "apis", "bitbucket.org"], $config);
 
         if ($config != [
                 "tokens" => [],
@@ -57,7 +58,8 @@ class NormalizerTest extends Test
             "protocol" => "c2"
         ];
 
-        Normalizer::normalize(["hub", "apis", "c3"], $config);
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["hub", "apis", "c3"], $config);
 
         if ($config != [
                 "tokens" => "c1",

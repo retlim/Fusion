@@ -53,7 +53,8 @@ class NormalizerTest extends Test
             ]
         ];
 
-        Normalizer::normalize([], $config);
+        $normalizer = new Normalizer;
+        $normalizer->normalize([], $config);
 
         if ($config !== $assertion)
             $this->handleFailedTest();
@@ -77,7 +78,8 @@ class NormalizerTest extends Test
             ]
         ];
 
-        Normalizer::normalize([], $config);
+        $normalizer = new Normalizer;
+        $normalizer->normalize([], $config);
 
         if ($config != $assertion)
             $this->handleFailedTest();
@@ -103,7 +105,8 @@ class NormalizerTest extends Test
             ]
         ];
 
-        Normalizer::normalize([], $config);
+        $normalizer = new Normalizer;
+        $normalizer->normalize([], $config);
 
         if ($config != $assertion)
             $this->handleFailedTest();

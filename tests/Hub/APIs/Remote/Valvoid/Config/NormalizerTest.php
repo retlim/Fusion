@@ -39,7 +39,8 @@ class NormalizerTest extends Test
     {
         $config = [];
 
-        Normalizer::normalize(["hub", "apis", "valvoid.com"], $config);
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["hub", "apis", "valvoid.com"], $config);
 
         if ($config !== [
                 "tokens" => [],
@@ -56,7 +57,8 @@ class NormalizerTest extends Test
             "protocol" => "c2"
         ];
 
-        Normalizer::normalize(["hub", "apis", "c3"], $config);
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["hub", "apis", "c3"], $config);
 
         if ($config !== [
                 "tokens" => "c1",
