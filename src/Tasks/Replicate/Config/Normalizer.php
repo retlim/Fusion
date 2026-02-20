@@ -26,7 +26,7 @@ use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
 /**
  * Replicate task config normalizer.
  */
-class Normalizer extends ConfigNormalizer
+class Normalizer implements ConfigNormalizer
 {
 
     /** @inheritdoc */

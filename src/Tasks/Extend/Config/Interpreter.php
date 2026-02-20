@@ -30,7 +30,7 @@ use Valvoid\Fusion\Tasks\Extend\Extend;
 /**
  * Extend task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the extend task config.

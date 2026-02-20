@@ -30,7 +30,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * GitLab config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the GitLab config.

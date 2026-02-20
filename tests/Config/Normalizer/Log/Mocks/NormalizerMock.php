@@ -23,7 +23,7 @@ namespace Valvoid\Fusion\Tests\Config\Normalizer\Log\Mocks;
 
 use Valvoid\Fusion\Config\Normalizer;
 
-class NormalizerMock extends Normalizer
+class NormalizerMock implements Normalizer
 {
     public function normalize(array $breadcrumb, array &$config): void
     {

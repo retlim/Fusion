@@ -31,7 +31,7 @@ use Valvoid\Fusion\Util\Version\Interpreter as VersionInterpreter;
 /**
  * Build task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the build task config.

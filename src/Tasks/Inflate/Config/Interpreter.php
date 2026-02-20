@@ -30,7 +30,7 @@ use Valvoid\Fusion\Tasks\Inflate\Inflate;
 /**
  * Inflate task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the inflate task config.

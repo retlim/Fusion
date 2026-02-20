@@ -27,7 +27,7 @@ use Valvoid\Fusion\Util\Version\Parser as VersionParser;
 /**
  * Replicate task config parser.
  */
-class Parser extends ConfigParser
+class Parser implements ConfigParser
 {
     /**
      * @param array $breadcrumb

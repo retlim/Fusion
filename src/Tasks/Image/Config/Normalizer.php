@@ -26,7 +26,7 @@ use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
 /**
  * Image task config normalizer.
  */
-class Normalizer extends ConfigNormalizer
+class Normalizer implements ConfigNormalizer
 {
     /**
      * Normalizes the config.

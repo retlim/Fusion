@@ -26,7 +26,7 @@ use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
 /**
  * Build task config normalizer.
  */
-class Normalizer extends ConfigNormalizer
+class Normalizer implements ConfigNormalizer
 {
     /**
      * Normalizes the build task config.

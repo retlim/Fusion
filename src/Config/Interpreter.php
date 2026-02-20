@@ -24,7 +24,7 @@ namespace Valvoid\Fusion\Config;
 /**
  * Config interpreter.
  */
-abstract class Interpreter
+interface Interpreter
 {
     /**
      * Interprets the config.
@@ -32,5 +32,5 @@ abstract class Interpreter
      * @param array $breadcrumb Index path inside the config to the passed sub config.
      * @param mixed $entry Sub config to interpret.
      */
-    abstract public function interpret(array $breadcrumb, mixed $entry): void;
+    public function interpret(array $breadcrumb, mixed $entry): void;
 }

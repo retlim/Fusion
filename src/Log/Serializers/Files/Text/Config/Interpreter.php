@@ -30,7 +30,7 @@ use Valvoid\Fusion\Log\Serializers\Files\Text\Text;
 /**
  * Text file log config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the text serializer config.

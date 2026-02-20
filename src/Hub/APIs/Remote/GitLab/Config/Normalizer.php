@@ -26,7 +26,7 @@ use Valvoid\Fusion\Config\Normalizer as ConfigNormalizer;
 /**
  * GitLab config normalizer.
  */
-class Normalizer extends ConfigNormalizer
+class Normalizer implements ConfigNormalizer
 {
     /** @inheritdoc */
     public function normalize(array $breadcrumb, array &$config): void

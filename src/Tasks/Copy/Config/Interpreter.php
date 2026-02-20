@@ -30,7 +30,7 @@ use Valvoid\Fusion\Tasks\Copy\Copy;
 /**
  * Copy task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the copy task config.

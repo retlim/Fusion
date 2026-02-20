@@ -26,7 +26,7 @@ use Valvoid\Fusion\Config\Parser as ConfigParser;
 /**
  * GitHub config parser.
  */
-class Parser extends ConfigParser
+class Parser implements ConfigParser
 {
     /** @inheritdoc */
     public function parse(array $breadcrumb, array &$config): void

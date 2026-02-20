@@ -30,7 +30,7 @@ use Valvoid\Fusion\Tasks\Shift\Shift;
 /**
  * Shift task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the shift task config.

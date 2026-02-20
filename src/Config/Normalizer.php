@@ -24,7 +24,7 @@ namespace Valvoid\Fusion\Config;
 /**
  * Config normalizer.
  */
-abstract class Normalizer
+interface Normalizer
 {
     /**
      * Normalizes the config.
@@ -32,5 +32,5 @@ abstract class Normalizer
      * @param array $breadcrumb Index path inside the config to the passed sub config.
      * @param array $config Sub config to normalize.
      */
-    abstract public function normalize(array $breadcrumb, array &$config): void;
+    public function normalize(array $breadcrumb, array &$config): void;
 }

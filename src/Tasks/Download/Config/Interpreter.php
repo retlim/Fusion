@@ -30,7 +30,7 @@ use Valvoid\Fusion\Tasks\Download\Download;
 /**
  * Download task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the download task config.

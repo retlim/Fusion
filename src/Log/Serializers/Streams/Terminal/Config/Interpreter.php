@@ -30,7 +30,7 @@ use Valvoid\Fusion\Log\Serializers\Streams\Terminal\Terminal;
 /**
  * Terminal stream log config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the terminal serializer config.

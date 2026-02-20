@@ -27,7 +27,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * Text file log config normalizer.
  */
-class Normalizer extends ConfigNormalizer
+class Normalizer implements ConfigNormalizer
 {
     /**
      * Normalizes the config.

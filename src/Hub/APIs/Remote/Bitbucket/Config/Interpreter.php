@@ -30,7 +30,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * Bitbucket config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the Bitbucket config.

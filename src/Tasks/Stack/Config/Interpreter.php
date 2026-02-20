@@ -30,7 +30,7 @@ use Valvoid\Fusion\Tasks\Stack\Stack;
 /**
  * Stack task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the stack task config.

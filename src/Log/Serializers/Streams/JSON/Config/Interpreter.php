@@ -30,7 +30,7 @@ use Valvoid\Fusion\Log\Serializers\Streams\JSON\JSON;
 /**
  * JSON stream log config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the JSON serializer config.

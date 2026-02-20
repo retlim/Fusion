@@ -30,7 +30,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * GitHub config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the GitHub config.

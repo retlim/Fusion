@@ -30,7 +30,7 @@ use Valvoid\Fusion\Tasks\Snap\Snap;
 /**
  * Snap task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the snap task config.

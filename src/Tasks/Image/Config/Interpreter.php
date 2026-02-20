@@ -30,7 +30,7 @@ use Valvoid\Fusion\Tasks\Image\Image;
 /**
  * Image task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the image task config.

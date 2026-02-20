@@ -24,7 +24,7 @@ namespace Valvoid\Fusion\Config;
 /**
  * Config parser.
  */
-abstract class Parser
+interface Parser
 {
     /**
      * Parses the config.
@@ -32,5 +32,5 @@ abstract class Parser
      * @param array $breadcrumb Index path inside the config to the passed sub config.
      * @param array $config Sub config to parse.
      */
-    abstract public function parse(array $breadcrumb, array &$config): void;
+    public function parse(array $breadcrumb, array &$config): void;
 }

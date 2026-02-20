@@ -30,7 +30,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * Directory config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the directory config.

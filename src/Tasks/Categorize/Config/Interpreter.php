@@ -30,7 +30,7 @@ use Valvoid\Fusion\Tasks\Categorize\Categorize;
 /**
  * Categorize task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the categorize task config.

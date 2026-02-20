@@ -27,7 +27,7 @@ use Valvoid\Fusion\Log\Events\Level;
 /**
  * JSON stream log config normalizer.
  */
-class Normalizer extends ConfigNormalizer
+class Normalizer implements ConfigNormalizer
 {
     /**
      * Normalizes the config.

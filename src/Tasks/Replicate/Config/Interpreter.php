@@ -31,7 +31,7 @@ use Valvoid\Fusion\Util\Version\Interpreter as VersionInterpreter;
 /**
  * Replicate task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the replicate task config.

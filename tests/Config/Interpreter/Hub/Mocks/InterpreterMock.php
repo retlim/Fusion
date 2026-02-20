@@ -23,7 +23,7 @@ namespace Valvoid\Fusion\Tests\Config\Interpreter\Hub\Mocks;
 
 use Valvoid\Fusion\Config\Interpreter;
 
-class InterpreterMock extends Interpreter
+class InterpreterMock implements Interpreter
 {
     public static array $breadcrumb;
     public static mixed $entry;

@@ -23,7 +23,7 @@ namespace Valvoid\Fusion\Tests\Config\Parser\Hub\Mocks;
 
 use Valvoid\Fusion\Config\Parser as ConfigParser;
 
-class ParserMock extends ConfigParser
+class ParserMock implements ConfigParser
 {
     public function parse(array $breadcrumb, array &$config): void
     {

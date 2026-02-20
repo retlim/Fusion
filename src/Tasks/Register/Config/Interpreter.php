@@ -30,7 +30,7 @@ use Valvoid\Fusion\Tasks\Register\Register;
 /**
  * Register task config interpreter.
  */
-class Interpreter extends ConfigInterpreter
+class Interpreter implements ConfigInterpreter
 {
     /**
      * Interprets the register task config.
