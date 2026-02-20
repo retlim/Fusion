@@ -20,7 +20,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Fusion;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Event;
@@ -30,9 +30,30 @@ use Valvoid\Fusion\Options\Paths;
 use Valvoid\Fusion\Options\Version;
 use Valvoid\Fusion\Settings\Config;
 
-spl_autoload_register(loadLazyCode(...));
-
 try {
+    $prefixes = require __DIR__ . "/state/prefixes.php";
+    $root = dirname(__FILE__,
+
+        // extract from own relative path
+        substr_count($prefixes["Valvoid\\Fusion"], '/'));
+
+    $loadLazyCode = function (string $loadable) use ($root, $prefixes)
+    {
+        foreach ($prefixes as $prefix => $path)
+            if (str_starts_with($loadable, $prefix)) {
+                $suffix = substr($loadable, strlen($prefix));
+                $suffix = str_replace('\\', '/', $suffix);
+                $file = "$root$path$suffix.php";
+
+                if (file_exists($file)) {
+                    require $file;
+                    break;
+                }
+            }
+    };
+
+    spl_autoload_register($loadLazyCode);
+
     $options = getopt("vhp", ["version", "help", "paths"]);
 
     if ($options)
@@ -133,11 +154,13 @@ try {
         $fusion = (new Box)->get(Fusion::class,
 
             // runtime config
-            config: $arguments);
+            config: $arguments,
+            prefixes: $prefixes,
+            root: $root);
 
         // Fusion uses own callback
         // tasks are complex and may result in code shifts
-        spl_autoload_unregister(loadLazyCode(...));
+        spl_autoload_unregister($loadLazyCode);
 
         if ($fusion->execute($command) === false) {
             echo "\n\n";
@@ -220,23 +243,6 @@ function showHelp(int $code = 1): void
         "\n\n";
 
     exit($code);
-}
-
-/**
- * Loads lazy loadable.
- *
- * @param string $loadable Loadable.
- */
-function loadLazyCode(string $loadable): void
-{
-    if (str_starts_with($loadable, "Valvoid\Fusion")) {
-        $file = substr($loadable, 14);
-        $file = str_replace('\\', '/', $file);
-        $file = __DIR__ . "/src$file.php";
-
-        if (file_exists($file))
-            require $file;
-    }
 }
 
 /**
