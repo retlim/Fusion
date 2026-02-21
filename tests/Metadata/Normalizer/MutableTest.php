@@ -42,7 +42,6 @@ class MutableTest extends Test
         };
 
         $this->testPaths();
-        $this->box->unsetInstance();
     }
 
     public function testPaths(): void

@@ -63,8 +63,6 @@ class ShiftTest extends Test
         $this->testShiftRecursiveWithExecutedFiles();
         $this->testShiftNestedWithExecutedFiles();
         $this->testRefresh();
-
-        $this->box::unsetInstance();
     }
 
     public function testRefresh(): void

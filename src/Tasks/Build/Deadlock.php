@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Tasks\Build;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Log\Events\Errors\Deadlock as DeadlockError;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Tasks\Group;

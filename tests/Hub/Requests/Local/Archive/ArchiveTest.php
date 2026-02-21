@@ -74,8 +74,6 @@ class ArchiveTest extends Test
         } catch (Throwable) {
             $this->handleFailedTest();
         }
-
-        $this->boxMock::unsetInstance();
     }
 
     public function testInit(): void

@@ -63,8 +63,6 @@ class ReplicateTest extends Test
 
         $this->testSourceSnapshot();
         $this->testCachedSnapshotFiles();
-
-        $this->box::unsetInstance();
     }
 
     public function testSourceSnapshot(): void

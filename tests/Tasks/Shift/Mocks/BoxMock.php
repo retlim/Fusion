@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Log\Events\Infos\Content;

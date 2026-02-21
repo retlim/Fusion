@@ -42,8 +42,6 @@ class DirTest extends Test
         $this->testFallbackPaths();
         $this->testWindowsPaths();
         $this->testWindowsFallbackPaths();
-
-        $this->box::unsetInstance();
     }
 
     public function testWindowsFallbackPaths(): void

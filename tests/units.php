@@ -35,10 +35,24 @@ foreach ($lazy as $class => $path) {
 $result = 0;
 $coverageClassnames = [];
 
-spl_autoload_register(function (string $loadable) use ($root, $lazy)
+$prefixes = require "$root/state/prefixes.php";
+
+$loadLazyCode = function (string $loadable) use ($root, $prefixes)
 {
-    require $root . $lazy[$loadable];
-});
+    foreach ($prefixes as $prefix => $path)
+        if (str_starts_with($loadable, $prefix)) {
+            $suffix = substr($loadable, strlen($prefix));
+            $suffix = str_replace('\\', '/', $suffix);
+            $file = "$root$path$suffix.php";
+
+            if (file_exists($file)) {
+                require $file;
+                break;
+            }
+        }
+};
+
+spl_autoload_register($loadLazyCode);
 
 try {
     foreach ($lazy as $classname => $dir) {

@@ -47,8 +47,6 @@ class HubTest extends Test
         $this->testDefaultApi();
         $this->testConfiguredApi();
         $this->testAnonymousApi();
-
-        $this->box::unsetInstance();
     }
 
     public function testDefaultApi(): void

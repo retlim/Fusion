@@ -51,8 +51,6 @@ class TasksTest extends Test
         $this->testGroupedConfiguredTask();
         $this->testAnonymousTask();
         $this->testGroupedAnonymousTask();
-
-        $this->box::unsetInstance();
     }
 
     public function testGroupedDefaultTask(): void

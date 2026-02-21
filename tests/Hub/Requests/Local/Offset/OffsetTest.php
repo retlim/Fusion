@@ -76,8 +76,6 @@ class OffsetTest extends Test
         } catch (Throwable) {
             $this->handleFailedTest();
         }
-
-        $container::unsetInstance();
     }
 
 

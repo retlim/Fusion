@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Hub\Requests\Cache;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;

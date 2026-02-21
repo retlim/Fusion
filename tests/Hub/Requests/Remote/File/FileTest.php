@@ -123,8 +123,6 @@ class FileTest extends Test
         } catch (Throwable) {
             $this->handleFailedTest();
         }
-
-        $this->box::unsetInstance();
     }
 
     public function testInit(): void

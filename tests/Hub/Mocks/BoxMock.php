@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Tests\Hub\Mocks;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Requests\Cache\Versions;
 
@@ -42,6 +42,7 @@ class BoxMock extends Box
             "Valvoid\Fusion\Hub\Cache" => $this->cache ??= new ($this->classes[$class]),
             "Valvoid\Fusion\Wrappers\File" => new ($this->classes[$class]),
             "Valvoid\Fusion\Hub\Requests\Cache\Versions" => new Versions($this, ...$args),
+            "Valvoid\Fusion\Hub\Requests\Cache\File" => new $class(...$args, fileWrapper:  new FileMock),
             default => new $class(...$args)
         };
     }

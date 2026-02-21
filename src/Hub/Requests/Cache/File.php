@@ -22,7 +22,6 @@
 namespace Valvoid\Fusion\Hub\Requests\Cache;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\Cache as HubCache;
@@ -51,7 +50,8 @@ class File extends Cache
      * @param string $filename Filename.
     */
     public function __construct(int $id, HubCache $cache, array $source, string $path,
-                                string $filename, LocalApi|RemoteApi $api)
+                                string $filename, LocalApi|RemoteApi $api,
+        private Wrapper $fileWrapper)
     {
         parent::__construct($id, $cache, $source, $api);
 
@@ -75,8 +75,7 @@ class File extends Cache
         $path = $this->source["path"];
         $reference = $this->source["prefix"] . $this->source["reference"];
         $filename = $this->path . $this->filename;
-        $wrapper = Box::getInstance()->get(Wrapper::class);
-        $content = $wrapper->get($file);
+        $content = $this->fileWrapper->get($file);
 
         if ($content === false)
             throw new InternalError(

@@ -93,8 +93,6 @@ class LogTest extends Test
         $this->testInfo();
         $this->testVerbose();
         $this->testDebug();
-
-        $this->box::unsetInstance();
     }
 
     public function testInterceptor(): void

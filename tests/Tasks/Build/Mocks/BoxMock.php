@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Build\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Metadata\External\Builder;
 use Valvoid\Fusion\Tasks\Build\SAT\Solver;

@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Remote;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Status;
@@ -66,7 +66,7 @@ class Archive extends Remote
         // use temp name
         // enable cache to clear broken files
         $this->dir = $cache->getRemoteDir($source);
-        $this->stream = Box::getInstance()->get(Stream::class,
+        $this->stream = $this->box->get(Stream::class,
             file: "$this->dir/archive",
             mode: "w+"
         );

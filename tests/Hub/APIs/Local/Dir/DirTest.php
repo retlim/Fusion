@@ -53,8 +53,6 @@ class DirTest extends Test
         $this->testContent();
         $this->testReferences();
         $this->testArchive();
-
-        $this->box::unsetInstance();
     }
 
     public function testRoot(): void

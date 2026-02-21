@@ -193,8 +193,6 @@ class BuilderTest extends Test
         $this->testNormalizeReference();
         $this->testProductionLayer();
         $this->testMetadata();
-
-        $this->box::unsetInstance();
     }
 
     public function testProductionLayer(): void

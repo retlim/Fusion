@@ -41,8 +41,6 @@ class HubTest extends Test
         $this->testDefaultApiConfig();
         $this->testConfiguredApiConfig();
         $this->testConfiguredParsableApiConfig();
-
-        $this->box::unsetInstance();
     }
 
     public function testDefaultApiConfig(): void

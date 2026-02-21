@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Config;
 
 use Exception;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Interpreter\Dir as DirectoryInterpreter;

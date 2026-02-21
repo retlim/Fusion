@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Hub\APIs\Local;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Hub\Responses\Local\Archive;
 use Valvoid\Fusion\Hub\Responses\Local\File;
 use Valvoid\Fusion\Hub\Responses\Local\References;

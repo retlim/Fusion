@@ -64,8 +64,6 @@ class ReferencesTest extends Test
         } catch (Throwable) {
             $this->handleFailedTest();
         }
-
-        $container::unsetInstance();
     }
 
     public function testInit(): void

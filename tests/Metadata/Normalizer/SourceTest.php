@@ -42,7 +42,6 @@ class SourceTest extends Test
                 return new MetadataEvent(...$args);
         };
         $this->testSources();
-        $this->box->unsetInstance();
     }
 
     public function testSources(): void

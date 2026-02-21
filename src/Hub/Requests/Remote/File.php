@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Remote;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Status;
 use Valvoid\Fusion\Hub\Cache;
@@ -130,7 +130,7 @@ class File extends Remote
 
         switch ($this->api->getStatus($code, $headers)) {
             case Status::OK:
-                $wrapper = Box::getInstance()->get(Wrapper::class);
+                $wrapper = $this->box->get(Wrapper::class);
 
                 if ($wrapper->put($this->file, $content) === false)
                     throw new Error(

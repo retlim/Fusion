@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Hub;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Hub\APIs\Local\Local;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote;

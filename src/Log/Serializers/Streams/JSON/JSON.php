@@ -47,11 +47,11 @@ class JSON implements Stream
     /**
      * Constructs the JSON stream serializer.
      *
-     * @param array $config Config.
+     * @param array $configuration Config.
      */
-    public function __construct(array $config)
+    public function __construct(array $configuration)
     {
-        $this->threshold = $config["threshold"];
+        $this->threshold = $configuration["threshold"];
     }
 
     /** @inheritdoc */

@@ -23,7 +23,6 @@ namespace Valvoid\Fusion\Hub\APIs\Local\Dir;
 
 use Exception;
 use PharData;
-use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\Responses\Local\Archive;
 use Valvoid\Fusion\Hub\Responses\Local\File;
@@ -49,7 +48,7 @@ class Dir extends LocalApi
         // directory has only one pointer
         // version inside metadata
         $file = "$this->root$path/fusion.json";
-        $wrapper = Box::getInstance()->get(FileWrapper::class);
+        $wrapper = $this->box->get(FileWrapper::class);
 
         if (!$wrapper->exists($file))
             return "Invalid directory (package) content. The required " .
@@ -103,7 +102,7 @@ class Dir extends LocalApi
             return "Can't get content from the file \"$file\"" .
                 " at reference \"$reference\". Reference does not exist.";
 
-        $wrapper = Box::getInstance()->get(FileWrapper::class);
+        $wrapper = $this->box->get(FileWrapper::class);
 
         if (!$wrapper->exists($file))
             return "The file \"$file\" does not exist.";
@@ -133,7 +132,7 @@ class Dir extends LocalApi
                 " of reference \"$reference\". Reference does not exist.";
 
         $file = "$dir/archive.zip";
-        $archive = Box::getInstance()->get(PharData::class, filename: $file);
+        $archive = $this->box->get(PharData::class, filename: $file);
 
         $archive->buildFromDirectory($this->root . $path);
 

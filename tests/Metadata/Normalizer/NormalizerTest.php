@@ -79,8 +79,6 @@ class NormalizerTest extends Test
 
         $this->testNormalize();
         $this->testOverlay();
-
-        $this->box->unsetInstance();
     }
 
     public function testNormalize(): void

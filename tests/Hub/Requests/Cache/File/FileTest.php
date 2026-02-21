@@ -51,13 +51,11 @@ class FileTest extends Test
         $this->cacheMock = new CacheMock;
         $this->apiMock = new APIMock;
         $this->file = new File(1, $this->cacheMock, $this->source,
-            "", "/fusion.json", $this->apiMock);
+            "", "/fusion.json", $this->apiMock, fileWrapper: $container->file);
 
         $this->testInit();
         $this->testMetadataResponse();
         $this->testSnapshotResponse();
-
-        $container::unsetInstance();
     }
 
     public function testInit(): void
@@ -93,7 +91,7 @@ class FileTest extends Test
     public function testSnapshotResponse(): void
     {
         $this->file = new File(1, $this->cacheMock, $this->source,
-            "/nested", "/snapshot.json", $this->apiMock);
+            "/nested", "/snapshot.json", $this->apiMock, fileWrapper: new FileMock);
 
         try {
             $this->file->response(function (Snapshot $response) {

@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Mocks;
 
 use PharData;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 
 class BoxMock extends Box
 {

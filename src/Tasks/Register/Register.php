@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Tasks\Register;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Log\Events\Errors\Error as InternalError;
 use Valvoid\Fusion\Log\Events\Infos\Content;

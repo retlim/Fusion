@@ -76,8 +76,6 @@ class HubTest extends Test
         $this->testVersionsCacheRequest();
         $this->testFileCacheRequest();
         $this->testArchiveCacheRequest();
-
-        $this->box::unsetInstance();
     }
 
     public function testArchiveCacheRequest(): void

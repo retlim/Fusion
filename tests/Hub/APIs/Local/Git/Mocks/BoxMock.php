@@ -21,10 +21,7 @@
 
 namespace Valvoid\Fusion\Tests\Hub\APIs\Local\Git\Mocks;
 
-use PharData;
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Mocks\FileMock;
-use Valvoid\Fusion\Tests\Hub\APIs\Local\Dir\Mocks\PharDataMock;
+use Valvoid\Box\Box;
 
 class BoxMock extends Box
 {

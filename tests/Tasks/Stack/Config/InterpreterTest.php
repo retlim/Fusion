@@ -44,8 +44,6 @@ class InterpreterTest extends Test
         $this->testInvalidType();
         $this->testDefault();
         $this->testInflated();
-
-        $box::unsetInstance();
     }
 
     public function testReset(): void

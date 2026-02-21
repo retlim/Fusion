@@ -21,7 +21,6 @@
 
 namespace Valvoid\Fusion\Log\Serializers\Files\Text;
 
-use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Log\Events\Errors\Config;
 use Valvoid\Fusion\Log\Events\Errors\Deadlock;
@@ -49,23 +48,22 @@ class Text implements File
     /** @var string Filename. */
     private string $filename;
 
-    /** @var Dir Root package directory. */
-    private Dir $directory;
-
     /** @var string Storage dir. */
     private string $storage;
 
     /**
      * Constructs the text file serializer.
      *
-     * @param array $config
+     * @param Dir $directory
+     * @param array $configuration
      */
-    public function __construct(array $config)
+    public function __construct(
+        private readonly Dir $directory,
+        array $configuration)
     {
-        $this->threshold = $config["threshold"];
-        $this->filename = $config["filename"];
+        $this->threshold = $configuration["threshold"];
+        $this->filename = $configuration["filename"];
 
-        $this->directory = Box::getInstance()->get(Dir::class);
         $this->storage = $this->directory->getLogDir();
     }
 

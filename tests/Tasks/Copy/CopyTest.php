@@ -48,8 +48,6 @@ class CopyTest extends Test
 
         $this->testPackageCategory();
         $this->testCustomMigration();
-
-        $this->box::unsetInstance();
     }
 
     public function testPackageCategory(): void

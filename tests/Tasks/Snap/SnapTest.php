@@ -51,8 +51,6 @@ class SnapTest extends Test
         // could be development env
         // local, dev, prod metas === snaps
         $this->testDependencyState();
-
-        $this->box::unsetInstance();
     }
 
     public function testCurrentRecursiveState(): void

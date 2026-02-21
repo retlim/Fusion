@@ -23,7 +23,7 @@ namespace Valvoid\Fusion\Tasks\Download;
 
 use Exception;
 use PharData;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Hub\Hub;
 use Valvoid\Fusion\Hub\Responses\Cache\Archive;

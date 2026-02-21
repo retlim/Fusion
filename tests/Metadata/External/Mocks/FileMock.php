@@ -22,7 +22,6 @@
 namespace Valvoid\Fusion\Tests\Metadata\External\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Wrappers\File;
 
 class FileMock extends File

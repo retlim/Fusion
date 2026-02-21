@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Local;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\Cache;

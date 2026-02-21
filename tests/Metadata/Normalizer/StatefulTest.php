@@ -42,7 +42,6 @@ class StatefulTest extends Test
                 return new MetadataEvent(...$args);
         };
         $this->testPath();
-        $this->box->unsetInstance();
     }
 
     public function testPath(): void

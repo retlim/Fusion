@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Metadata\Parser;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
 use Valvoid\Fusion\Log\Events\Level;

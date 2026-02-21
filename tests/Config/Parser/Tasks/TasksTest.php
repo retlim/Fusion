@@ -44,8 +44,6 @@ class TasksTest extends Test
         $this->testGroupedConfiguredTaskConfig();
         $this->testConfiguredParsableTaskConfig();
         $this->testGroupedConfiguredParsableTaskConfig();
-
-        $this->box::unsetInstance();
     }
 
     public function testGroupedDefaultTaskConfig(): void

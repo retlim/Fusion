@@ -43,8 +43,6 @@ class PersistenceTest extends Test
         $this->testReset();
         $this->testInvalidType();
         $this->testInvalidKey();
-
-        $this->box::unsetInstance();
     }
 
 

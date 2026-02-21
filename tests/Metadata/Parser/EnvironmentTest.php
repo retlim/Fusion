@@ -53,7 +53,6 @@ class EnvironmentTest extends Test
         };
 
         $this->testParse();
-        $this->box->unsetInstance();
     }
 
     public function testParse(): void

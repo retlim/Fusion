@@ -56,8 +56,6 @@ class VersionsTest extends Test
         $this->testInit();
         $this->testResponse();
         $this->testErrorResponse();
-
-        $container::unsetInstance();
     }
 
     public function testInit(): void

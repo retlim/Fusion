@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Log;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Log\Events\Event;
 use Valvoid\Fusion\Log\Events\Infos\Error as ErrorInfo;
@@ -54,7 +54,7 @@ class Log
     {
         foreach ($config->get("log", "serializers") as $serializer)
             $this->serializers[] = $this->box->get($serializer["serializer"],
-                config: $serializer);
+                configuration: $serializer);
 
         // verbose debug log
         // wrap all to extended serializer info
@@ -69,12 +69,6 @@ class Log
 
             $this->verbose(new ErrorInfo($message, $code, $backtrace));
         });
-    }
-
-    /** Destructs the log instance. */
-    public function __destruct()
-    {
-        restore_error_handler();
     }
 
     /**

@@ -22,9 +22,7 @@
 namespace Valvoid\Fusion\Tests\Hub\Requests\Remote\References\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Log\Log;
-use Valvoid\Fusion\Wrappers\Curl;
+use Valvoid\Box\Box;
 
 class BoxMock extends Box
 {

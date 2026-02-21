@@ -45,8 +45,6 @@ class RegisterTest extends Test
 
         $this->testRefreshAutoloader();
         $this->testNewStateAutoloader();
-
-        $this->box::unsetInstance();
     }
 
     public function testRefreshAutoloader(): void

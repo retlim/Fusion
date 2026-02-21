@@ -30,13 +30,6 @@ use Valvoid\Fusion\Log\Events\Level;
 interface File
 {
     /**
-     * Constructs the file serializer.
-     *
-     * @param array $config Config.
-     */
-    public function __construct(array $config);
-
-    /**
      * Logs event.
      *
      * @param Event|string $event Event.

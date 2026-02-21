@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Hub\Requests\Remote;
 
 use CurlHandle;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\Cache;
 use Valvoid\Fusion\Hub\Requests\Request;
@@ -84,7 +84,7 @@ abstract class Remote extends Request
         $this->api = $api;
         $this->tokens = $api->getTokens($source["path"]);
         $this->auth = $api->getAuthHeaderPrefix();
-        $this->curl = Box::getInstance()->get(Curl::class);
+        $this->curl = $this->box->get(Curl::class);
 
         $this->curl->setOptions([
             CURLOPT_PRIVATE => $id,

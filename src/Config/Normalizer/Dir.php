@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Config\Normalizer;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Config\Parser\Dir as DirectoryParser;
 use Valvoid\Fusion\Log\Events\Errors\Error;

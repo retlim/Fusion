@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Tasks\Copy;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Infos\Content;

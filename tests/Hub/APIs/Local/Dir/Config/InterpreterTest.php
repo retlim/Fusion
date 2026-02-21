@@ -40,8 +40,6 @@ class InterpreterTest extends Test
         $this->testDefault();
         $this->testCustom();
         $this->testError();
-
-        $this->boxMock::unsetInstance();
     }
 
     public function testDefault(): void

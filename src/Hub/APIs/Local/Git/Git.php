@@ -22,7 +22,6 @@
 namespace Valvoid\Fusion\Hub\APIs\Local\Git;
 
 use Error;
-use Valvoid\Fusion\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;
 use Valvoid\Fusion\Hub\Responses\Local\Archive;
 use Valvoid\Fusion\Hub\Responses\Local\File;
@@ -47,7 +46,7 @@ class Git extends LocalOffsetApi
     public function getReferences(string $path): References|string
     {
         try {
-            $program = Box::getInstance()->get(Program::class);
+            $program = $this->box->get(Program::class);
             $output = [];
             $code = 0; // ok
 
@@ -83,7 +82,7 @@ class Git extends LocalOffsetApi
     public function getOffset(string $path, string $offset): OffsetResponse|string
     {
         try {
-            $program = Box::getInstance()->get(Program::class);
+            $program = $this->box->get(Program::class);
             $output = [];
             $code = 0;  // ok
 
@@ -119,7 +118,7 @@ class Git extends LocalOffsetApi
     {
         try {
             $filename = substr($filename, 1);
-            $program = Box::getInstance()->get(Program::class);
+            $program = $this->box->get(Program::class);
             $output = [];
             $code = 0;  // ok
 
@@ -179,7 +178,7 @@ class Git extends LocalOffsetApi
 
             // get current branch name
             // detached HEAD is empty
-            $program = Box::getInstance()->get(Program::class);
+            $program = $this->box->get(Program::class);
             $output = [];
             $code = 0;  // ok
 

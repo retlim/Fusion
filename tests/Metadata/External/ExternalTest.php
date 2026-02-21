@@ -139,8 +139,6 @@ class ExternalTest extends Test
         $this->testLifecycleMigrate();
         $this->testLifecycleDownload();
         $this->testLifecycleInstall();
-
-        $this->box::unsetInstance();
     }
 
     public function testLifecycleCopy(): void

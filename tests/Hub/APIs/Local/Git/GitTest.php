@@ -55,8 +55,6 @@ class GitTest extends Test
         $this->testOffset();
         $this->testReferences();
         $this->testArchive();
-
-        $this->box::unsetInstance();
     }
 
     public function testRoot(): void

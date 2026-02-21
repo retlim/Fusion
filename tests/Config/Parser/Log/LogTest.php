@@ -41,8 +41,6 @@ class LogTest extends Test
         $this->testDefaultSerializerConfig();
         $this->testConfiguredSerializerConfig();
         $this->testConfiguredParsableSerializerConfig();
-
-        $this->box::unsetInstance();
     }
 
     public function testDefaultSerializerConfig(): void

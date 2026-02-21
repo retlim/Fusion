@@ -47,8 +47,6 @@ class InflateTest extends Test
 
         $this->testRefresh();
         $this->testDownloadable();
-
-        $this->box::unsetInstance();
     }
 
     public function testRefresh(): void

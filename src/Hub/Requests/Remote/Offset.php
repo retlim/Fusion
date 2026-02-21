@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Hub\Requests\Remote;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Hub\APIs\Remote\Offset as RemoteOffsetApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Remote as RemoteApi;
 use Valvoid\Fusion\Hub\APIs\Remote\Status;

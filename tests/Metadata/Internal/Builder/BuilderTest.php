@@ -145,8 +145,6 @@ class BuilderTest extends Test
         $this->testLocalLayer();
         $this->testBotLayer();
         $this->testMetadata();
-
-        $this->box::unsetInstance();
     }
 
     public function testLocalLayer(): void

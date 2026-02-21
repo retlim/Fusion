@@ -94,8 +94,6 @@ class DownloadTest extends Test
 
         $this->testZipArchive();
         $this->testPharData();
-
-        $this->box::unsetInstance();
     }
 
     public function testZipArchive(): void

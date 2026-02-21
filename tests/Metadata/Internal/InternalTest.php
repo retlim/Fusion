@@ -141,8 +141,6 @@ class InternalTest extends Test
         $this->testLifecycleUpdate();
         $this->testLifecycleDelete();
         $this->testLifecycleMigrate();
-
-        $this->box::unsetInstance();
     }
 
     public function testLifecycleCopy(): void

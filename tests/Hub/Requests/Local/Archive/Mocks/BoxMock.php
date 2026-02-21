@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Tests\Hub\Requests\Local\Archive\Mocks;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Dir\Dir;
 
 class BoxMock extends Box

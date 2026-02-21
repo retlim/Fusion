@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Tests\Units\Config;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Config\Interpreter\Interpreter;

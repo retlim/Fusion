@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Tasks\Shift;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Events\Cache;
 use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Bus\Bus;

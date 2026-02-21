@@ -40,8 +40,6 @@ class InterpreterTest extends Test
         $this->testDefault();
         $this->testCustom();
         $this->testError();
-
-        $this->container::unsetInstance();
     }
 
     public function testDefault(): void

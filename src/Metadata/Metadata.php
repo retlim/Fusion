@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Metadata;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Log\Events\Errors\Lifecycle;
 use Valvoid\Fusion\Log\Log;

@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Tests\Tasks\Stack;
 
 use Exception;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Metadata\External\Category as ExternalCategory;
 use Valvoid\Fusion\Metadata\Internal\Category as InternalCategory;
 use Valvoid\Fusion\Tasks\Stack\Stack;
@@ -52,8 +52,6 @@ class StackTest extends Test
         $this->log = new LogMock;
 
         $this->test();
-
-        $this->box::unsetInstance();
     }
 
     public function test(): void

@@ -30,12 +30,6 @@ use Valvoid\Fusion\Log\Events\Level;
 interface Stream
 {
     /**
-     * Constructs the stream serializer.
-     * @param array $config Config.
-     */
-    public function __construct(array $config);
-
-    /**
      * Logs event.
      *
      * @param Level $level Level.

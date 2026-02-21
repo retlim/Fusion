@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Config\Normalizer;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 
 /**
  * Config normalizer.

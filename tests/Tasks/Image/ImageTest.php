@@ -55,8 +55,6 @@ class ImageTest extends Test
         $this->box->config = $this->config;
 
         $this->testMetas();
-
-        $this->box::unsetInstance();
     }
 
     public function testMetas(): void

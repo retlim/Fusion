@@ -44,8 +44,6 @@ class InterpreterTest extends Test
         $this->testInvalid();
         $this->testDefault();
         $this->testCustom();
-
-        $this->container::unsetInstance();
     }
 
     public function testCustom(): void

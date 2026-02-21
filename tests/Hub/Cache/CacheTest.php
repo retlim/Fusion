@@ -65,8 +65,6 @@ class CacheTest extends Test
 
         $this->testLogicalReference();
         $this->testIllogicalReference();
-
-        $this->box::unsetInstance();
     }
 
     public function testLogicalReference(): void

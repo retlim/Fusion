@@ -74,8 +74,6 @@ class FileTest extends Test
         } catch (Throwable) {
             $this->handleFailedTest();
         }
-
-        $this->containerMock::unsetInstance();
     }
 
     public function testInit(): void

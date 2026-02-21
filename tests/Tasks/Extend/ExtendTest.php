@@ -48,8 +48,6 @@ class ExtendTest extends Test
         $this->testCurrentStateRefresh();
         $this->testNewState();
         $this->testNewStateWithRecycledRoot();
-
-        $this->box::unsetInstance();
     }
 
     public function testCurrentStateRefresh(): void

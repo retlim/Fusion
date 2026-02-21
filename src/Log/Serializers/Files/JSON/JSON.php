@@ -21,8 +21,7 @@
 
 namespace Valvoid\Fusion\Log\Serializers\Files\JSON;
 
-use Valvoid\Fusion\Box\Box;
-use Valvoid\Fusion\Dir\Dir as Directory;
+use Valvoid\Fusion\Dir\Dir;
 use Valvoid\Fusion\Log\Events\Errors\Config;
 use Valvoid\Fusion\Log\Events\Errors\Deadlock;
 use Valvoid\Fusion\Log\Events\Errors\Environment;
@@ -49,23 +48,22 @@ class JSON implements File
     /** @var string Filename. */
     private string $filename;
 
-    /** @var Directory Root package directory. */
-    private Directory $directory;
-
     /** @var string Storage dir. */
     private string $storage;
 
     /**
-     * Constructs the JSON file serializer.
+     * Constructs the text file serializer.
      *
-     * @param array $config
+     * @param Dir $directory
+     * @param array $configuration
      */
-    public function __construct(array $config)
+    public function __construct(
+        private readonly Dir $directory,
+        array $configuration)
     {
-        $this->threshold = $config["threshold"];
-        $this->filename = $config["filename"];
+        $this->threshold = $configuration["threshold"];
+        $this->filename = $configuration["filename"];
 
-        $this->directory = Box::getInstance()->get(Directory::class);
         $this->storage = $this->directory->getLogDir();
     }
 

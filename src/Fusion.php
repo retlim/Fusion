@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion;
 
 use Exception;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Events\Root;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Config;
@@ -44,16 +44,12 @@ use Valvoid\Fusion\Wrappers\File;
  */
 class Fusion
 {
-    /** @var string Variation, nested, and raw root directory. */
-    private string $root;
-
-    /** @var array Namespace prefixes to path. */
-    private array $prefixes;
-
     /**
      * Constructs the package manager.
      *
      * @param Box $box Dependency injection container.
+     * @param string $root Variation, nested, and raw root directory.
+     * @param array $prefixes Namespace prefixes to path.
      * @param File $file Wrapper for standard file operations.
      * @param Dir $dir Wrapper for standard directory operations.
      * @param array $config Runtime config layer.
@@ -63,8 +59,10 @@ class Fusion
      */
     public function __construct(
         private readonly Box $box,
+        private readonly array $prefixes,
+        private string $root,
         private readonly File $file,
-        private readonly Dir $dir,
+        Dir $dir,
         array $config = [])
     {
         spl_autoload_register($this->loadLazyCode(...),
@@ -73,20 +71,8 @@ class Fusion
             prepend: true);
 
         $root = $dir->getDirname(__DIR__);
-        $this->root = $this->getRoot($root);
-        $prefixes = "$root/state/prefixes.php";
         $overlay = $config["persistence"]["overlay"] ??
             true;
-
-        if ($overlay && $file->is($prefixes))
-            $this->prefixes = $file->require($prefixes);
-
-        // fallback, raw prefix
-        // to fix broken state for example
-        else $this->prefixes = [
-            __NAMESPACE__ => substr($root, strlen($this->root)) .
-                "/src"
-        ];
 
         // share common object instances
         $box->recycle(Bus::class,
@@ -113,14 +99,6 @@ class Fusion
     }
 
     /**
-     * Destroys the package manager.
-     */
-    public function __destruct()
-    {
-        spl_autoload_unregister($this->loadLazyCode(...));
-    }
-
-    /**
      * Loads lazy loadable.
      *
      * @param string $loadable Loadable.
@@ -134,7 +112,7 @@ class Fusion
                 $file = $this->root . "$path$suffix.php";
 
                 if ($this->file->is($file)) {
-                    require $file;
+                    $this->file->require($file);
                     break;
                 }
             }
@@ -220,36 +198,5 @@ class Fusion
     private function handleBusEvent(Root $event): void
     {
         $this->root = $event->getDir();
-    }
-
-    /**
-     * Returns non-nested root.
-     *
-     * @param string $path Directory to start.
-     * @return string Root.
-     * @throws InternalError
-     */
-    private function getRoot(string $path): string
-    {
-        $match = null;
-
-        while ($path) {
-            if ($this->file->is("$path/fusion.json"))
-                $match = $path;
-
-            $parent = $this->dir->getDirname($path);
-
-            if ($path == $parent)
-                break;
-
-            $path = $parent;
-        }
-
-        if ($match === null)
-            throw new InternalError(
-                "Cant get root path."
-            );
-
-        return $match;
     }
 }

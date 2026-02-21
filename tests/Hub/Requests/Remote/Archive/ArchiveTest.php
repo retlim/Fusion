@@ -118,8 +118,6 @@ class ArchiveTest extends Test
         } catch (Throwable) {
             $this->handleFailedTest();
         }
-
-        $this->box::unsetInstance();
     }
 
 

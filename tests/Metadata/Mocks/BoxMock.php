@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Tests\Metadata\Mocks;
 
 use Closure;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 
 class BoxMock extends Box
 {

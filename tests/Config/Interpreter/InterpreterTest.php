@@ -42,8 +42,6 @@ class InterpreterTest extends Test
         $this->testReset();
         $this->testInvalidType();
         $this->testInvalidKey();
-
-        $this->box::unsetInstance();
     }
 
     public function testReset(): void

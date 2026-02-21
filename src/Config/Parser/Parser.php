@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Config\Parser;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 
 /**
  * Config parser.

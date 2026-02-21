@@ -45,8 +45,6 @@ class DirTest extends Test
         $this->testNestedPathError();
         $this->testInvalidTypeError();
         $this->testInvalidKeyError();
-
-        $this->box::unsetInstance();
     }
 
     public function testRootPath(): void

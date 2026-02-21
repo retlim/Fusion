@@ -39,8 +39,6 @@ class DirTest extends Test
 
         $this->testParse();
         $this->testRootDir();
-
-        $this->box::unsetInstance();
     }
 
     public function testParse(): void

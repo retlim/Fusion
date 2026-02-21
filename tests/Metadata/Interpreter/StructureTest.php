@@ -48,8 +48,6 @@ class StructureTest extends Test
 
         $this->testReset();
         $this->testInvalidType();
-
-        $this->box->unsetInstance();
     }
 
     public function testReset(): void

@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Metadata\Parser;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 
 /**
  * Metadata parser.

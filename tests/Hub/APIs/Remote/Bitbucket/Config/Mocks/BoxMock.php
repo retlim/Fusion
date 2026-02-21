@@ -21,7 +21,7 @@
 
 namespace Valvoid\Fusion\Tests\Hub\APIs\Remote\Bitbucket\Config\Mocks;
 
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
 
 class BoxMock extends Box

@@ -64,8 +64,6 @@ class BuildTest extends Test
         $this->testExternalRootSourceImplication();
         $this->testRecursiveMetadataImplication();
         $this->testNestedMetadataImplication();
-
-        $this->box::unsetInstance();
     }
 
     public function testExternalRootSourceImplication(): void

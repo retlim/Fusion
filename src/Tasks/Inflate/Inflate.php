@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Tasks\Inflate;
 
 use PhpToken;
-use Valvoid\Fusion\Box\Box;
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Dir\Dir as Directory;
 use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Infos\Content;

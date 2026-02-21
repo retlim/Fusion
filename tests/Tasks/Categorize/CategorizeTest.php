@@ -49,8 +49,6 @@ class CategorizeTest extends Test
 
         $this->testEfficientCategorization();
         $this->testRedundantCategorization();
-
-        $this->box::unsetInstance();
     }
 
     public function testEfficientCategorization(): void

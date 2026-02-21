@@ -41,8 +41,6 @@ class ParserTest extends Test
         $this->box = new BoxMock;
 
         $this->testReference();
-
-        $this->box::unsetInstance();
     }
 
     public function testReference(): void

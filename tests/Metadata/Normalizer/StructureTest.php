@@ -55,7 +55,6 @@ class StructureTest extends Test
         };
 
         $this->testNormalize();
-        $this->box->unsetInstance();
     }
 
     public function testNormalize(): void
