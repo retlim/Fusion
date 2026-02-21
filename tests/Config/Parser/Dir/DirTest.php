@@ -98,8 +98,7 @@ class DirTest extends Test
                     "/d0/fusion.json"] ||
                 $dirname != [
                     "/d0/d1/d2",
-                    "/d0/d1",
-                    "/d0"] ||
+                    "/d0/d1"] ||
                 $path !== "/d0")
                 $this->handleFailedTest();
 

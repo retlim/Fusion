@@ -99,11 +99,9 @@ class Dir
      */
     public function getRootPath(string $path): ?string
     {
-        $match = null;
-
         while ($path) {
             if ($this->file->is("$path/fusion.json"))
-                $match = $path;
+                return $path;
 
             $parent = $this->dir->getDirname($path);
 
@@ -113,6 +111,6 @@ class Dir
             $path = $parent;
         }
 
-        return $match;
+        return null;
     }
 }

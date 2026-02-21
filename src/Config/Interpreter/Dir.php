@@ -26,6 +26,7 @@ use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Config\Parser\Dir as DirectoryParser;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Bus\Bus;
+use Valvoid\Fusion\Wrappers\File;
 
 /**
  * Directories config interpreter.
@@ -40,7 +41,8 @@ class Dir
      */
     public function __construct(
         private readonly Box $box,
-        private readonly Bus $bus) {}
+        private readonly Bus $bus,
+        private readonly File $file) {}
 
     /**
      * Interprets current working directory entry.
@@ -49,8 +51,7 @@ class Dir
      */
     public function interpret(array $config): void
     {
-        if (!is_array($config["dir"]) ||
-            empty($config["dir"]))
+        if (!is_array($config["dir"]) || empty($config["dir"]))
             $this->broadcastConfigEvent(
                 "The value of the 'dir' index must be an assoc array.",
                 Level::ERROR,
@@ -78,37 +79,8 @@ class Dir
      */
     private function interpretPath(mixed $entry): void
     {
-        if (!is_string($entry) && $entry == "")
-            $this->broadcastConfigEvent(
-                "Must be non-empty string. Not empty. " .
-                "Absolute path ...",
-                Level::ERROR,
-                ["dir", "path"]
-            );
-
-        if (str_starts_with($entry, "/..") ||
-            str_starts_with($entry, "\\.."))
-            $this->broadcastConfigEvent(
-                "The value of the 'path' key, " .
-                "the current working directory, does not point to " .
-                "anything, as it starts with a reference (double dot) " .
-                "to a non-existent parent directory.",
-                Level::ERROR,
-                ["dir", "path"]
-            );
-
-        // trailing slash
-        // directory separator
-        if (str_ends_with($entry, '/') ||
-            str_ends_with($entry, '\\'))
-            $this->broadcastConfigEvent(
-                "Trailing slash is not a filename. " .
-                "Must be string. Absolute path ...",
-                Level::ERROR,
-                ["dir", "path"]
-            );
-
-        if (is_file($entry))
+        // if exists and file
+        if ($this->file->is($entry))
             $this->broadcastConfigEvent(
                 "The value of the 'path' key, the current " .
                 "working directory must be a directory.",
