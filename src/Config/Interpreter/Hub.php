@@ -160,7 +160,7 @@ class Hub
                 );
 
             $interpreter->interpret(
-                ["hub", "apis", $id, "api"],
+                ["hub", "apis", $id],
                 $entry
             );
         }
