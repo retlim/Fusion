@@ -161,7 +161,7 @@ class Log
                 );
 
             $interpreter->interpret(
-                ["log", "serializers", $id, "serializer"],
+                ["log", "serializers", $id],
                 $entry
             );
         }
