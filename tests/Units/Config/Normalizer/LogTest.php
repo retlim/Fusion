@@ -25,36 +25,36 @@ use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Config\Normalizer;
-use Valvoid\Fusion\Config\Normalizer\Hub;
+use Valvoid\Fusion\Config\Normalizer\Log;
 use Valvoid\Reflex\Test\Wrapper;
 
-class HubTest extends Wrapper
+class LogTest extends Wrapper
 {
-    public function testDefaultApi(): void
+    public function testDefaultSerializer(): void
     {
         $box = $this->createStub(Box::class);
         $configuration = $this->createStub(Config::class);
         $bus = $this->createStub(Bus::class);
-        $hub = new Hub($box, $configuration, $bus);
+        $log = new Log($box, $configuration, $bus);
 
-        $config["apis"]["test"] = "#";
+        $config["serializers"]["test"] = "#";
 
-        $hub->normalize($config);
+        $log->normalize($config);
 
         $this->validate($config)
-            ->as(["apis" => [
-                "test" => [
-                    "api" => "#"
-                ]]]);
+            ->as(["serializers" => [
+                    "test" => [
+                        "serializer" => "#"
+                    ]]]);
     }
 
-    public function testConfiguredApi(): void
+    public function testConfiguredSerializer(): void
     {
         $box = $this->createMock(Box::class);
         $configuration = $this->createMock(Config::class);
         $bus = $this->createStub(Bus::class);
         $normalizer = $this->createMock(Normalizer::class);
-        $hub = new Hub($box, $configuration, $bus);
+        $log = new Log($box, $configuration, $bus);
 
         $configuration->fake("hasLazy")
             ->expect(class: "#0\\Config\\Normalizer")
@@ -65,9 +65,9 @@ class HubTest extends Wrapper
             ->return($normalizer);
 
         $config = [
-            "apis" => [
+            "serializers" => [
                 "test" => [
-                    "api" => "#0\\#1",
+                    "serializer" => "#0\\#1",
                     "whatever"
                 ]
             ]
@@ -75,29 +75,29 @@ class HubTest extends Wrapper
 
         $normalizer->fake("normalize")
             ->set(config: "###")
-            ->expect(breadcrumb: ["hub", "apis", "test"], config: [
-                "api" => "#0\\#1",
+            ->expect(breadcrumb: ["log", "serializers", "test"], config: [
+                "serializer" => "#0\\#1",
                 "whatever"
             ]);
 
-        $hub->normalize($config);
+        $log->normalize($config);
 
         $this->validate($config)
-            ->as(["apis" => [
+            ->as(["serializers" => [
                 "test" => "###"
             ]]);
     }
 
-    public function testAnonymousApi(): void
+    public function testAnonymousSerializer(): void
     {
         $box = $this->createMock(Box::class);
         $configuration = $this->createMock(Config::class);
         $bus = $this->createStub(Bus::class);
         $normalizer = $this->createMock(Normalizer::class);
-        $hub = new Hub($box, $configuration, $bus);
+        $log = new Log($box, $configuration, $bus);
 
         $configuration->fake("get")
-            ->expect(breadcrumb: ["hub", "apis", "test", "api"])
+            ->expect(breadcrumb: ["log", "serializers", "test", "serializer"])
             ->return("#0\\#1")
             ->fake("hasLazy")
             ->expect(class: "#0\\Config\\Normalizer")
@@ -108,9 +108,9 @@ class HubTest extends Wrapper
             ->return($normalizer);
 
         $config = [
-            "apis" => [
+            "serializers" => [
                 "test" => [
-                    #"api" => "#0\\#1",
+                    #"serializer" => "#0\\#1",
                     "whatever"
                 ]
             ]
@@ -118,15 +118,15 @@ class HubTest extends Wrapper
 
         $normalizer->fake("normalize")
             ->set(config: "###")
-            ->expect(breadcrumb: ["hub", "apis", "test"], config: [
-               # "api" => "#0\\#1",
+            ->expect(breadcrumb: ["log", "serializers", "test"], config: [
+               # "serializer" => "#0\\#1",
                 "whatever"
             ]);
 
-        $hub->normalize($config);
+        $log->normalize($config);
 
         $this->validate($config)
-            ->as(["apis" => [
+            ->as(["serializers" => [
                 "test" => "###"
             ]]);
     }
