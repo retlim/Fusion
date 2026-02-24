@@ -107,26 +107,26 @@ class Tasks
      */
     private function normalizerGroup(string $groupId, array &$config): void
     {
-        foreach ($config as $taskId => &$task)
+        foreach ($config as $key => &$value)
 
             // configured task
-            if (is_array($task)) {
-                $breadcrumb = ["tasks", $groupId, $taskId];
+            if (is_array($value)) {
+                $breadcrumb = ["tasks", $groupId, $key];
 
                 // identifiable
-                if (isset($task["task"])) {
-                    $this->normalizeTask($breadcrumb, $task);
+                if (isset($value["task"])) {
+                    $this->normalizeTask($breadcrumb, $value);
 
-                    // identifier in composite layer
+                // identifier in composite layer
                 } else {
-                    $task["task"] = $this->config->get(...[...$breadcrumb, "task"]);
+                    $task = $this->config->get(...[...$breadcrumb, "task"]);
 
                     // custom normalizer already validated in prev layer
                     // just pass settings
-                    $class = substr($task["task"], 0,
+                    $class = substr($task, 0,
 
                             // namespace length
-                            strrpos($task["task"], '\\')) . "\Config\Normalizer";
+                            strrpos($task, '\\')) . "\Config\Normalizer";
 
                     // registered file and
                     // implements interface
@@ -140,16 +140,16 @@ class Tasks
                                 "must be a string, name of a class that implements the '" .
                                 Normalizer::class . "' interface.",
                                 Level::ERROR,
-                                ["tasks", $groupId, $taskId]
+                                ["tasks", $groupId, $key]
                             );
 
-                        $normalizer->normalize($breadcrumb, $task);
+                        $normalizer->normalize($breadcrumb, $value);
                     }
                 }
 
-            } elseif(is_string($task))
-                $task = [
-                    "task" => $task
+            } elseif(is_string($value))
+                $value = [
+                    "task" => $value
                 ];
     }
 
