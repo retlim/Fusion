@@ -6,6 +6,7 @@
     "structure": {
         "valvoid.com/valvoid": "fusion/2.0.0",
         "/config": "extendable",
+        "/dependencies": "valvoid.com/valvoid/box/1.2.0",
         "/state": "stateful"
     },
     "environment": {
