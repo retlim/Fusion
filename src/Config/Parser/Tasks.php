@@ -24,7 +24,7 @@ namespace Valvoid\Fusion\Config\Parser;
 use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Config\Parser as ConfigParser;
+use Valvoid\Fusion\Config\Parser;
 use Valvoid\Fusion\Config\Config;
 use Valvoid\Fusion\Log\Events\Level;
 
@@ -79,12 +79,12 @@ class Tasks
                     if ($this->config->hasLazy($class)) {
                         $parser = $this->box->get($class);
 
-                        if (!is_subclass_of($parser, ConfigParser::class))
+                        if (!is_subclass_of($parser, Parser::class))
                             $this->broadcastConfigEvent(
                                 "The auto-generated '$class' " .
                                 "derivation of the 'task' value, task config parser, " .
                                 "must be a string, name of a class that implements the '" .
-                                ConfigParser::class . "' interface.",
+                                Parser::class . "' interface.",
                                 Level::ERROR,
                                 ["tasks", $key]
                             );
@@ -107,49 +107,49 @@ class Tasks
      */
     private function parseGroup(string $groupId, array &$config): void
     {
-        foreach ($config as $taskId => &$task)
+        foreach ($config as $key => &$value)
 
             // configured task
-            if (is_array($task)) {
-                $breadcrumb = ["tasks", $groupId, $taskId];
+            if (is_array($value)) {
+                $breadcrumb = ["tasks", $groupId, $key];
 
                 // identifiable
-                if (isset($task["task"])) {
-                    $this->parseTask($breadcrumb, $task);
+                if (isset($value["task"])) {
+                    $this->parseTask($breadcrumb, $value);
 
                 // identifier in composite layer
                 } else {
-                    $task["task"] = $this->config->get(...[...$breadcrumb, "task"]);
+                    $task = $this->config->get(...[...$breadcrumb, "task"]);
 
                     // custom parser already validated in prev layer
                     // just pass settings
-                    $class = substr($task["task"], 0,
+                    $class = substr($task, 0,
 
                             // namespace length
-                            strrpos($task["task"], '\\')) . "\Config\Parser";
+                            strrpos($task, '\\')) . "\Config\Parser";
 
                     // registered file and
                     // implements interface
                     if ($this->config->hasLazy($class)) {
                         $parser = $this->box->get($class);
 
-                        if (!is_subclass_of($parser, ConfigParser::class))
+                        if (!is_subclass_of($parser, Parser::class))
                             $this->broadcastConfigEvent(
                                 "The auto-generated '$class' " .
                                 "derivation of the 'task' value, task config parser, " .
                                 "must be a string, name of a class that implements the '" .
-                                ConfigParser::class . "' interface.",
+                                Parser::class . "' interface.",
                                 Level::ERROR,
-                                ["tasks", $groupId, $taskId]
+                                ["tasks", $groupId, $key]
                             );
 
-                        $parser->parse($breadcrumb, $task);
+                        $parser->parse($breadcrumb, $value);
                     }
                 }
 
-            } elseif(is_string($task))
-                $task = [
-                    "task" => $task
+            } elseif(is_string($value))
+                $value = [
+                    "task" => $value
                 ];
     }
 
@@ -171,12 +171,12 @@ class Tasks
         if ($this->config->hasLazy($class)) {
             $parser = $this->box->get($class);
 
-            if (!is_subclass_of($parser, ConfigParser::class))
+            if (!is_subclass_of($parser, Parser::class))
                 $this->broadcastConfigEvent(
                     "The auto-generated '$class' " .
                     "derivation of the 'task' value, task config parser, " .
                     "must be a string, name of a class that implements the '" .
-                    ConfigParser::class . "' interface.",
+                    Parser::class . "' interface.",
                     Level::ERROR,
                     [...$breadcrumb, "task"]
                 );
