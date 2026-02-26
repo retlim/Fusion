@@ -33,7 +33,7 @@ class DirectoryMock extends Dir
 
     public function __construct(){}
 
-    public function getCacheDir(): string
+    public function getStatefulDir(): string
     {
         return call_user_func($this->cache);
     }

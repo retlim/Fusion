@@ -154,7 +154,7 @@ class Shift extends Task
         $internalCachePath = $this->group->getInternalRootMetadata()->getStatefulPath();
         $externalCachePath = $this->externalRootMeta->getStatefulPath();
         $this->lockedDirs = [
-            $this->directory->getCacheDir() . "/log",
+            $this->directory->getStatefulDir() . "/log",
             $this->state,
             $this->directory->getPackagesDir(),
             $this->directory->getTaskDir(),

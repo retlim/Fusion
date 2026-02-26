@@ -82,7 +82,7 @@ class Snap extends Task
         // redundant state
         // refresh/create state file
         if (!$this->group->hasDownloadable()) {
-            $cacheDir = $this->directory->getCacheDir();
+            $cacheDir = $this->directory->getStatefulDir();
             $metadata = $this->group->getRootMetadata();
             $id = $metadata->getId();
 

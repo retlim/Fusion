@@ -26,7 +26,7 @@ use Valvoid\Fusion\Dir\Dir;
 
 class DirectoryMock extends Dir
 {
-    public Closure $state;
+    public Closure $stateful;
     public Closure $packages;
     public Closure $task;
     public Closure $other;
@@ -46,7 +46,7 @@ class DirectoryMock extends Dir
 
     public function getStateDir(): string
     {
-        return call_user_func($this->state);
+        return call_user_func($this->stateful);
     }
 
     public function getOtherDir(): string
@@ -59,7 +59,7 @@ class DirectoryMock extends Dir
         call_user_func($this->delete, $file);
     }
 
-    public function getCacheDir(): string {return "";}
+    public function getStatefulDir(): string {return "";}
 
     public function createDir(string $dir, int $permissions = 0755): void{}
     public function rename(string $from, string $to): void {}

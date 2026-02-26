@@ -46,7 +46,7 @@ class DirectoryMock extends Dir
     public function copy(string $from, string $to): void {}
     public function getTaskDir(): string {return "";}
     public function getStateDir(): string {return "";}
-    public function getCacheDir(): string {return "";}
+    public function getStatefulDir(): string {return "";}
     public function getOtherDir(): string {return "";}
     public function getRootDir(): string {return "";}
     public function getHubDir(): string {return "";}

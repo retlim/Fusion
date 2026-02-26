@@ -71,7 +71,7 @@ class StackTest extends Test
             $onCopy =
             $onDownload =
             $create = [];
-            $directory->state = function () {return "/tmp/state";};
+            $directory->stateful = function () {return "/tmp/state";};
             $directory->packages = function () {return "/tmp/packages";};
             $group->hasDownloadable = true;
             $group->implication = [

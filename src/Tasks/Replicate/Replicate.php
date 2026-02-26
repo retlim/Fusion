@@ -260,7 +260,7 @@ class Replicate extends Task implements Interceptor
     private function replicateNestedRoots(InternalMetadata $metadata): void
     {
         foreach (["", ".dev", ".local"] as $filename) {
-            $file = $this->directory->getCacheDir() . "/snapshot$filename.json";
+            $file = $this->directory->getStatefulDir() . "/snapshot$filename.json";
 
             if ($this->file->exists($file)) {
                 $snapshot = $this->file->get($file);

@@ -52,7 +52,7 @@ class DirectoryMock extends Dir
     public function getTaskDir(): string {return "";}
     public function clear(string $dir, string $path): void {}
     public function getStateDir(): string {return "";}
-    public function getCacheDir(): string {return "";}
+    public function getStatefulDir(): string {return "";}
     public function getOtherDir(): string {return "";}
     public function getRootDir(): string {return "";}
     public function getHubDir(): string {return "";}

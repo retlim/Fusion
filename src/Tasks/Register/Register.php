@@ -145,7 +145,7 @@ class Register extends Task
         }
 
         $this->writeAutoloader(
-            $this->directory->getCacheDir(),
+            $this->directory->getStatefulDir(),
             $this->group->getInternalRootMetadata()->getStatefulPath()
         );
 

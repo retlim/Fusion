@@ -28,7 +28,7 @@ class DirectoryMock extends Dir
 {
     public Closure $root;
     public Closure $other;
-    public Closure $state;
+    public Closure $stateful;
     public Closure $task;
     public Closure $cache;
     public Closure $packages;
@@ -38,7 +38,7 @@ class DirectoryMock extends Dir
     public Closure $clear;
     public Closure $copy;
     public function __construct(){}
-    public function getCacheDir(): string
+    public function getStatefulDir(): string
     {
         return call_user_func($this->cache);
     }
@@ -79,7 +79,7 @@ class DirectoryMock extends Dir
 
     public function getStateDir(): string
     {
-        return call_user_func($this->state);
+        return call_user_func($this->stateful);
     }
 
     public function getOtherDir(): string

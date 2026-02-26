@@ -34,7 +34,7 @@ class DirMock extends Dir
 
     public function getTaskDir(): string {return "";}
     public function getStateDir(): string {return "";}
-    public function getCacheDir(): string {return "";}
+    public function getStatefulDir(): string {return "";}
     public function getOtherDir(): string {return "";}
     public function getPackagesDir(): string {return "";}
     public function createDir(string $dir, int $permissions = 755): void {}

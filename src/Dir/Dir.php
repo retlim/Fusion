@@ -42,19 +42,19 @@ class Dir
      * event during migration if the new package version defines a
      * different cache path in its metadata structure.
      */
-    private string $state;
+    private string $stateful;
 
     /**
      * @var string OS-level cache directory for immutable artifacts
      * like downloaded packages.
      */
-    private string $osCache;
+    private string $cache;
 
     /**
      * @var string OS-level state directory for mutable runtime data
      * like logs or build flow directories.
      */
-    private string $osState;
+    private string $state;
 
     /**
      * Constructs the directory.
@@ -71,8 +71,8 @@ class Dir
         Bus $bus,
         Config $config)
     {
-        $this->osState = $config->get("state", "path");
-        $this->osCache = $config->get("cache", "path");
+        $this->state = $config->get("state", "path");
+        $this->cache = $config->get("cache", "path");
         $this->root = $config->get("dir", "path");
 
         $bus->addReceiver(static::class, $this->handleBusEvent(...),
@@ -129,7 +129,7 @@ class Dir
             $this->copy(__DIR__ . "/placeholder.json", $file);
 
             // default placeholder
-            $this->state = "$this->root/state";
+            $this->stateful = "$this->root/state";
 
             return;
         }
@@ -164,7 +164,7 @@ class Dir
                 "of invalid content."
             );
 
-        $this->state = $this->root . $path;
+        $this->stateful = $this->root . $path;
     }
 
     /**
@@ -186,7 +186,7 @@ class Dir
             "$this->root/fusion.json");
 
         // default placeholder
-        $this->state = "$this->root/state";
+        $this->stateful = "$this->root/state";
     }
 
     /**
@@ -214,7 +214,7 @@ class Dir
             "$this->root/fusion.json");
 
         // default placeholder
-        $this->state = "$this->root/state";
+        $this->stateful = "$this->root/state";
     }
 
     /**
@@ -250,7 +250,7 @@ class Dir
      */
     public function getTaskDir(): string
     {
-        return "$this->osState/task";
+        return "$this->state/task";
     }
 
     /**
@@ -261,7 +261,7 @@ class Dir
      */
     public function getHubDir(): string
     {
-        return "$this->osCache/hub";
+        return "$this->cache/hub";
     }
 
     /**
@@ -271,7 +271,7 @@ class Dir
      */
     public function getLogDir(): string
     {
-        return "$this->osState/log";
+        return "$this->state/log";
     }
 
     /**
@@ -281,17 +281,17 @@ class Dir
      */
     public function getStateDir(): string
     {
-        return "$this->osState/state";
+        return "$this->state/state";
     }
 
     /**
-     * Returns absolute cache directory.
+     * Returns absolute stateful directory.
      *
-     * @return string Directory.
+     * @return string Absolut path.
      */
-    public function getCacheDir(): string
+    public function getStatefulDir(): string
     {
-        return $this->state;
+        return $this->stateful;
     }
 
     /**
@@ -301,7 +301,7 @@ class Dir
      */
     public function getOtherDir(): string
     {
-        return "$this->osState/other";
+        return "$this->state/other";
     }
 
     /**
@@ -312,7 +312,7 @@ class Dir
      */
     public function getPackagesDir(): string
     {
-        return "$this->osState/packages";
+        return "$this->state/packages";
     }
 
     /**
@@ -456,6 +456,6 @@ class Dir
      */
     protected function handleBusEvent(Cache $event): void
     {
-        $this->state = $event->getDir();
+        $this->stateful = $event->getDir();
     }
 }

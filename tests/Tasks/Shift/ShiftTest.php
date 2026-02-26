@@ -112,7 +112,7 @@ class ShiftTest extends Test
             $directory->root = function () {return "/root";};
             $directory->cache = function () {return "/root/c";};
             $directory->task = function () {return "/tmp/task";};
-            $directory->state = function () {return "/tmp/state";};
+            $directory->stateful = function () {return "/tmp/state";};
             $directory->other = function () {return "/tmp/other";};
             $directory->packages = function () {return "/tmp/packages";};
             $directory->delete = function (string $file) use (&$delete) {
@@ -192,7 +192,7 @@ class ShiftTest extends Test
             $directory->root = function () {return "/root";};
             $directory->cache = function () {return "/root/c";};
             $directory->task = function () {return "/tmp/task";};
-            $directory->state = function () {return "/tmp/state";};
+            $directory->stateful = function () {return "/tmp/state";};
             $directory->other = function () {return "/tmp/other";};
             $directory->packages = function () {return "/tmp/packages";};
             $dir->filenames = function (string $dir) use (&$filenames) {
@@ -327,7 +327,7 @@ class ShiftTest extends Test
             $directory->root = function () {return "/root";};
             $directory->cache = function () {return "/root/c0";};
             $directory->task = function () {return "/tmp/task";};
-            $directory->state = function () {return "/tmp/state";};
+            $directory->stateful = function () {return "/tmp/state";};
             $directory->other = function () {return "/tmp/other";};
             $directory->packages = function () {return "/tmp/packages";};
             $dir->filenames = function (string $dir) use (&$filenames) {
@@ -478,7 +478,7 @@ class ShiftTest extends Test
             $directory->root = function () {return "/root";};
             $directory->cache = function () {return "/root/c";};
             $directory->task = function () {return "/tmp/task";};
-            $directory->state = function () {return "/tmp/state";};
+            $directory->stateful = function () {return "/tmp/state";};
             $directory->other = function () {return "/tmp/other";};
             $directory->packages = function () {return "/tmp/packages";};
             $dir->filenames = function (string $dir) use (&$filenames) {
@@ -664,7 +664,7 @@ class ShiftTest extends Test
             $directory->root = function () {return "/root";};
             $directory->cache = function () {return "/root/c";};
             $directory->task = function () {return "/tmp/task";};
-            $directory->state = function () {return "/tmp/state";};
+            $directory->stateful = function () {return "/tmp/state";};
             $directory->other = function () {return "/tmp/other";};
             $directory->packages = function () {return "/tmp/packages";};
             $dir->filenames = function (string $dir) use (&$filenames) {
@@ -863,7 +863,7 @@ class ShiftTest extends Test
             $directory->root = function () {return "/#";};
             $directory->cache = function () {return "/#/c";};
             $directory->task = function () {return "/tmp/task";};
-            $directory->state = function () {return "/tmp/state";};
+            $directory->stateful = function () {return "/tmp/state";};
             $directory->other = function () {return "/tmp/other";};
             $directory->packages = function () {return "/tmp/packages";};
             $dir->filenames = function (string $dir) use (&$filenames) {
@@ -1071,7 +1071,7 @@ class ShiftTest extends Test
             $directory->root = fn () => "/#";
             $directory->cache = fn () => "/#/c";
             $directory->task = fn () => "/tmp/task";
-            $directory->state = fn () => "/tmp/state";
+            $directory->stateful = fn () => "/tmp/state";
             $directory->other = fn () => "/tmp/other";
             $directory->packages = fn () => "/tmp/packages";
             $dir->filenames = function (string $dir) use (&$filenames) {
