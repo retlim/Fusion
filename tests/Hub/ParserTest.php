@@ -35,7 +35,7 @@ class ParserTest extends Test
 
     public function testOffsets(): void
     {
-        if (Parser::getOffsets([
+        if ((new Parser)->getOffsets([
             [
                 "major" => "1",
                 "minor" => "0",

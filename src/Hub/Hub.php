@@ -159,7 +159,9 @@ class Hub
         // visible external request
         // hub caches everything
         $id = $this->id++;
-        $offsets = Parser::getOffsets($source["reference"]);
+        $offsets = $this->box->get(Parser::class)
+            ->getOffsets($source["reference"]);
+
         $request = $this->box->get(CacheVersionsRequest::class,
             id: $id,
             cache: $this->cache,
@@ -217,8 +219,8 @@ class Hub
                 $sync->addCacheId($id);
                 $request->addSyncId($this->id++);
 
-                // redundant
-                // recycle active sync request ID
+            // redundant
+            // recycle active sync request ID
             } elseif (is_int($state)) {
                 $this->queues["local"][$state]->addCacheId($id);
                 $request->addSyncId($state);
@@ -269,8 +271,8 @@ class Hub
                 $sync->addCacheId($id);
                 $request->addSyncId($this->id++);
 
-                // redundant
-                // recycle active sync request ID
+            // redundant
+            // recycle active sync request ID
             } elseif (is_int($state)) {
                 $this->queues["remote"][$state]->addCacheId($id);
                 $request->addSyncId($state);

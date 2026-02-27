@@ -31,7 +31,7 @@ class Parser
      *
      * @param array $reference Inflated reference.
      */
-    public static function getOffsets(array $reference): array
+    public function getOffsets(array $reference): array
     {
         $offsets = [];
 
@@ -54,7 +54,7 @@ class Parser
 
                 // brackets
                 } elseif (!isset($entry["sign"])) {
-                    $result = self::getOffsets($entry);
+                    $result = $this->getOffsets($entry);
 
                     if ($result)
                         $offsets = array_merge($offsets, $result);
