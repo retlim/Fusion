@@ -19,23 +19,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Hub;
+namespace Valvoid\Fusion\Tests\Units\Hub;
 
 use Valvoid\Fusion\Hub\Parser;
-use Valvoid\Fusion\Tests\Test;
+use Valvoid\Reflex\Test\Wrapper;
 
-class ParserTest extends Test
+class ParserTest extends Wrapper
 {
-    protected string|array $coverage = Parser::class;
-
-    public function __construct()
-    {
-        $this->testOffsets();
-    }
-
     public function testOffsets(): void
     {
-        if ((new Parser)->getOffsets([
+        $this->validate((new Parser)->getOffsets([
             [
                 "major" => "1",
                 "minor" => "0",
@@ -73,7 +66,8 @@ class ParserTest extends Test
                     ]
                 ]
             ]
-        ]) !== [
+        ]))
+            ->as([
                 [
                     "version" => "1.0.0",
                     "entry" => [
@@ -110,7 +104,6 @@ class ParserTest extends Test
                         "sign" => "=="
                     ]
                 ],
-            ])
-            $this->handleFailedTest();
+            ]);
     }
 }

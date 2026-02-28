@@ -846,7 +846,6 @@ class HubTest extends Wrapper
         $api = $this->createMock(LocalApi::class);
         $cacheRequest = $this->createMock(CacheArchiveRequest::class);
         $localRequest = $this->createMock(LocalArchiveRequest::class);
-        $curl = $this->createMock(Curl::class);
         $source = [
             "api" => "test",
             "reference" => "####"

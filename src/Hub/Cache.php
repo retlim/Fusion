@@ -273,8 +273,7 @@ class Cache
             // recycle parser logic
             // inflated values are for:
             // sort, pattern selections (source reference), ...
-            $this->box->get(Parser::class)
-                ::getInflatedVersion($inline);
+            Parser::getInflatedVersion($inline);
 
         return true;
     }
@@ -285,6 +284,7 @@ class Cache
      * @param array $source Source.
      * @param string $inline Inline offset version.
      * @param array $inflated Inflated offset version.
+     * @param string $id Commit ID, sha, hash, whatever unique identifier ....
      * @return bool Version conflict indicator.
      */
     public function addOffset(array $source, string $inline, array $inflated, string $id): bool
@@ -303,8 +303,7 @@ class Cache
         if (str_starts_with($id, $offset))
             $type = "commit";
 
-        elseif ($this->box->get(VersionInterpreter::class)
-            ::isSemanticVersion(
+        elseif (VersionInterpreter::isSemanticVersion(
                 substr($offset,
                     strlen($source["prefix"]))))
             $type = "tag";
@@ -429,8 +428,7 @@ class Cache
     {
         $match = [];
         $versions = $this->versions[$api][$path]["entries"] ?? [];
-        $versions = $this->box->get(Normalizer::class)
-            ::getFilteredVersions($versions, $reference);
+        $versions = Normalizer::getFilteredVersions($versions, $reference);
 
         // sort descending order
         // by inflated values
@@ -443,8 +441,7 @@ class Cache
 
                 // 1 = $b > $a
                 // -1 = $a > $b
-                return ($this->box->get(VersionInterpreter::class)
-                    ::isBiggerThan(
+                return (VersionInterpreter::isBiggerThan(
 
                         // descending
                         // ($a, $b) switch params for ascending
