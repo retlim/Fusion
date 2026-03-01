@@ -19,21 +19,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Hub\APIs\Remote\Valvoid\Config;
+namespace Valvoid\Fusion\Tests\Units\Hub\APIs\Remote\Valvoid\Config;
 
 use Valvoid\Fusion\Hub\APIs\Remote\Valvoid\Config\Parser;
-use Valvoid\Fusion\Tests\Test;
+use Valvoid\Reflex\Test\Wrapper;
 
-class ParserTest extends Test
+class ParserTest extends Wrapper
 {
-    /** @var string|array Code coverage. */
-    protected string|array $coverage = Parser::class;
-
-    public function __construct()
-    {
-        $this->testParse();
-    }
-
     public function testParse(): void
     {
         $config["tokens"] = [
@@ -50,7 +42,8 @@ class ParserTest extends Test
         $parser = new Parser;
         $parser->parse([], $config);
 
-        if ($config["tokens"] !== [
+        $this->validate($config["tokens"])
+            ->as([
                 "token1",
                 "valvoid" => [
                     "mosaic" => [
@@ -67,6 +60,6 @@ class ParserTest extends Test
                         ]
                     ]
                 ]
-            ]) $this->handleFailedTest();
+            ]);
     }
 }

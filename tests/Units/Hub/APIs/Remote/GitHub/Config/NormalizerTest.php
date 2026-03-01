@@ -19,35 +19,26 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Hub\APIs\Remote\GitLab\Config;
+namespace Valvoid\Fusion\Tests\Units\Hub\APIs\Remote\GitHub\Config;
 
-use Valvoid\Fusion\Hub\APIs\Remote\GitLab\Config\Normalizer;
-use Valvoid\Fusion\Tests\Test;
+use Valvoid\Fusion\Hub\APIs\Remote\GitHub\Config\Normalizer;
+use Valvoid\Reflex\Test\Wrapper;
 
-class NormalizerTest extends Test
+class NormalizerTest extends Wrapper
 {
-    /** @var string|array Code coverage. */
-    protected string|array $coverage = Normalizer::class;
-
-    public function __construct()
-    {
-        $this->testDefault();
-        $this->testCustom();
-    }
-
     public function testDefault(): void
     {
         $config = [];
-
         $normalizer = new Normalizer;
-        $normalizer->normalize(["hub", "apis", "gitlab.com"], $config);
+        $normalizer->normalize(["hub", "apis", "github.com"], $config);
 
-        if ($config !== [
+        $this->validate($config)
+            ->as([
                 "tokens" => [],
                 "protocol" => "https",
-                "domain" => "gitlab.com",
-                "url" => "https://gitlab.com/api/v4/projects"
-            ]) $this->handleFailedTest();
+                "domain" => "github.com",
+                "url" => "https://api.github.com/repos"
+            ]);
     }
 
     public function testCustom(): void
@@ -60,11 +51,12 @@ class NormalizerTest extends Test
         $normalizer = new Normalizer;
         $normalizer->normalize(["hub", "apis", "c3"], $config);
 
-        if ($config !== [
+        $this->validate($config)
+            ->as([
                 "tokens" => "c1",
                 "protocol" => "c2",
                 "domain" => "c3",
-                "url" => "c2://c3/api/v4/projects"
-            ]) $this->handleFailedTest();
+                "url" => "c2://c3/api/v3/repos"
+            ]);
     }
 }

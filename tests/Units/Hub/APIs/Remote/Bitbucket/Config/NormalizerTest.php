@@ -19,36 +19,27 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Hub\APIs\Remote\Bitbucket\Config;
+namespace Valvoid\Fusion\Tests\Units\Hub\APIs\Remote\Bitbucket\Config;
 
 use Valvoid\Fusion\Hub\APIs\Remote\Bitbucket\Config\Normalizer;
-use Valvoid\Fusion\Tests\Test;
+use Valvoid\Reflex\Test\Wrapper;
 
-class NormalizerTest extends Test
+class NormalizerTest extends Wrapper
 {
-    /** @var string|array Code coverage. */
-    protected string|array $coverage = Normalizer::class;
-
-    public function __construct()
-    {
-        $this->testDefault();
-        $this->testCustom();
-    }
-
     public function testDefault(): void
     {
         $config = [];
-
         $normalizer = new Normalizer;
         $normalizer->normalize(["hub", "apis", "bitbucket.org"], $config);
 
-        if ($config != [
+        $this->validate($config)
+            ->as([
                 "tokens" => [],
                 "protocol" => "https",
                 "domain" => "bitbucket.org",
-                "url" => "https://api.bitbucket.org/2.0/repositories",
-                "version" => 2.0
-            ]) $this->handleFailedTest();
+                "version" => 2.0,
+                "url" => "https://api.bitbucket.org/2.0/repositories"
+            ]);
     }
 
     public function testCustom(): void
@@ -61,12 +52,13 @@ class NormalizerTest extends Test
         $normalizer = new Normalizer;
         $normalizer->normalize(["hub", "apis", "c3"], $config);
 
-        if ($config != [
+        $this->validate($config)
+            ->as([
                 "tokens" => "c1",
                 "protocol" => "c2",
                 "domain" => "c3",
-                "url" => "c2://c3/rest/api/latest/projects",
-                "version" => 1.0
-            ]) $this->handleFailedTest();
+                "version" => 1.0,
+                "url" => "c2://c3/rest/api/latest/projects"
+            ]);
     }
 }
