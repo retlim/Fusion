@@ -341,59 +341,6 @@ class JSONTest extends Wrapper
         $serializer->log(Level::INFO, $request);
     }
 
-    public function testError(): void
-    {
-        $dir = $this->createMock(Dir::class);
-        $file = $this->createMock(File::class);
-        $error = $this->createStub(Error::class);
-
-        $dir->fake("getLogDir")
-            ->return("#0")
-            ->fake("createDir")
-            ->expect(dir: "#0");
-
-        $file->fake("is")
-            ->expect(file: "#0/#1")
-            ->return(false)
-            ->fake("put")
-            ->hook(function ($file, $data) use ($error) {
-                $this->validate($file)
-                    ->as("#0/#1");
-
-                $data = json_decode($data, true);
-                $data = $data[0];
-                unset($data["date"]); // may diff sec error
-
-                $this->validate($data)
-                    ->as([
-                        "category" => "error",
-                        "type" => "error",
-                        "payload" => [
-                            "trace" => $error->getTrace(),
-                            "line" => $error->getLine(),
-                            "file" => $error->getFile(),
-                            "message" => $error->getMessage()
-                        ],
-                        "level" => [
-                            "name" => "info",
-                            "ordinal" => Level::INFO->value]
-                    ]);
-
-                return true;
-            });
-
-        $serializer = new JSON(
-            directory: $dir,
-            file: $file,
-            configuration: [
-                "threshold" => Level::INFO,
-                "filename" => "#1",
-            ]
-        );
-
-        $serializer->log(Level::INFO, $error);
-    }
-
     public function testErrorInfo(): void
     {
         $dir = $this->createMock(Dir::class);

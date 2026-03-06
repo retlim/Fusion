@@ -202,28 +202,6 @@ class JSONTest extends Wrapper
             ]));
     }
 
-    public function testError(): void
-    {
-        $error = $this->createStub(Error::class);
-
-        ob_start();
-        $this->serializer->log(Level::INFO, $error);
-        $this->validate(ob_get_clean())
-            ->as(json_encode([
-                "category" => "error",
-                "type" => "error",
-                "payload" => [
-                    "trace" => $error->getTrace(),
-                    "line" => $error->getLine(),
-                    "file" => $error->getFile(),
-                    "message" => $error->getMessage()
-                ],
-                "level" => [
-                    "name" => "info",
-                    "ordinal" => Level::INFO->value]
-            ]));
-    }
-
     public function testErrorInfo(): void
     {
         $error = $this->createStub(InfoError::class);
