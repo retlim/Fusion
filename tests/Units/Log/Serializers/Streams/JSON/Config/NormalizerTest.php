@@ -19,17 +19,33 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Log\Mocks;
+namespace Valvoid\Fusion\Tests\Units\Log\Serializers\Streams\JSON\Config;
 
-use Closure;
-use Valvoid\Box\Box;
+use Valvoid\Fusion\Log\Events\Level;
+use Valvoid\Fusion\Log\Serializers\Streams\JSON\Config\Normalizer;
+use Valvoid\Reflex\Test\Wrapper;
 
-class BoxMock extends Box
+class NormalizerTest extends Wrapper
 {
-    public Closure $get;
-
-    public function get(string $class, ...$args): object
+    public function testDefaultNormalization(): void
     {
-        return call_user_func($this->get, $class, ...$args);
+        $normalizer = new Normalizer;
+        $config = [];
+
+        $normalizer->normalize([], $config);
+
+        $this->validate($config)
+            ->as(["threshold" => Level::INFO]);
+    }
+
+    public function testCustomNormalization(): void
+    {
+        $normalizer = new Normalizer;
+        $config = ["threshold" => Level::WARNING];
+
+        $normalizer->normalize([], $config);
+
+        $this->validate($config)
+            ->as(["threshold" => Level::WARNING]);
     }
 }

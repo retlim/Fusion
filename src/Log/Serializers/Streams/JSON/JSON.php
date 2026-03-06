@@ -99,7 +99,7 @@ class JSON implements Stream
         // custom unknown
         // generic message fallback
         else
-            $this->encodeGeneric($level, $event->__toString());
+            $this->encodeMessage($level, "$event");
     }
 
     /**
@@ -109,27 +109,6 @@ class JSON implements Stream
      * @param string $message Message.
      */
     private function encodeMessage(Level $level, string $message): void
-    {
-        echo json_encode([
-            "category" => "generic", // no category
-            "type" => "string",
-            "payload" => [
-                "message" => $message
-            ],
-            "level" => [
-                "name" => strtolower($level->name),
-                "ordinal" => $level->value
-            ]
-        ]);
-    }
-
-    /**
-     * Encodes generic string message.
-     *
-     * @param Level $level Level.
-     * @param string $message Message.
-     */
-    private function encodeGeneric(Level $level, string $message): void
     {
         echo json_encode([
             "category" => "generic", // no category

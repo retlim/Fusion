@@ -37,7 +37,7 @@ class Normalizer implements ConfigNormalizer
      */
     public function normalize(array $breadcrumb, array &$config): void
     {
-        self::normalizeLevel($config);
+        $this->normalizeLevel($config);
     }
 
     /**
@@ -45,7 +45,7 @@ class Normalizer implements ConfigNormalizer
      *
      * @param array $config Config.
      */
-    private static function normalizeLevel(array &$config): void
+    private function normalizeLevel(array &$config): void
     {
         if (isset($config["threshold"])) {
             if (is_string($config["threshold"]))

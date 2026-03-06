@@ -102,7 +102,7 @@ class Terminal implements Stream
         // custom unknown
         // generic message fallback
         else
-            $this->formatGeneric($level, $event->__toString());
+            $this->formatMessage($level, "$event");
 
         $this->header = false;
     }
@@ -119,19 +119,6 @@ class Terminal implements Stream
     }
 
     /**
-     * Formats generic string message.
-     *
-     * @param Level $level Level.
-     * @param string $message Message.
-     */
-    private function formatGeneric(Level $level, string $message): void
-    {
-        $this->formatCategory($level, "generic ");
-
-        echo "\n$message";
-    }
-
-    /**
      * Formats error event.
      *
      * @param Level $level Level.
@@ -141,9 +128,9 @@ class Terminal implements Stream
     {
         $this->formatCategory($level, "");
 
-        #foreach (array_reverse($error->getTrace()) as $entry)
-         #   echo "\n\033[4min\033[0m: \033[0;4m" . $entry["line"] . " - " . $entry["file"] .
-          #      "\n\033[0mat: " . ($entry["class"] ?? "") . ($entry["type"] ?? "") . $entry["function"] . "()" ;
+        foreach (array_reverse($error->getTrace()) as $entry)
+            echo "\n\033[4min\033[0m: \033[0;4m" . $entry["line"] . " - " . $entry["file"] .
+                "\n\033[0mat: " . ($entry["class"] ?? "") . ($entry["type"] ?? "") . $entry["function"] . "()" ;
 
         echo "\n\033[4min\033[0m: \033[0;4m" . $error->getLine() . " - " . $error->getFile() .
             "\n\033[0mis: " . $error->getMessage();
@@ -193,7 +180,7 @@ class Terminal implements Stream
     private function formatDeadlock(Level $level, Deadlock $deadlock): void
     {
         // error
-        $this->formatCategory($level, "deadlock");
+        $this->formatCategory($level, "deadlock ");
         $this->formatPath($deadlock->getLockedPath());
 
         echo "\n\033[4min\033[0m: \033[0;4m" . $deadlock->getLockedLayer() .
@@ -338,7 +325,7 @@ class Terminal implements Stream
         foreach ($info->getPath() as $entry)
             echo "\n\033[4min\033[0m: \033[0;4m" . $entry["line"] . " - " . $entry["file"] .
                 "\n\033[0mat: " . ($entry["class"] ?? "") . ($entry["type"] ?? "") .
-                $entry["function"] . "()" ;
+                $entry["function"] . "()";
 
         echo "\nis: " . $info->getMessage() . " | code: " . $info->getCode();
     }

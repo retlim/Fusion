@@ -37,8 +37,8 @@ class Normalizer implements ConfigNormalizer
      */
     public function normalize(array $breadcrumb, array &$config): void
     {
-        self::normalizeFilename($config);
-        self::normalizeLevel($config);
+        $this->normalizeFilename($config);
+        $this->normalizeLevel($config);
     }
 
     /**
@@ -46,7 +46,7 @@ class Normalizer implements ConfigNormalizer
      *
      * @param array $config Config.
      */
-    private static function normalizeFilename(array &$config): void
+    private function normalizeFilename(array &$config): void
     {
         $config["filename"] = date(
             $config["filename"] ??
@@ -60,7 +60,7 @@ class Normalizer implements ConfigNormalizer
      *
      * @param array $config Config.
      */
-    private static function normalizeLevel(array &$config): void
+    private function normalizeLevel(array &$config): void
     {
         if (isset($config["threshold"])) {
             if (is_string($config["threshold"]))

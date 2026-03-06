@@ -21,6 +21,7 @@
 
 namespace Valvoid\Fusion\Log\Serializers\Streams\JSON\Config;
 
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Config\Interpreter as ConfigInterpreter;
@@ -32,7 +33,15 @@ use Valvoid\Fusion\Log\Serializers\Streams\JSON\JSON;
  */
 class Interpreter implements ConfigInterpreter
 {
-    public function __construct(private readonly Bus $bus) {}
+    /**
+     * Constructs the interpreter.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
 
     /**
      * Interprets the JSON serializer config.
@@ -47,27 +56,29 @@ class Interpreter implements ConfigInterpreter
             return;
 
         if (is_string($entry))
-            self::interpretDefaultSerializer($breadcrumb, $entry);
+            $this->interpretDefaultSerializer($breadcrumb, $entry);
 
         elseif (is_array($entry))
             foreach ($entry as $key => $value)
                 match ($key) {
-                    "serializer" => self::interpretSerializer($breadcrumb, $value),
-                    "threshold" => self::interpretThreshold($breadcrumb, $value),
-                    default => $this->bus->broadcast(new ConfigEvent(
-                        "The unknown \"$key\" index must be " .
-                        "\"serializer\" or \"threshold\" string.",
-                        Level::ERROR,
-                        [...$breadcrumb, $key]
-                    ))
+                    "serializer" => $this->interpretSerializer($breadcrumb, $value),
+                    "threshold" => $this->interpretThreshold($breadcrumb, $value),
+                    default => $this->bus->broadcast(
+                        $this->box->get(ConfigEvent::class,
+                            message: "The unknown '$key' index must be " .
+                            "'serializer' or 'threshold' string.",
+                            level: Level::ERROR,
+                            breadcrumb: [...$breadcrumb, $key]
+                        ))
                 };
 
-        else $this->bus->broadcast(new ConfigEvent(
-            "The value must be the default \"" . JSON::class .
-            "\" class name string or a configured array serializer.",
-            Level::ERROR,
-            $breadcrumb
-        ));
+        else $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: "The value must be the default '" . JSON::class .
+                "' class name string or a configured array serializer.",
+                level: Level::ERROR,
+                breadcrumb: $breadcrumb
+            ));
     }
 
     /**
@@ -78,12 +89,13 @@ class Interpreter implements ConfigInterpreter
     private function interpretDefaultSerializer(array $breadcrumb, mixed $entry): void
     {
         if ($entry !== JSON::class)
-            $this->bus->broadcast(new ConfigEvent(
-                "The value must be the \"" . JSON::class .
-                "\" class name string.",
-                Level::ERROR,
-                $breadcrumb
-            ));
+            $this->bus->broadcast(
+                $this->box->get(ConfigEvent::class,
+                    message: "The value must be the '" . JSON::class .
+                    "' class name string.",
+                    level: Level::ERROR,
+                    breadcrumb: $breadcrumb
+                ));
     }
 
     /**
@@ -97,12 +109,13 @@ class Interpreter implements ConfigInterpreter
         if ($entry === null || $entry === JSON::class)
             return;
 
-        $this->bus->broadcast(new ConfigEvent(
-            "The value, serializer class name, of the \"serializer\" " .
-            "index must be the \"" . JSON::class . "\" string.",
-            Level::ERROR,
-            [...$breadcrumb, "serializer"]
-        ));
+        $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: "The value, serializer class name, of the 'serializer' " .
+                "index must be the '" . JSON::class . "' string.",
+                level: Level::ERROR,
+                breadcrumb: [...$breadcrumb, "serializer"]
+            ));
     }
 
     /**
@@ -117,12 +130,13 @@ class Interpreter implements ConfigInterpreter
             return;
 
         if (!is_string($entry) || Level::tryFromName($entry) === null)
-            $this->bus->broadcast(new ConfigEvent(
-                "The value of the \"threshold\" " .
-                "index must be a case or a related value of the \"" .
-                Level::class . "\".",
-                Level::ERROR,
-                [...$breadcrumb, "threshold"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(ConfigEvent::class,
+                    message: "The value of the 'threshold' " .
+                    "index must be a case or a related value of the '" .
+                    Level::class . "'.",
+                    level: Level::ERROR,
+                    breadcrumb: [...$breadcrumb, "threshold"]
+                ));
     }
 }

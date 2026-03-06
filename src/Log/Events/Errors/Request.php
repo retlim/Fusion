@@ -115,7 +115,7 @@ class Request extends Exception implements Event
                 "\nas: " . $entry["source"];
 
         foreach ($this->sources as $source)
-            $string .= "\nby: $source" .
+            $string .= "\nby: $source";
 
         $string .= "\nis: " . $this->message;
 

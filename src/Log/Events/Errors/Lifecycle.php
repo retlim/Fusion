@@ -100,13 +100,13 @@ class Lifecycle extends Exception implements Event
         $string = "";
 
         foreach ($this->path as $entry)
-            echo "\nin: " . $entry["layer"] .
+            $string .= "\nin: " . $entry["layer"] .
                 "\nat: " . implode(" | ", $entry["breadcrumb"]) .
                 "\nas: " . $entry["source"];
 
         $string .= "\nin: " . $this->layer .
             "\nat: " . implode(" | ", $this->breadcrumb) .
-            "\nis: " . $this->message . "\n";
+            "\nis: " . $this->message;
 
         return $string;
     }

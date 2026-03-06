@@ -19,21 +19,30 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Log\Mocks;
+namespace Valvoid\Fusion\Tests\Units\Log\Events\Errors;
 
-use Closure;
-use Valvoid\Fusion\Log\Events\Event;
-use Valvoid\Fusion\Log\Events\Level;
-use Valvoid\Fusion\Log\Serializers\Streams\Stream;
+use Valvoid\Fusion\Log\Events\Errors\Config;
+use Valvoid\Reflex\Test\Wrapper;
 
-class SerializerMock implements Stream
+class ConfigTest extends Wrapper
 {
-    public Closure $log;
-
-    public function __construct(protected array $config) {}
-
-    public function log(Level $level, string|Event $event): void
+    public function testMapping(): void
     {
-        call_user_func($this->log, $level, $event);
+        $event = new Config("#0", "#1", ["#2", "#3"]);
+
+        $this->validate($event->getMessage())
+            ->as("#0");
+
+        $this->validate($event->getLayer())
+            ->as("#1");
+
+        $this->validate($event->getBreadcrumb())
+            ->as(["#2", "#3"]);
+
+        $this->validate("$event")
+            ->as("\nin: #1" .
+                "\nat: #2 | #3" .
+                "\nis: #0"
+            );
     }
 }

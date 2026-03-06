@@ -104,7 +104,7 @@ class Error implements Event
         $string = "";
 
         foreach ($this->getPath() as $entry)
-            echo "\nin: " . $entry["line"] . " - " . $entry["file"] .
+            $string .= "\nin: " . $entry["line"] . " - " . $entry["file"] .
                 "\nat: " . ($entry["class"] ?? "") . ($entry["type"] ?? "") .
                 $entry["function"] . "()" ;
 

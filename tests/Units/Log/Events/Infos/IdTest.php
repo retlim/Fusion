@@ -19,17 +19,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Log\Mocks;
+namespace Valvoid\Fusion\Tests\Units\Log\Events\Infos;
 
-use Closure;
-use Valvoid\Fusion\Log\Events\Event;
-use Valvoid\Fusion\Log\Events\Interceptor;
+use Valvoid\Fusion\Log\Events\Infos\Id;
+use Valvoid\Reflex\Test\Wrapper;
 
-class InterceptorMock implements Interceptor
+class IdTest extends Wrapper
 {
-    public Closure $extend;
-    public function extend(string|Event $event): void
+    public function testMapping(): void
     {
-        call_user_func($this->extend, $event);
+        $event = new Id("###");
+
+        $this->validate($event->getId())
+            ->as("###");
+
+        $this->validate($event . "")
+            ->as("\nid: ###");
     }
 }

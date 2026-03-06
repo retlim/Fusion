@@ -36,6 +36,7 @@ use Valvoid\Fusion\Log\Events\Infos\Id;
 use Valvoid\Fusion\Log\Events\Infos\Name;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Log\Serializers\Files\File;
+use Valvoid\Fusion\Wrappers\File as FileWrapper;
 
 /**
  * JSON file serializer.
@@ -55,10 +56,12 @@ class JSON implements File
      * Constructs the text file serializer.
      *
      * @param Dir $directory
+     * @param FileWrapper $file
      * @param array $configuration
      */
     public function __construct(
         private readonly Dir $directory,
+        private readonly FileWrapper $file,
         array $configuration)
     {
         $this->threshold = $configuration["threshold"];
@@ -77,50 +80,50 @@ class JSON implements File
             return;
 
         if (is_string($event))
-            $content = self::getMessage($level, $event);
+            $content = $this->getMessage($level, $event);
 
         elseif ($event instanceof Deadlock)
-            $content = self::getDeadlock($level, $event);
+            $content = $this->getDeadlock($level, $event);
 
         elseif ($event instanceof Environment)
-            $content = self::getEnvironment($level, $event);
+            $content = $this->getEnvironment($level, $event);
 
         elseif ($event instanceof Metadata)
-            $content = self::getMetadata($level, $event);
+            $content = $this->getMetadata($level, $event);
 
         elseif ($event instanceof Request)
-            $content = self::getRequest($level, $event);
+            $content = $this->getRequest($level, $event);
 
         elseif ($event instanceof Error)
-            $content = self::getError($level, $event);
+            $content = $this->getError($level, $event);
 
         elseif ($event instanceof ErrorInfo)
-            $content = self::getErrorInfo($level, $event);
+            $content = $this->getErrorInfo($level, $event);
 
         elseif ($event instanceof Content)
-            $content = self::getContent($level, $event);
+            $content = $this->getContent($level, $event);
 
         elseif ($event instanceof Lifecycle)
-            $content = self::getLifecycle($level, $event);
+            $content = $this->getLifecycle($level, $event);
 
         elseif ($event instanceof Config)
-            $content = self::getConfig($level, $event);
+            $content = $this->getConfig($level, $event);
 
         elseif ($event instanceof Id)
-            $content = self::getID($level, $event);
+            $content = $this->getID($level, $event);
 
         elseif ($event instanceof Name)
-            $content = self::getName($level, $event);
+            $content = $this->getName($level, $event);
 
         // custom unknown
         // generic message fallback
         else
-            $content = self::getGeneric($level, $event->__toString());
+            $content = $this->getMessage($level, "$event");
 
         $file = "$this->storage/$this->filename";
 
-        if (is_file($file)) {
-            $events = file_get_contents($file);
+        if ($this->file->is($file)) {
+            $events = $this->file->get($file);
 
             if ($events === false)
                 throw new Error(
@@ -158,7 +161,7 @@ class JSON implements File
                 "Can't encode events for the file \"$file\"."
             );
 
-        if (!file_put_contents($file, $events))
+        if (!$this->file->put($file, $events))
             throw new Error(
                 "Can't write to the file \"$file\"."
             );
@@ -172,29 +175,6 @@ class JSON implements File
      * @return array
      */
     private function getMessage(Level $level, string $message): array
-    {
-        return [
-            "date" => date("Y.m.d_H:i:s"),
-            "category" => "generic", // no category
-            "type" => "string",
-            "payload" => [
-                "message" => $message
-            ],
-            "level" => [
-                "name" => strtolower($level->name),
-                "ordinal" => $level->value
-            ]
-        ];
-    }
-
-    /**
-     * Returns generic string message.
-     *
-     * @param Level $level Level.
-     * @param string $message Message.
-     * @return array
-     */
-    private function getGeneric(Level $level, string $message): array
     {
         return [
             "date" => date("Y.m.d_H:i:s"),

@@ -36,6 +36,7 @@ use Valvoid\Fusion\Log\Events\Infos\Id;
 use Valvoid\Fusion\Log\Events\Infos\Name;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Log\Serializers\Files\File;
+use Valvoid\Fusion\Wrappers\File as FileWrapper;
 
 /**
  * Text file serializer.
@@ -55,10 +56,12 @@ class Text implements File
      * Constructs the text file serializer.
      *
      * @param Dir $directory
+     * @param FileWrapper $file
      * @param array $configuration
      */
     public function __construct(
         private readonly Dir $directory,
+        private readonly FileWrapper $file,
         array $configuration)
     {
         $this->threshold = $configuration["threshold"];
@@ -77,7 +80,7 @@ class Text implements File
             return;
 
         if (is_string($event))
-            $content = $this->getGeneric($level, $event);
+            $content = $this->getMessage($level, $event);
 
         elseif ($event instanceof Deadlock)
             $content = $this->getDeadlock($level, $event);
@@ -115,11 +118,11 @@ class Text implements File
         // custom unknown
         // generic message fallback
         else
-            $content = $this->getGeneric($level, $event->__toString());
+            $content = $this->getMessage($level, "$event");
 
         $this->directory->createDir($this->storage);
 
-        if (!file_put_contents("$this->storage/$this->filename", $content, FILE_APPEND))
+        if (!$this->file->put("$this->storage/$this->filename", $content))
             throw new Error(
                 "Can't write to the file \"$this->storage/$this->filename\"."
             );
@@ -132,10 +135,10 @@ class Text implements File
      * @param string $message Message.
      * @return string
      */
-    private function getGeneric(Level $level, string $message): string
+    private function getMessage(Level $level, string $message): string
     {
         return "\n" . date("Y.m.d_H:i:s") . " --------- generic " .
-            strtolower($level->name) . ":\n$message\n";
+            strtolower($level->name) . ":\n$message";
     }
 
     /**
@@ -191,7 +194,7 @@ class Text implements File
 
         $content .= "\nin: " . $deadlock->getConflictLayer() .
             "\nat: " . implode(" | ", $deadlock->getConflictBreadcrumb()) .
-            "\nis: " . $deadlock->getMessage() . "\n";
+            "\nis: " . $deadlock->getMessage();
 
         return $content;
     }
@@ -215,7 +218,7 @@ class Text implements File
 
         $content .= "\nin: " . $environment->getLayer() .
             "\nat: " . implode(" | ", $environment->getBreadcrumb()) .
-            "\nis: " . $environment->getMessage() . "\n";
+            "\nis: " . $environment->getMessage();
 
         return $content;
     }
@@ -269,7 +272,7 @@ class Text implements File
         if ($index)
             $content .= "\nat: " . implode(" | ", $index);
 
-        $content .= "\nis: " . $metadata->getMessage() . "\n";
+        $content .= "\nis: " . $metadata->getMessage();
 
         return $content;
     }
@@ -291,7 +294,7 @@ class Text implements File
                 "\nat: " . ($entry["class"] ?? "") . ($entry["type"] ?? "") . $entry["function"] . "()" ;
 
         $content .= "\nin: " . $error->getLine() . " - " . $error->getFile() .
-            "\nis: " . $error->getMessage() . "\n";
+            "\nis: " . $error->getMessage();
 
         return $content;
     }
@@ -312,7 +315,7 @@ class Text implements File
             $content .= "\nin: " . $entry["line"] . " - " . $entry["file"] .
                 "\nat: " . ($entry["class"] ?? "") . ($entry["type"] ?? "") . $entry["function"] . "()" ;
 
-        $content .= "\nis: " . $info->getMessage() . " | code: " . $info->getCode() . "\n";
+        $content .= "\nis: " . $info->getMessage() . " | code: " . $info->getCode();
 
         return $content;
     }
@@ -337,7 +340,7 @@ class Text implements File
         foreach ($request->getSources() as $source)
             $content .= "\nby: $source";
 
-        $content .= "\nis: " . $request->getMessage() . "\n";
+        $content .= "\nis: " . $request->getMessage();
 
         return $content;
     }
@@ -356,7 +359,7 @@ class Text implements File
 
         $content .= "\nin: " . $config->getLayer() .
             "\nat: " . implode(" | ", $config->getBreadcrumb()) .
-            "\nis: " . $config->getMessage() . "\n";
+            "\nis: " . $config->getMessage();
 
         return $content;
     }
@@ -373,7 +376,7 @@ class Text implements File
         $content = "\n" . date("Y.m.d_H:i:s") . " --------- id " .
             strtolower($level->name) . ":";
 
-        $content .= "\nid: " . $id->getId() . "\n";
+        $content .= "\nid: " . $id->getId();
 
         return $content;
     }
@@ -389,7 +392,7 @@ class Text implements File
         $content = "\n" . date("Y.m.d_H:i:s") . " --------- name " .
             strtolower($level->name) . ":";
 
-        $content .= "\nname: " . $name->getName() . "\n";
+        $content .= "\nname: " . $name->getName();
 
         return $content;
     }

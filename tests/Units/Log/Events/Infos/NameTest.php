@@ -19,19 +19,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Log\Mocks;
+namespace Valvoid\Fusion\Tests\Units\Log\Events\Infos;
 
-use Closure;
-use Valvoid\Fusion\Config\Config;
+use Valvoid\Fusion\Log\Events\Infos\Name;
+use Valvoid\Reflex\Test\Wrapper;
 
-class ConfigMock extends Config
+class NameTest extends Wrapper
 {
-    public Closure $get;
-
-    public function __construct() {}
-
-    public function get(string ...$breadcrumb): mixed
+    public function testMapping(): void
     {
-        return call_user_func($this->get, ...$breadcrumb);
+        $event = new Name("###");
+
+        $this->validate($event->getName())
+            ->as("###");
+
+        $this->validate($event . "")
+            ->as("\nname: ###");
     }
 }
