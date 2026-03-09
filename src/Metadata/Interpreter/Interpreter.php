@@ -49,9 +49,10 @@ class Interpreter
     public function interpret(string $layer, mixed $entry): void
     {
         if (!is_array($entry) || empty($entry))
-            $this->bus->broadcast(new MetadataEvent(
-                "Meta must be an assoc array.",
-                Level::ERROR
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                message: "Meta must be an assoc array.",
+                level: Level::ERROR
             ));
 
         foreach ($entry as $key => $value)
