@@ -21,6 +21,7 @@
 
 namespace Valvoid\Fusion\Tasks\Categorize\Config;
 
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Config\Interpreter as ConfigInterpreter;
@@ -32,7 +33,16 @@ use Valvoid\Fusion\Tasks\Categorize\Categorize;
  */
 class Interpreter implements ConfigInterpreter
 {
-    public function __construct(private readonly Bus $bus) {}
+    /**
+     * Constructs the interpreter.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
+
 
     /**
      * Interprets the categorize task config.
@@ -47,27 +57,29 @@ class Interpreter implements ConfigInterpreter
             return;
 
         if (is_string($entry))
-            self::interpretDefaultTask($breadcrumb, $entry);
+            $this->interpretDefaultTask($breadcrumb, $entry);
 
         elseif (is_array($entry))
             foreach ($entry as $key => $value)
                 match ($key) {
-                    "task" => self::interpretTask($breadcrumb, $value),
-                    "efficiently" => self::interpretEfficiently($breadcrumb, $value),
-                    default => $this->bus->broadcast(new ConfigEvent(
-                        "The unknown \"$key\" index must be \"task\", " .
-                        "or \"efficiently\" string.",
-                        Level::ERROR,
-                        [...$breadcrumb, $key]
-                    ))
+                    "task" => $this->interpretTask($breadcrumb, $value),
+                    "efficiently" => $this->interpretEfficiently($breadcrumb, $value),
+                    default => $this->bus->broadcast(
+                        $this->box->get(ConfigEvent::class,
+                            message: "The unknown \"$key\" index must be \"task\", " .
+                            "or \"efficiently\" string.",
+                            level: Level::ERROR,
+                            breadcrumb: [...$breadcrumb, $key]
+                        ))
                 };
 
-        else $this->bus->broadcast(new ConfigEvent(
-            "The value must be the default \"" . Categorize::class .
-            "\" class name string or a configured array task.",
-            Level::ERROR,
-            $breadcrumb
-        ));
+        else $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: "The value must be the default \"" . Categorize::class .
+                "\" class name string or a configured array task.",
+                level: Level::ERROR,
+                breadcrumb: $breadcrumb
+            ));
     }
 
     /**
@@ -78,12 +90,13 @@ class Interpreter implements ConfigInterpreter
     private function interpretDefaultTask(array $breadcrumb, mixed $entry): void
     {
         if ($entry !== Categorize::class)
-            $this->bus->broadcast(new ConfigEvent(
-                "The value must be the \"" . Categorize::class .
-                "\" class name string.",
-                Level::ERROR,
-                $breadcrumb
-            ));
+            $this->bus->broadcast(
+                $this->box->get(ConfigEvent::class,
+                    message: "The value must be the \"" . Categorize::class .
+                    "\" class name string.",
+                    level: Level::ERROR,
+                    breadcrumb: $breadcrumb
+                ));
     }
 
     /**
@@ -98,12 +111,13 @@ class Interpreter implements ConfigInterpreter
             return;
 
         if ($entry !== Categorize::class)
-            $this->bus->broadcast(new ConfigEvent(
-                "The value, task class name, of the \"task\" " .
-                "index must be the \"" . Categorize::class . "\" string.",
-                Level::ERROR,
-                [...$breadcrumb, "task"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(ConfigEvent::class,
+                    message: "The value, task class name, of the \"task\" " .
+                    "index must be the \"" . Categorize::class . "\" string.",
+                    level: Level::ERROR,
+                    breadcrumb: [...$breadcrumb, "task"]
+                ));
     }
 
     /**
@@ -118,11 +132,12 @@ class Interpreter implements ConfigInterpreter
             return;
 
         if (!is_bool($entry))
-            $this->bus->broadcast(new ConfigEvent(
-                "The value of the \"efficiently\" " .
-                "index must be a boolean.",
-                Level::ERROR,
-                [...$breadcrumb, "efficiently"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(ConfigEvent::class,
+                    message: "The value of the \"efficiently\" " .
+                    "index must be a boolean.",
+                    level: Level::ERROR,
+                    breadcrumb: [...$breadcrumb, "efficiently"]
+                ));
     }
 }

@@ -19,15 +19,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Units\Tasks\Build\Config;
+namespace Valvoid\Fusion\Tests\Units\Tasks\Categorize\Config;
 
 use Exception;
 use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config;
 use Valvoid\Fusion\Log\Events\Level;
-use Valvoid\Fusion\Tasks\Build\Build;
-use Valvoid\Fusion\Tasks\Build\Config\Interpreter;
+use Valvoid\Fusion\Tasks\Categorize\Categorize;
+use Valvoid\Fusion\Tasks\Categorize\Config\Interpreter;
 use Valvoid\Reflex\Test\Wrapper;
 
 class InterpreterTest extends Wrapper
@@ -86,7 +86,7 @@ class InterpreterTest extends Wrapper
             bus: $bus
         );
 
-        $interpreter->interpret([], Build::class);
+        $interpreter->interpret([], Categorize::class);
     }
 
     public function testConfigured(): void
@@ -99,7 +99,7 @@ class InterpreterTest extends Wrapper
         );
 
         $interpreter->interpret([], [
-            "task" => Build::class
+            "task" => Categorize::class
         ]);
     }
 }

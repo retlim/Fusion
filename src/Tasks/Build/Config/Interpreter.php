@@ -57,14 +57,14 @@ class Interpreter implements ConfigInterpreter
             return;
 
         if (is_string($entry))
-            self::interpretDefaultTask($breadcrumb, $entry);
+            $this->interpretDefaultTask($breadcrumb, $entry);
 
         elseif (is_array($entry))
             foreach ($entry as $key => $value)
                 match ($key) {
-                    "environment" => self::interpretEnvironment($breadcrumb, $value),
-                    "task" => self::interpretTask($breadcrumb, $value),
-                    "source" => self::interpretSource($breadcrumb, $value),
+                    "environment" => $this->interpretEnvironment($breadcrumb, $value),
+                    "task" => $this->interpretTask($breadcrumb, $value),
+                    "source" => $this->interpretSource($breadcrumb, $value),
                     default => $this->bus->broadcast(
                         $this->box->get(ConfigEvent::class,
                             message: "The unknown \"$key\" index must be \"task\", " .
