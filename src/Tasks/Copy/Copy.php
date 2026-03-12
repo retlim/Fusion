@@ -112,16 +112,14 @@ class Copy extends Task
             // obsolete old exists in current state
             // trigger migrate hook
             } elseif (isset($externalMetas[$id])) {
-                $parser = $this->box->get(Parser::class);
-                $internalVersion = $parser::getInflatedVersion($metadata->getVersion());
-                $externalVersion = $parser::getInflatedVersion($externalMetas[$id]->getVersion());
+                $internalVersion = Parser::getInflatedVersion($metadata->getVersion());
+                $externalVersion = Parser::getInflatedVersion($externalMetas[$id]->getVersion());
 
                 // higher version must support
                 // up and downgrade
-                $this->box->get(Interpreter::class)
-                    ::isBiggerThan($externalVersion, $internalVersion) ?
-                        $externalMetas[$id]->onMigrate() :
-                        $metadata->onMigrate();
+                Interpreter::isBiggerThan($externalVersion, $internalVersion) ?
+                    $externalMetas[$id]->onMigrate() :
+                    $metadata->onMigrate();
             }
     }
 
