@@ -19,38 +19,22 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Build\SAT;
+namespace Valvoid\Fusion\Tests\Units\Tasks\Build\SAT;
 
 use Valvoid\Fusion\Tasks\Build\SAT\Clause\Clause;
-use Valvoid\Fusion\Tasks\Build\SAT\Clause\Literal;
 use Valvoid\Fusion\Tasks\Build\SAT\Clause\State;
-use Valvoid\Fusion\Tests\Test;
+use Valvoid\Reflex\Test\Wrapper;
 
-class ClauseTest extends Test
+class ClauseTest extends Wrapper
 {
-    protected string|array $coverage = [
-        Clause::class,
-
-        // ballast
-        Literal::class
-    ];
-
-    public function __construct()
-    {
-        $this->testUnitState();
-        $this->testSatisfiedState();
-        $this->testUnsatisfiedState();
-    }
-
     public function testUnitState(): void
     {
         $clause = new Clause;
         $clause->appendLiteral(3);
         $clause->updateState();
 
-        // assert equal
-        if ($clause->getState() !== State::UNIT)
-            $this->handleFailedTest();
+        $this->validate($clause->getState())
+            ->as(State::UNIT);
     }
 
     public function testSatisfiedState(): void
@@ -62,9 +46,8 @@ class ClauseTest extends Test
         $clause->setVariableState(5, false, 2);
         $clause->updateState();
 
-        // assert equal
-        if ($clause->getState() !== State::SATISFIED)
-            $this->handleFailedTest();
+        $this->validate($clause->getState())
+            ->as(State::SATISFIED);
     }
 
     public function testUnsatisfiedState(): void
@@ -76,8 +59,7 @@ class ClauseTest extends Test
         $clause->setVariableState(5, false, 3);
         $clause->updateState();
 
-        // assert equal
-        if ($clause->getState() !== State::UNSATISFIED)
-            $this->handleFailedTest();
+        $this->validate($clause->getState())
+            ->as(State::UNSATISFIED);
     }
 }

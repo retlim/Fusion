@@ -19,19 +19,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Build\SAT;
+namespace Valvoid\Fusion\Tests\Units\Tasks\Build\SAT;
 
-use Valvoid\Fusion\Tasks\Build\SAT\Formula;
 use Valvoid\Fusion\Tasks\Build\SAT\Solver;
-use Valvoid\Fusion\Tests\Test;
+use Valvoid\Reflex\Test\Wrapper;
 
-class SolverTest extends Test
+class SolverTest extends Wrapper
 {
-    protected string|array $coverage = [
-        Solver::class,
-        Formula::class
-    ];
-
     private array $structure = [
         "mosaic" => [
             "implication" => [
@@ -76,47 +70,58 @@ class SolverTest extends Test
         ]
     ];
 
-    public function __construct()
-    {
-        $this->testSatisfiable();
-        $this->testUnsatisfiable();
-        $this->testDeadlock();
-    }
-
     public function testSatisfiable(): void
     {
-        $solver = new Solver("root", "1.2.0", $this->structure);
+        $solver = new Solver(
+            id: "root",
+            version: "1.2.0",
+            implication: $this->structure
+        );
 
-        // assert equal
-        if ($solver->isStructureSatisfiable() !== true)
-            $this->handleFailedTest();
+        $this->validate($solver->isStructureSatisfiable())
+            ->as(true);
+
+        $this->validate($solver->getPath())
+            ->as([
+                "root" => "1.2.0",
+                "router" => "1.0.0",
+                "mosaic" => "2.0.0",
+                "platform" => "1.0.0",
+            ]);
     }
 
     public function testUnsatisfiable(): void
     {
         // change root version
         // result in multi version conflict
-        $solver = new Solver("root", "1.0.0", $this->structure);
+        $solver = new Solver(
+            id: "root",
+            version: "1.0.0",
+            implication: $this->structure
+        );
 
-        // assert equal
-        if ($solver->isStructureSatisfiable() !== false)
-            $this->handleFailedTest();
+        $this->validate($solver->isStructureSatisfiable())
+            ->as(false);
     }
 
     public function testDeadlock(): void
     {
         // change root version
         // result in multi version conflict
-        $solver = new Solver("root", "1.0.0", $this->structure);
-        $expectation = [
-            "id" => "root",
-            "conflict" => "0.8.0-beta+23425",
-            "locked" => "1.0.0"
-        ];
+        $solver = new Solver(
+            id: "root",
+            version: "1.0.0",
+            implication: $this->structure
+        );
 
-        // assert equal
-        if ($solver->isStructureSatisfiable() !== false ||
-            $solver->getDeadlock() != $expectation)
-            $this->handleFailedTest();
+        $this->validate($solver->isStructureSatisfiable())
+            ->as(false);
+
+        $this->validate($solver->getDeadlock())
+            ->as([
+                "id" => "root",
+                "conflict" => "0.8.0-beta+23425",
+                "locked" => "1.0.0"
+            ]);
     }
 }

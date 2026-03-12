@@ -19,29 +19,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Build\SAT;
+namespace Valvoid\Fusion\Tests\Units\Tasks\Build\SAT;
 
 use Valvoid\Fusion\Tasks\Build\SAT\Clause\State;
 use Valvoid\Fusion\Tasks\Build\SAT\Graph;
-use Valvoid\Fusion\Tests\Test;
+use Valvoid\Reflex\Test\Wrapper;
 
-class GraphTest extends Test
+class GraphTest extends Wrapper
 {
-    protected string|array $coverage = Graph::class;
-
-    public function __construct()
-    {
-        $this->testFallback();
-        $this->testConflictSeparation();
-        $this->testNodeMutation();
-    }
-
     public function testFallback(): void
     {
         // all placeholder true state
         // must not be valid
         // only result reflection must be true
         $graph = new Graph;
+
         $graph->addRootNode(1, true, 1);
         $graph->addRootNode(2, true, 2);
         $graph->addLeafNode([2], 3, true, 2);
@@ -60,65 +52,65 @@ class GraphTest extends Test
         $clause = $fallback["clause"];
         $literals = $clause->getLiterals();
 
-        // assert equal
-        if ($fallback["level"] !== 1 ||
-            $clause->getState() !== State::UNIT ||
-            sizeof($literals) !== 2 ||
-            isset($literals[1]) !== true ||
-            isset($literals[5]) !== true)
-            $this->handleFailedTest();
+        $this->validate($fallback["level"])
+            ->as(1);
+
+        $this->validate($clause->getState())
+            ->as(State::UNIT);
+
+        $this->validate(sizeof($literals))
+            ->as(2);
+
+        $this->validate(isset($literals[1]))
+            ->as(true);
+
+        $this->validate(isset($literals[5]))
+            ->as(true);
     }
 
     public function testConflictSeparation(): void
     {
         // conflict is extra node
         $graph = new Graph;
-        $expectation = [
-            0 => [
-                "roots" => [],
-                "level" => 0,
-                "state" => true
-            ]
-        ];
 
         $graph->addRootNode(0, true, 0);
         $graph->addLeafNode([0], 2, false, 1);
         $graph->addLeafNode([0], 2, true, 1);
-
-        // assert equal
-        // conflict node is separated
-        if ($graph->getNodes() !== $expectation)
-            $this->handleFailedTest();
+        $this->validate($graph->getNodes())
+            ->as([
+                0 => [
+                    "roots" => [],
+                    "level" => 0,
+                    "state" => true
+                ]
+            ]);
     }
 
     public function testNodeMutation(): void
     {
         $graph = new Graph;
-        $expectation = [
-            0 => [
-                "roots" => [],
-                "level" => 2,
-                "state" => false
-            ],
-            1 => [
-                "roots" => [],
-                "level" => 1,
-                "state" => true
-            ],
-            2 => [
-                "roots" => [0, 1],
-                "level" => 1,
-                "state" => true
-            ]
-        ];
 
         $graph->addRootNode(0, true, 0);
         $graph->addRootNode(1, true, 1);
         $graph->addLeafNode([0, 1], 2, true, 1);
         $graph->addRootNode(0, false, 2);
-
-        // assert equal
-        if ($graph->getNodes() !== $expectation)
-            $this->handleFailedTest();
+        $this->validate($graph->getNodes())
+            ->as([
+                0 => [
+                    "roots" => [],
+                    "level" => 2,
+                    "state" => false
+                ],
+                1 => [
+                    "roots" => [],
+                    "level" => 1,
+                    "state" => true
+                ],
+                2 => [
+                    "roots" => [0, 1],
+                    "level" => 1,
+                    "state" => true
+                ]
+            ]);
     }
 }
