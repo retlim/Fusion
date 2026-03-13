@@ -19,28 +19,32 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Download\Mocks;
+namespace Valvoid\Fusion\Tests\Units\Tasks\Download\Config;
 
-use Closure;
-use ZipArchive;
+use Valvoid\Fusion\Tasks\Download\Config\Normalizer;
+use Valvoid\Reflex\Test\Wrapper;
 
-class ZipArchiveMock extends ZipArchive
+class NormalizerTest extends Wrapper
 {
-    public Closure $open;
-    public Closure $extract;
-
-    public function open($filename, $flags = null): int|bool
+    public function testGroup(): void
     {
-        return call_user_func($this->open, $filename, $flags);
+        $config = [];
+
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["t", "g", "i"], $config);
+
+        $this->validate($config)
+            ->as(["group" => "g", "id" => "i"]);
     }
 
-    public function extractTo(string $pathto, array|string|null $files = null): bool
+    public function testId(): void
     {
-        return call_user_func($this->extract, $pathto, $files);
-    }
+        $config = [];
 
-    public function close(): bool
-    {
-        return true;
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["t", "i"], $config);
+
+        $this->validate($config)
+            ->as(["id" => "i"]);
     }
 }
