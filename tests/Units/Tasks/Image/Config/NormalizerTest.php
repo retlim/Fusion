@@ -19,21 +19,32 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Image\Mocks;
+namespace Valvoid\Fusion\Tests\Units\Tasks\Image\Config;
 
-use Valvoid\Fusion\Log\Events\Event;
-use Valvoid\Fusion\Log\Events\Interceptor;
-use Valvoid\Fusion\Log\Log;
+use Valvoid\Fusion\Tasks\Image\Config\Normalizer;
+use Valvoid\Reflex\Test\Wrapper;
 
-class LogMock extends Log
+class NormalizerTest extends Wrapper
 {
-    public function __construct(){}
-    public function addInterceptor(Interceptor $interceptor): void {}
-    public function removeInterceptor(): void {}
-    public function error(string|Event $event): void {}
-    public function warning(string|Event $event): void {}
-    public function notice(string|Event $event): void {}
-    public function info(string|Event $event): void {}
-    public function verbose(string|Event $event): void {}
-    public function debug(string|Event $event): void {}
+    public function testGroup(): void
+    {
+        $config = [];
+
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["t", "g", "i"], $config);
+
+        $this->validate($config)
+            ->as(["group" => "g", "id" => "i"]);
+    }
+
+    public function testId(): void
+    {
+        $config = [];
+
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["t", "i"], $config);
+
+        $this->validate($config)
+            ->as(["id" => "i"]);
+    }
 }
