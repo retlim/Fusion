@@ -128,7 +128,7 @@ class Replicate extends Task implements Interceptor
             // recursive root source
             if (isset($sources[""]) &&
 
-                // default behaviour
+                // default behavior
                 // else take local snapshot and
                 // ignore recursive source
                 $this->config["source"] === false)
@@ -431,8 +431,7 @@ class Replicate extends Task implements Interceptor
 
         // validate version and
         // modules
-        if (!$this->box->get(Normalizer::class)
-                ::getFilteredVersions($environment, $php["version"])) {
+        if (!Normalizer::getFilteredVersions($environment, $php["version"])) {
             $layers = $metadata->getLayers();
             $this->buildImplication();
 
@@ -441,7 +440,7 @@ class Replicate extends Task implements Interceptor
                 "\". The current PHP version \"" . $environment[0]["major"] . "." .
                 $environment[0]["minor"] . "." . $environment[0]["patch"].
                 "\" does not pass the pattern.",
-                $this->group->getPath($layers["object"]["source"]),
+                $this->group->getEventTrace($layers["object"]["source"]),
                 array_key_first($layers),
                 ["environment", "php", "version"]
             );
@@ -460,7 +459,7 @@ class Replicate extends Task implements Interceptor
                 throw new EnvironmentError(
                     "Can't replicate the package \"" . $metadata->getId() .
                     "\". It requires the missing module \"$module\".",
-                    $this->group->getPath($layers["object"]["source"]),
+                    $this->group->getEventTrace($layers["object"]["source"]),
                     array_key_first($layers),
                     ["environment", "php", "modules"]
                 );
@@ -481,7 +480,7 @@ class Replicate extends Task implements Interceptor
         if ($event instanceof Request) {
             $this->buildImplication();
             $event->setPath(
-                $this->group->getPath(
+                $this->group->getEventTrace(
                     $this->requests[$event->getId()]["source"]
                 )
             );
@@ -489,7 +488,7 @@ class Replicate extends Task implements Interceptor
         } elseif ($event instanceof MetadataError) {
             $this->buildImplication();
             $event->setPath(
-                $this->group->getPath(
+                $this->group->getEventTrace(
                     $event->getSource()
                 )
             );

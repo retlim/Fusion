@@ -19,30 +19,30 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Replicate\Mocks;
+namespace Valvoid\Fusion\Tests\Units\Tasks\Replicate\Config;
 
-use Closure;
-use Valvoid\Box\Box;
-use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Log\Events\Infos\Content;
-use Valvoid\Fusion\Metadata\External\Builder;
+use Valvoid\Fusion\Tasks\Replicate\Config\Parser;
+use Valvoid\Reflex\Test\Wrapper;
 
-class BoxMock extends Box
+class ParserTest extends Wrapper
 {
-    public BusMock $bus;
-    public Closure $builder;
-
-    public function get(string $class, ...$args): object
+    public function testPhpVersion(): void
     {
-        if ($class === Bus::class)
-            return $this->bus;
+        $config["environment"]["php"]["version"] = "1.23.4-beta";
+        $parser = new Parser;
 
-        if ($class === Builder::class)
-            return call_user_func($this->builder, ...$args);
-
-        if ($class === Content::class)
-            return new ContentMock;
-
-        return parent::get($class, ...$args);
+        $parser->parse([], $config);
+        $this->validate($config)
+            ->as(["environment" => [
+                "php" => [
+                    "version" => [
+                        "build" => "",
+                        "release" => "beta",
+                        "major" => "1",
+                        "minor" => "23",
+                        "patch" => "4"
+                    ]
+                ]
+            ]]);
     }
 }

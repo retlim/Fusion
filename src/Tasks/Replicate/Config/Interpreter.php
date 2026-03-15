@@ -21,6 +21,7 @@
 
 namespace Valvoid\Fusion\Tasks\Replicate\Config;
 
+use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Config as ConfigEvent;
 use Valvoid\Fusion\Config\Interpreter as ConfigInterpreter;
@@ -33,7 +34,15 @@ use Valvoid\Fusion\Util\Version\Interpreter as VersionInterpreter;
  */
 class Interpreter implements ConfigInterpreter
 {
-    public function __construct(private readonly Bus $bus) {}
+    /**
+     * Constructs the interpreter.
+     *
+     * @param Box $box Dependency injection container.
+     * @param Bus $bus Event bus.
+     */
+    public function __construct(
+        private readonly Box $box,
+        private readonly Bus $bus) {}
 
     /**
      * Interprets the replicate task config.
@@ -48,28 +57,30 @@ class Interpreter implements ConfigInterpreter
             return;
 
         if (is_string($entry))
-            self::interpretDefaultTask($breadcrumb, $entry);
+            $this->interpretDefaultTask($breadcrumb, $entry);
 
         elseif (is_array($entry))
             foreach ($entry as $key => $value)
                 match ($key) {
-                    "task" => self::interpretTask($breadcrumb, $value),
-                    "environment" => self::interpretEnvironment($breadcrumb, $value),
-                    "source" => self::interpretSource($breadcrumb, $value),
-                    default => $this->bus->broadcast(new ConfigEvent(
-                        "The unknown \"$key\" index must be \"task\", " .
-                        "\"environment\", or \"source\" string.",
-                        Level::ERROR,
-                        [...$breadcrumb, $key]
-                    ))
+                    "task" => $this->interpretTask($breadcrumb, $value),
+                    "environment" => $this->interpretEnvironment($breadcrumb, $value),
+                    "source" => $this->interpretSource($breadcrumb, $value),
+                    default => $this->bus->broadcast(
+                        $this->box->get(ConfigEvent::class,
+                            message: "The unknown \"$key\" index must be \"task\", " .
+                            "\"environment\", or \"source\" string.",
+                            level: Level::ERROR,
+                            breadcrumb: [...$breadcrumb, $key]
+                        ))
                 };
 
-        else $this->bus->broadcast(new ConfigEvent(
-            "The value must be the default \"" . Replicate::class .
-            "\" class name string or a configured array task.",
-            Level::ERROR,
-            $breadcrumb
-        ));
+        else $this->bus->broadcast(
+            $this->box->get(ConfigEvent::class,
+                message: "The value must be the default \"" . Replicate::class .
+                "\" class name string or a configured array task.",
+                level: Level::ERROR,
+                breadcrumb: $breadcrumb
+            ));
     }
 
     /**
@@ -80,12 +91,13 @@ class Interpreter implements ConfigInterpreter
     private function interpretDefaultTask(array $breadcrumb, mixed $entry): void
     {
         if ($entry !== Replicate::class)
-            $this->bus->broadcast(new ConfigEvent(
-                "The value must be the \"" . Replicate::class .
-                "\" class name string.",
-                Level::ERROR,
-                $breadcrumb
-            ));
+            $this->bus->broadcast(
+                $this->box->get(ConfigEvent::class,
+                    message: "The value must be the \"" . Replicate::class .
+                    "\" class name string.",
+                    level: Level::ERROR,
+                    breadcrumb: $breadcrumb
+                ));
     }
 
     /**
@@ -100,12 +112,13 @@ class Interpreter implements ConfigInterpreter
             return;
 
         if ($entry !== Replicate::class)
-            $this->bus->broadcast(new ConfigEvent(
-                "The value, task class name, of the \"task\" " .
-                "index must be the \"" . Replicate::class . "\" string.",
-                Level::ERROR,
-                [...$breadcrumb, "task"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(ConfigEvent::class,
+                    message: "The value, task class name, of the \"task\" " .
+                    "index must be the \"" . Replicate::class . "\" string.",
+                    level: Level::ERROR,
+                    breadcrumb: [...$breadcrumb, "task"]
+                ));
     }
 
     /**
@@ -122,11 +135,12 @@ class Interpreter implements ConfigInterpreter
         // external source or
         // internal snapshot files
         if (!is_string($entry) && $entry !== false)
-            $this->bus->broadcast(new ConfigEvent(
-                "The value of the \"source\" index must be a string.",
-                Level::ERROR,
-                [...$breadcrumb, "source"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(ConfigEvent::class,
+                    message: "The value of the \"source\" index must be a string.",
+                    level: Level::ERROR,
+                    breadcrumb: [...$breadcrumb, "source"]
+                ));
     }
 
     /**
@@ -142,24 +156,26 @@ class Interpreter implements ConfigInterpreter
             return;
 
         if (!is_array($entry) || empty($entry))
-            $this->bus->broadcast(new ConfigEvent(
-                "The value, environment config, of the \"environment\" " .
-                "index must be an assoc array.",
-                Level::ERROR,
-                [...$breadcrumb, "environment"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(ConfigEvent::class,
+                    message: "The value, environment config, of the \"environment\" " .
+                    "index must be an assoc array.",
+                    level: Level::ERROR,
+                    breadcrumb: [...$breadcrumb, "environment"]
+                ));
 
         foreach ($entry as $key => $value)
             match ($key) {
-                "php" => self::interpretPhp($breadcrumb, $value),
+                "php" => $this->interpretPhp($breadcrumb, $value),
 
                 // pass error to builder
                 // prevent redundant error handling
-                default => $this->bus->broadcast(new ConfigEvent(
-                    "The unknown \"$key\" index must be \"php\" string.",
-                    Level::ERROR,
-                    [...$breadcrumb, $key]
-                ))
+                default => $this->bus->broadcast(
+                    $this->box->get(ConfigEvent::class,
+                        message: "The unknown \"$key\" index must be \"php\" string.",
+                        level: Level::ERROR,
+                        breadcrumb: [...$breadcrumb, $key]
+                    ))
             };
     }
 
@@ -176,23 +192,25 @@ class Interpreter implements ConfigInterpreter
             return;
 
         if (!is_array($entry) || empty($entry))
-            $this->bus->broadcast(new ConfigEvent(
-                "The value of the \"php\" index must be an assoc array.",
-                Level::ERROR,
-                [...$breadcrumb, "environment", "php"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(ConfigEvent::class,
+                    message: "The value of the \"php\" index must be an assoc array.",
+                    level: Level::ERROR,
+                    breadcrumb: [...$breadcrumb, "environment", "php"]
+                ));
 
         foreach ($entry as $key => $value)
             match ($key) {
-                "version" => self::interpretPhpVersion($breadcrumb, $value),
+                "version" => $this->interpretPhpVersion($breadcrumb, $value),
 
                 // pass error to builder
                 // prevent redundant error handling
-                default => $this->bus->broadcast(new ConfigEvent(
-                    "The unknown \"$key\" index must be \"version\" string.",
-                    Level::ERROR,
-                    [...$breadcrumb, $key]
-                ))
+                default => $this->bus->broadcast(
+                    $this->box->get(ConfigEvent::class,
+                        message: "The unknown \"$key\" index must be \"version\" string.",
+                        level: Level::ERROR,
+                        breadcrumb: [...$breadcrumb, $key]
+                    ))
             };
     }
 
@@ -210,11 +228,12 @@ class Interpreter implements ConfigInterpreter
 
         if (!is_string($entry) || !$entry ||
             !VersionInterpreter::isSemanticCoreVersion($entry))
-            $this->bus->broadcast(new ConfigEvent(
-                "The value of the \"version\" index must be a " .
-                "core (major.minor.patch) semantic version string.",
-                Level::ERROR,
-                [...$breadcrumb, "environment", "php", "version"]
-            ));
+            $this->bus->broadcast(
+                $this->box->get(ConfigEvent::class,
+                    message: "The value of the \"version\" index must be a " .
+                    "core (major.minor.patch) semantic version string.",
+                    level: Level::ERROR,
+                    breadcrumb: [...$breadcrumb, "environment", "php", "version"]
+                ));
     }
 }
