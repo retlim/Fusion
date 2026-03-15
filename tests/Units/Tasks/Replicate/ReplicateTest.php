@@ -179,7 +179,7 @@ class ReplicateTest extends Wrapper
             ->hook(fn ($callback) => $callback($versions)) // #m0
             ->hook(fn ($callback) => $callback($metadata)) // #m0
             ->hook(fn ($callback) => $callback($snapshot)) // #m0
-            ->hook(function ($callback) use ($versions, $metadata) { // async hub loop
+            ->hook(function ($callback) use ($metadata) { // async hub loop
                 $callback($metadata); // #m1
             })
             ->fake("addMetadataRequest")
