@@ -72,7 +72,7 @@ build standalone package:
   script:
     - fusion build build.source=gitlab.com/valvoid/fusion/\'code/==$CI_COMMIT_TAG
     - touch $PACKAGE_FILE
-    - tar --exclude=$PACKAGE_FILE -czvf $PACKAGE_FILE .
+    - tar --exclude=$PACKAGE_FILE -czvf $PACKAGE_FILE *
     - |
       curl -v --fail-with-body --location --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
       --upload-file $PACKAGE_FILE \
