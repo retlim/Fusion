@@ -58,6 +58,7 @@ class DirTest extends Wrapper
             ->return(false)
             ->fake("getFilenames")
             ->expect(dir: "#")
+            ->return([]) // writable
             ->return(["f0"]);
 
         $file->fake("is")
@@ -122,7 +123,10 @@ class DirTest extends Wrapper
 
         $dirWrapper->fake("is")
             ->expect(dir: "#")
-            ->return(true);
+            ->return(true)
+            ->fake("getFilenames")
+            ->expect(dir: "#")
+            ->return([]); // writable
 
         $file->fake("exists")
             ->expect(file: "#/fusion.json")
@@ -184,6 +188,7 @@ class DirTest extends Wrapper
             ->expect(dir: "#")
             ->return(true)
             ->fake("getFilenames")
+            ->return([]) // writable
             ->return([]);
 
         $file->fake("exists")

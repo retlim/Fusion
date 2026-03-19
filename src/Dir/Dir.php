@@ -82,19 +82,52 @@ class Dir
 
         // replace existing content with placeholder or
         // recycle package / empty dir content
-        if ($dir->is($this->root))
+        if ($dir->is($this->root)) {
+            $this->checkDirPermission($this->root);
+
             $config->get("dir", "clearable") ?
                 $this->replaceContent() :
                 $this->recycleContent();
 
         // create new placeholder package
-        elseif ($config->get("dir", "creatable"))
+        } elseif ($config->get("dir", "creatable"))
             $this->createContent();
 
         else throw new Error(
             "Can't create the specified directory '$this->root' " .
             "because 'creatable' is not set to true."
         );
+    }
+
+    /**
+     * Checks working dir permissions.
+     *
+     * @param string $dir
+     * @throws Error
+     */
+    private function checkDirPermission(string $dir): void
+    {
+        $filenames = $this->dir->getFilenames($dir);
+
+        if ($filenames === false)
+            throw new Error(
+                "Can't scan directory '$dir'. " .
+                "Check permissions."
+            );
+
+        foreach ($filenames as $filename)
+            if ($filename !== "." && $filename !== "..") {
+                $file = "$dir/$filename";
+
+                if ($this->dir->writable($file) === false)
+                    throw new Error(
+                        "Working directory contains unwritable " .
+                        "file '$dir'. Check permissions."
+                    );
+
+                if ($this->dir->is($file))
+                    $this->checkDirPermission($file);
+            }
     }
 
     /**
