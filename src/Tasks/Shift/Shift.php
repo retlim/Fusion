@@ -128,6 +128,15 @@ class Shift extends Task
             $this->externalRootMeta->getCategory() == ExternalMetaCategory::DOWNLOADABLE) ?
             $this->shiftRecursive() :
             $this->shiftNested();
+
+        if (PHP_OS_FAMILY != 'Windows' &&
+            isset($this->externalMetas["valvoid/fusion"])) {
+            $file = $this->root . $this->externalMetas["valvoid/fusion"]
+                    ->getDir() . "/fusion";
+
+            if (is_file($file))
+                chmod($file, 0755);
+        }
     }
 
     /**
