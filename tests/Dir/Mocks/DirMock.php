@@ -28,6 +28,7 @@ class DirMock extends Dir
 {
     public Closure $is;
     public Closure $create;
+    public Closure $writable;
     public Closure $filenames;
     public Closure $delete;
     public Closure $rename;
@@ -45,6 +46,11 @@ class DirMock extends Dir
     public function rename(string $from, string $to): bool
     {
         return call_user_func($this->rename, $from, $to);
+    }
+
+    public function writable(string $dir): bool
+    {
+        return call_user_func($this->writable, $dir);
     }
 
     public function getFilenames(string $dir, int $order = SCANDIR_SORT_ASCENDING): array|false
