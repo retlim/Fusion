@@ -321,6 +321,14 @@ class LogicTest extends Test
             ]]);
         };
 
+        $this->dir->writable = function () {
+            return true;
+        };
+
+        $this->dir->filenames = function () {
+            return [];
+        };
+
         $this->logic = new Logic(dir: $this->dir,
             file: $this->file,
             bus: $this->bus, config: [
@@ -377,6 +385,7 @@ class LogicTest extends Test
 
     public function testReplaceContent(): void
     {
+        $counter = 0;
         $dirs =
         $filenames =
         $deletes =
@@ -389,7 +398,16 @@ class LogicTest extends Test
             return $dir == "/#" || $dir == "/#/f0";
         };
 
-        $this->dir->filenames = function ($dir) use (&$filenames) {
+        $this->dir->writable = function () {
+            return true;
+        };
+
+        $this->dir->filenames = function ($dir) use (&$filenames, &$counter) {
+            if ($counter == 0) {
+                $counter++;
+                return [];
+            }
+
             $filenames[] = $dir;
 
             return $dir == "/#" ?

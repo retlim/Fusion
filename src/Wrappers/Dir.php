@@ -44,6 +44,17 @@ class Dir
     }
 
     /**
+     * Tells whether the file is writable
+     * @param string $dir The file being checked.
+     * @return bool true if the filename exists and is
+     * writable.
+     */
+    public function writable(string $dir): bool
+    {
+        return is_writable($dir);
+    }
+
+    /**
      * Creates directory.
      *
      * @param string $dir The directory to create.
