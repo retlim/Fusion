@@ -261,7 +261,7 @@ class Dir
     {
         // assoc or seq key due to loadable inside stateful folder
         foreach ($struct as $key => $value)
-            if ($value == "stateful")
+            if ($value == "stateful" || $value == "cache")
                 return is_string($key) ?
                     $breadcrumb . $key :
                     $breadcrumb;

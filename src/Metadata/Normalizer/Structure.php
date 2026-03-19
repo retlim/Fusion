@@ -129,7 +129,7 @@ class Structure
                     $this->extractStructure($value, $path, $source);
 
             // stateful dir
-            elseif ($value == "stateful" && !$source) {
+            elseif (($value == "stateful" || $value == "cache") && !$source) {
                 $entry = ($key[0] ?? null) === '/' ?
                     $path . $key :
                     $path;
@@ -147,13 +147,13 @@ class Structure
                 $this->stateful[] = $entry;
 
             // mutable dir
-            } elseif ($value == "mutable" && !$source)
+            } elseif (($value == "mutable" || $value == "state") && !$source)
                 $this->mutable[] = ($key[0] ?? null) === '/' ?
                     $path . $key :
                     $path;
 
             // extendable dir
-            elseif ($value == "extendable" && !$source)
+            elseif (($value == "extendable" || $value == "extension") && !$source)
                 $this->extendable[] = ($key[0] ?? null) === '/' ?
                     $path . $key :
                     $path;
