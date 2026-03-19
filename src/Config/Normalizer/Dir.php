@@ -86,6 +86,9 @@ class Dir
             $localAppData = $this->system->getEnvVariable('LOCALAPPDATA') ?:
                 $this->system->getEnvVariable('USERPROFILE') . '/AppData/Local';
 
+            $localAppData = str_replace('\\', '/',
+                $localAppData);
+
             $identifier = ucwords($identifier, '/');
             $config["cache"]["path"] = "$localAppData/$identifier/cache";
             $config["config"]["path"] = "$localAppData/$identifier/config";
