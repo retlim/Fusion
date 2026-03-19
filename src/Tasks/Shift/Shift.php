@@ -396,6 +396,9 @@ class Shift extends Task
                     "Cant get executed file from backtrace " .
                     "to work around the windows bug."
                 );
+
+            $this->executedFile = str_replace('\\', '/',
+                $this->executedFile);
         }
 
         $this->directory->createDir($to);
