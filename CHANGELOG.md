@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.9](/../../compare/1.0.7...1.0.8) - Mar 20, 2026
+
+- Fix: Ensure CLI file remains executable on Unix systems ([#46](https://gitlab.com/valvoid/fusion/code/-/issues/46))
+- Fix: Check working dir permissions ([#45](https://gitlab.com/valvoid/fusion/code/-/issues/45))
+
 ## [1.0.8](/../../compare/1.0.7...1.0.8) - Sep 30, 2025
 
 - Fix: Redundant snap task output ([#25](https://gitlab.com/valvoid/fusion/code/-/issues/25))
