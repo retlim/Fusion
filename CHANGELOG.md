@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.2](/../../compare/1.1.1...1.1.2) - Mar 20, 2026
+
+- Ensure CLI file remains executable on Unix systems ([#46](https://gitlab.com/valvoid/fusion/code/-/issues/46))
+- Check working dir permissions ([#45](https://gitlab.com/valvoid/fusion/code/-/issues/45))
+- Fix Windows recursive build by normalizing path separators in shift task ([#44](https://gitlab.com/valvoid/fusion/code/-/issues/44))
+ 
 ## [1.1.1](/../../compare/1.1.0...1.1.1) - Feb 18, 2026
 
 - Replace rename with copy for cross filesystem compatibility ([#43](https://gitlab.com/valvoid/fusion/code/-/issues/43))
