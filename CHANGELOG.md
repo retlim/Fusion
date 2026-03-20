@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.9](/../../compare/1.0.7...1.0.8) - Mar 20, 2026
+## [1.0.9](/../../compare/1.0.8...1.0.9) - Mar 20, 2026
 
 - Fix: Ensure CLI file remains executable on Unix systems ([#46](https://gitlab.com/valvoid/fusion/code/-/issues/46))
 - Fix: Check working dir permissions ([#45](https://gitlab.com/valvoid/fusion/code/-/issues/45))
