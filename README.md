@@ -5,78 +5,17 @@ code, extensions, and state of PHP projects.
 
 ## Documentation
 
-The separated [documentation repository](https://gitlab.com/valvoid/fusion/docs)
-also has the [user-friendly output](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/prologue/fusion) and contains information about the 
-following key features:
+The separate [documentation repository](https://gitlab.com/valvoid/fusion/docs)
+also has the [user-friendly version](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/prologue/fusion) 
+and covers the following key features:
 
-### Everything Is a Modular Package
-
-The root project, its dependencies, and even Fusion itself are modular packages that 
-can be used as standalone software, as dependencies in other projects, or both at the 
-same time.
-
-### Scoped Metadata and Snapshot Files
-
-A package can be defined using three individual [metadata files](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/files), 
-each serving a different use case:
-
-- Optional local development metadata specific to your personal machine.
-- Optional shared development metadata used across all machines in the project.
-- Production metadata used for releases.
-
-These files intersect in a top-down order, where local metadata overrides shared 
-metadata, and shared metadata overrides production metadata. Fusion also generates 
-a snapshot file for each metadata file, capturing replicable versions of its 
-dependencies.
-
-### Lifecycle Hooks
-
-Packages can define custom scripts in their metadata that run after recycling, 
-downloading, installing, or updating, and before migrating or deleting the package.
-
-### Loadable Code
-
-All object-oriented and procedural code is automatically indexed into granular 
-files for custom loading. The same files also form the basis of a pre-built 
-autoloader, providing default out-of-the-box loading.
-
-### Flexible Package References
-
-Fusion offers full support for [semantic versioning](https://semver.org), as well
-as commit, branch, and tag offsets, which can be extended by intuitive, well-known
-logic for [complex references](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#trailing-reference-segment),
-similar to the syntax used in code:
-
-- Logical `&&` and `||` operators.
-- Comparison signs `!=`, `==`, `>=`, `<=`, `>` and `<`.
-- Grouping brackets `()`.
-
-The resolution process uses a conflict-driven clause learning (CDCL) algorithm
-to ensure efficient decision-making.
-
-### Directory Type Indicators
-
-Fusion builds new versions efficiently by recycling existing packages. To 
-instruct the package manager that your package includes a mutable directory built by a 
-callback and should be handled individually as new content, set the [mutable](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#mutable-directory-indicator) 
-indicator in your metadata.
-
-To allow other packages to extend yours at a special directory using the default 
-built-in, out-of-the-box behavior, set the [extendable](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/package/schema/structure#extendable-directory-indicator) 
-indicator in your metadata. Fusion will also generate an extensions file for your 
-package, containing the parent package dirs and the order in which they extend it, 
-in case your package needs to know this.
-
-### Interface-Based Customization
-
-As mentioned above, Fusion is itself a [package](https://valvoid.com/registry/packages/1/fusion-php-package-manager), 
-and its architecture supports out-of-the-box customization through built-in directory 
-indicators. You can build your [own package manager](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/extensions/package) 
-on top by extending it with custom implementations, such as:
-
-- Adding a custom package registry.
-- Replacing the download, build, or replication logic.
-- Setting a custom log serializer.
+- **Typeless Packages**: Build the root project along with its dependencies.
+- **Environments**: Define production, shared development, and local metadata.
+- **Lifecycle Hooks**: Attach custom scripts to specific workflow stages.
+- **Source Code**: Index requirable code automatically.
+- **Package References**: Resolve packages by semver, commit, branch, or tag.
+- **Dir Type Indicators**: Expose extendable directories to other packages.
+- **Extensions**: Build your own package manager on top of Fusion.
 
 ## Registry
 
