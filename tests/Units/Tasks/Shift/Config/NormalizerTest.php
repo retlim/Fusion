@@ -19,26 +19,32 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Tasks\Shift\Mocks;
+namespace Valvoid\Fusion\Tests\Units\Tasks\Shift\Config;
 
-use Valvoid\Box\Box;
-use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Dir\Dir;
-use Valvoid\Fusion\Log\Events\Infos\Content;
+use Valvoid\Fusion\Tasks\Shift\Config\Normalizer;
+use Valvoid\Reflex\Test\Wrapper;
 
-class BoxMock extends Box
+class NormalizerTest extends Wrapper
 {
-    public BusMock $bus;
-    public Dir $dir;
-
-    public function get(string $class, ...$args): object
+    public function testGroup(): void
     {
-        if ($class === Bus::class)
-            return $this->bus;
+        $config = [];
 
-        if ($class === Content::class)
-            return new ContentMock;
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["t", "g", "i"], $config);
 
-        return parent::get($class, ...$args);
+        $this->validate($config)
+            ->as(["group" => "g", "id" => "i"]);
+    }
+
+    public function testId(): void
+    {
+        $config = [];
+
+        $normalizer = new Normalizer;
+        $normalizer->normalize(["t", "i"], $config);
+
+        $this->validate($config)
+            ->as(["id" => "i"]);
     }
 }
