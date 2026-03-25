@@ -19,15 +19,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Util\Reference;
+namespace Valvoid\Fusion\Tests\Units\Util\Reference;
 
-use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Util\Reference\Normalizer;
+use Valvoid\Reflex\Test\Wrapper;
 
-class NormalizerTest extends Test
+class NormalizerTest extends Wrapper
 {
-    protected string|array $coverage = Normalizer::class;
-
     private array $versions = [
         ["major" => 3, "minor" => 0, "patch" => 0, "release" => "", "build" => ""],
         ["major" => 2, "minor" => 0, "patch" => 2, "release" => "", "build" => ""],
@@ -42,15 +40,6 @@ class NormalizerTest extends Test
         ["major" => 0, "minor" => 1, "patch" => 0, "release" => "", "build" => ""]
     ];
 
-    public function __construct()
-    {
-        $this->testAbsoluteReference();
-        $this->testDefaultRangeReference();
-        $this->testReleaseReference();
-        $this->testAndReference();
-        $this->testOrReference();
-        $this->testBracketReference();
-    }
 
     public function testBracketReference(): void
     {
@@ -87,7 +76,8 @@ class NormalizerTest extends Test
             ]]]
         );
 
-        if (array_values($versions) !== [[
+        $this->validate(array_values($versions))
+            ->as([[
                 "major" => 3,
                 "minor" => 0,
                 "patch" => 0,
@@ -99,11 +89,7 @@ class NormalizerTest extends Test
                 "patch" => 2,
                 "release" => "",
                 "build" => ""
-            ]]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]]);
     }
 
     public function testOrReference(): void
@@ -134,17 +120,14 @@ class NormalizerTest extends Test
             ]]
         );
 
-        if (array_values($versions) !== [[
+        $this->validate(array_values($versions))
+            ->as([[
                 "major" => 3,
                 "minor" => 0,
                 "patch" => 0,
                 "release" => "",
                 "build" => ""
-            ]]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]]);
     }
 
     public function testAndReference(): void
@@ -178,17 +161,14 @@ class NormalizerTest extends Test
             ]]
         );
 
-        if (array_values($versions) !== [[
+        $this->validate(array_values($versions))
+            ->as([[
                 "major" => 0,
                 "minor" => 2,
                 "patch" => 0,
                 "release" => "",
                 "build" => "1"
-            ]]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]]);
     }
 
     public function testReleaseReference(): void
@@ -211,7 +191,8 @@ class NormalizerTest extends Test
             ]]
         );
 
-        if (array_values($versions) !== [[
+        $this->validate(array_values($versions))
+            ->as([[
                 "major" => 0,
                 "minor" => 2,
                 "patch" => 0,
@@ -229,11 +210,7 @@ class NormalizerTest extends Test
                 "patch" => 0,
                 "release" => "",
                 "build" => ""
-            ]]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]]);
     }
 
     public function testDefaultRangeReference(): void
@@ -256,7 +233,8 @@ class NormalizerTest extends Test
             ]]
         );
 
-        if (array_values($versions) !== [[
+        $this->validate(array_values($versions))
+            ->as([[
                 "major" => 0,
                 "minor" => 2,
                 "patch" => 0,
@@ -268,11 +246,7 @@ class NormalizerTest extends Test
                 "patch" => 0,
                 "release" => "",
                 "build" => ""
-            ]]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]]);
     }
 
     public function testAbsoluteReference(): void
@@ -290,16 +264,13 @@ class NormalizerTest extends Test
             ]]
         );
 
-        if (array_values($versions) !== [[
+        $this->validate(array_values($versions))
+            ->as([[
                 "major" => 1,
                 "minor" => 0,
                 "patch" => 0,
                 "release" => "",
                 "build" => ""
-            ]]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]]);
     }
 }

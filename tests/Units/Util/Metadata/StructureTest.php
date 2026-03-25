@@ -19,72 +19,58 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Util\Metadata;
+namespace Valvoid\Fusion\Tests\Units\Util\Metadata;
 
-use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Util\Metadata\Structure;
+use Valvoid\Reflex\Test\Wrapper;
 
-class StructureTest extends Test
+class StructureTest extends Wrapper
 {
-    protected string|array $coverage = Structure::class;
-
-    /** @var array|array[] Inflated (normalized)  */
-    private array $structure = [
-        "/dir1" => [
-            "adapter1" => [
-                "/dir2" => [],
-                "path1" => [
-                    "path2" => [
-                        "ref1"
-                    ]
-                ]
-            ],
-        ]
-    ];
-
-    public function __construct()
-    {
-        $this->testFullSource();
-        $this->testSuffixSource();
-    }
-
     public function testSuffixSource(): void
     {
-        $breadcrumb = Structure::getBreadcrumb(
-            $this->structure,
-            "path2/ref1"
-        );
-
-        if ($breadcrumb !== [
+        $this->validate(Structure::getBreadcrumb([
+                "/dir1" => [
+                    "adapter1" => [
+                        "/dir2" => [],
+                        "path1" => [
+                            "path2" => [
+                                "ref1"
+                            ]
+                        ]
+                    ],
+                ]
+            ],
+                "path2/ref1"
+            ))->as([
                 "/dir1",
                 "adapter1" ,
                 "path1" ,
                 "path2" ,
                 "ref1"
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]);
     }
 
     public function testFullSource(): void
     {
-        $breadcrumb = Structure::getBreadcrumb(
-            $this->structure,
-            "adapter1/path1/path2/ref1"
-        );
-
-        if ($breadcrumb !== [
+        $this->validate(Structure::getBreadcrumb([
+                "/dir1" => [
+                    "adapter1" => [
+                        "/dir2" => [],
+                        "path1" => [
+                            "path2" => [
+                                "ref1"
+                            ]
+                        ]
+                    ],
+                ]
+            ],
+                "adapter1/path1/path2/ref1"
+            ))->as([
                 "/dir1",
                 "adapter1" ,
                 "path1" ,
                 "path2" ,
                 "ref1"
-            ]) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+            ]);
     }
 }

@@ -19,18 +19,29 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Mocks;
+namespace Valvoid\Fusion\Tests\Units\Util\Pattern;
 
-use Valvoid\Fusion\Tasks\Task;
+use Valvoid\Fusion\Util\Pattern\Interpreter;
+use Valvoid\Reflex\Test\Wrapper;
 
-class TaskMock extends Task
+class InterpreterTest extends Wrapper
 {
-    public int $executes = 0;
-
-    public function __construct(public array $config){}
-
-    public function execute(): void
+    public function testMatch(): void
     {
-        $this->executes++;
+        $this->validate(Interpreter::isMatch([
+            "build" => "",
+            "release" => "",
+            "major" => "2",
+            "minor" => "0",
+            "patch" => "0"
+        ], [
+            "build" => "",
+            "release" => "",
+            "major" => "1",
+            "minor" => "0",
+            "patch" => "0",
+            "sign" =>  ">="
+
+        ]))->as(true);
     }
 }

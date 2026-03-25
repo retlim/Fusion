@@ -19,22 +19,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Valvoid\Fusion\Tests\Util\Version;
+namespace Valvoid\Fusion\Tests\Units\Util\Version;
 
-use Valvoid\Fusion\Tests\Test;
 use Valvoid\Fusion\Util\Version\Interpreter;
+use Valvoid\Reflex\Test\Wrapper;
 
-class InterpreterTest extends Test
+class InterpreterTest extends Wrapper
 {
-    protected string|array $coverage = Interpreter::class;
-
-    public function __construct()
-    {
-        $this->testCoreIsBiggerThan();
-        $this->testReleaseIsBiggerThan();
-        $this->testBuildIsBiggerThan();
-    }
-
     public function testCoreIsBiggerThan(): void
     {
         $comparison = Interpreter::isBiggerThan([
@@ -51,12 +42,8 @@ class InterpreterTest extends Test
             "patch" => "0"
         ]);
 
-        // assert true
-        if ($comparison !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        $this->validate($comparison)
+            ->as(true);
     }
 
     public function testReleaseIsBiggerThan(): void
@@ -75,12 +62,8 @@ class InterpreterTest extends Test
             "patch" => "0"
         ]);
 
-        // assert true
-        if ($comparison !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        $this->validate($comparison)
+            ->as(true);
     }
 
     public function testBuildIsBiggerThan(): void
@@ -99,11 +82,7 @@ class InterpreterTest extends Test
             "patch" => "0"
         ]);
 
-        // assert true
-        if ($comparison !== true) {
-            echo "\n[x] " . __CLASS__ . " | " . __FUNCTION__;
-
-            $this->result = false;
-        }
+        $this->validate($comparison)
+            ->as(true);
     }
 }
