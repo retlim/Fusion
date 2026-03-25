@@ -43,7 +43,6 @@ class Interpreter implements ConfigInterpreter
         private readonly Box $box,
         private readonly Bus $bus) {}
 
-
     /**
      * Interprets the snap task config.
      *
