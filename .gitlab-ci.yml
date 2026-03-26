@@ -63,7 +63,7 @@ test integrations:
   rules:
     - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX
   needs:
-    - job: test units
+    - job: build development package
       artifacts: true
   script:
     - php reflex integrations
