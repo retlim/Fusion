@@ -13,9 +13,9 @@ and covers the following key features:
 - **Environments**: Define production, shared development, and local metadata.
 - **Lifecycle Hooks**: Attach custom scripts to specific workflow stages.
 - **Source Code**: Index requirable code automatically.
+- **Dir Indicators**: Expose dirs to other packages so they can extend yours.
+- **Custom Logic**: Build your own package manager on top of Fusion.
 - **Package References**: Resolve packages by semver, commit, branch, or tag.
-- **Dir Type Indicators**: Expose extendable directories to other packages.
-- **Extensions**: Build your own package manager on top of Fusion.
 
 ## Registry
 
