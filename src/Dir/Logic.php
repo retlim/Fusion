@@ -97,7 +97,10 @@ class Logic implements Proxy
             );
 
         foreach ($filenames as $filename)
-            if ($filename !== "." && $filename !== "..") {
+            if ($filename !== "." && $filename !== ".." &&
+
+                // git has read-only files
+                $filename !== ".git") {
                 $file = "$dir/$filename";
 
                 if ($this->dir->writable($file) === false)
