@@ -305,6 +305,7 @@ class Shift extends Task
                     $this->directory->delete($to);
 
                     // cross filesystem rename
+                    $this->directory->createDir($to);
                     $this->copyDir($from, $to);
                     $this->directory->delete($from);
 
