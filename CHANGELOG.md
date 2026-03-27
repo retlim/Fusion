@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.3](/../../compare/1.1.2...1.1.3) - Mar 27, 2026
+
+- Do not check Git permissions ([#47](https://gitlab.com/valvoid/fusion/code/-/issues/47))
+- Fix missing stateful directory for recyclable packages ([#43](https://gitlab.com/valvoid/fusion/code/-/issues/43))
+
 ## [1.1.2](/../../compare/1.1.1...1.1.2) - Mar 20, 2026
 
 - Ensure CLI file remains executable on Unix systems ([#46](https://gitlab.com/valvoid/fusion/code/-/issues/46))
