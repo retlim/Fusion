@@ -305,6 +305,7 @@ class Shift extends Task
                     $this->directory->delete($to);
 
                     // cross filesystem rename
+                    $this->directory->createDir($to);
                     $this->copyDir($from, $to);
                     $this->directory->delete($from);
 
@@ -544,12 +545,12 @@ class Shift extends Task
                 $file = "$from/$filename";
                 $copy = "$to/$filename";
 
-                if ($this->file->is($file))
+                if ($this->file->is($file)) {
                     $this->directory->copy($file, $copy);
 
                 // do not copy locked dirs
                 // cache and source
-                elseif (!in_array($file, $this->lockedDirs)) {
+                } elseif (!in_array($file, $this->lockedDirs)) {
                     $this->directory->createDir($copy);
                     $this->copyDir($file, $copy);
                 }
