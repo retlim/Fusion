@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.10](/../../compare/1.0.9...1.0.10) - Mar 27, 2026
+
+- Do not check Git permissions ([#47](https://gitlab.com/valvoid/fusion/code/-/issues/47))
+
 ## [1.0.9](/../../compare/1.0.8...1.0.9) - Mar 20, 2026
 
 - Fix: Ensure CLI file remains executable on Unix systems ([#46](https://gitlab.com/valvoid/fusion/code/-/issues/46))
