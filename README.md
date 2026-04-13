@@ -10,7 +10,7 @@ also has the [user-friendly version](https://valvoid.com/registry/packages/1/fus
 and covers the following key features:
 
 - **Projects Are Packages**: Build the root project along with its dependencies.
-- **Generic Packages**: Build a recursive, open, or circular dependency graphs.
+- **Modular Packages**: Build a recursive, open, or circular dependency graphs.
 - **Environments**: Define production, shared development, and local metadata.
 - **Lifecycle Hooks**: Attach custom scripts to specific workflow stages.
 - **Source Code**: Index requirable code automatically.
