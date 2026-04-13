@@ -14,6 +14,11 @@ build development package:
   image: valvoid/fusion:2
   script:
     - fusion build
+  rules:
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX
+    - changes:
+      - src/**/*
+      - tests/**/*
   artifacts:
     name: dev-package-build
     paths:
@@ -30,6 +35,11 @@ analyze code:
       artifacts: true
   script:
     - phpstan analyse -c phpstan.neon --error-format gitlab > phpstan.json
+  rules:
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX
+    - changes:
+      - src/**/*
+      - tests/**/*
   artifacts:
     paths:
       - phpstan.json
@@ -48,8 +58,14 @@ test units:
     - docker-php-ext-install zip
     - echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
   needs:
+    - job: analyze code
     - job: build development package
       artifacts: true
+  rules:
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX
+    - changes:
+      - src/**/*
+      - tests/**/*
   parallel:
     matrix:
       - VERSION: ["8.2", "8.3", "8.4", "8.5"]
@@ -63,6 +79,7 @@ test integrations:
   rules:
     - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX
   needs:
+    - job: test units
     - job: build development package
       artifacts: true
   script:
