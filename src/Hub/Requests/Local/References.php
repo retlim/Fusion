@@ -75,13 +75,7 @@ class References extends Local
             $entry = substr($entry, $this->prefix);
 
             if (Interpreter::isSemanticVersion($entry))
-                if (!$this->cache->addVersion($api, $path, $entry))
-                    $this->throwError(
-                        "The offset ($entry) conflicts " .
-                        "with an existing version. Remove it from the " .
-                        "source or create an other one. Offset must be a " .
-                        "non-existing pseudo version."
-                    );
+                $this->cache->addVersion($api, $path, $entry);
         }
 
         $this->cache->unlockReferences($this->source);

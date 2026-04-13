@@ -129,15 +129,8 @@ class References extends RemoteRequest
                     $entry = substr($entry, $this->prefix);
 
                     if (Interpreter::isSemanticVersion($entry))
-                        if (!$this->cache->addVersion($this->source["api"],
-                            $this->source["path"], $entry))
-                            $this->throwError(
-                                "The offset ($entry) conflicts " .
-                                "with an existing version. Remove it from the " .
-                                "source or create an other one. Offset must be a " .
-                                "non-existing pseudo version.",
-                                $this->url
-                            );
+                        $this->cache->addVersion($this->source["api"],
+                            $this->source["path"], $entry);
                 }
 
                 if ($next) {

@@ -54,8 +54,12 @@ class Offset extends Remote
      */
     public function __construct(
         private readonly Box $box,
-        int $id, Cache $cache, array $source,
-                                RemoteOffsetApi $api, string $inline, array $inflated)
+        int $id,
+        Cache $cache,
+        array $source,
+        RemoteOffsetApi $api,
+        string $inline,
+        array $inflated)
     {
         parent::__construct($this->box, $id, $cache, $source, $api);
 
@@ -135,14 +139,28 @@ class Offset extends Remote
 
                 // override locked (unlock)
                 if (!$this->cache->addOffset($this->source, $this->inline,
-                    $this->inflated, $response->getId()))
-                    $this->throwError(
-                        "The offset ($this->inline) conflicts " .
-                        "with an existing version. Remove it from the " .
-                        "source or create an other one. Offset must be a " .
-                        "non-existing pseudo version.",
-                        $this->url
-                    );
+                    $this->inflated, $response->getId())) {
+                    $offset = $this->inflated["sign"] .
+                        $this->inflated["major"] . "." .
+                        $this->inflated["minor"] . "." .
+                        $this->inflated["patch"];
+
+                    if ($this->inflated["release"])
+                        $offset .= "-" . $this->inflated["release"];
+
+                    if ($this->inflated["build"])
+                        $offset .= "+" . $this->inflated["build"];
+
+                    $offset .= ":" . $this->inflated["offset"];
+
+                    $this->box->get(Log::class)
+                        ->notice(
+                            "The offset pseudo-version ($offset) conflicts " .
+                            "with the preferred existing release version. " .
+                            "Change the it to bypass the version overlap. URL: " .
+                            $this->url
+                        );
+                }
 
                 // clear callback
                 // enable destruct

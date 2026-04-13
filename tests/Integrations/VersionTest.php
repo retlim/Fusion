@@ -1,6 +1,6 @@
 <?php
 /*
- * Reflex – PHP Testing Framework
+ * Fusion - PHP Package Manager
  * Copyright © Valvoid
  *
  * This program is free software: you can redistribute it and/or modify

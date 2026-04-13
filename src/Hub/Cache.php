@@ -258,14 +258,9 @@ class Cache
      *
      * @param string $api API.
      * @param string $path Path.
-     * @return bool Offset conflict indicator.
      */
-    public function addVersion(string $api, string $path, string $inline): bool
+    public function addVersion(string $api, string $path, string $inline): void
     {
-        // offset conflict
-        if (isset($this->versions[$api][$path]["entries"][$inline]))
-            return false;
-
         // inline keys are for:
         // SAT solver, URl requests, ...
         $this->versions[$api][$path]["entries"][$inline] =
@@ -274,8 +269,6 @@ class Cache
             // inflated values are for:
             // sort, pattern selections (source reference), ...
             Parser::getInflatedVersion($inline);
-
-        return true;
     }
 
     /**
@@ -292,7 +285,8 @@ class Cache
         $api = $source["api"];
         $path = $source["path"];
 
-        // version conflict
+        // async requests may result version conflict
+        // do nothing since real version is preferred
         if (isset($this->versions[$api][$path]["entries"][$inline]))
             return false;
 

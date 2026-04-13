@@ -26,6 +26,7 @@ use Valvoid\Fusion\Hub\APIs\Local\Local as LocalApi;
 use Valvoid\Fusion\Hub\APIs\Local\Offset as LocalOffsetApi;
 use Valvoid\Fusion\Hub\Cache;
 use Valvoid\Fusion\Log\Events\Errors\Request as RequestError;
+use Valvoid\Fusion\Log\Log;
 
 /**
  * Local offset synchronization request.
@@ -87,12 +88,26 @@ class Offset extends Local
         // override locked (unlock)
         // pseudo version conflicts with real one
         if (!$this->cache->addOffset($this->source, $this->inline,
-            $this->inflated, $response->getId()))
-            $this->throwError(
-                "The offset ($this->inline) conflicts " .
-                "with an existing version. Remove it from the " .
-                "source or create an other one. Offset must be a " .
-                "non-existing pseudo version."
-            );
+            $this->inflated, $response->getId())) {
+            $offset = $this->inflated["sign"] .
+                $this->inflated["major"] . "." .
+                $this->inflated["minor"] . "." .
+                $this->inflated["patch"];
+
+            if ($this->inflated["release"])
+                $offset .= "-" . $this->inflated["release"];
+
+            if ($this->inflated["build"])
+                $offset .= "+" . $this->inflated["build"];
+
+            $offset .= ":" . $this->inflated["offset"];
+
+            $this->box->get(Log::class)
+                ->notice(
+                    "The offset pseudo-version ($offset) conflicts " .
+                    "with the preferred existing release version. " .
+                    "Change the it to bypass the version overlap."
+                );
+        }
     }
 }
