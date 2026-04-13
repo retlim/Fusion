@@ -1,7 +1,7 @@
 # About Fusion
 
 Fusion is a PHP package manager that manages dependencies, loadable source 
-code, extensions, and state of PHP projects.
+code, extensions, and the state of PHP projects.
 
 ## Documentation
 
@@ -9,7 +9,8 @@ The separate [documentation repository](https://gitlab.com/valvoid/fusion/docs)
 also has the [user-friendly version](https://valvoid.com/registry/packages/1/fusion-php-package-manager/docs/prologue/fusion) 
 and covers the following key features:
 
-- **Typeless Packages**: Build the root project along with its dependencies.
+- **Projects Are Packages**: Build the root project along with its dependencies.
+- **Generic Packages**: Build a recursive, open, or circular dependency graphs.
 - **Environments**: Define production, shared development, and local metadata.
 - **Lifecycle Hooks**: Attach custom scripts to specific workflow stages.
 - **Source Code**: Index requirable code automatically.
@@ -19,12 +20,12 @@ and covers the following key features:
 
 ## Registry
 
-For default packages, see the [default registry](https://valvoid.com/registry) page.
+For default packages, see the [default registry](https://valvoid.com/registry).
 
 ## Contribution
 
-Each merge request serves as confirmation to transfer ownership to the project 
-and must meet the following criteria:
+Each merge request serves as confirmation of ownership transfer to the 
+project and must meet the following criteria:
 
 - Own intellectual property.
 - Neutral content. Free from political bias, for example.
