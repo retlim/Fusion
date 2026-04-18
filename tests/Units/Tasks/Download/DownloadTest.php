@@ -88,11 +88,14 @@ class DownloadTest extends Wrapper
             ->return("i0")
             ->return("i1")
             ->fake("getLayers")
-            ->return(["object" => ["version" => "3.4.5"]]) // bot meta
+            ->return(["production" => ["version" => "1.0.0"]]) // bot meta
             ->return([])
             ->fake("getContent")
             ->return(["#i0c"])
-            ->return(["#i1c"]);
+            ->return(["#i1c"])
+            ->fake("getVersion")
+            ->return("3.4.5")
+            ->repeat(1);
 
         $directory->fake("getPackagesDir")
             ->return("/p")
@@ -208,11 +211,14 @@ class DownloadTest extends Wrapper
             ->return("i0")
             ->return("i1")
             ->fake("getLayers")
-            ->return(["object" => ["version" => "3.4.5"]]) // bot meta
+            ->return(["production" => ["version" => "1.0.0"]]) // bot meta
             ->return([])
             ->fake("getContent")
             ->return(["#i0c"])
-            ->return(["#i1c"]);
+            ->return(["#i1c"])
+            ->fake("getVersion")
+            ->return("3.4.5")
+            ->repeat(1);
 
         $directory->fake("getPackagesDir")
             ->return("/p")

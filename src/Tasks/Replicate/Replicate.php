@@ -247,7 +247,11 @@ class Replicate extends Task implements Interceptor
                 json_last_error_msg()
             );
 
-        $this->snapshot += $snapshot;
+        // overlay existing
+        // since source intersection no longer an error
+        // result in multiple identifiers
+        foreach ($snapshot as $id => $reference)
+            $this->snapshot[$id] = $reference;
     }
 
     /**

@@ -257,10 +257,10 @@ class BuilderTest extends Wrapper
 
         $bus->fake("addReceiver")
             ->expect(id: Builder::class, events: [Metadata::class])
-            ->repeat(4)
+            ->repeat(3)
             ->fake("removeReceiver")
             ->expect(id: Builder::class)
-            ->repeat(4);
+            ->repeat(3);
 
         $this->validate($this->builder->getMetadata())
             ->as($internal);

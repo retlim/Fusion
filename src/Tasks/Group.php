@@ -210,8 +210,8 @@ class Group
      * @return array Path.
      * @deprecated Will be renamed to {@see getEventTrace} in
      * version 3.0.0. The term "path" is confusing here, as it
-     * * is already used in the metadata structure and overlaps
-     * * with implication semantics.
+     * is already used in the metadata structure and overlaps
+     * with implication semantics.
      */
     public function getPath(string $source): array
     {

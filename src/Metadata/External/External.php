@@ -130,7 +130,7 @@ class External extends Metadata
     {
         return $this->path ??=
             $this->box->get(Group::class)
-                ->getPath($this->layers["object"]["source"]);
+                ->getEventTrace($this->layers["object"]["source"]);
     }
 
     /**

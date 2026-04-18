@@ -28,11 +28,11 @@ use Valvoid\Fusion\Log\Events\Errors\Metadata as MetadataError;
 use Valvoid\Fusion\Log\Events\Level;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\Normalizer\Reference;
-use Valvoid\Fusion\Metadata\External\Parser\Source;
 use Valvoid\Fusion\Metadata\Interpreter\Interpreter;
 use Valvoid\Fusion\Metadata\Normalizer\Normalizer;
 use Valvoid\Fusion\Metadata\Normalizer\Structure;
 use Valvoid\Fusion\Metadata\Parser\Parser;
+use Valvoid\Fusion\Metadata\Parser\Source;
 
 /**
  * External metadata builder.
@@ -265,15 +265,14 @@ class Builder
             $source = explode('/', $source);
 
             // remove api and reference
-            array_shift($source);
-            array_pop($source);
+            $identifier = array_slice($source, 1, -1);
 
             // remove ' parts
-            foreach ($source as $i => $segment)
+            foreach ($identifier as $i => $segment)
                 if ($segment[0] === "'")
-                    unset($source[$i]);
+                    unset($identifier[$i]);
 
-            $dependencies[] = implode('/', $source);
+            $dependencies[] = implode('/', $identifier);
         }
     }
 

@@ -23,6 +23,7 @@ namespace Valvoid\Fusion\Tests\Units\Tasks\Snap;
 
 use Valvoid\Box\Box;
 use Valvoid\Fusion\Dir\Dir;
+use Valvoid\Fusion\Log\Events\Errors\Error;
 use Valvoid\Fusion\Log\Events\Infos\Content;
 use Valvoid\Fusion\Log\Log;
 use Valvoid\Fusion\Metadata\External\External;
@@ -47,7 +48,7 @@ class SnapTest extends Wrapper
             box: $box,
             group: $group,
             log: $log,
-            directory: $directory,
+            dir: $directory,
             file: $file,
             config: []
         );
@@ -89,13 +90,15 @@ class SnapTest extends Wrapper
             ->return(["i1", "i2"])
             ->fake("getSource")
             ->return(["reference" => "offset"])
-            ->return(["reference" => "1.2.3"])
             ->fake("getLayers")
-            ->return(["object" => ["version" => "3.2.1"]])
+            ->return(["production" => ["version" => "1.0.0"]])
             ->return([])
             ->fake("getContent")
             ->return(["###"])
-            ->repeat(1);
+            ->repeat(1)
+            ->fake("getVersion")
+            ->return("3.2.1") // offset fake
+            ->return("1.2.3");
 
         $box->fake("get")
             ->expect(class: Content::class, arguments: ["content" => ["###"]])
@@ -126,7 +129,7 @@ class SnapTest extends Wrapper
             box: $box,
             group: $group,
             log: $log,
-            directory: $directory,
+            dir: $directory,
             file: $file,
             config: []
         );
@@ -170,13 +173,15 @@ class SnapTest extends Wrapper
             ->return(["i1", "i2"])
             ->fake("getSource")
             ->return(["reference" => "offset"])
-            ->return(["reference" => "1.2.3"])
             ->fake("getLayers")
-            ->return(["object" => ["version" => "3.2.1"]])
+            ->return(["production" => ["version" => "1.0.0"]])
             ->return([])
             ->fake("getContent")
             ->return(["###"])
-            ->repeat(1);
+            ->repeat(1)
+            ->fake("getVersion")
+            ->return("3.2.1") // offset fake
+            ->return("1.2.3");
 
         $box->fake("get")
             ->expect(class: Content::class, arguments: ["content" => ["###"]])
@@ -208,7 +213,7 @@ class SnapTest extends Wrapper
             box: $box,
             group: $group,
             log: $log,
-            directory: $directory,
+            dir: $directory,
             file: $file,
             config: []
         );
@@ -244,24 +249,28 @@ class SnapTest extends Wrapper
 
         $external->fake("getSource")
             ->return(["reference" => "offset"])
-            ->return(["reference" => "1.2.3"])
             ->fake("getLayers")
-            ->return(["object" => ["version" => "3.2.1"]])
+            ->return(["production" => ["version" => "1.0.0"]])
             ->return([])
             ->fake("getContent")
             ->return(["###"])
-            ->repeat(1);
+            ->repeat(1)
+            ->fake("getVersion")
+            ->return("3.2.1") // i2 - offset fake
+            ->return("1.2.3");
 
         $internal->fake("getId")
             ->return("i0")
             ->fake("getStatefulPath")
             ->return("/state")
-            ->fake("getProductionIds")
-            ->return(["i1"])
             ->fake("getLocalIds")
             ->return(null)
             ->fake("getDevelopmentIds")
-            ->return(["i2"]);
+            ->return(["i2"])
+            ->fake("getProductionIds")
+            ->return(["i1"])
+            ->fake("getContent")
+            ->return(["intersections" => []]);
 
         $box->fake("get")
             ->expect(class: Content::class, arguments: ["content" => ["###"]])
@@ -270,15 +279,228 @@ class SnapTest extends Wrapper
 
         $file->fake("put")
             ->return(1)
+            ->expect(file: "/tmp/packages/i0/state/snapshot.dev.json",
+                data: "{\n" .
+                "    \"i2\": \"3.2.1:offset\"\n" .
+                "}")
             ->expect(file: "/tmp/packages/i0/state/snapshot.json",
                 data: "{\n" .
-                "    \"i1\": \"3.2.1:offset\"\n" .
-                "}")
+                "    \"i1\": \"1.2.3\"\n" .
+                "}");
+
+        $task->execute();
+    }
+
+    public function testSourceIntersection(): void
+    {
+        $box = $this->createMock(Box::class);
+        $log = $this->createMock(Log::class);
+        $directory = $this->createMock(Dir::class);
+        $file = $this->createMock(File::class);
+        $group = $this->createMock(Group::class);
+        $internal = $this->createMock(Internal::class);
+        $external = $this->createMock(External::class);
+        $content = $this->createStub(Content::class);
+        $task = new Snap(
+            box: $box,
+            group: $group,
+            log: $log,
+            dir: $directory,
+            file: $file,
+            config: []
+        );
+
+        $log->fake("info")
+            ->return(null)
+            ->repeat(5)
+            ->fake("verbose")
+            ->return(null)
+            ->repeat(1);
+
+        $group->fake("getImplication")
+            ->return([
+                "i1" => ["implication" => []],
+                "i2" => ["implication" => []]
+            ])
+            ->fake("hasDownloadable")
+            ->return(true)
+            ->fake("getExternalMetas")
+            ->return([
+                "i1" => $external,
+                "i2" => $external
+            ])
+            ->fake("getRootMetadata")
+            ->return($internal);
+
+        $directory->fake("getPackagesDir")
+            ->return("/tmp/packages")
+            ->fake("createDir")
+            ->expect(dir: "/tmp/packages/i0/state")
+            ->fake("delete")
+            ->expect(file: "/tmp/packages/i0/state/snapshot.local.json");
+
+        $external->fake("getSource")
+            ->return(["reference" => "offset"])
+            ->fake("getLayers")
+            ->return(["production" => ["version" => "1.0.0"]])
+            ->return([])
+            ->fake("getContent")
+            ->return(["###"])
+            ->repeat(2)
+            ->fake("getVersion")
+            ->return("3.2.1") // i2 - offset fake
+            ->return("1.2.3")
+            ->return("3.2.1"); // intersection
+
+        $internal->fake("getId")
+            ->return("i0")
+            ->fake("getStatefulPath")
+            ->return("/state")
+            ->fake("getLocalIds")
+            ->return(null)
+            ->fake("getDevelopmentIds")
+            ->return(["i2"])
+            ->fake("getProductionIds")
+            ->return(["i1", "i2"])
+            ->fake("getContent")
+            ->return(["intersections" => [
+                "i2" => [
+                    "production" => [
+                        "reference" => [[
+                            "major" => "3",
+                            "minor" => "2",
+                            "patch" => "1",
+                            "build" => "",
+                            "release" => "",
+                            "sign" => "==",
+                            "offset" => "main"
+                        ]]
+                    ]
+                ]
+            ]]);
+
+        $box->fake("get")
+            ->expect(class: Content::class, arguments: ["content" => ["###"]])
+            ->return($content)
+            ->repeat(2);
+
+        $file->fake("put")
             ->return(1)
             ->expect(file: "/tmp/packages/i0/state/snapshot.dev.json",
                 data: "{\n" .
-                "    \"i2\": \"1.2.3\"\n" .
+                "    \"i2\": \"3.2.1:offset\"\n" .
+                "}")
+            ->expect(file: "/tmp/packages/i0/state/snapshot.json",
+                data: "{\n" .
+                "    \"i1\": \"1.2.3\",\n" .
+                "    \"i2\": \"3.2.1:main\"\n" .
                 "}");
+
+        $task->execute();
+    }
+
+    public function testSourceIntersectionError(): void
+    {
+        $box = $this->createMock(Box::class);
+        $log = $this->createMock(Log::class);
+        $directory = $this->createMock(Dir::class);
+        $file = $this->createMock(File::class);
+        $group = $this->createMock(Group::class);
+        $internal = $this->createMock(Internal::class);
+        $external = $this->createMock(External::class);
+        $content = $this->createStub(Content::class);
+        $task = new Snap(
+            box: $box,
+            group: $group,
+            log: $log,
+            dir: $directory,
+            file: $file,
+            config: []
+        );
+
+        $log->fake("info")
+            ->return(null)
+            ->repeat(5)
+            ->fake("verbose")
+            ->return(null)
+            ->repeat(1);
+
+        $group->fake("getImplication")
+            ->return([
+                "i1" => ["implication" => []],
+                "i2" => ["implication" => []]
+            ])
+            ->fake("hasDownloadable")
+            ->return(true)
+            ->fake("getExternalMetas")
+            ->return([
+                "i1" => $external,
+                "i2" => $external
+            ])
+            ->fake("getRootMetadata")
+            ->return($internal);
+
+        $directory->fake("getPackagesDir")
+            ->return("/tmp/packages")
+            ->fake("createDir")
+            ->expect(dir: "/tmp/packages/i0/state")
+            ->fake("delete")
+            ->expect(file: "/tmp/packages/i0/state/snapshot.local.json")
+            ->fake("getRootDir")
+            ->return("###");
+
+        $external->fake("getSource")
+            ->return(["reference" => "offset"])
+            ->fake("getLayers")
+            ->return(["production" => ["version" => "1.0.0"]])
+            ->return([])
+            ->fake("getContent")
+            ->return(["###"])
+            ->repeat(2)
+            ->fake("getVersion")
+            ->return("3.2.1") // i2 - offset fake
+            ->return("1.2.3")
+            ->return("3.2.1"); // intersection
+
+        $internal->fake("getId")
+            ->return("i0")
+            ->fake("getStatefulPath")
+            ->return("/state")
+            ->fake("getLocalIds")
+            ->return(null)
+            ->fake("getDevelopmentIds")
+            ->return(["i2"])
+            ->fake("getProductionIds")
+            ->return(["i1", "i2"])
+            ->fake("getContent")
+            ->return(["intersections" => [
+                "i2" => [
+                    "production" => [
+                        "reference" => [[
+                            "major" => "",
+                            "minor" => "",
+                            "patch" => "",
+                            "build" => "",
+                            "release" => "",
+                            "sign" => "",
+                        ]]
+                    ]
+                ]
+            ]]);
+
+        $box->fake("get")
+            ->expect(class: Content::class, arguments: ["content" => ["###"]])
+            ->return($content)
+            ->repeat(2);
+
+        $file->fake("put")
+            ->return(1)
+            ->expect(file: "/tmp/packages/i0/state/snapshot.dev.json",
+                data: "{\n" .
+                "    \"i2\": \"3.2.1:offset\"\n" .
+                "}");
+
+        $this->expectException(Error::class);
 
         $task->execute();
     }

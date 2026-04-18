@@ -31,6 +31,7 @@ use Valvoid\Fusion\Metadata\Interpreter\Interpreter;
 use Valvoid\Fusion\Metadata\Normalizer\Normalizer;
 use Valvoid\Fusion\Metadata\Normalizer\Structure;
 use Valvoid\Fusion\Metadata\Parser\Parser;
+use Valvoid\Fusion\Metadata\Parser\Source;
 
 /**
  * Internal metadata builder.
@@ -131,7 +132,9 @@ class Builder
      */
     public function getMetadata(): Internal
     {
-        $this->content = [];
+        $this->content = [
+            "intersections" => []
+        ];
 
         $this->normalize();
         $this->normalizeIndividually("production");
@@ -142,72 +145,35 @@ class Builder
         $this->content["dependencies"]["production"] =
             $this->layers["production"]["content"]["parsed"]["dependencies"];
 
-        $this->bus->addReceiver(self::class, $this->handleBusEvent(...),
-            MetadataEvent::class);
+        // optional layers
+        $this->content["dependencies"]["development"] =
+            $this->layers["development"]["content"]["parsed"]["dependencies"] ?:
+                null;
 
-        // optional dev
-        if (isset($this->layers["development"])) {
-            $this->layer = "development";
-            $this->content["dependencies"]["development"] =
-                $this->layers["development"]["content"]["parsed"]["dependencies"];
+        $this->content["dependencies"]["local"] =
+            $this->layers["local"]["content"]["parsed"]["dependencies"] ?:
+                null;
 
-            $intersection = array_intersect(
-                $this->content["dependencies"]["production"],
-                $this->content["dependencies"]["development"]
-            );
+        // drop ballast
+        foreach ($this->content["intersections"] as $id => &$intersection)
+            if (sizeof($intersection) === 1)
+                unset($this->content["intersections"][$id]);
 
-            if ($intersection)
-                $this->bus->broadcast(
-                    $this->box->get(MetadataEvent::class,
-                        message: "Nested source intersection: " .
-                        implode(', ', $intersection),
-                        level: Level::ERROR,
-                        breadcrumb: ["structure"]
-                    ));
+            else {
 
-        } else
-            $this->content["dependencies"]["development"] = null;
+                // drop top layer since covered by metadata
+                array_pop($intersection);
 
-        // optional local
-        if (isset($this->layers["local"])) {
-            $this->layer = "local";
-            $this->content["dependencies"]["local"] =
-                $this->layers["local"]["content"]["parsed"]["dependencies"];
+                foreach ($intersection as $layer => $source) {
+                    $parser = $this->box->get(Source::class,
+                        source: $source);
 
-            $intersection = array_intersect(
-                $this->content["dependencies"]["production"],
-                $this->content["dependencies"]["local"]
-            );
+                    $intersection[$layer] =
 
-            if ($intersection)
-                $this->bus->broadcast(
-                    $this->box->get(MetadataEvent::class,
-                        message: "Nested source intersection: " .
-                        implode(', ', $intersection),
-                        level: Level::ERROR,
-                        breadcrumb: ["structure"]
-                    ));
-
-            if ($this->content["dependencies"]["development"]) {
-                $intersection = array_intersect(
-                    $this->content["dependencies"]["development"],
-                    $this->content["dependencies"]["local"]
-                );
-
-                if ($intersection)
-                    $this->bus->broadcast(
-                        $this->box->get(MetadataEvent::class,
-                            message: "Nested source intersection: " .
-                            implode(', ', $intersection),
-                            level: Level::ERROR,
-                            breadcrumb: ["structure"]
-                        ));
+                        // processable by snap task
+                        $parser->getSource();
+                }
             }
-
-        } else
-            $this->content["dependencies"]["local"] = null;
-
-        $this->bus->removeReceiver(self::class);
 
         return $this->box->get(Internal::class,
             layers: $this->getRawLayers(),
@@ -264,7 +230,7 @@ class Builder
         // extract dependencies
         foreach ($content["structure"]["sources"] as $dir => $sources)
             if ($dir)
-                $this->setDependencies($sources);
+                $this->setDependencies($sources, $layer);
 
         $this->bus->removeReceiver(self::class);
     }
@@ -273,24 +239,29 @@ class Builder
      * Sets dependencies.
      *
      * @param array $sources Sources.
+     * @param string $layer Layer.
      */
-    private function setDependencies(array $sources): void
+    private function setDependencies(array $sources, string $layer): void
     {
         $dependencies = &$this->layers[$this->layer]["content"]["parsed"]["dependencies"];
 
         foreach ($sources as $source) {
-            $source = explode('/', $source);
+            if (str_ends_with($source, "/"))
+                continue; // is null reset
+
+            $identifier = explode('/', $source);
 
             // remove api and reference
-            array_shift($source);
-            array_pop($source);
+            $identifier = array_slice($identifier, 1, -1);
 
-            // remove ' parts
-            foreach ($source as $i => $segment)
+            // remove ID ballast ' parts
+            foreach ($identifier as $i => $segment)
                 if ($segment[0] === "'")
-                    unset($source[$i]);
+                    unset($identifier[$i]);
 
-            $dependencies[] = implode('/', $source);
+            $identifier = implode('/', $identifier);
+            $dependencies[] = $identifier;
+            $this->content["intersections"][$identifier][$layer] = $source;
         }
     }
 
@@ -337,7 +308,6 @@ class Builder
     private function normalize(): void
     {
         $this->layer = "all";
-        $this->content = [];
 
         $this->bus->addReceiver(self::class, $this->handleBusEvent(...),
             MetadataEvent::class);

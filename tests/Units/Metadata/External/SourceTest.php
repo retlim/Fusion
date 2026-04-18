@@ -22,7 +22,7 @@
 namespace Valvoid\Fusion\Tests\Units\Metadata\External;
 
 use Valvoid\Fusion\Bus\Bus;
-use Valvoid\Fusion\Metadata\External\Parser\Source;
+use Valvoid\Fusion\Metadata\Parser\Source;
 use Valvoid\Reflex\Test\Wrapper;
 
 class SourceTest extends Wrapper

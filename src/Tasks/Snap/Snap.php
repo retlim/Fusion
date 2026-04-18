@@ -30,10 +30,12 @@ use Valvoid\Fusion\Metadata\External\External as ExternalMetadata;
 use Valvoid\Fusion\Metadata\Internal\Internal as InternalMetadata;
 use Valvoid\Fusion\Tasks\Group;
 use Valvoid\Fusion\Tasks\Task;
+use Valvoid\Fusion\Util\Pattern\Interpreter as PatternInterpreter;
+use Valvoid\Fusion\Util\Version\Parser;
 use Valvoid\Fusion\Wrappers\File;
 
 /**
- * Snap task to persist current built state.
+ * Snap task to persist built state.
  */
 class Snap extends Task
 {
@@ -46,13 +48,19 @@ class Snap extends Task
     /** @var array<string, string> Snapshot file content. */
     private array $content;
 
+    /** @var string Current layer. */
+    private string $layer = "local";
+
+    /** @var array Source intersections. */
+    private array $intersections = [];
+
     /**
      * Constructs the task.
      *
      * @param Box $box Dependency injection container.
      * @param Group $group Tasks group.
      * @param Log $log Event log.
-     * @param Directory $directory Current working directory.
+     * @param Directory $dir Current working directory.
      * @param File $file Standard file logic wrapper.
      * @param array $config Task config.
      */
@@ -60,7 +68,7 @@ class Snap extends Task
         private readonly Box $box,
         private readonly Group $group,
         private readonly Log $log,
-        private readonly Directory $directory,
+        private readonly Directory $dir,
         private readonly File $file,
         array $config)
     {
@@ -74,66 +82,66 @@ class Snap extends Task
      */
     public function execute(): void
     {
-        $this->log->info("persist implication and references");
+        $this->log->info("persist versions");
 
-        $this->implication = $this->group->getImplication();
         $this->metas = $this->group->getExternalMetas();
+        $this->implication = $this->group->getImplication();
+        $metadata = $this->group->getRootMetadata();
+        $id = $metadata->getId();
 
-        // redundant state
         // refresh/create state file
-        if (!$this->group->hasDownloadable()) {
-            $cacheDir = $this->directory->getStatefulDir();
-            $metadata = $this->group->getRootMetadata();
-            $id = $metadata->getId();
-
-        } else {
-            $metadata = $this->group->getRootMetadata();
-            $id = $metadata->getId();
-            $cacheDir = $this->directory->getPackagesDir() . "/$id" .
-                $metadata->getStatefulPath();
-        }
+        // redundant state
+        $statefulDir = $this->group->hasDownloadable() ?
+            $this->dir->getPackagesDir() . "/$id" . $metadata->getStatefulPath() :
+            $this->dir->getStatefulDir();
 
         // do not cache root
         // only nested dependencies
         if (isset($this->implication[$id]))
             $this->implication = $this->implication[$id]["implication"];
 
-        $this->directory->createDir($cacheDir);
-        $this->log->info("production:");
-
-        // common production
-        // internal or external
-        $this->addRootIds(
-            $metadata->getProductionIds(),
-            "$cacheDir/snapshot.json"
-        );
+        $this->dir->createDir($statefulDir);
 
         // internal root only
         // development
         if ($metadata instanceof InternalMetadata) {
+            $this->intersections = $metadata->getContent()["intersections"];
 
             // local development
             $ids = $metadata->getLocalIds();
-            $file = "$cacheDir/snapshot.local.json";
+            $file = "$statefulDir/snapshot.local.json";
 
-            if ($ids !== null) {
+            if ($ids === null)
+                $this->dir->delete($file);
+
+            else {
                 $this->log->info("local:");
                 $this->addRootIds($ids, $file);
-
-            } else
-                $this->directory->delete($file);
+            }
 
             // shared development
             $ids = $metadata->getDevelopmentIds();
-            $file = "$cacheDir/snapshot.dev.json";
+            $file = "$statefulDir/snapshot.dev.json";
+            $this->layer = "development";
 
-            if ($ids !== null) {
+            if ($ids === null)
+                $this->dir->delete($file);
+
+            else {
                 $this->log->info("development:");
                 $this->addRootIds($ids, $file);
-
-            } else
-                $this->directory->delete($file);
+            }
         }
+
+        $this->layer = "production";
+
+        // common production
+        // internal or external
+        $this->log->info("production:");
+        $this->addRootIds(
+            $metadata->getProductionIds(),
+            "$statefulDir/snapshot.json"
+        );
     }
 
     /**
@@ -173,21 +181,59 @@ class Snap extends Task
      */
     private function addContent(string $id): void
     {
+        // already done
+        if (isset($this->content[$id]))
+            return;
+
         $metadata = $this->metas[$id];
-        $reference = $metadata->getSource()["reference"];
-        $layers = $metadata->getLayers();
+        $version = $metadata->getVersion();
 
-        // offset
-        if (isset($layers["object"]["version"]))
-            $reference = $layers["object"]["version"] . ":$reference";
+        // common version valid for sub layers
+        if (isset($this->intersections[$id][$this->layer])) {
+            $references = $this->getReferences(
+                Parser::getInflatedVersion($version),
+                $this->intersections[$id][$this->layer]["reference"]);
 
-        if (!isset($this->content[$id])) {
-            $this->content[$id] = $reference;
+            if (empty($references)) {
+                $filename = ($this->layer == "development") ?
+                    "fusion.dev.php" :
+                    "fusion.json";
 
-            $this->log->info(
-                $this->box->get(Content::class,
-                    content: $metadata->getContent()));
-        }
+                $file = $this->dir->getRootDir() . "/$filename";
+
+                throw new Error(
+                    "Invalid source intersection. The " .
+                    "built version '$version' for the package '$id' " .
+                    "conflicts with the reference in '$file'. " .
+                    "Adjust the source reference so the version " .
+                    "can pass this layer. "
+                );
+            }
+
+            // version overridden by offset fake
+            // first pattern to pass
+            foreach ($references as $reference) {
+                if (isset($reference["offset"]))
+                    $version .= ":" . $reference["offset"];
+
+                break;
+            }
+
+        // version overridden by offset fake
+        // first match is production layer
+        } else foreach ($metadata->getLayers() as $layer)
+            if (isset($layer["version"]) &&
+                $version !== $layer["version"]) {
+                $version .= ":" . $metadata->getSource()["reference"];
+
+                break;
+            }
+
+        $this->content[$id] = $version;
+
+        $this->log->info(
+            $this->box->get(Content::class,
+                content: $metadata->getContent()));
     }
 
     /**
@@ -201,5 +247,79 @@ class Snap extends Task
             $this->addNestedIds($entry["implication"]);
             $this->addContent($id);
         }
+    }
+
+    /**
+     * Returns reference patterns the version passes.
+     *
+     * @param array $version Version.
+     * @param array $reference Patterns.
+     * @return array Match.
+     */
+    private function getReferences(array $version, array $reference): array
+    {
+        // per round brackets
+        $wrapper = [];
+        $skip = false;
+
+        foreach ($reference as $entry) {
+            if ($entry == "||") {
+                $skip = false;
+                $intersection = array_intersect_key(...$wrapper);
+
+                if ($intersection)
+                    return $intersection;
+
+                // remove last value
+                // the "||" value takes it then
+                array_pop($wrapper);
+                continue;
+
+            // ignore
+            // actually default behavior
+            // but parsed for easier debugging
+            } elseif ($entry == "&&")
+                continue;
+
+            // fake result
+            elseif ($skip)
+                $entry = [];
+
+            // pattern
+            // inflated semantic version
+            elseif (isset($entry["sign"])) {
+                $matches = [];
+
+                if (PatternInterpreter::isMatch($version, $entry)) {
+                    $inline = $entry["major"] . "." .
+                        $entry["minor"] . "." .
+                        $entry["patch"];
+
+                    if ($entry["release"])
+                        $inline .= "-" . $entry["release"];
+
+                    if ($entry["build"])
+                        $inline .= "+" . $entry["build"];
+
+                    if (isset($entry["offset"]))
+                        $inline .= ":" . $entry["offset"];
+
+                    $matches[$inline] = $entry;
+                }
+
+                $entry = $matches;
+
+            // brackets
+            // nested wrapper
+            } else $entry = $this->getReferences($version, $entry);
+
+            // skip all next "&&" entries
+            // empty intersection
+            $skip = !$entry;
+            $wrapper[] = $entry;
+        }
+
+        return ($skip || !$wrapper) ? [] :
+            array_intersect_key(...$wrapper);
     }
 }

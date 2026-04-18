@@ -175,7 +175,7 @@ class Download extends Task implements Interceptor
         $from = $this->getNormalizedFromDir($from, $file);
 
         $this->directory->rename($from, $to);
-        $this->addBotLayer($to, $metadata->getLayers());
+        $this->addBotLayer($to, $metadata);
         $this->log->info(
             $this->box->get(Content::class,
                 content: $metadata->getContent()));
@@ -208,7 +208,7 @@ class Download extends Task implements Interceptor
             $from = $this->getNormalizedFromDir($from, $file);
 
             $this->directory->rename($from, $to);
-            $this->addBotLayer($to, $metadata->getLayers());
+            $this->addBotLayer($to, $metadata);
             $this->log->info(
                 $this->box->get(Content::class,
                     content: $metadata->getContent()));
@@ -222,27 +222,32 @@ class Download extends Task implements Interceptor
      * Adds bot layer.
      *
      * @param string $to Directory.
-     * @param array $layers Raw layers.
+     * @param ExternalMeta $metadata
      * @throws Error generic exception.
      */
-    private function addBotLayer(string $to, array $layers): void
+    private function addBotLayer(string $to, ExternalMeta $metadata): void
     {
-        // persist
+        // persist offset
         // runtime version = offset overlay
-        if (isset($layers["object"]["version"])) {
-            $status = $this->file->put(
-                "$to/fusion.bot.php",
-                "<?php\n" .
-                "return [\n" .
-                "\t\"version\" => \"" . $layers["object"]["version"] . "\"\n" .
-                "];"
-            );
-
-            if (!$status)
-                throw new Error(
-                    "Can't create file '$to/fusion.bot.php'."
+        // if parsed version differ from origin production layer metadata
+        foreach ($metadata->getLayers() as $layer)
+            if (isset($layer["version"]) &&
+                $metadata->getVersion() !== $layer["version"]) {
+                $status = $this->file->put(
+                    "$to/fusion.bot.php",
+                    "<?php\n" .
+                    "return [\n" .
+                    "\t\"version\" => \"" . $metadata->getVersion() . "\"\n" .
+                    "];"
                 );
-        }
+
+                if (!$status)
+                    throw new Error(
+                        "Can't create file '$to/fusion.bot.php'."
+                    );
+
+                break;
+            }
     }
 
     /**

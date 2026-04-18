@@ -27,11 +27,11 @@ use Valvoid\Fusion\Bus\Events\Metadata;
 use Valvoid\Fusion\Metadata\External\Builder;
 use Valvoid\Fusion\Metadata\External\External;
 use Valvoid\Fusion\Metadata\External\Normalizer\Reference;
-use Valvoid\Fusion\Metadata\External\Parser\Source;
 use Valvoid\Fusion\Metadata\Interpreter\Interpreter;
 use Valvoid\Fusion\Metadata\Normalizer\Normalizer;
 use Valvoid\Fusion\Metadata\Normalizer\Structure;
 use Valvoid\Fusion\Metadata\Parser\Parser;
+use Valvoid\Fusion\Metadata\Parser\Source;
 use Valvoid\Reflex\Test\Wrapper;
 
 class BuilderTest extends Wrapper
