@@ -72,10 +72,8 @@ class Interpreter
                 "id" => $this->interpretId($layer, $value),
                 default => $this->bus->broadcast(
                     $this->box->get(MetadataEvent::class,
-                        message: "The metadata contains an unknown key '$key'. " .
-                        "If it is a valid optional key, updating the package " .
-                        "manager may add support for it.",
-                        level: Level::NOTICE,
+                        message: "The metadata contains an unknown key '$key'.",
+                        level: Level::ERROR,
                         breadcrumb: [$key]
                     ))
             };

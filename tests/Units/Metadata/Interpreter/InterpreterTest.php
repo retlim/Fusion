@@ -96,7 +96,7 @@ class InterpreterTest extends Wrapper
                     ->as(Metadata::class);
 
                 $this->validate($arguments["level"])
-                    ->as(Level::NOTICE);
+                    ->as(Level::ERROR);
 
                 $this->validate($arguments["breadcrumb"])
                     ->as(["key"]);
