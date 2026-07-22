@@ -2,13 +2,14 @@
     "name": "Fusion",
     "description": "A package manager for PHP projects.",
     "id": "valvoid/fusion",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "structure": {
         "valvoid.com/valvoid": "fusion/2.0.0",
         "/config": "extendable",
         "/dependencies": "valvoid.com/valvoid/box/2.0.0",
         "/state": "stateful"
     },
+    "license": "GPL-3.0-only",
     "environment": {
         "php": {
             "version": "8.2.0",
