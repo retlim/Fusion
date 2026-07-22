@@ -21,6 +21,7 @@
 
 namespace Valvoid\Fusion\Metadata\Interpreter;
 
+use Exception;
 use Valvoid\Box\Box;
 use Valvoid\Fusion\Bus\Bus;
 use Valvoid\Fusion\Bus\Events\Metadata as MetadataEvent;
@@ -66,6 +67,7 @@ class Interpreter
                 "structure" => $this->box->get(Structure::class)
                     ->interpret($value),
 
+                "license" => $this->interpretLicense($value),
                 "environment" => $this->box->get(Environment::class)
                     ->interpret($value),
 
@@ -173,6 +175,23 @@ class Interpreter
                     "must be a semantic version string.",
                     level: Level::ERROR,
                     breadcrumb: ["version"]
+                ));
+    }
+
+    /**
+     * Interprets license.
+     *
+     * @param mixed $entry license.
+     * @throws Exception
+     */
+    private function interpretLicense(mixed $entry): void
+    {
+        if (!is_string($entry) || trim($entry) === "")
+            $this->bus->broadcast(
+                $this->box->get(MetadataEvent::class,
+                    message: "The value of the 'license' key must be a non-empty string.",
+                    level: Level::ERROR,
+                    breadcrumb: ["license"]
                 ));
     }
 }

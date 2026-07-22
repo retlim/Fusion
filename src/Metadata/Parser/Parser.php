@@ -22,6 +22,7 @@
 namespace Valvoid\Fusion\Metadata\Parser;
 
 use Valvoid\Box\Box;
+use Valvoid\Fusion\Metadata\Parser\License\Parser as LicenseParser;
 
 /**
  * Metadata parser.
@@ -45,6 +46,9 @@ class Parser
         foreach ($meta as $key => &$value)
             match($key) {
                 "structure" => $this->box->get(Structure::class)
+                    ->parse($value),
+
+                "license" => $this->box->get(LicenseParser::class)
                     ->parse($value),
 
                 "environment" => $this->box->get(Environment::class)
