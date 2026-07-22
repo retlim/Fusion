@@ -9,7 +9,7 @@
         "/dependencies": "valvoid.com/valvoid/box/2.0.0",
         "/state": "stateful"
     },
-    "license": "GPL-3.0-only",
+    "license": "GPL-3.0-or-later",
     "environment": {
         "php": {
             "version": "8.2.0",
